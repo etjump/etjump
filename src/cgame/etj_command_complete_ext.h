@@ -24,6 +24,35 @@
 
 #pragma once
 
-namespace ETJump::CommandCompletions {
-bool completeArgument();
-}
+#include <memory>
+
+#include "etj_icompletion.h"
+
+namespace ETJump {
+
+class CommandCompletions {
+public:
+  CommandCompletions();
+  ~CommandCompletions() = default;
+
+  [[nodiscard]] bool completeArgument() const;
+  static bool isAlias(std::string_view arg, const std::vector<std::string> &aliases);
+
+private:
+  struct CompletionObject {
+    CompletionObject(std::string cmd, std::unique_ptr<ICompletion> obj) : cmd(std::move(cmd)), obj(std::move(obj)) {}
+
+    CompletionObject(std::string cmd, std::vector<std::string> aliases, std::unique_ptr<ICompletion> obj)
+      : cmd(std::move(cmd)), aliases(std::move(aliases)), obj(std::move(obj)) {}
+
+    std::string cmd;
+    std::vector<std::string> aliases;
+    std::unique_ptr<ICompletion> obj;
+  };
+
+  void setupCompletions();
+
+  std::vector<CompletionObject> completions;
+};
+
+} // namespace ETJump

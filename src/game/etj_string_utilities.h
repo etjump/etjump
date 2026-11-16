@@ -24,31 +24,26 @@
 
 #pragma once
 
-#include <string>
-#include <sstream>
-#include <vector>
 #include <fmt/printf.h>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace StringUtils {
-std::string getBestMatch(const std::vector<std::string> &words,
-                         const std::string &current);
-std::string sanitize(std::string_view text, bool toLower = false,
-                     bool removeControlChars = true);
+std::string getBestMatch(const std::vector<std::string> &words, const std::string &current);
+std::string sanitize(std::string_view text, bool toLower = false, bool removeControlChars = true);
 // returns the value if it's specified, else the default value
 std::string getValue(const char *value, const std::string &defaultValue = "");
-std::string getValue(const std::string &value,
-                     const std::string &defaultValue = "");
+std::string getValue(const std::string &value, const std::string &defaultValue = "");
 
-template <typename... Targs>
-std::string format(const std::string &format, const Targs &...Fargs) {
+template <typename... Targs> std::string format(const std::string &format, const Targs &...Fargs) {
   try {
     return fmt::sprintf(format, Fargs...);
   } catch (const fmt::v10::format_error &e) {
 #ifdef _DEBUG
     return "^3" + std::string(__func__) + ": ^7" + e.what() + "\n";
 #else
-    return "^3" + std::string(__func__) + ": ^7" + e.what() +
-           ", please report this error to the developers.\n";
+    return "^3" + std::string(__func__) + ": ^7" + e.what() + ", please report this error to the developers.\n";
 #endif
   }
 }
@@ -57,11 +52,9 @@ std::string trimStart(const std::string &input);
 std::string trimEnd(const std::string &input);
 std::string trim(const std::string &input);
 
-std::vector<std::string> wrapWords(const std::string &input, char separator,
-                                   size_t maxLength);
+std::vector<std::string> wrapWords(const std::string &input, char separator, size_t maxLength);
 
-template <typename T>
-std::string getPluralizedString(const T &val, const std::string &str) {
+template <typename T> std::string getPluralizedString(const T &val, const std::string &str) {
   return std::to_string(val) + " " + str + (val == 1 ? "" : "s");
 }
 
@@ -77,8 +70,7 @@ std::string toLowerCase(const std::string &input);
 std::string toUpperCase(const std::string &input);
 std::string eraseLast(const std::string &input, const std::string &substring);
 
-template <typename T>
-std::string join(const T &v, const std::string &delim) {
+template <typename T> std::string join(const T &v, const std::string &delim) {
   std::ostringstream s;
   for (const auto &i : v) {
     if (&i != &v[0]) {
@@ -88,32 +80,30 @@ std::string join(const T &v, const std::string &delim) {
   }
   return s.str();
 }
-std::vector<std::string> split(const std::string &input,
-                               const std::string &delimiter);
-void replaceAll(std::string &input, const std::string &from,
-                const std::string &to);
+
+std::vector<std::string> split(const std::string &input, const std::string &delimiter);
+void replaceAll(std::string &input, const std::string &from, const std::string &to);
 // wstring variant
-void replaceAll(std::wstring &input, const std::wstring &from,
-                const std::wstring &to);
+void replaceAll(std::wstring &input, const std::wstring &from, const std::wstring &to);
 
 // replaces all occurrences of specified character
 // and the following N characters in the string
 // substitution will "eat" the substitution character, so it does need to
 // be accounted for when defining how many characters to replace
-void stringSubstitute(std::string &input, char character,
-                      const std::string &replacement, size_t numChars);
+void stringSubstitute(std::string &input, char character, const std::string &replacement, size_t numChars);
 
 bool startsWith(const std::string &str, const std::string &prefix);
 bool endsWith(const std::string &str, const std::string &suffix);
 
-template <typename T>
-bool contains(const std::string &str, const T &text) {
+template <typename T> bool contains(const std::string &str, const T &text) {
   return str.find(text) != std::string::npos;
 }
 
+// true if string is empty or contains just whitespace
+bool isWhiteSpace(std::string_view s);
+
 // case-insensitive string comparison, optionally with sanitized strings
-bool iEqual(std::string_view str1, std::string_view str2,
-            bool sanitized = false);
+bool iEqual(std::string_view str1, std::string_view str2, bool sanitized = false);
 
 // Counts the padding needed to reach 'targetPadding' when using
 // format specifiers like '%-20s' with text that contains ET color codes
@@ -148,16 +138,14 @@ void stripExtension(std::string &str);
 
 // sorts strings either with case sensitivity or insensitivity
 // identical strings are kept in order
-template <typename T>
-void sortStrings(T &v, const bool noCase) {
-  std::sort(
-      v.begin(), v.end(), [&](const std::string &lhs, const std::string &rhs) {
-        if (noCase) {
-          return StringUtils::toUpperCase(lhs) < StringUtils::toUpperCase(rhs);
-        } else {
-          return lhs < rhs;
-        }
-      });
+template <typename T> void sortStrings(T &v, const bool noCase) {
+  std::sort(v.begin(), v.end(), [&](const std::string &lhs, const std::string &rhs) {
+    if (noCase) {
+      return StringUtils::toUpperCase(lhs) < StringUtils::toUpperCase(rhs);
+    } else {
+      return lhs < rhs;
+    }
+  });
 }
 
 void stripLocalizationMarkers(std::string &str);

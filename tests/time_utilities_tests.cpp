@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+
 #include "../src/game/etj_time_utilities.h"
 
 class TimeUtilitiesTests : public testing::Test {

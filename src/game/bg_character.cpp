@@ -2,8 +2,8 @@
 **  Character definition code
 */
 
-#include "q_shared.h"
 #include "bg_public.h"
+#include "q_shared.h"
 
 bg_character_t alliedClassCharacters[NUM_PLAYER_CLASSES];
 bg_character_t axisClassCharacters[NUM_PLAYER_CLASSES];
@@ -19,7 +19,7 @@ static qboolean BG_PCF_ParseError(int handle, const char *format, ...) {
   va_end(argptr);
 
   filename[0] = '\0';
-  line = 0;
+  line        = 0;
   trap_PC_SourceFileAndLine(handle, filename, &line);
 
   Com_Printf(S_COLOR_RED "ERROR: %s, line %d: %s\n", filename, line, string);
@@ -29,8 +29,7 @@ static qboolean BG_PCF_ParseError(int handle, const char *format, ...) {
   return qfalse;
 }
 
-qboolean BG_ParseCharacterFile(const char *filename,
-                               bg_characterDef_t *characterDef) {
+qboolean BG_ParseCharacterFile(const char *filename, bg_characterDef_t *characterDef) {
   pc_token_t token;
   int handle;
 
@@ -40,8 +39,7 @@ qboolean BG_ParseCharacterFile(const char *filename,
     return qfalse;
   }
 
-  if (!trap_PC_ReadToken(handle, &token) ||
-      Q_stricmp(token.string, "characterDef")) {
+  if (!trap_PC_ReadToken(handle, &token) || Q_stricmp(token.string, "characterDef")) {
     return BG_PCF_ParseError(handle, "expected 'characterDef'");
   }
 
@@ -59,24 +57,20 @@ qboolean BG_ParseCharacterFile(const char *filename,
     }
 
     if (!Q_stricmp(token.string, "mesh")) {
-      if (!PC_String_ParseNoAlloc(handle, characterDef->mesh,
-                                  sizeof(characterDef->mesh))) {
+      if (!PC_String_ParseNoAlloc(handle, characterDef->mesh, sizeof(characterDef->mesh))) {
         return BG_PCF_ParseError(handle, "expected mesh filename");
       }
     } else if (!Q_stricmp(token.string, "animationGroup")) {
-      if (!PC_String_ParseNoAlloc(handle, characterDef->animationGroup,
-                                  sizeof(characterDef->animationGroup))) {
+      if (!PC_String_ParseNoAlloc(handle, characterDef->animationGroup, sizeof(characterDef->animationGroup))) {
         return BG_PCF_ParseError(handle, "expected animationGroup filename");
       }
     } else if (!Q_stricmp(token.string, "animationScript")) {
-      if (!PC_String_ParseNoAlloc(handle, characterDef->animationScript,
-                                  sizeof(characterDef->animationScript))) {
+      if (!PC_String_ParseNoAlloc(handle, characterDef->animationScript, sizeof(characterDef->animationScript))) {
         return BG_PCF_ParseError(handle, "expected animationScript "
                                          "filename");
       }
     } else if (!Q_stricmp(token.string, "skin")) {
-      if (!PC_String_ParseNoAlloc(handle, characterDef->skin,
-                                  sizeof(characterDef->skin))) {
+      if (!PC_String_ParseNoAlloc(handle, characterDef->skin, sizeof(characterDef->skin))) {
         return BG_PCF_ParseError(handle, "expected skin filename");
       }
     } else if (!Q_stricmp(token.string, "undressedCorpseModel")) {
@@ -92,18 +86,15 @@ qboolean BG_ParseCharacterFile(const char *filename,
                                          "filename");
       }
     } else if (!Q_stricmp(token.string, "hudhead")) {
-      if (!PC_String_ParseNoAlloc(handle, characterDef->hudhead,
-                                  sizeof(characterDef->hudhead))) {
+      if (!PC_String_ParseNoAlloc(handle, characterDef->hudhead, sizeof(characterDef->hudhead))) {
         return BG_PCF_ParseError(handle, "expected hudhead filename");
       }
     } else if (!Q_stricmp(token.string, "hudheadskin")) {
-      if (!PC_String_ParseNoAlloc(handle, characterDef->hudheadskin,
-                                  sizeof(characterDef->hudheadskin))) {
+      if (!PC_String_ParseNoAlloc(handle, characterDef->hudheadskin, sizeof(characterDef->hudheadskin))) {
         return BG_PCF_ParseError(handle, "expected hudhead filename");
       }
     } else if (!Q_stricmp(token.string, "hudheadanims")) {
-      if (!PC_String_ParseNoAlloc(handle, characterDef->hudheadanims,
-                                  sizeof(characterDef->hudheadanims))) {
+      if (!PC_String_ParseNoAlloc(handle, characterDef->hudheadanims, sizeof(characterDef->hudheadanims))) {
         return BG_PCF_ParseError(handle, "expected hudheadanims filename");
       }
     } else {
@@ -167,8 +158,7 @@ bg_character_t *BG_FindFreeCharacter(const char *characterFile) {
   for (i = 0; i < MAX_CHARACTERS; i++) {
     if (!bg_characterPoolInuse[i]) {
       bg_characterPoolInuse[i] = qtrue;
-      Q_strncpyz(bg_characterPool[i].characterFile, characterFile,
-                 sizeof(bg_characterPool[i].characterFile));
+      Q_strncpyz(bg_characterPool[i].characterFile, characterFile, sizeof(bg_characterPool[i].characterFile));
       return &bg_characterPool[i];
     }
   }

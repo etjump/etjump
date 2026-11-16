@@ -74,9 +74,7 @@ bool anyonePlaying();
 /**
  * Converts timestamp to date
  */
-std::string timestampToString(int timestamp,
-                              const char *format = "%d/%m/%y %H:%M:%S",
-                              const char *start = "never");
+std::string timestampToString(int timestamp, const char *format = "%d/%m/%y %H:%M:%S", const char *start = "never");
 
 /**
  * Sets a valid weapon as currently held weapon
@@ -98,6 +96,11 @@ void copyStanceFromClient(gentity_t *self, const gentity_t *target);
  * Returns team from a string, 'TEAM_FREE' is no match
  */
 team_t teamFromString(std::string_view team);
+
+/**
+ * Executes autoexec file for the current map, if present
+ */
+void execMapAutoexec();
 
 /**
  * Strips a port from an IP address.

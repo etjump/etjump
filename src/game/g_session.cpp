@@ -17,8 +17,7 @@ G_WriteClientSessionData
 Called on game shutdown
 ================
 */
-static void G_WriteClientSessionData(gclient_t *client, qboolean restart,
-                                     bool levelTimeReset) {
+static void G_WriteClientSessionData(gclient_t *client, qboolean restart, bool levelTimeReset) {
   const char *s;
   auto clientNum = ClientNum(client);
 
@@ -39,30 +38,26 @@ static void G_WriteClientSessionData(gclient_t *client, qboolean restart,
     clientLastActive -= level.time;
   }
 
-  s = va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i "
-         "%i %i %i %i %i",
-         client->sess.sessionTeam, client->sess.spectatorTime,
-         client->sess.spectatorState, client->sess.spectatorClient,
-         client->sess.specLocked, client->sess.specInvitedClients[0],
-         client->sess.specInvitedClients[1],
-         client->sess.playerType,   // DHM - Nerve
-         client->sess.playerWeapon, // DHM - Nerve
-         client->sess.playerWeapon2,
-         client->sess.latchPlayerType,   // DHM - Nerve
-         client->sess.latchPlayerWeapon, // DHM - Nerve
-         client->sess.latchPlayerWeapon2, clientLastActive,
+  s =
+    va("%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i "
+       "%i %i %i %i %i",
+       client->sess.sessionTeam, client->sess.spectatorTime, client->sess.spectatorState, client->sess.spectatorClient,
+       client->sess.specLocked, client->sess.specInvitedClients[0], client->sess.specInvitedClients[1],
+       client->sess.playerType,   // DHM - Nerve
+       client->sess.playerWeapon, // DHM - Nerve
+       client->sess.playerWeapon2,
+       client->sess.latchPlayerType,   // DHM - Nerve
+       client->sess.latchPlayerWeapon, // DHM - Nerve
+       client->sess.latchPlayerWeapon2, clientLastActive,
 
-         // OSP
-         client->sess.coach_team, client->sess.deaths, client->sess.game_points,
-         client->sess.kills, client->sess.spec_invite, client->sess.spec_team,
-         client->sess.suicides, client->sess.team_kills,
-         // Damage and rounds played rolled in with weapon stats (below)
-         // OSP
+       // OSP
+       client->sess.coach_team, client->sess.deaths, client->sess.game_points, client->sess.kills,
+       client->sess.spec_invite, client->sess.spec_team, client->sess.suicides, client->sess.team_kills,
+       // Damage and rounds played rolled in with weapon stats (below)
+       // OSP
 
-         client->sess.muted, client->sess.ignoreClients[0],
-         client->sess.ignoreClients[1], client->pers.enterTime,
-         restart ? client->sess.spawnObjectiveIndex : 0,
-         client->sess.firstTime);
+       client->sess.muted, client->sess.ignoreClients[0], client->sess.ignoreClients[1], client->pers.enterTime,
+       restart ? client->sess.spawnObjectiveIndex : 0, client->sess.firstTime);
 
   trap_Cvar_Set(va("session%i", clientNum), s);
 
@@ -72,21 +67,17 @@ static void G_WriteClientSessionData(gclient_t *client, qboolean restart,
   if (!(restart && !level.warmupTime)) {
     s = va("%.2f %.2f %.2f %.2f %.2f %.2f %.2f %i %i %i %i %i "
            "%i %i",
-           client->sess.skillpoints[0], client->sess.skillpoints[1],
-           client->sess.skillpoints[2], client->sess.skillpoints[3],
-           client->sess.skillpoints[4], client->sess.skillpoints[5],
-           client->sess.skillpoints[6], client->sess.medals[0],
-           client->sess.medals[1], client->sess.medals[2],
-           client->sess.medals[3], client->sess.medals[4],
-           client->sess.medals[5], client->sess.medals[6]);
+           client->sess.skillpoints[0], client->sess.skillpoints[1], client->sess.skillpoints[2],
+           client->sess.skillpoints[3], client->sess.skillpoints[4], client->sess.skillpoints[5],
+           client->sess.skillpoints[6], client->sess.medals[0], client->sess.medals[1], client->sess.medals[2],
+           client->sess.medals[3], client->sess.medals[4], client->sess.medals[5], client->sess.medals[6]);
 
     trap_Cvar_Set(va("sessionstats%i", clientNum), s);
   }
 
   // OSP -- save weapon stats too
   if (!level.fResetStats) {
-    trap_Cvar_Set(va("wstats%i", clientNum),
-                  G_createStats(&g_entities[clientNum]));
+    trap_Cvar_Set(va("wstats%i", clientNum), G_createStats(&g_entities[clientNum]));
   }
   // OSP
 }
@@ -168,39 +159,32 @@ Called on a reconnect
 */
 void G_ReadSessionData(gclient_t *client) {
   char s[MAX_STRING_CHARS];
-  qboolean test;
   auto clientNum = ClientNum(client);
 
   trap_Cvar_VariableStringBuffer(va("session%i", clientNum), s, sizeof(s));
 
-  sscanf(
-      s,
-      "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i "
-      "%i %i %i %i",
-      reinterpret_cast<int *>(&client->sess.sessionTeam),
-      &client->sess.spectatorTime,
-      reinterpret_cast<int *>(&client->sess.spectatorState),
-      &client->sess.spectatorClient,
-      reinterpret_cast<int *>(&client->sess.specLocked),
-      &client->sess.specInvitedClients[0], &client->sess.specInvitedClients[1],
-      &client->sess.playerType,   // DHM - Nerve
-      &client->sess.playerWeapon, // DHM - Nerve
-      &client->sess.playerWeapon2,
-      &client->sess.latchPlayerType,   // DHM - Nerve
-      &client->sess.latchPlayerWeapon, // DHM - Nerve
-      &client->sess.latchPlayerWeapon2, &client->sess.clientLastActive,
+  sscanf(s,
+         "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i "
+         "%i %i %i %i",
+         reinterpret_cast<int *>(&client->sess.sessionTeam), &client->sess.spectatorTime,
+         reinterpret_cast<int *>(&client->sess.spectatorState), &client->sess.spectatorClient,
+         reinterpret_cast<int *>(&client->sess.specLocked), &client->sess.specInvitedClients[0],
+         &client->sess.specInvitedClients[1],
+         &client->sess.playerType,   // DHM - Nerve
+         &client->sess.playerWeapon, // DHM - Nerve
+         &client->sess.playerWeapon2,
+         &client->sess.latchPlayerType,   // DHM - Nerve
+         &client->sess.latchPlayerWeapon, // DHM - Nerve
+         &client->sess.latchPlayerWeapon2, &client->sess.clientLastActive,
 
-      // OSP
-      &client->sess.coach_team, &client->sess.deaths, &client->sess.game_points,
-      &client->sess.kills, &client->sess.spec_invite, &client->sess.spec_team,
-      &client->sess.suicides, &client->sess.team_kills,
-      // Damage and round count rolled in with weapon stats (below)
-      // OSP
+         // OSP
+         &client->sess.coach_team, &client->sess.deaths, &client->sess.game_points, &client->sess.kills,
+         &client->sess.spec_invite, &client->sess.spec_team, &client->sess.suicides, &client->sess.team_kills,
+         // Damage and round count rolled in with weapon stats (below)
+         // OSP
 
-      reinterpret_cast<int *>(&client->sess.muted),
-      &client->sess.ignoreClients[0], &client->sess.ignoreClients[1],
-      &client->pers.enterTime, &client->sess.spawnObjectiveIndex,
-      reinterpret_cast<int *>(&client->sess.firstTime));
+         reinterpret_cast<int *>(&client->sess.muted), &client->sess.ignoreClients[0], &client->sess.ignoreClients[1],
+         &client->pers.enterTime, &client->sess.spawnObjectiveIndex, reinterpret_cast<int *>(&client->sess.firstTime));
 
   // OSP -- pull and parse weapon stats
   *s = 0;
@@ -225,8 +209,8 @@ void G_ReadSessionData(gclient_t *client) {
 
     client->sess.startxptotal = 0;
     for (j = 0; j < SK_NUM_SKILLS; j++) {
-      client->sess.startskillpoints[j] = client->sess.skillpoints[j];
-      client->sess.startxptotal += client->sess.skillpoints[j];
+      client->sess.startskillpoints[j]  = client->sess.skillpoints[j];
+      client->sess.startxptotal        += client->sess.skillpoints[j];
     }
   }
 }
@@ -248,7 +232,7 @@ void G_InitSessionData(gclient_t *client, char *userinfo) {
   sess->sessionTeam = TEAM_SPECTATOR;
 
   sess->spectatorState = SPECTATOR_FREE;
-  sess->spectatorTime = level.time;
+  sess->spectatorTime  = level.time;
 
   // DHM - Nerve
   sess->latchPlayerType = sess->playerType = 0;
@@ -267,10 +251,10 @@ void G_InitSessionData(gclient_t *client, char *userinfo) {
   sess->rank = 0;
 
   // OSP
-  sess->coach_team = 0;
+  sess->coach_team  = 0;
   sess->spec_invite = 0;
-  sess->spec_team = 0;
-  sess->firstTime = qtrue;
+  sess->spec_team   = 0;
+  sess->firstTime   = qtrue;
 
   G_deleteStats(client - level.clients);
   // OSP
@@ -296,22 +280,22 @@ void G_InitWorldSession() {
   // if the gametype changed since the last session, don't use any
   // client sessions
   if (g_gametype.integer != gt) {
-    level.newSession = qtrue;
+    level.newSession  = qtrue;
     level.fResetStats = qtrue;
     G_Printf("Gametype changed, clearing session data.\n");
 
   } else {
     char *tmp = s;
 
-#define GETVAL(x)                                                              \
-  if ((tmp = strchr(tmp, ' ')) == NULL) {                                      \
-    return;                                                                    \
-  }                                                                            \
+#define GETVAL(x)                         \
+  if ((tmp = strchr(tmp, ' ')) == NULL) { \
+    return;                               \
+  }                                       \
   x = Q_atoi(++tmp);
 
     // Get team lock stuff
     GETVAL(gt);
-    teamInfo[TEAM_AXIS].spec_lock = (gt & TEAM_AXIS) ? qtrue : qfalse;
+    teamInfo[TEAM_AXIS].spec_lock   = (gt & TEAM_AXIS) ? qtrue : qfalse;
     teamInfo[TEAM_ALLIES].spec_lock = (gt & TEAM_ALLIES) ? qtrue : qfalse;
 
     // See if we need to clear player stats
@@ -340,7 +324,7 @@ void G_InitWorldSession() {
     }
     level.fireTeams[i].ident = j + 1;
 
-    p = Info_ValueForKey(s, "p");
+    p                       = Info_ValueForKey(s, "p");
     level.fireTeams[i].priv = !Q_atoi(p) ? qfalse : qtrue;
 
     p = Info_ValueForKey(s, "i");
@@ -355,9 +339,9 @@ void G_InitWorldSession() {
           break;
         }
         Q_strncpyz(str, c, l - c + 1);
-        str[l - c] = '\0';
+        str[l - c]                        = '\0';
         level.fireTeams[i].joinOrder[j++] = static_cast<char>(Q_atoi(str));
-        c = l + 1;
+        c                                 = l + 1;
       }
     }
 
@@ -384,15 +368,14 @@ void G_WriteSessionData(qboolean restart) {
   int j;
 
   trap_GetServerinfo(strServerInfo, sizeof(strServerInfo));
-  trap_Cvar_Set("session", va("%i %i %s", g_gametype.integer,
-                              (teamInfo[TEAM_AXIS].spec_lock * TEAM_AXIS |
-                               teamInfo[TEAM_ALLIES].spec_lock * TEAM_ALLIES),
-                              Info_ValueForKey(strServerInfo, "mapname")));
+  trap_Cvar_Set("session",
+                va("%i %i %s", g_gametype.integer,
+                   (teamInfo[TEAM_AXIS].spec_lock * TEAM_AXIS | teamInfo[TEAM_ALLIES].spec_lock * TEAM_ALLIES),
+                   Info_ValueForKey(strServerInfo, "mapname")));
 
   // Keep stats for all players in sync
   for (i = 0; !level.fResetStats && i < level.numConnectedClients; i++) {
-    if ((g_gamestate.integer == GS_WARMUP_COUNTDOWN &&
-         level.clients[level.sortedClients[i]].sess.rounds >= 1)) {
+    if ((g_gamestate.integer == GS_WARMUP_COUNTDOWN && level.clients[level.sortedClients[i]].sess.rounds >= 1)) {
       level.fResetStats = qtrue;
     }
   }
@@ -403,13 +386,11 @@ void G_WriteSessionData(qboolean restart) {
   // because these are not 'CVAR_LATCH', so they might be changed mid map.
   // 'sv_levelTimeReset' = ETe, 'sv_serverTimeReset' = ET: Legacy
   const bool levelTimeReset =
-      trap_Cvar_VariableIntegerValue("sv_levelTimeReset") ||
-      trap_Cvar_VariableIntegerValue("sv_serverTimeReset");
+    trap_Cvar_VariableIntegerValue("sv_levelTimeReset") || trap_Cvar_VariableIntegerValue("sv_serverTimeReset");
 
   for (i = 0; i < level.numConnectedClients; i++) {
     if (level.clients[level.sortedClients[i]].pers.connected == CON_CONNECTED) {
-      G_WriteClientSessionData(&level.clients[level.sortedClients[i]], restart,
-                               levelTimeReset);
+      G_WriteClientSessionData(&level.clients[level.sortedClients[i]], restart, levelTimeReset);
       // For slow connecters and a short warmup
     } else if (level.fResetStats) {
       G_deleteStats(level.sortedClients[i]);
@@ -432,8 +413,7 @@ void G_WriteSessionData(qboolean restart) {
       //		Com_sprintf(buffer,
       // MAX_STRING_CHARS, "\\n\\%s\\i\\%s",
       // level.fireTeams[i].name, buffer2);
-      Com_sprintf(buffer, MAX_STRING_CHARS, "\\id\\%i\\i\\%s\\p\\%i",
-                  level.fireTeams[i].ident - 1, buffer2,
+      Com_sprintf(buffer, MAX_STRING_CHARS, "\\id\\%i\\i\\%s\\p\\%i", level.fireTeams[i].ident - 1, buffer2,
                   level.fireTeams[i].priv ? 1 : 0);
     }
 

@@ -23,20 +23,19 @@
  */
 
 #include "etj_client_commands_handler.h"
+
 #include "../game/etj_string_utilities.h"
 
-ETJump::ClientCommandsHandler::ClientCommandsHandler(
-    void (*addToAutocompleteList)(const char *))
-    : _addToAutocompleteList{addToAutocompleteList} {
+ETJump::ClientCommandsHandler::ClientCommandsHandler(void (*addToAutocompleteList)(const char *))
+  : _addToAutocompleteList{addToAutocompleteList} {
   _callbacks.clear();
 }
 
 ETJump::ClientCommandsHandler::~ClientCommandsHandler() {}
 
-bool ETJump::ClientCommandsHandler::check(
-    const std::string &command, const std::vector<std::string> &arguments) {
+bool ETJump::ClientCommandsHandler::check(const std::string &command, const std::vector<std::string> &arguments) {
   auto lowercasedCommand = StringUtils::toLowerCase(command);
-  auto match = _callbacks.find(lowercasedCommand);
+  auto match             = _callbacks.find(lowercasedCommand);
   if (match != end(_callbacks)) {
     match->second(arguments);
     return true;
@@ -44,10 +43,9 @@ bool ETJump::ClientCommandsHandler::check(
   return false;
 }
 
-bool ETJump::ClientCommandsHandler::subscribe(
-    const std::string &command,
-    std::function<void(const std::vector<std::string> &)> callback,
-    bool autocomplete) {
+bool ETJump::ClientCommandsHandler::subscribe(const std::string &command,
+                                              std::function<void(const std::vector<std::string> &)> callback,
+                                              bool autocomplete) {
   auto lowercasedCommand = StringUtils::toLowerCase(command);
   if (_callbacks.find(lowercasedCommand) != end(_callbacks)) {
     return false;
@@ -62,7 +60,7 @@ bool ETJump::ClientCommandsHandler::subscribe(
 
 bool ETJump::ClientCommandsHandler::unsubscribe(const std::string &command) {
   auto lowercasedCommand = StringUtils::toLowerCase(command);
-  auto callback = _callbacks.find(lowercasedCommand);
+  auto callback          = _callbacks.find(lowercasedCommand);
   if (callback == end(_callbacks)) {
     return false;
   }

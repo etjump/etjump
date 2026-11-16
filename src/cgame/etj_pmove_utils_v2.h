@@ -28,10 +28,11 @@
 #include <optional>
 #include <vector>
 
+#include "etj_chs_data.h"
 #include "etj_local.h"
 
-#include "../game/bg_public.h"
 #include "../game/bg_local.h"
+#include "../game/bg_public.h"
 #include "../game/etj_shared.h"
 
 namespace ETJump {
@@ -42,20 +43,20 @@ public:
   static constexpr float PM_FRAMETIME = 0.008f;
 
   enum class PmoveSingleResult {
-    NONE = 0,
-    LADDER = 1,
-    WATER = 2,
+    NONE    = 0,
+    LADDER  = 1,
+    WATER   = 2,
     MOUNTED = 3,
-    WALK = 4,
-    AIR = 5,
+    WALK    = 4,
+    AIR     = 5,
   };
 
   enum class PmoveDefaultInput {
-    NONE = 0,
+    NONE    = 0,
     FORWARD = 1 << 0,
-    SIDE = 1 << 2,
-    UP = 1 << 3,
-    SPRINT = 1 << 4,
+    SIDE    = 1 << 2,
+    UP      = 1 << 3,
+    SPRINT  = 1 << 4,
   };
 
   struct State {
@@ -86,9 +87,7 @@ public:
 
   [[nodiscard]] const State &getState() const;
 
-  static PmoveSingleResult
-  pmoveSingle(pmove_t &pm, pml_t &pml,
-              const EnumBitset<PmoveDefaultInput> &defaultInput);
+  static PmoveSingleResult pmoveSingle(pmove_t &pm, pml_t &pml, const EnumBitset<PmoveDefaultInput> &defaultInput);
 
   static void setWaterLevel(pmove_t &pm);
   static bool checkProne(pmove_t &pm);
@@ -97,26 +96,23 @@ public:
   static void checkLadderMove(pmove_t &pm, pml_t &pml);
   static bool checkJump(pmove_t &pm, pml_t &pml, bool isLerpFrame);
   static void sprint(pmove_t &pm);
-  static void updateWishvel(vec2_t wishvel, const pmove_t &pm,
-                            const pml_t &pml);
+  static void updateWishvel(vec2_t wishvel, const pmove_t &pm, const pml_t &pml);
   static float cmdScale(const pmove_t &pm, const usercmd_t &cmd, bool upmove);
 
   // "forwards" means player viewangles naturally match keys pressed,
   // i.e. looking ahead with +forward and looking backwards with +back,
   // except for nobeat: looking to the left with +forward only and
   // looking to the right with +back only
-  static bool strafingForwards(const pmove_t &pm, float wishspeed,
-                               const vec2_t wishvel);
+  static bool strafingForwards(const pmove_t &pm, float wishspeed, const vec2_t wishvel);
 
   static bool rightStrafe(bool forwards, const usercmd_t &cmd);
 
-  static bool skipUpdate(int32_t &lastUpdateTime,
-                         std::optional<HUDLerpFlags> flag, const pmove_t &pm);
+  bool skipUpdate(int32_t &lastUpdateTime, std::optional<HUDLerpFlags> flag, const pmove_t &pm);
 
   // 'cg.predictedPlayerState' is considered accurate if:
   // - we are not following anyone
-  // - we are in demo playback (not following), and the snapshot intervals
-  //   match 'pmove_msec', meaning demo was recorded at 'sv_fps/snaps 125'
+  // - we are in demo playback (not following), and the snapshot cadence
+  //   matches 'pmove_msec', meaning demo was recorded at 'sv_fps/snaps 125'
   //
   // In any other scenario, we cannot fully trust it, because it has some form
   // of interpolation applied to it - most notably, velocity isn't snapped,
@@ -124,7 +120,7 @@ public:
   // TODO: all code that uses this needs to be revised once
   // 'g_synchronousClients' is implemented, because we no longer use
   // predicted playerstate with that, but rather 'cg.snap->ps'
-  static bool ppsIsAccurate(const pmove_t &pm);
+  bool ppsIsAccurate(const pmove_t &pm);
 
 private:
   void initCvars();
@@ -139,19 +135,22 @@ private:
 
   static bool canProne(const pmove_t &pm);
   static void groundTraceMissed(pmove_t &pm, pml_t &pml);
-  static void traceAll(trace_t &trace, vec3_t start, vec3_t end,
-                       const pmove_t &pm);
-  static void traceAllLegs(trace_t &trace, float *legsOffset, vec3_t start,
-                           vec3_t end, const pmove_t &pm);
+  static void traceAll(trace_t &trace, vec3_t start, vec3_t end, const pmove_t &pm);
+  static void traceAllLegs(trace_t &trace, float *legsOffset, vec3_t start, vec3_t end, const pmove_t &pm);
   static bool correctAllSolid(trace_t &trace, pmove_t &pm, pml_t &pml);
-  static void
-  setDefaultInput(pmove_t &pm, int8_t scale,
-                  const EnumBitset<PmoveDefaultInput> &defaultInput);
+  static void setDefaultInput(pmove_t &pm, int8_t scale, const EnumBitset<PmoveDefaultInput> &defaultInput);
+
+  // true if snapshots arrive at physics framerate ('sv_fps 125' & 'snaps 125')
+  bool snapCadenceMatchesPmove();
 
   State s{};
 
+  int32_t prevSnapTime{};
+  int32_t snapInterval{};
+
   bool doPmove{};
-  std::vector<const vmCvar_t *> cvars;
+  std::vector<const vmCvar_t *> hudCvars;
+  std::vector<const vmCvar_t *> chsCvars;
 
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 };

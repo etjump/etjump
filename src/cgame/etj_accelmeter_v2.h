@@ -55,8 +55,8 @@ private:
 
   enum class Align {
     CENTER = 0,
-    LEFT = 1,
-    RIGHT = 2,
+    LEFT   = 1,
+    RIGHT  = 2,
   };
 
   AccelColorV2::Style accelColorStyle{};

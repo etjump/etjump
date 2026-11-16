@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace ETJump {
 class MenuIntegrityChecker {
@@ -35,8 +35,7 @@ public:
   static void printIntegrityWatermark();
 
 private:
-  static std::vector<std::pair<std::string, std::string>>
-  generateFileHashList();
+  static std::vector<std::pair<std::string, std::string>> generateFileHashList();
   static std::vector<std::string> getBadPaks();
 };
 } // namespace ETJump

@@ -23,20 +23,19 @@
  */
 
 #include "etj_savepos.h"
+
+#include "cg_local.h"
 #include "etj_demo_compatibility.h"
 #include "etj_local.h"
 #include "etj_timerun.h"
-#include "cg_local.h"
 
-#include "../game/etj_json_utilities.h"
 #include "../game/etj_filesystem.h"
+#include "../game/etj_json_utilities.h"
 
 namespace ETJump {
 
 SavePos::SavePos(const std::shared_ptr<Timerun> &timerunHandler) {
-  const bool timerunCompatible =
-      cg.demoPlayback ? !cgame.demo.compatibility->flags.noSavePosTimerunInfo
-                      : true;
+  const bool timerunCompatible = cg.demoPlayback ? !cgame.demo.compatibility->flags.noSavePosTimerunInfo : true;
 
   if (!timerunHandler || !timerunCompatible) {
     CG_Printf("^3WARNING: ^7unable to initialize timerun information for "
@@ -57,8 +56,7 @@ SavePos::SavePos(const std::shared_ptr<Timerun> &timerunHandler) {
 }
 
 void SavePos::parseExistingPositions(const bool manual) {
-  const std::vector<std::string> files =
-      FileSystem::getFileList("savepos", ".dat", false);
+  const std::vector<std::string> files = FileSystem::getFileList("savepos", ".dat", false);
 
   savePositions.clear();
 
@@ -72,8 +70,7 @@ void SavePos::parseExistingPositions(const bool manual) {
                 "^3'etjump/savepos/' ^7directory.\n");
     }
   } else {
-    CG_Printf("Parsed data for ^3%i ^7savepos %s.\n",
-              static_cast<int>(savePositions.size()),
+    CG_Printf("Parsed data for ^3%i ^7savepos %s.\n", static_cast<int>(savePositions.size()),
               savePositions.size() == 1 ? "file" : "files");
   }
 }
@@ -87,7 +84,7 @@ void SavePos::createSaveposData(const std::string &file, const int flags) {
     return;
   }
 
-  data.name = file.empty() ? defaultName : file;
+  data.name    = file.empty() ? defaultName : file;
   data.mapname = cgs.rawmapname;
 
   VectorCopy(ps->origin, data.pos.origin);
@@ -105,21 +102,16 @@ void SavePos::createSaveposData(const std::string &file, const int flags) {
 
   if (timerun && cgs.clientinfo[ps->clientNum].timerunActive) {
     const auto currentRun = timerun->getTimerunInformationFor(ps->clientNum);
-    const int currentTime = (ps->clientNum == cg.clientNum || cgs.sv_fps == 125)
-                                ? ps->commandTime
-                                : cg.time;
+    const int currentTime = (ps->clientNum == cg.clientNum || cgs.sv_fps == 125) ? ps->commandTime : cg.time;
 
-    data.timerunInfo.runName = currentRun->runName;
+    data.timerunInfo.runName         = currentRun->runName;
     data.timerunInfo.currentRunTimer = currentTime - currentRun->startTime;
-    data.timerunInfo.previousRecord = currentRun->previousRecord;
+    data.timerunInfo.previousRecord  = currentRun->previousRecord;
 
-    std::copy(currentRun->checkpoints.cbegin(), currentRun->checkpoints.cend(),
-              data.timerunInfo.checkpoints.begin());
-    std::copy(currentRun->previousRecordCheckpoints.cbegin(),
-              currentRun->previousRecordCheckpoints.cend(),
+    std::copy(currentRun->checkpoints.cbegin(), currentRun->checkpoints.cend(), data.timerunInfo.checkpoints.begin());
+    std::copy(currentRun->previousRecordCheckpoints.cbegin(), currentRun->previousRecordCheckpoints.cend(),
               data.timerunInfo.previousRecordCheckpoints.begin());
-    std::copy(currentRun->checkpointIndicesHit.cbegin(),
-              currentRun->checkpointIndicesHit.cend(),
+    std::copy(currentRun->checkpointIndicesHit.cbegin(), currentRun->checkpointIndicesHit.cend(),
               data.timerunInfo.checkpointIndicesHit.begin());
   }
 
@@ -137,11 +129,11 @@ void SavePos::writeSaveposFile(SavePosData &data) {
     data.name = defaultName;
   }
 
-  root["name"] = data.name;
+  root["name"]    = data.name;
   root["mapname"] = data.mapname;
 
-  position["origin"] = Json::arrayValue;
-  position["angles"] = Json::arrayValue;
+  position["origin"]   = Json::arrayValue;
+  position["angles"]   = Json::arrayValue;
   position["velocity"] = Json::arrayValue;
 
   for (int i = 0; i < 3; i++) {
@@ -152,15 +144,15 @@ void SavePos::writeSaveposFile(SavePosData &data) {
 
   position["stance"] = static_cast<int>(data.pos.stance);
 
-  root["position"] = position;
+  root["position"] = std::move(position);
 
-  timerunInfo["runName"] = data.timerunInfo.runName;
+  timerunInfo["runName"]         = data.timerunInfo.runName;
   timerunInfo["currentRunTimer"] = data.timerunInfo.currentRunTimer;
-  timerunInfo["previousRecord"] = data.timerunInfo.previousRecord;
+  timerunInfo["previousRecord"]  = data.timerunInfo.previousRecord;
 
-  timerunInfo["checkpoints"] = Json::arrayValue;
+  timerunInfo["checkpoints"]               = Json::arrayValue;
   timerunInfo["previousRecordCheckpoints"] = Json::arrayValue;
-  timerunInfo["checkpointIndicesHit"] = Json::arrayValue;
+  timerunInfo["checkpointIndicesHit"]      = Json::arrayValue;
 
   for (const auto &checkpoint : data.timerunInfo.checkpoints) {
     timerunInfo["checkpoints"].append(checkpoint).asInt();
@@ -175,7 +167,7 @@ void SavePos::writeSaveposFile(SavePosData &data) {
     timerunInfo["checkpointIndicesHit"].append(checkpoint).asInt();
   }
 
-  root["timerunInfo"] = timerunInfo;
+  root["timerunInfo"] = std::move(timerunInfo);
 
   const std::string filename = "savepos/" + data.name + ".dat";
 
@@ -191,8 +183,7 @@ void SavePos::parseSavepos(const std::string &file) {
   SavePosData data;
   Json::Value root;
 
-  const std::string filename =
-      "savepos/" + (file.empty() ? defaultName + ".dat" : file);
+  const std::string filename = "savepos/" + (file.empty() ? defaultName + ".dat" : file);
 
   if (!JsonUtils::readFile(filename, root, &errors)) {
     CG_Printf("%s\n", errors.c_str());
@@ -209,26 +200,22 @@ void SavePos::parseSavepos(const std::string &file) {
     return;
   }
 
-  if (!JsonUtils::parseValue(data.mapname, root["mapname"], &errors,
-                             "mapname")) {
+  if (!JsonUtils::parseValue(data.mapname, root["mapname"], &errors, "mapname")) {
     parsingFailed(errors);
     return;
   }
 
-  const Json::Value position = root["position"];
+  const Json::Value position    = root["position"];
   const Json::Value timerunInfo = root["timerunInfo"];
 
-  const Json::Value &origin = position["origin"];
-  const Json::Value &angles = position["angles"];
+  const Json::Value &origin   = position["origin"];
+  const Json::Value &angles   = position["angles"];
   const Json::Value &velocity = position["velocity"];
 
   for (int i = 0; i < 3; i++) {
-    if (!JsonUtils::parseValue(data.pos.origin[i], origin[i], &errors,
-                               "origin") ||
-        !JsonUtils::parseValue(data.pos.angles[i], angles[i], &errors,
-                               "angles") ||
-        !JsonUtils::parseValue(data.pos.velocity[i], velocity[i], &errors,
-                               "velocity")) {
+    if (!JsonUtils::parseValue(data.pos.origin[i], origin[i], &errors, "origin") ||
+        !JsonUtils::parseValue(data.pos.angles[i], angles[i], &errors, "angles") ||
+        !JsonUtils::parseValue(data.pos.velocity[i], velocity[i], &errors, "velocity")) {
       parsingFailed(errors);
       return;
     }
@@ -244,39 +231,32 @@ void SavePos::parseSavepos(const std::string &file) {
 
   data.pos.stance = static_cast<PlayerStance>(stance);
 
-  if (!JsonUtils::parseValue(data.timerunInfo.runName, timerunInfo["runName"],
-                             &errors, "runName")) {
+  if (!JsonUtils::parseValue(data.timerunInfo.runName, timerunInfo["runName"], &errors, "runName")) {
     parsingFailed(errors);
     return;
   }
 
-  if (!JsonUtils::parseValue(data.timerunInfo.currentRunTimer,
-                             timerunInfo["currentRunTimer"], &errors,
+  if (!JsonUtils::parseValue(data.timerunInfo.currentRunTimer, timerunInfo["currentRunTimer"], &errors,
                              "currentRunTimer")) {
     parsingFailed(errors);
     return;
   }
 
-  if (!JsonUtils::parseValue(data.timerunInfo.previousRecord,
-                             timerunInfo["previousRecord"], &errors,
+  if (!JsonUtils::parseValue(data.timerunInfo.previousRecord, timerunInfo["previousRecord"], &errors,
                              "previousRecord")) {
     parsingFailed(errors);
     return;
   }
 
-  const Json::Value &checkpoints = timerunInfo["checkpoints"];
-  const Json::Value &previousRecordCheckpoints =
-      timerunInfo["previousRecordCheckpoints"];
-  const Json::Value &checkpointIndicesHit = timerunInfo["checkpointIndicesHit"];
+  const Json::Value &checkpoints               = timerunInfo["checkpoints"];
+  const Json::Value &previousRecordCheckpoints = timerunInfo["previousRecordCheckpoints"];
+  const Json::Value &checkpointIndicesHit      = timerunInfo["checkpointIndicesHit"];
 
   for (int i = 0; i < MAX_TIMERUN_CHECKPOINTS; i++) {
-    if (!JsonUtils::parseValue(data.timerunInfo.checkpoints[i], checkpoints[i],
-                               &errors, "checkpoints") ||
-        !JsonUtils::parseValue(data.timerunInfo.previousRecordCheckpoints[i],
-                               previousRecordCheckpoints[i], &errors,
+    if (!JsonUtils::parseValue(data.timerunInfo.checkpoints[i], checkpoints[i], &errors, "checkpoints") ||
+        !JsonUtils::parseValue(data.timerunInfo.previousRecordCheckpoints[i], previousRecordCheckpoints[i], &errors,
                                "previousRecordCheckpoints") ||
-        !JsonUtils::parseValue(data.timerunInfo.checkpointIndicesHit[i],
-                               checkpointIndicesHit[i], &errors,
+        !JsonUtils::parseValue(data.timerunInfo.checkpointIndicesHit[i], checkpointIndicesHit[i], &errors,
                                "checkpointIndicesHit")) {
       parsingFailed(errors);
       return;
@@ -291,15 +271,16 @@ void SavePos::storePosition(const SavePosData &data) {
 }
 
 bool SavePos::saveposExists(const std::string &name) {
-  return savePositions.find(name.empty() ? defaultName : name) !=
-         savePositions.end();
+  return savePositions.find(name.empty() ? defaultName : name) != savePositions.end();
 }
 
 const SavePosData &SavePos::getSaveposData(const std::string &name) {
   return savePositions[name.empty() ? defaultName : name];
 }
 
-std::string SavePos::getDefaultSaveposName() const { return defaultName; }
+std::string SavePos::getDefaultSaveposName() const {
+  return defaultName;
+}
 
 std::vector<std::string> SavePos::getSaveposNames() {
   std::vector<std::string> saveposNames;

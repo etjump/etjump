@@ -1,214 +1,29 @@
-name: ETJump CI/CD
+name: ETJump CI
 
 on:
-  workflow_dispatch:
   push:
     branches: [master, dev]
     tags-ignore:
       - "*"
-    paths-ignore:
-      - docs/*
+    paths-ignore: &paths_ignore
+      - docs/**
+      - .editorconfig
       - .gitignore
       - .gitattributes
       - .clang-format
+      - .clang-tidy
       - README.md
+      - AGENTS.md
       - VERSION.txt
-      - release.sh
+      - scripts/release.sh
+
   pull_request:
     branches: [master, dev]
-    paths-ignore:
-      - docs/*
-      - .gitignore
-      - .gitattributes
-      - .clang-format
-      - README.md
-      - VERSION.txt
-      - release.sh
+    paths-ignore: *paths_ignore
+
   merge_group:
 
 jobs:
-  Windows:
-    name: Windows ${{ matrix.arch }}
-    runs-on: windows-2022
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x86, x64]
-        config: [Release]
-        include:
-          - arch: x86
-            platform: Win32
-
-          - arch: x64
-            platform: x64
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Configure CMake
-        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -G "Visual Studio 17 2022" -A ${{ matrix.platform }}
-
-      - name: Build
-        run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
-
-      - name: Test
-        working-directory: ${{github.workspace}}/build
-        run: ctest -C ${{ matrix.config }}
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: etjump-artifacts-win-${{ matrix.arch }}
-          path: ${{ github.workspace }}/build/etjump
-
-  Linux:
-    name: Linux ${{ matrix.arch }}
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x86, x86_64]
-        config: [Release]
-        generator: [Ninja]
-
-    steps:
-      - name: Install dependencies
-        if: matrix.arch == 'x86'
-        run: |
-          sudo apt-get update
-          sudo apt-get install gcc-multilib g++-multilib
-
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Configure CMake
-        run: |
-          if [ ${{ matrix.arch }} == "x86" ]; then
-            cmake -B ${{ github.workspace }}/build -G ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-cross-x86-linux.cmake
-          else
-            cmake -B ${{ github.workspace }}/build -G ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.config }}
-          fi
-
-      - name: Build
-        run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
-
-      - name: Test
-        working-directory: ${{github.workspace}}/build
-        run: ctest -C ${{ matrix.config }}
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: etjump-artifacts-linux-${{ matrix.arch }}
-          path: ${{ github.workspace }}/build/etjump
-
-  macOS:
-    name: macOS ${{ matrix.arch }}
-    runs-on: macos-14
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x86_64, arm64]
-        config: [Release]
-        include:
-          - osx-target: "10.15"
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Configure CMake
-        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.osx-target }}
-
-      - name: Build
-        run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.config }} --parallel
-
-      - name: Test
-        working-directory: ${{ github.workspace }}/build
-        run: ctest -C ${{ matrix.config }}
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: etjump-artifacts-macos-${{ matrix.arch }}
-          path: ${{ github.workspace }}/build/etjump
-
-  macOS-universal:
-    name: macOS Universal Binaries
-    runs-on: macos-14
-    needs: [macOS]
-    steps:
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: etjump-artifacts-macos-*
-          path: artifacts
-
-      - name: Create universal binaries
-        run: |
-          mkdir -p build-universal
-          cp -R artifacts/etjump-artifacts-macos-arm64/* build-universal
-          lipo -create artifacts/etjump-artifacts-macos-x86_64/cgame_mac \
-                       artifacts/etjump-artifacts-macos-arm64/cgame_mac \
-                -output build-universal/cgame_mac
-          lipo -create artifacts/etjump-artifacts-macos-x86_64/ui_mac \
-                       artifacts/etjump-artifacts-macos-arm64/ui_mac \
-                -output build-universal/ui_mac
-          lipo -create artifacts/etjump-artifacts-macos-x86_64/qagame_mac \
-                       artifacts/etjump-artifacts-macos-arm64/qagame_mac \
-                -output build-universal/qagame_mac
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: etjump-artifacts-macos-universal
-          path: ${{ github.workspace }}/build-universal
-
-      # cleanup the individual builds so package doesn't download them
-      - name: Cleanup
-        uses: geekyeggo/delete-artifact@v6
-        with:
-          name: |
-            etjump-artifacts-macos-arm64
-            etjump-artifacts-macos-x86_64
-
-  package:
-    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-    runs-on: ubuntu-22.04
-    needs: [Windows, Linux, macOS-universal]
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v8
-        with:
-          pattern: etjump-artifacts-*
-          merge-multiple: true
-          path: ${{ github.workspace }}/build/etjump
-
-      - name: Pack release zip
-        working-directory: ${{ github.workspace }}/build
-        run: |
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
-          make mod_release
-
-      - name: Upload release
-        uses: actions/upload-artifact@v7
-        with:
-          name: etjump-snapshot-release
-          path: ${{ github.workspace }}/build/*.zip
-
-      - name: Create latest build
-        uses: czietz/action-automatic-releases@latest
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: "latest"
-          prerelease: false
-          title: Latest Build
-          files: ${{ github.workspace }}/build/*.zip
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml

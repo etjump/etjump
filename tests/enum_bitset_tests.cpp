@@ -1,18 +1,20 @@
 #include <gtest/gtest.h>
+
 #include "../src/game/etj_shared.h"
 
 namespace ETJump {
 class EnumBitsetTests : public testing::Test {
   void SetUp() override {}
+
   void TearDown() override {}
 
 public:
   enum class TestEnum : uint8_t {
     VALUE_NONE = 0,
-    VALUE_1 = 1 << 0,
-    VALUE_2 = 1 << 1,
-    VALUE_3 = 1 << 2,
-    VALUE_4 = 1 << 3,
+    VALUE_1    = 1 << 0,
+    VALUE_2    = 1 << 1,
+    VALUE_3    = 1 << 2,
+    VALUE_4    = 1 << 3,
   };
 };
 

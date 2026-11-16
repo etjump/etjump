@@ -1,20 +1,21 @@
-#include "g_local.h"
-#include <vector>
 #include <regex>
-#include "etj_printer.h"
-#include "etj_operation_result.h"
-#include "etj_save_system.h"
-#include "etj_entity_utilities.h"
-#include "etj_string_utilities.h"
-#include "etj_rtv.h"
-#include "etj_utilities.h"
+#include <vector>
+
 #include "etj_chat_replay.h"
-#include "etj_session.h"
 #include "etj_commands.h"
-#include "etj_map_statistics.h"
+#include "etj_entity_utilities.h"
 #include "etj_file.h"
 #include "etj_inactivity_timer.h"
+#include "etj_map_statistics.h"
+#include "etj_operation_result.h"
+#include "etj_printer.h"
+#include "etj_rtv.h"
+#include "etj_save_system.h"
+#include "etj_session.h"
+#include "etj_string_utilities.h"
+#include "etj_utilities.h"
 #include "etj_worldspawn.h"
+#include "g_local.h"
 
 #ifdef NEW_AUTH
   #include "etj_session_v2.h"
@@ -31,7 +32,7 @@ enum class VotingTypes {
 };
 
 inline constexpr int VOTING_ATTEMPTS = 3;
-inline constexpr int VOTING_TIMEOUT = 1000;
+inline constexpr int VOTING_TIMEOUT  = 1000;
 } // namespace ETJump
 
 /*
@@ -56,19 +57,17 @@ void G_SendScore(gentity_t *ent) {
   }
 
   for (int32_t i = 0; i < NUM_SCORESTRINGS; i++) {
-    *buffer = '\0';
+    *buffer      = '\0';
     *startbuffer = '\0';
 
     // first scorestring contains team scores
     if (i == 0) {
-      Q_strncpyz(startbuffer,
-                 va("sc0 %i %i", level.teamScores[TEAM_AXIS],
-                    level.teamScores[TEAM_ALLIES]),
+      Q_strncpyz(startbuffer, va("sc0 %i %i", level.teamScores[TEAM_AXIS], level.teamScores[TEAM_ALLIES]),
                  sizeof(startbuffer));
     } else {
       Q_strncpyz(startbuffer, "sc1", sizeof(startbuffer));
     }
-    size = strlen(startbuffer) + 1;
+    size  = strlen(startbuffer) + 1;
     count = 0;
 
     for (; i < numSorted; i++) {
@@ -93,10 +92,8 @@ void G_SendScore(gentity_t *ent) {
         totalXP += cl->sess.skillpoints[j];
       }
 
-      Com_sprintf(entry, sizeof(entry), " %i %i %i %i %i %i %i",
-                  level.sortedClients[i], totalXP, ping,
-                  (level.time - cl->pers.enterTime) / 60000,
-                  g_entities[level.sortedClients[i]].s.powerups, playerClass,
+      Com_sprintf(entry, sizeof(entry), " %i %i %i %i %i %i %i", level.sortedClients[i], totalXP, ping,
+                  (level.time - cl->pers.enterTime) / 60000, g_entities[level.sortedClients[i]].s.powerups, playerClass,
                   cl->ps.clientNum);
 
       if (size + strlen(entry) > MAX_SCORESTRING_LEN) {
@@ -112,8 +109,7 @@ void G_SendScore(gentity_t *ent) {
     }
 
     if (count > 0 || i == 0) {
-      trap_SendServerCommand(ent - g_entities,
-                             va("%s %i%s", startbuffer, count, buffer));
+      trap_SendServerCommand(ent - g_entities, va("%s %i%s", startbuffer, count, buffer));
     }
   }
 }
@@ -137,9 +133,8 @@ CheatsOk
 */
 qboolean CheatsOk(gentity_t *ent) {
   if (!g_cheats.integer) {
-    trap_SendServerCommand(ent - g_entities,
-                           va("print \"Cheats are not enabled "
-                              "on this server.\n\""));
+    trap_SendServerCommand(ent - g_entities, va("print \"Cheats are not enabled "
+                                                "on this server.\n\""));
     return qfalse;
   }
   if (ent->health <= 0) {
@@ -162,7 +157,7 @@ char *ConcatArgs(int start) {
   char arg[MAX_STRING_CHARS];
 
   len = 0;
-  c = trap_Argc();
+  c   = trap_Argc();
   for (i = start; i < c; i++) {
     trap_Argv(i, arg, sizeof(arg));
     tlen = strlen(arg);
@@ -268,12 +263,11 @@ int ClientNumberFromString(gentity_t *to, char *s) {
   char s2[MAX_STRING_CHARS];
   char n2[MAX_STRING_CHARS];
   qboolean fIsNumber = qtrue;
-  int partialMatchs = 0;
+  int partialMatchs  = 0;
   int partialMatchId = -1;
 
   // See if its a number or string
-  for (idnum = 0; idnum < static_cast<int>(strlen(s)) && s[idnum] != 0;
-       idnum++) {
+  for (idnum = 0; idnum < static_cast<int>(strlen(s)) && s[idnum] != 0; idnum++) {
     if (s[idnum] < '0' || s[idnum] > '9') {
       fIsNumber = qfalse;
       break;
@@ -302,14 +296,13 @@ int ClientNumberFromString(gentity_t *to, char *s) {
   if (fIsNumber) {
     idnum = Q_atoi(s);
     if (idnum < 0 || idnum >= level.maxclients) {
-      Printer::console(to, StringUtils::format("Bad client slot: %i\n", idnum));
+      Printer::console(to, "Bad client slot: %i\n", idnum);
       return -1;
     }
 
     cl = &level.clients[idnum];
     if (cl->pers.connected != CON_CONNECTED) {
-      Printer::console(to,
-                       StringUtils::format("Client %i is not active\n", idnum));
+      Printer::console(to, "Client %i is not active\n", idnum);
       return -1;
     }
     return (idnum);
@@ -323,8 +316,7 @@ int ClientNumberFromString(gentity_t *to, char *s) {
     return partialMatchId;
   }
 
-  Printer::console(to,
-                   StringUtils::format("User %s is not on the server\n", s));
+  Printer::console(to, "User %s is not on the server\n", s);
   return (-1);
 }
 
@@ -359,11 +351,9 @@ int ClientNumbersFromString(const char *s, int *plist) {
     i = Q_atoi(s);
     if (i >= 0 && i < level.maxclients) {
       p = &level.clients[i];
-      if (p->pers.connected == CON_CONNECTED ||
-          p->pers.connected == CON_CONNECTING) {
-
+      if (p->pers.connected == CON_CONNECTED || p->pers.connected == CON_CONNECTING) {
         *plist++ = i;
-        *plist = -1;
+        *plist   = -1;
         return 1;
       }
     }
@@ -376,9 +366,7 @@ int ClientNumbersFromString(const char *s, int *plist) {
   }
   for (i = 0; i < level.maxclients; i++) {
     p = &level.clients[i];
-    if (p->pers.connected != CON_CONNECTED &&
-        p->pers.connected != CON_CONNECTING) {
-
+    if (p->pers.connected != CON_CONNECTED && p->pers.connected != CON_CONNECTING) {
       continue;
     }
     SanitizeString(p->pers.netname, n2, qtrue);
@@ -398,7 +386,7 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter) {
   char line[MAX_NAME_LENGTH + 10];
   int matches = 0;
 
-  err[0] = '\0';
+  err[0]  = '\0';
   line[0] = '\0';
   if (plist[0] == -1) {
     Q_strcat(err, len, "no connected player by that name or slot #");
@@ -411,15 +399,13 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter) {
 
     for (p = plist; *p != -1; p++) {
       cl = &level.clients[*p];
-      if (cl->pers.connected == CON_CONNECTED ||
-          cl->pers.connected == CON_CONNECTING) {
+      if (cl->pers.connected == CON_CONNECTED || cl->pers.connected == CON_CONNECTING) {
         // ETJump: filtering out specific team
         if (cl->sess.sessionTeam == filter) {
           continue;
         }
 
-        Com_sprintf(line, MAX_NAME_LENGTH + 10, "\n%2i - %s^7", *p,
-                    cl->pers.netname);
+        Com_sprintf(line, MAX_NAME_LENGTH + 10, "\n%2i - %s^7", *p, cl->pers.netname);
         if (static_cast<int>(strlen(err) + strlen(line)) > len) {
           break;
         }
@@ -453,10 +439,10 @@ qboolean G_MatchOnePlayer(int *plist, char *err, int len, team_t filter) {
 // Updates voting stats
 namespace ETJump {
 void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
-  auto *client = ent->client;
-  const int clientNum = ClientNum(ent);
+  auto *client         = ent->client;
+  const int clientNum  = ClientNum(ent);
   const bool isRtvVote = game.rtv->rtvVoteActive();
-  auto *rtvMaps = game.rtv->getRtvMaps();
+  auto *rtvMaps        = game.rtv->getRtvMaps();
 
   switch (vote) {
     case VotingTypes::VoteYes:
@@ -489,11 +475,9 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
     case VotingTypes::RevoteNo:
       if (isRtvVote) {
         if (client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
-          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted]
-              .voteCountInfo.spectatorCount--;
+          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted].voteCountInfo.spectatorCount--;
         } else {
-          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted]
-              .voteCountInfo.playerCount--;
+          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted].voteCountInfo.playerCount--;
         }
       }
 
@@ -517,7 +501,7 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
       }
 
       client->pers.votingInfo.lastRtvMapVoted = mapNum;
-      client->pers.votingInfo.isVotedYes = true;
+      client->pers.votingInfo.isVotedYes      = true;
       if (client->sess.sessionTeam == TEAM_SPECTATOR) {
         level.voteInfo.voteYesSpectators++;
       }
@@ -528,11 +512,9 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
       // as this gets called on 'vote no' -> 're-vote yes' scenarios too
       if (client->pers.votingInfo.isVotedYes) {
         if (client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
-          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted]
-              .voteCountInfo.spectatorCount--;
+          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted].voteCountInfo.spectatorCount--;
         } else {
-          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted]
-              .voteCountInfo.playerCount--;
+          (*rtvMaps)[client->pers.votingInfo.lastRtvMapVoted].voteCountInfo.playerCount--;
         }
       } else {
         if (client->sess.sessionTeam == TEAM_SPECTATOR) {
@@ -553,7 +535,7 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
         (*rtvMaps)[mapNum].voteCountInfo.playerCount++;
       }
       client->pers.votingInfo.lastRtvMapVoted = mapNum;
-      client->pers.votingInfo.isVotedYes = true;
+      client->pers.votingInfo.isVotedYes      = true;
       break;
   }
 
@@ -573,14 +555,11 @@ void updateVotingInfo(gentity_t *ent, int mapNum, VotingTypes vote) {
     game.rtv->setRtvConfigstrings();
   } else {
     std::string newcs =
-        StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
-                            level.voteInfo.voteYesSpectators);
+      StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteYes, level.voteInfo.voteYesSpectators);
     trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
   }
 
-  std::string newcs =
-      StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
-                          level.voteInfo.voteNoSpectators);
+  std::string newcs = StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteNo, level.voteInfo.voteNoSpectators);
   trap_SetConfigstring(CS_VOTE_NO, newcs.c_str());
 }
 } // namespace ETJump
@@ -602,11 +581,10 @@ void Cmd_ListBotGoals_f(gentity_t *ent) {
 
   int ti = TEAM_AXIS;
   for (ti = TEAM_AXIS; ti <= TEAM_ALLIES; ti++) {
-    t = static_cast<team_t>(ti);
+    t               = static_cast<team_t>(ti);
     gentity_t *list = g_entities, *targ;
 
-    G_Printf("\n%s bot goals\n=====================\n",
-             (t == TEAM_AXIS ? "Axis" : "Allies"));
+    G_Printf("\n%s bot goals\n=====================\n", (t == TEAM_AXIS ? "Axis" : "Allies"));
 
     for (i = 0; i < level.num_entities; i++, list++) {
       if (!list->inuse) {
@@ -614,18 +592,12 @@ void Cmd_ListBotGoals_f(gentity_t *ent) {
       }
 
       if (!(list->aiInactive & (1 << t))) {
-        G_Printf("%s (%s)",
-                 (list->scriptName
-                      ? list->scriptName
-                      : (list->targetname ? list->targetname : "NONE")),
+        G_Printf("%s (%s)", (list->scriptName ? list->scriptName : (list->targetname ? list->targetname : "NONE")),
                  list->classname);
         if (list->target_ent) {
           targ = list->target_ent;
           G_Printf(" -> ");
-          G_Printf("%s (%s)",
-                   (targ->scriptName
-                        ? targ->scriptName
-                        : (targ->targetname ? targ->targetname : "NONE")),
+          G_Printf("%s (%s)", (targ->scriptName ? targ->scriptName : (targ->targetname ? targ->targetname : "NONE")),
                    targ->classname);
         }
         G_Printf("\n");
@@ -671,15 +643,13 @@ void Cmd_Give_f(gentity_t *ent) {
     if (hasAmount) {
       if (amount >= 0 && amount < SK_NUM_SKILLS) {
         G_AddSkillPoints(ent, static_cast<skillType_t>(amount), 20);
-        G_DebugAddSkillPoints(ent, static_cast<skillType_t>(amount), 20,
-                              "give skill");
+        G_DebugAddSkillPoints(ent, static_cast<skillType_t>(amount), 20, "give skill");
       }
     } else {
       // bumps all skills with 1 level
       for (i = 0; i < SK_NUM_SKILLS; i++) {
         G_AddSkillPoints(ent, static_cast<skillType_t>(i), 20);
-        G_DebugAddSkillPoints(ent, static_cast<skillType_t>(i), 20,
-                              "give skill");
+        G_DebugAddSkillPoints(ent, static_cast<skillType_t>(i), 20, "give skill");
       }
     }
     return;
@@ -706,8 +676,7 @@ void Cmd_Give_f(gentity_t *ent) {
           amount *= 2;
         }
 
-        G_Damage(ent, ent, ent, nullptr, nullptr, std::abs(amount),
-                 DAMAGE_NO_PROTECTION, MOD_UNKNOWN);
+        G_Damage(ent, ent, ent, nullptr, nullptr, std::abs(amount), DAMAGE_NO_PROTECTION, MOD_UNKNOWN);
       } else {
         ent->health += amount;
       }
@@ -733,14 +702,12 @@ void Cmd_Give_f(gentity_t *ent) {
 
   if (give_all || Q_stricmpn(name, "ammo", 4) == 0) {
     if (amount) {
-      if (ent->client->ps.weapon && ent->client->ps.weapon != WP_SATCHEL &&
-          ent->client->ps.weapon != WP_SATCHEL_DET) {
+      if (ent->client->ps.weapon && ent->client->ps.weapon != WP_SATCHEL && ent->client->ps.weapon != WP_SATCHEL_DET) {
         Add_Ammo(ent, ent->client->ps.weapon, amount, qtrue);
       }
     } else {
       for (i = 1; i < WP_NUM_WEAPONS; i++) {
-        if (COM_BitCheck(ent->client->ps.weapons, i) && i != WP_SATCHEL &&
-            i != WP_SATCHEL_DET) {
+        if (COM_BitCheck(ent->client->ps.weapons, i) && i != WP_SATCHEL && i != WP_SATCHEL_DET) {
           Add_Ammo(ent, i, 9999, qtrue);
         }
       }
@@ -756,7 +723,8 @@ void Cmd_Give_f(gentity_t *ent) {
   // weapons while 	allowing "give ammo <n>" to only give to the
   // selected weap.
   if (Q_stricmpn(name, "allammo", 7) == 0 && amount) {
-    for (i = 1; i < WP_NUM_WEAPONS; i++) Add_Ammo(ent, i, amount, qtrue);
+    for (i = 1; i < WP_NUM_WEAPONS; i++)
+      Add_Ammo(ent, i, amount, qtrue);
 
     if (!give_all) {
       return;
@@ -883,7 +851,7 @@ void Cmd_Notarget_f(gentity_t *ent) {
 void capitalizeWithColor(std::string &str) {
   if (str.length() > 0) {
     unsigned char index = str[0] == '^' ? 2 : 0;
-    str[index] = toupper(str[index]);
+    str[index]          = toupper(str[index]);
   }
 }
 
@@ -898,8 +866,7 @@ OperationResult canNoclip(gentity_t *ent) {
       return {false, "^7Cannot use ^3%s ^7while timer is running.\n"};
     }
 
-    if (ent->client->sess.deathrunFlags &
-        static_cast<int>(DeathrunFlags::Active)) {
+    if (ent->client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) {
       return {false, "^7Cannot use ^3%s ^7while death run is active.\n"};
     }
 
@@ -928,24 +895,20 @@ void decreaseNoclipCount(gentity_t *ent, const std::string &action) {
 
   if (ent->client->pers.noclipCount > 0) {
     --ent->client->pers.noclipCount;
-    Printer::center(
-        ClientNum(ent),
-        StringUtils::format("^7You may use ^3%s ^2%d^7 more times.\n", action,
-                            ent->client->pers.noclipCount));
+    Printer::center(ent, "^7You may use ^3%s ^2%d^7 more times.\n", action, ent->client->pers.noclipCount);
   }
 }
 
 const float MaxAxisOffset = 4096.f;
+
 // offsets player's position by given vector if noclip is available
 void setPlayerOffset(gentity_t *ent) {
   static char buffer[64];
   const int clientNum = ClientNum(ent);
 
   if (trap_Argc() != 4) {
-    Printer::console(
-        clientNum,
-        "^3Usage: ^7setoffset x y z\n"
-        "Changes your position into the direction of X Y Z vector.\n");
+    Printer::console(clientNum, "^3Usage: ^7setoffset x y z\n"
+                                "Changes your position into the direction of X Y Z vector.\n");
     return;
   }
 
@@ -963,19 +926,18 @@ void setPlayerOffset(gentity_t *ent) {
 
   for (auto i = 0; i < 3; i++) {
     trap_Argv(i + 1, buffer, sizeof buffer);
-    const float value = Q_atof(buffer);
-    dst[i] += std::clamp(value, -MaxAxisOffset, MaxAxisOffset);
+    const float value  = Q_atof(buffer);
+    dst[i]            += std::clamp(value, -MaxAxisOffset, MaxAxisOffset);
   }
 
   // check if there is a non-noclippable content between our position and
   // current target
   trace_t trace;
-  trap_TraceCapsule(&trace, ent->client->ps.origin, ent->client->ps.mins,
-                    ent->client->ps.maxs, dst, ent->client->ps.clientNum,
-                    CONTENTS_NONOCLIP);
+  trap_TraceCapsule(&trace, ent->client->ps.origin, ent->client->ps.mins, ent->client->ps.maxs, dst,
+                    ent->client->ps.clientNum, CONTENTS_NONOCLIP);
 
   if (!g_cheats.integer &&
-      game.worldspawn->noNoclip == (trace.fraction == 1.0f)) {
+      !WorldspawnShared::areaAllowsAction(game.worldspawn->resolvedKeysForClient(ent).noNoclip, trace)) {
     Printer::console(clientNum, "^7You cannot ^3setoffset ^7to this area.\n");
     return;
   }
@@ -1000,11 +962,8 @@ void interruptRun(gentity_t *ent) {
 }
 
 bool checkTrackerIndex(int clientNum, int idx, char *buffer, bool noIndex) {
-  if (((idx < 1 || idx > MAX_PROGRESSION_TRACKERS) && !noIndex) ||
-      !(std::regex_match(buffer, std::regex("^-*\\d+")))) {
-    Printer::console(
-        clientNum,
-        "^3Error: ^7Invalid index specified. Valid range is ^31-50^7.\n");
+  if (((idx < 1 || idx > MAX_PROGRESSION_TRACKERS) && !noIndex) || !(std::regex_match(buffer, std::regex("^-*\\d+")))) {
+    Printer::console(clientNum, "^3Error: ^7Invalid index specified. Valid range is ^31-50^7.\n");
     return false;
   }
 
@@ -1013,8 +972,7 @@ bool checkTrackerIndex(int clientNum, int idx, char *buffer, bool noIndex) {
 
 bool checkTrackerValue(int clientNum, char *value) {
   if (!std::regex_match(value, std::regex("^[+-]?\\d+"))) {
-    Printer::console(clientNum,
-                     "^3Error: ^7Specified value is not an integer.\n");
+    Printer::console(clientNum, "^3Error: ^7Specified value is not an integer.\n");
     return false;
   }
 
@@ -1028,14 +986,12 @@ void printTracker(gentity_t *ent) {
   int i;
 
   if (g_debugTrackers.integer <= 0) {
-    Printer::console(clientNum,
-                     "^3Error: ^7Tracker debugging is not enabled.\n");
+    Printer::console(clientNum, "^3Error: ^7Tracker debugging is not enabled.\n");
     return;
   }
 
   if (trap_Argc() < 2) {
-    printTrackerMsg = StringUtils::format("Index: ^3%i ^7value: ^2%i\n", 1,
-                                          ent->client->pers.progression[0]);
+    printTrackerMsg = StringUtils::format("Index: ^3%i ^7value: ^2%i\n", 1, ent->client->pers.progression[0]);
     Printer::console(clientNum, printTrackerMsg);
     return;
   }
@@ -1044,9 +1000,7 @@ void printTracker(gentity_t *ent) {
 
   if (!Q_stricmp("all", buffer)) {
     for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
-      printTrackerMsg =
-          StringUtils::format("Index: ^3%i ^7value: ^2%i\n", i + 1,
-                              ent->client->pers.progression[i]);
+      printTrackerMsg = StringUtils::format("Index: ^3%i ^7value: ^2%i\n", i + 1, ent->client->pers.progression[i]);
       Printer::console(clientNum, printTrackerMsg);
     }
   } else {
@@ -1058,8 +1012,7 @@ void printTracker(gentity_t *ent) {
 
       if (checkTrackerIndex(clientNum, idx, buffer, false)) {
         printTrackerMsg =
-            StringUtils::format("Index: ^3%i ^7value: ^2%i\n", idx,
-                                ent->client->pers.progression[idx - 1]);
+          StringUtils::format("Index: ^3%i ^7value: ^2%i\n", idx, ent->client->pers.progression[idx - 1]);
         Printer::console(clientNum, printTrackerMsg);
       }
     }
@@ -1077,16 +1030,14 @@ void setTracker(gentity_t *ent) {
   // Check this first before g_debugTrackers so help can be printed even
   // when debugging isn't enabled.
   if (trap_Argc() < 2 || trap_Argc() > 3) {
-    Printer::console(clientNum,
-                     "^3Usage: ^7tracker_set <index|all> <value>\n"
-                     "Sets your tracker value on specified index to N. If "
-                     "index isn't specified, defaults to index 1.\n");
+    Printer::console(clientNum, "^3Usage: ^7tracker_set <index|all> <value>\n"
+                                "Sets your tracker value on specified index to N. If "
+                                "index isn't specified, defaults to index 1.\n");
     return;
   }
 
   if (g_debugTrackers.integer <= 0) {
-    Printer::console(clientNum,
-                     "^3Error: ^7Tracker debugging is not enabled.\n");
+    Printer::console(clientNum, "^3Error: ^7Tracker debugging is not enabled.\n");
     return;
   }
 
@@ -1107,8 +1058,7 @@ void setTracker(gentity_t *ent) {
         ent->client->pers.progression[i] = value;
       }
 
-      setTrackerMsg = StringUtils::format(
-          "^7Set tracker value on all indices to ^2%i^7.\n", value);
+      setTrackerMsg = StringUtils::format("^7Set tracker value on all indices to ^2%i^7.\n", value);
       Printer::console(clientNum, setTrackerMsg);
     }
   }
@@ -1119,8 +1069,7 @@ void setTracker(gentity_t *ent) {
       if (checkTrackerIndex(clientNum, idx, bufferIndex, noIndex)) {
         ent->client->pers.progression[0] = idx; // No index specified, use it
                                                 // for value on index 1
-        setTrackerMsg = StringUtils::format(
-            "^7Tracker set - index: ^31 ^7value: ^2%i\n", idx);
+        setTrackerMsg                    = StringUtils::format("^7Tracker set - index: ^31 ^7value: ^2%i\n", idx);
         Printer::console(clientNum, setTrackerMsg);
         return;
       }
@@ -1140,10 +1089,9 @@ void setTracker(gentity_t *ent) {
       }
 
       if (checkTrackerValue(clientNum, bufferValue)) {
-        value = Q_atoi(bufferValue);
+        value                                  = Q_atoi(bufferValue);
         ent->client->pers.progression[idx - 1] = value;
-        setTrackerMsg = StringUtils::format(
-            "^7Tracker set - index: ^3%i ^7value: ^2%i\n", idx, value);
+        setTrackerMsg = StringUtils::format("^7Tracker set - index: ^3%i ^7value: ^2%i\n", idx, value);
         Printer::console(clientNum, setTrackerMsg);
       }
     }
@@ -1164,15 +1112,13 @@ static void dumpEntities(gentity_t *ent) {
   // the vector is never empty if the map was loaded with 'developer 1'
   // because worldspawn is an entity (and you need a spawnpoint to load the map)
   if (!g_developer.integer || entities.empty()) {
-    Printer::console(
-        ent, "You must be in developer mode to dump entities.\nSet "
-             "^3'developer 1' ^7and reload the map to dump entities.\n");
+    Printer::console(ent, "You must be in developer mode to dump entities.\nSet "
+                          "^3'developer 1' ^7and reload the map to dump entities.\n");
     return;
   }
 
-  std::string arg = ConcatArgs(1);
-  const std::string filename =
-      StringUtils::format("maps/%s.ent", arg.empty() ? level.rawmapname : arg);
+  std::string arg            = ConcatArgs(1);
+  const std::string filename = StringUtils::format("maps/%s.ent", arg.empty() ? level.rawmapname : arg);
 
   try {
     File out(filename, File::Mode::Write);
@@ -1183,11 +1129,9 @@ static void dumpEntities(gentity_t *ent) {
     }
 
     out.write(contents);
-    Printer::console(
-        ent, StringUtils::format("Dumped entities to ^3'%s'\n", filename));
+    Printer::console(ent, "Dumped entities to ^3'%s'\n", filename);
   } catch (const File::FileIOException &e) {
-    Printer::console(
-        ent, StringUtils::format("Failed to write file ^3'%s'\n", e.what()));
+    Printer::console(ent, "Failed to write file ^3'%s'\n", e.what());
   }
 }
 } // namespace ETJump
@@ -1200,9 +1144,9 @@ argv(0) noclip
 ==================
 */
 void Cmd_Noclip_f(gentity_t *ent) {
-  auto *name = ConcatArgs(1);
+  auto *name     = ConcatArgs(1);
   auto clientNum = ClientNum(ent);
-  auto result = ETJump::canNoclip(ent);
+  auto result    = ETJump::canNoclip(ent);
 
   if (!result.success) {
     std::string str = StringUtils::format(result.message, "noclip");
@@ -1231,8 +1175,7 @@ Cmd_Kill_f
 =================
 */
 void Cmd_Kill_f(gentity_t *ent) {
-  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR ||
-      (ent->client->ps.pm_flags & PMF_LIMBO) || ent->health <= 0 ||
+  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.pm_flags & PMF_LIMBO) || ent->health <= 0 ||
       level.match_pause != PAUSE_NONE) {
     return;
   }
@@ -1241,17 +1184,14 @@ void Cmd_Kill_f(gentity_t *ent) {
     return;
   }
 
-  ent->flags &= ~FL_GODMODE;
+  ent->flags                         &= ~FL_GODMODE;
   ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
-  ent->client->ps.persistant[PERS_HWEAPON_USE] =
-      0; // TTimo - if using /kill while at MG42
-  player_die(ent, ent, ent, (g_gamestate.integer == GS_PLAYING) ? 100000 : 135,
-             MOD_SUICIDE);
+  ent->client->ps.persistant[PERS_HWEAPON_USE]     = 0; // TTimo - if using /kill while at MG42
+  player_die(ent, ent, ent, (g_gamestate.integer == GS_PLAYING) ? 100000 : 135, MOD_SUICIDE);
   ent->client->sess.lastKillTime = level.time;
 }
 
-void G_TeamDataForString(const char *teamstr, int clientNum, team_t *team,
-                         spectatorState_t *sState, int *specClient) {
+void G_TeamDataForString(const char *teamstr, int clientNum, team_t *team, spectatorState_t *sState, int *specClient) {
   *sState = SPECTATOR_NOT;
   if (!Q_stricmp(teamstr,
                  "follow1")) // follow player 1 as a spectator (we do
@@ -1259,8 +1199,7 @@ void G_TeamDataForString(const char *teamstr, int clientNum, team_t *team,
   {
     *team = TEAM_SPECTATOR;
 
-    if (TeamCount(clientNum, TEAM_AXIS) + TeamCount(clientNum, TEAM_ALLIES) >
-        0) {
+    if (TeamCount(clientNum, TEAM_AXIS) + TeamCount(clientNum, TEAM_ALLIES) > 0) {
       *sState = SPECTATOR_FOLLOW;
     } else {
       *sState = SPECTATOR_FREE;
@@ -1274,8 +1213,7 @@ void G_TeamDataForString(const char *teamstr, int clientNum, team_t *team,
                                     // require at least 2 playing clients)
   {
     int specClientNum = -2;
-    int playerCount =
-        TeamCount(clientNum, TEAM_AXIS) + TeamCount(clientNum, TEAM_ALLIES);
+    int playerCount   = TeamCount(clientNum, TEAM_AXIS) + TeamCount(clientNum, TEAM_ALLIES);
 
     *team = TEAM_SPECTATOR;
     if (playerCount > 1) {
@@ -1283,7 +1221,7 @@ void G_TeamDataForString(const char *teamstr, int clientNum, team_t *team,
     }
     // if there is no 2nd player to follow, follow the first one
     else if (playerCount > 0) {
-      *sState = SPECTATOR_FOLLOW;
+      *sState       = SPECTATOR_FOLLOW;
       specClientNum = -1;
     } else {
       *sState = SPECTATOR_FREE;
@@ -1293,13 +1231,11 @@ void G_TeamDataForString(const char *teamstr, int clientNum, team_t *team,
       *specClient = specClientNum;
     }
   } else if (!Q_stricmp(teamstr, "spectator") || !Q_stricmp(teamstr, "s")) {
-    *team = TEAM_SPECTATOR;
+    *team   = TEAM_SPECTATOR;
     *sState = SPECTATOR_FREE;
-  } else if (!Q_stricmp(teamstr, "red") || !Q_stricmp(teamstr, "r") ||
-             !Q_stricmp(teamstr, "axis")) {
+  } else if (!Q_stricmp(teamstr, "red") || !Q_stricmp(teamstr, "r") || !Q_stricmp(teamstr, "axis")) {
     *team = TEAM_AXIS;
-  } else if (!Q_stricmp(teamstr, "blue") || !Q_stricmp(teamstr, "b") ||
-             !Q_stricmp(teamstr, "allies")) {
+  } else if (!Q_stricmp(teamstr, "blue") || !Q_stricmp(teamstr, "b") || !Q_stricmp(teamstr, "allies")) {
     *team = TEAM_ALLIES;
   } else {
     *team = PickTeam(clientNum);
@@ -1314,8 +1250,7 @@ void G_TeamDataForString(const char *teamstr, int clientNum, team_t *team,
 SetTeam
 =================
 */
-qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
-                 weapon_t w2, qboolean setweapons) {
+qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1, weapon_t w2, qboolean setweapons) {
   team_t team, oldTeam;
   gclient_t *client;
   int clientNum;
@@ -1327,11 +1262,10 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
   //
   client = ent->client;
 
-  clientNum = client - level.clients;
+  clientNum  = client - level.clients;
   specClient = 0;
 
-  G_TeamDataForString(s, client - level.clients, &team, &specState,
-                      &specClient);
+  G_TeamDataForString(s, client - level.clients, &team, &specState, &specClient);
 
   if (team != TEAM_SPECTATOR) {
     // Ensure the player can join
@@ -1342,8 +1276,7 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
     }
   }
 
-  if (g_maxGameClients.integer > 0 &&
-      level.numNonSpectatorClients >= g_maxGameClients.integer) {
+  if (g_maxGameClients.integer > 0 && level.numNonSpectatorClients >= g_maxGameClients.integer) {
     team = TEAM_SPECTATOR;
   }
 
@@ -1368,7 +1301,7 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
   if (oldTeam != TEAM_SPECTATOR) {
     if (!(ent->client->ps.pm_flags & PMF_LIMBO)) {
       // Kill him (makes sure he loses flags, etc)
-      ent->flags &= ~FL_GODMODE;
+      ent->flags                         &= ~FL_GODMODE;
       ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
       player_die(ent, ent, ent, 100000, MOD_SWITCHTEAM);
     }
@@ -1376,7 +1309,7 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
   // they go to the end of the line for tournements
   if (team == TEAM_SPECTATOR) {
     client->sess.spectatorTime = level.time;
-    client->pers.invite = 0;
+    client->pers.invite        = 0;
   }
 
   G_LeaveTank(ent, qfalse);
@@ -1394,8 +1327,7 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
     for (i = 0; i < 2; i++) {
       teamList = &mapEntityData[i];
 
-      if ((mEnt = G_FindMapEntityData(&mapEntityData[0], ent - g_entities)) !=
-          NULL) {
+      if ((mEnt = G_FindMapEntityData(&mapEntityData[0], ent - g_entities)) != NULL) {
         G_FreeMapEntityData(teamList, mEnt);
       }
 
@@ -1404,26 +1336,25 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
       while (mEnt) {
         mapEntityData_t *mEntFree = mEnt;
 
-        mEnt =
-            G_FindMapEntityDataSingleClient(teamList, mEnt, ent->s.number, -1);
+        mEnt = G_FindMapEntityDataSingleClient(teamList, mEnt, ent->s.number, -1);
 
         G_FreeMapEntityData(teamList, mEntFree);
       }
     }
   }
-  client->sess.spec_team = 0;
-  client->sess.sessionTeam = team;
-  client->sess.spectatorState = specState;
+  client->sess.spec_team       = 0;
+  client->sess.sessionTeam     = team;
+  client->sess.spectatorState  = specState;
   client->sess.spectatorClient = specClient;
-  client->pers.ready = qfalse;
-  client->sess.lastTeamSwitch = level.time;
+  client->pers.ready           = qfalse;
+  client->sess.lastTeamSwitch  = level.time;
 
   // (l)users will spam spec messages... honest!
   if (team != oldTeam) {
-    gentity_t *tent = G_PopupMessage(PM_TEAM);
+    gentity_t *tent     = G_PopupMessage(PM_TEAM);
     tent->s.effect2Time = team;
     tent->s.effect3Time = clientNum;
-    tent->s.density = 0;
+    tent->s.density     = 0;
   }
 
   if (setweapons) {
@@ -1431,8 +1362,7 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
   }
 
   // get and distribute relevent paramters
-  G_UpdateCharacter(
-      client); // FIXME : doesn't ClientBegin take care of this already?
+  G_UpdateCharacter(client); // FIXME : doesn't ClientBegin take care of this already?
   ClientUserinfoChanged(clientNum);
 
   ClientBegin(clientNum);
@@ -1447,26 +1377,23 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
   G_UpdateSpawnCounts();
 
   if (g_gamestate.integer == GS_PLAYING &&
-      (client->sess.sessionTeam == TEAM_AXIS ||
-       client->sess.sessionTeam == TEAM_ALLIES)) {
+      (client->sess.sessionTeam == TEAM_AXIS || client->sess.sessionTeam == TEAM_ALLIES)) {
     int i;
     int x = client->sess.sessionTeam - TEAM_AXIS;
 
     for (i = 0; i < MAX_COMMANDER_TEAM_SOUNDS; i++) {
       if (level.commanderSounds[x][i].index) {
-        gentity_t *tent =
-            G_TempEntity(client->ps.origin, EV_GLOBAL_CLIENT_SOUND);
+        gentity_t *tent   = G_TempEntity(client->ps.origin, EV_GLOBAL_CLIENT_SOUND);
         tent->s.eventParm = level.commanderSounds[x][i].index - 1;
-        tent->s.teamNum = clientNum;
+        tent->s.teamNum   = clientNum;
       }
     }
   }
 
   ent->client->pers.autofireteamCreateEndTime = 0;
-  ent->client->pers.autofireteamJoinEndTime = 0;
+  ent->client->pers.autofireteamJoinEndTime   = 0;
 
-  if (client->sess.sessionTeam == TEAM_AXIS ||
-      client->sess.sessionTeam == TEAM_ALLIES) {
+  if (client->sess.sessionTeam == TEAM_AXIS || client->sess.sessionTeam == TEAM_ALLIES) {
     if (g_autoFireteams.integer) {
       fireteamData_t *ft = G_FindFreePublicFireteam(client->sess.sessionTeam);
 
@@ -1486,8 +1413,7 @@ qboolean SetTeam(gentity_t *ent, const char *s, qboolean force, weapon_t w1,
 
   if (ent->client->sess.timerunActive) {
     if (team == TEAM_SPECTATOR || !ent->client->sess.runSpawnflags ||
-        ent->client->sess.runSpawnflags &
-            static_cast<int>(ETJump::TimerunSpawnflags::ResetTeamChange)) {
+        ent->client->sess.runSpawnflags & static_cast<int>(ETJump::TimerunSpawnflags::ResetTeamChange)) {
       InterruptRun(ent);
     }
   }
@@ -1517,15 +1443,14 @@ void StopFollowing(gentity_t *ent) {
     //		pos[2] += 16; // Gordon: removing for now
     VectorCopy(client->ps.viewangles, angle);
     // Need this as it gets spec mode reset properly
-    SetTeam(ent, "s", qtrue, static_cast<weapon_t>(-1),
-            static_cast<weapon_t>(-1), qfalse);
+    SetTeam(ent, "s", qtrue, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
     VectorCopy(pos, client->ps.origin);
     SetClientViewAngle(ent, angle);
   } else {
     // legacy code, FIXME: useless?
     // Gordon: no this is for limbo i'd guess
     ent->client->sess.spectatorState = SPECTATOR_FREE;
-    ent->client->ps.clientNum = ent - g_entities;
+    ent->client->ps.clientNum        = ent - g_entities;
   }
 }
 
@@ -1543,8 +1468,7 @@ int G_NumPlayersWithWeapon(weapon_t weap, team_t team) {
       continue;
     }
 
-    if (level.clients[j].sess.latchPlayerWeapon != weap &&
-        level.clients[j].sess.playerWeapon != weap) {
+    if (level.clients[j].sess.latchPlayerWeapon != weap && level.clients[j].sess.playerWeapon != weap) {
       continue;
     }
 
@@ -1605,8 +1529,7 @@ int G_TeamCount(gentity_t *ent, weapon_t weap) {
     }
 
     if (weap != -1) {
-      if (level.clients[j].sess.playerWeapon != weap &&
-          level.clients[j].sess.latchPlayerWeapon != weap) {
+      if (level.clients[j].sess.playerWeapon != weap && level.clients[j].sess.latchPlayerWeapon != weap) {
         continue;
       }
     }
@@ -1618,7 +1541,6 @@ int G_TeamCount(gentity_t *ent, weapon_t weap) {
 }
 
 qboolean G_IsWeaponDisabled(gentity_t *ent, weapon_t weapon) {
-
   if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
     return qtrue;
   }
@@ -1626,24 +1548,23 @@ qboolean G_IsWeaponDisabled(gentity_t *ent, weapon_t weapon) {
   return qfalse;
 }
 
-void G_SetClientWeapons(gentity_t *ent, weapon_t w1, weapon_t w2,
-                        qboolean updateclient) {
+void G_SetClientWeapons(gentity_t *ent, weapon_t w1, weapon_t w2, qboolean updateclient) {
   qboolean changed = qfalse;
 
   if (ent->client->sess.latchPlayerWeapon2 != w2) {
     ent->client->sess.latchPlayerWeapon2 = w2;
-    changed = qtrue;
+    changed                              = qtrue;
   }
 
   if (!G_IsWeaponDisabled(ent, w1)) {
     if (ent->client->sess.latchPlayerWeapon != w1) {
       ent->client->sess.latchPlayerWeapon = w1;
-      changed = qtrue;
+      changed                             = qtrue;
     }
   } else {
     if (ent->client->sess.latchPlayerWeapon != 0) {
       ent->client->sess.latchPlayerWeapon = 0;
-      changed = qtrue;
+      changed                             = qtrue;
     }
   }
 
@@ -1676,8 +1597,7 @@ weapon_t G_GetDefaultWeaponForClass(gentity_t *ent, char *s, bool primary) {
       default:
         break;
     }
-  } else if (!Q_stricmp(s, "blue") || !Q_stricmp(s, "b") ||
-             !Q_stricmp(s, "allies")) {
+  } else if (!Q_stricmp(s, "blue") || !Q_stricmp(s, "b") || !Q_stricmp(s, "allies")) {
     switch (ent->client->sess.latchPlayerType) {
       case PC_SOLDIER:
       case PC_MEDIC:
@@ -1727,12 +1647,11 @@ void Cmd_Team_f(gentity_t *ent) {
   trap_Argv(3, weap, sizeof(weap));
   trap_Argv(4, weap2, sizeof(weap2));
 
-  w = static_cast<weapon_t>(Q_atoi(weap));
+  w  = static_cast<weapon_t>(Q_atoi(weap));
   w2 = static_cast<weapon_t>(Q_atoi(weap2));
 
   ent->client->sess.latchPlayerType = Q_atoi(ptype);
-  if (ent->client->sess.latchPlayerType < PC_SOLDIER ||
-      ent->client->sess.latchPlayerType > PC_COVERTOPS) {
+  if (ent->client->sess.latchPlayerType < PC_SOLDIER || ent->client->sess.latchPlayerType > PC_COVERTOPS) {
     ent->client->sess.latchPlayerType = PC_SOLDIER;
   }
 
@@ -1765,12 +1684,12 @@ void Cmd_ResetSetup_f(gentity_t *ent) {
 
   if (ent->client->sess.latchPlayerWeapon != ent->client->sess.playerWeapon) {
     ent->client->sess.latchPlayerWeapon = ent->client->sess.playerWeapon;
-    changed = qtrue;
+    changed                             = qtrue;
   }
 
   if (ent->client->sess.latchPlayerWeapon2 != ent->client->sess.playerWeapon2) {
     ent->client->sess.latchPlayerWeapon2 = ent->client->sess.playerWeapon2;
-    changed = qtrue;
+    changed                              = qtrue;
   }
 
   if (changed) {
@@ -1780,8 +1699,7 @@ void Cmd_ResetSetup_f(gentity_t *ent) {
 
 void Cmd_SetClass_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {}
 
-void Cmd_SetWeapons_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
-}
+void Cmd_SetWeapons_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {}
 
 // START Mad Doc - TDF
 /*
@@ -1808,11 +1726,11 @@ void Cmd_TeamBot_f(gentity_t *foo) {
   trap_Argv(4, weap, sizeof(weap));
   trap_Argv(5, fireteam, sizeof(fireteam));
 
-  ent->client->sess.latchPlayerType = Q_atoi(ptype);
-  ent->client->sess.latchPlayerWeapon = Q_atoi(weap);
+  ent->client->sess.latchPlayerType    = Q_atoi(ptype);
+  ent->client->sess.latchPlayerWeapon  = Q_atoi(weap);
   ent->client->sess.latchPlayerWeapon2 = 0;
-  ent->client->sess.playerType = Q_atoi(ptype);
-  ent->client->sess.playerWeapon = Q_atoi(weap);
+  ent->client->sess.playerType         = Q_atoi(ptype);
+  ent->client->sess.playerWeapon       = Q_atoi(weap);
 
   // remove any weapon info from the userinfo, so SetWolfSpawnWeapons()
   // doesn't reset the weapon as that
@@ -1866,8 +1784,7 @@ void Cmd_Follow_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     if (!TeamCount(ent - g_entities, i)) {
       CP(va("print \"The %s team %s empty!  Follow "
             "command ignored.\n\"",
-            aTeams[i],
-            ((ent->client->sess.sessionTeam != i) ? "is" : "would be")));
+            aTeams[i], ((ent->client->sess.sessionTeam != i) ? "is" : "would be")));
       return;
     }
 
@@ -1916,11 +1833,10 @@ void Cmd_Follow_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
 
   // first set them to spectator
   if (ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
-    SetTeam(ent, "spectator", qfalse, static_cast<weapon_t>(-1),
-            static_cast<weapon_t>(-1), qfalse);
+    SetTeam(ent, "spectator", qfalse, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
   }
 
-  ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
+  ent->client->sess.spectatorState  = SPECTATOR_FOLLOW;
   ent->client->sess.spectatorClient = i;
 }
 
@@ -1937,8 +1853,7 @@ void Cmd_FollowCycle_f(gentity_t *ent, int dir) {
   if ((ent->client->sess.spectatorState == SPECTATOR_NOT) &&
       (!(ent->client->ps.pm_flags & PMF_LIMBO))) // JPW NERVE for limbo state
   {
-    SetTeam(ent, "spectator", qfalse, static_cast<weapon_t>(-1),
-            static_cast<weapon_t>(-1), qfalse);
+    SetTeam(ent, "spectator", qfalse, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
   }
 
   if (dir != 1 && dir != -1) {
@@ -1957,7 +1872,7 @@ void Cmd_FollowCycle_f(gentity_t *ent, int dir) {
   }
 
   clientNum = ent->client->sess.spectatorClient;
-  original = clientNum;
+  original  = clientNum;
   do {
     clientNum += dir;
     if (clientNum >= level.maxclients) {
@@ -1982,8 +1897,7 @@ void Cmd_FollowCycle_f(gentity_t *ent, int dir) {
       if (level.clients[clientNum].ps.pm_flags & PMF_LIMBO) {
         continue;
       }
-      if (level.clients[clientNum].sess.sessionTeam !=
-          ent->client->sess.sessionTeam) {
+      if (level.clients[clientNum].sess.sessionTeam != ent->client->sess.sessionTeam) {
         continue;
       }
     }
@@ -1999,7 +1913,7 @@ void Cmd_FollowCycle_f(gentity_t *ent, int dir) {
 
     // this is good, we can use it
     ent->client->sess.spectatorClient = clientNum;
-    ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
+    ent->client->sess.spectatorState  = SPECTATOR_FOLLOW;
     return;
   } while (clientNum != original);
 
@@ -2017,16 +1931,13 @@ G_EntitySound
     be visible (unless it has the SVF_BROADCAST flag), so if you want to make
 sure the sound is heard, call this function instead.
 ======================*/
-void G_EntitySound(
-    gentity_t *ent,      // entity to play the sound on
-    const char *soundId, // sound file name or sound script ID
-    int volume)          // sound volume, only applies to sound file name call
-                         //   for sound script, volume is currently always 127.
+void G_EntitySound(gentity_t *ent,      // entity to play the sound on
+                   const char *soundId, // sound file name or sound script ID
+                   int volume)          // sound volume, only applies to sound file name call
+                                        //   for sound script, volume is currently always 127.
 {
-  trap_SendServerCommand(
-      -1, va("entitySound %d %s %d %i %i %i normal", ent->s.number, soundId,
-             volume, (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1],
-             (int)ent->s.pos.trBase[2]));
+  trap_SendServerCommand(-1, va("entitySound %d %s %d %i %i %i normal", ent->s.number, soundId, volume,
+                                (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2]));
 }
 
 /*======================
@@ -2036,16 +1947,13 @@ G_EntitySoundNoCut
     Similar to G_EntitySound, but do not cut this sound off
 
 ======================*/
-void G_EntitySoundNoCut(
-    gentity_t *ent,      // entity to play the sound on
-    const char *soundId, // sound file name or sound script ID
-    int volume)          // sound volume, only applies to sound file name call
-                         //   for sound script, volume is currently always 127.
+void G_EntitySoundNoCut(gentity_t *ent,      // entity to play the sound on
+                        const char *soundId, // sound file name or sound script ID
+                        int volume)          // sound volume, only applies to sound file name call
+                                             //   for sound script, volume is currently always 127.
 {
-  trap_SendServerCommand(
-      -1, va("entitySound %d %s %d %i %i %i noCut", ent->s.number, soundId,
-             volume, (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1],
-             (int)ent->s.pos.trBase[2]));
+  trap_SendServerCommand(-1, va("entitySound %d %s %d %i %i %i noCut", ent->s.number, soundId, volume,
+                                (int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2]));
 }
 
 /*
@@ -2053,10 +1961,10 @@ void G_EntitySoundNoCut(
 G_Say
 ==================
 */
-void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
-             const char *name, const char *message, qboolean encoded) {
+void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color, const char *name, const char *message,
+             qboolean encoded) {
   const char *cmd;
-  auto clientNum = ClientNum(ent);
+  auto clientNum      = ClientNum(ent);
   auto otherClientNum = ClientNum(other);
 
   if (!other || !other->inuse || !other->client) {
@@ -2068,7 +1976,7 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
   }
 
   if (mode == SAY_BUDDY) {
-    if (ent->s.clientNum != other->s.clientNum) {
+    if (ent != other) {
       fireteamData_t *ft1, *ft2;
       if (!G_IsOnFireteam(otherClientNum, &ft1)) {
         return;
@@ -2083,21 +1991,16 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color,
   }
 
   if (encoded) {
-    cmd = (mode == SAY_TEAM || mode == SAY_BUDDY || mode == SAY_ADMIN)
-              ? "enc_tchat"
-              : "enc_chat";
+    cmd = (mode == SAY_TEAM || mode == SAY_BUDDY || mode == SAY_ADMIN) ? "enc_tchat" : "enc_chat";
   } else {
-    cmd = (mode == SAY_TEAM || mode == SAY_BUDDY || mode == SAY_ADMIN) ? "tchat"
-                                                                       : "chat";
+    cmd = (mode == SAY_TEAM || mode == SAY_BUDDY || mode == SAY_ADMIN) ? "tchat" : "chat";
   }
 
   trap_SendServerCommand(otherClientNum,
-                         va("%s \"%s%c%c%s\" %i", cmd, name, Q_COLOR_ESCAPE,
-                            color, message, clientNum));
+                         va("%s \"%s%c%c%s\" %i", cmd, name, Q_COLOR_ESCAPE, color, message, clientNum));
 }
 
-void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
-           char *chatText) {
+void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded, char *chatText) {
   int j, len;
   gentity_t *other;
   int color;
@@ -2105,8 +2008,8 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   // don't let text be too long for malicious reasons
   char text[MAX_CHAT_TEXT];
   const char *escapedName = nullptr;
-  const char *printText = nullptr;
-  const int clientNum = ClientNum(ent);
+  const char *printText   = nullptr;
+  const int clientNum     = ClientNum(ent);
 
   switch (mode) {
     default:
@@ -2125,11 +2028,9 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
       color = COLOR_YELLOW;
       break;
     case SAY_ADMIN:
-      Printer::logAdminLn(StringUtils::format(
-          "adminchat: %i %s: %s", ent->s.number,
-          StringUtils::sanitize(ent->client->pers.netname), chatText));
-      Com_sprintf(name, sizeof(name),
-                  "^A> ^7%s^7: ", ent->client->pers.netname);
+      Printer::logAdminLn("adminchat: %i %s: %s", ent->s.number, StringUtils::sanitize(ent->client->pers.netname),
+                          chatText);
+      Com_sprintf(name, sizeof(name), "^A> ^7%s^7: ", ent->client->pers.netname);
       color = COLOR_LTORANGE;
   }
 
@@ -2138,13 +2039,13 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
 
   // if chat message is too long, e.g. being sent from console
   // cut it and put ellipsis at the end
-  if (Q_strnlen(chatText, MAX_SAY_TEXT) > len) {
+  if (Q_strnlen(chatText, MAX_SAY_TEXT) > static_cast<size_t>(len)) {
     text[len - 2] = '.';
     text[len - 3] = '.';
     text[len - 4] = '.';
   }
 
-  printText = text;
+  printText   = text;
   escapedName = EscapeString(name);
 
   if (g_chatOptions.integer & CHAT_OPTIONS_INTERPOLATE_NAME_TAGS) {
@@ -2152,8 +2053,7 @@ void G_Say(gentity_t *ent, gentity_t *target, int mode, qboolean encoded,
   }
 
   if (mode == SAY_ALL) {
-    game.chatReplay->createChatMessage(clientNum, escapedName, printText,
-                                       encoded);
+    game.chatReplay->createChatMessage(clientNum, escapedName, printText, encoded);
   }
 
   // remove inactivity flag as using BUTTON_TALK won't clear it,
@@ -2204,8 +2104,7 @@ void Cmd_Say_f(gentity_t *ent, int mode, qboolean arg0, qboolean encoded) {
 }
 
 // NERVE - SMF
-void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay,
-               qboolean voiceonly) {
+void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay, qboolean voiceonly) {
   int color;
   const char *cmd;
 
@@ -2224,7 +2123,7 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay,
 
   // send only to people who have the sender on their buddy list
   if (mode == SAY_BUDDY) {
-    if (ent->s.clientNum != other->s.clientNum) {
+    if (ent != other) {
       fireteamData_t *ft1, *ft2;
       if (!G_IsOnFireteam(other - g_entities, &ft1)) {
         return;
@@ -2240,37 +2139,32 @@ void G_VoiceTo(gentity_t *ent, gentity_t *other, int mode, vsayCmd_t *vsay,
 
   if (mode == SAY_TEAM) {
     color = COLOR_CYAN;
-    cmd = "vtchat";
+    cmd   = "vtchat";
   } else if (mode == SAY_BUDDY) {
     color = COLOR_YELLOW;
-    cmd = "vbchat";
+    cmd   = "vbchat";
   } else {
     color = COLOR_GREEN;
-    cmd = "vchat";
+    cmd   = "vchat";
   }
 
   if (mode == SAY_TEAM || mode == SAY_BUDDY) {
-    CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i %f \"%s\"", cmd,
-                               voiceonly, ClientNum(ent), color, vsay->id,
-                               static_cast<int>(ent->s.pos.trBase[0]),
-                               static_cast<int>(ent->s.pos.trBase[1]),
-                               static_cast<int>(ent->s.pos.trBase[2]),
-                               vsay->variant, vsay->random, vsay->custom));
+    CPx(other - g_entities, va("%s %d %d %d %s %i %i %i %i %f \"%s\"", cmd, voiceonly, ClientNum(ent), color, vsay->id,
+                               static_cast<int>(ent->s.pos.trBase[0]), static_cast<int>(ent->s.pos.trBase[1]),
+                               static_cast<int>(ent->s.pos.trBase[2]), vsay->variant, vsay->random, vsay->custom));
   } else {
-    CPx(other - g_entities,
-        va("%s %d %d %d %s %i %f \"%s\"", cmd, voiceonly, ClientNum(ent), color,
-           vsay->id, vsay->variant, vsay->random, vsay->custom));
+    CPx(other - g_entities, va("%s %d %d %d %s %i %f \"%s\"", cmd, voiceonly, ClientNum(ent), color, vsay->id,
+                               vsay->variant, vsay->random, vsay->custom));
   }
 }
 
-void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay,
-             qboolean voiceonly) {
+void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay, qboolean voiceonly) {
   int j;
   gentity_t *other;
 
   // DHM - Nerve :: Don't allow excessive spamming of voice chats
-  ent->voiceChatSquelch -= (level.time - ent->voiceChatPreviousTime);
-  ent->voiceChatPreviousTime = level.time;
+  ent->voiceChatSquelch      -= (level.time - ent->voiceChatPreviousTime);
+  ent->voiceChatPreviousTime  = level.time;
 
   if (ent->voiceChatSquelch < 0) {
     ent->voiceChatSquelch = 0;
@@ -2278,8 +2172,7 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay,
 
   // Only do the spam check for MP
   if (ent->voiceChatSquelch >= 30000) {
-    trap_SendServerCommand(ent - g_entities,
-                           "cpm \"^1Spam Protection^7: VoiceChat ignored\n\"");
+    trap_SendServerCommand(ent - g_entities, "cpm \"^1Spam Protection^7: VoiceChat ignored\n\"");
     return;
   }
 
@@ -2339,10 +2232,8 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay,
     }
 
     for (j = 0; j < level.numConnectedClients; j++) {
-
       if (level.sortedClients[j] != ent->s.clientNum) {
-        if (cls != -1 &&
-            cls != level.clients[level.sortedClients[j]].sess.playerType) {
+        if (cls != -1 && cls != level.clients[level.sortedClients[j]].sess.playerType) {
           continue;
         }
       }
@@ -2353,11 +2244,9 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay,
         }
       }
 
-      G_VoiceTo(ent, &g_entities[level.sortedClients[j]], mode, vsay,
-                voiceonly);
+      G_VoiceTo(ent, &g_entities[level.sortedClients[j]], mode, vsay, voiceonly);
     }
   } else {
-
     // send it to all the apropriate clients
     for (j = 0; j < level.numConnectedClients; j++) {
       other = &g_entities[level.sortedClients[j]];
@@ -2373,9 +2262,7 @@ void G_Voice(gentity_t *ent, gentity_t *target, int mode, vsayCmd_t *vsay,
 Cmd_Voice_f
 ==================
 */
-static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
-                        qboolean voiceonly) {
-
+static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0, qboolean voiceonly) {
   vsayCmd_t vsay;
   auto id = 1, cust = 2;
   char variant[2];
@@ -2385,7 +2272,6 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
   vsay.random = random();
 
   if (mode != SAY_BUDDY) {
-
     if (trap_Argc() < 2 && !arg0) {
       return;
     }
@@ -2393,8 +2279,8 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
     trap_Argv(1, variant, sizeof(variant));
 
     if (Q_isnumeric(variant[0])) {
-      id = 2;
-      cust = 3;
+      id           = 2;
+      cust         = 3;
       vsay.variant = Q_atoi(variant);
     }
 
@@ -2422,11 +2308,11 @@ static void Cmd_Voice_f(gentity_t *ent, int mode, qboolean arg0,
     trap_Argv(3 + skipArgs, variant, sizeof(variant));
 
     if (Q_isnumeric(variant[0])) {
-      id = 4 + skipArgs;
-      cust = 5 + skipArgs;
+      id           = 4 + skipArgs;
+      cust         = 5 + skipArgs;
       vsay.variant = Q_atoi(variant);
     } else {
-      id = 3 + skipArgs;
+      id   = 3 + skipArgs;
       cust = 4 + skipArgs;
     }
 
@@ -2588,8 +2474,7 @@ Cmd_Where_f
 ==================
 */
 void Cmd_Where_f(gentity_t *ent) {
-  trap_SendServerCommand(ent - g_entities,
-                         va("print \"%s\n\"", vtos(ent->s.origin)));
+  trap_SendServerCommand(ent - g_entities, va("print \"%s\n\"", vtos(ent->s.origin)));
 }
 
 /*
@@ -2608,16 +2493,12 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
   }
 
   if (ent->client->sess.muted && g_mute.integer & 2) {
-    Printer::popup(clientNum,
-                   "^3callvote: ^7not allowed to call a vote while muted.");
+    Printer::popup(clientNum, "^3callvote: ^7not allowed to call a vote while muted.");
     return false;
   }
 
-  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
-      g_spectatorVote.integer < 2) {
-    Printer::popup(
-        clientNum,
-        "^3callvote: ^7you are not allowed to call a vote as a spectator.");
+  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR && g_spectatorVote.integer < 2) {
+    Printer::popup(clientNum, "^3callvote: ^7you are not allowed to call a vote as a spectator.");
     return false;
   }
 
@@ -2631,34 +2512,24 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
     return false;
   }
 
-  if (vote_limit.integer > 0 &&
-      ent->client->pers.voteCount >= vote_limit.integer) {
-    voteError = StringUtils::format(
-        "You have already called the maximum number of votes (%d).",
-        vote_limit.integer);
+  if (vote_limit.integer > 0 && ent->client->pers.voteCount >= vote_limit.integer) {
+    voteError = StringUtils::format("You have already called the maximum number of votes (%d).", vote_limit.integer);
     Printer::popup(clientNum, voteError);
     return false;
   }
 
   if (level.time - level.startTime < g_disableVoteAfterMapChange.integer) {
-    const int remainingTime = std::ceil(
-        (g_disableVoteAfterMapChange.integer - (level.time - level.startTime)) /
-        1000.0);
-    voteError = "You must wait " +
-                StringUtils::getSecondsString(remainingTime) +
-                " before voting after a map change.";
+    const int remainingTime =
+      std::ceil((g_disableVoteAfterMapChange.integer - (level.time - level.startTime)) / 1000.0);
+    voteError = "You must wait " + StringUtils::getSecondsString(remainingTime) + " before voting after a map change.";
     Printer::popup(clientNum, voteError);
     return false;
   }
 
   if (level.time - ent->client->lastVoteTime < g_voteCooldown.integer * 1000) {
     const int voteCooldown =
-        std::ceil(((g_voteCooldown.integer * 1000) -
-                   (level.time - ent->client->lastVoteTime)) /
-                  1000.0);
-    voteError = "^3callvote:^7 you must wait " +
-                StringUtils::getSecondsString(voteCooldown) +
-                " before voting again.";
+      std::ceil(((g_voteCooldown.integer * 1000) - (level.time - ent->client->lastVoteTime)) / 1000.0);
+    voteError = "^3callvote:^7 you must wait " + StringUtils::getSecondsString(voteCooldown) + " before voting again.";
     Printer::chat(clientNum, voteError);
     return false;
   }
@@ -2686,24 +2557,21 @@ void setCvString(char *voteMsg, char *voteArg) {
     if (voteArgInt == 0) {
       Q_strncpyz(voteArg, "Off", MAX_STRING_TOKENS);
     } else {
-      voteString =
-          StringUtils::format("%s", StringUtils::getMinutesString(voteArgInt));
+      voteString = StringUtils::format("%s", StringUtils::getMinutesString(voteArgInt));
       Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
     }
   } else if (func == G_PortalPredict_v) {
-    voteString =
-        StringUtils::format("%s", Q_atoi(voteArg) ? "ON" : "OFF", voteMsg);
+    voteString = StringUtils::format("%s", Q_atoi(voteArg) ? "ON" : "OFF", voteMsg);
     Q_strncpyz(voteArg, voteString.c_str(), MAX_STRING_TOKENS);
   }
 
-  Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString),
-              voteStringFormat, voteMsg, voteArg);
+  Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), voteStringFormat, voteMsg, voteArg);
 }
 
 bool isValidVoteString(const std::string &str) {
-  return std::none_of(
-      tokenDelimiters.cbegin(), tokenDelimiters.cend(),
-      [&](const char token) { return StringUtils::contains(str, token); });
+  return std::none_of(tokenDelimiters.cbegin(), tokenDelimiters.cend(), [&](const char token) {
+    return StringUtils::contains(str, token);
+  });
 }
 
 } // namespace ETJump
@@ -2735,12 +2603,12 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   if ((i = G_voteCmdCheck(ent, arg1, arg2)) != G_OK) {
     if (i == G_NOTFOUND) {
       if (arg1[0]) {
-        std::string errorMessage = StringUtils::format(
-            "\n^3Unknown vote command: ^7%s %s\n", arg1, arg2);
-        Printer::console(clientNum, errorMessage);
+        Printer::console(clientNum, "\n^3Unknown vote command: ^7%s %s\n", arg1, arg2);
       }
+
       G_voteHelp(ent, qtrue);
     }
+
     return;
   }
 
@@ -2758,32 +2626,28 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   if (game.rtv->rtvVoteActive()) {
     level.voteInfo.voteYes = 0;
   } else {
-    level.voteInfo.voteYes = 1;
-    level.voteInfo.voteYesSpectators =
-        ent->client->sess.sessionTeam == TEAM_SPECTATOR ? 1 : 0;
+    level.voteInfo.voteYes           = 1;
+    level.voteInfo.voteYesSpectators = ent->client->sess.sessionTeam == TEAM_SPECTATOR ? 1 : 0;
 
     trap_SendServerCommand(clientNum, "voted yes");
   }
 
   std::string calledVoteString =
-      StringUtils::format("%s^7 called a vote. Voting for: %s\n",
-                          ent->client->pers.netname, level.voteInfo.voteString);
+    StringUtils::format("%s^7 called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
   Printer::consoleAll(calledVoteString);
 
-  calledVoteString =
-      StringUtils::format("%s^7 called a vote.", ent->client->pers.netname);
+  calledVoteString = StringUtils::format("%s^7 called a vote.", ent->client->pers.netname);
   Printer::centerAll(calledVoteString);
 
-  G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname,
-              level.voteInfo.voteString);
+  G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname, level.voteInfo.voteString);
 
   G_globalSound("sound/misc/vote.wav");
 
-  level.voteInfo.voteTime = level.time;
-  level.voteInfo.voteNo = 0;
+  level.voteInfo.voteTime         = level.time;
+  level.voteInfo.voteNo           = 0;
   level.voteInfo.voteNoSpectators = 0;
-  level.voteInfo.voter_cn = clientNum;
-  level.voteInfo.voter_team = ent->client->sess.sessionTeam;
+  level.voteInfo.voter_cn         = clientNum;
+  level.voteInfo.voter_team       = ent->client->sess.sessionTeam;
 
   ent->client->lastVoteTime = level.time;
 
@@ -2803,18 +2667,15 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     game.rtv->setRtvConfigstrings();
   } else {
     std::string newcs =
-        StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
-                            level.voteInfo.voteYesSpectators);
+      StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteYes, level.voteInfo.voteYesSpectators);
     trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
   }
-  std::string newcs =
-      StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
-                          level.voteInfo.voteNoSpectators);
+  std::string newcs = StringUtils::format("tot\\%i\\spe\\%i", level.voteInfo.voteNo, level.voteInfo.voteNoSpectators);
   trap_SetConfigstring(CS_VOTE_NO, newcs.c_str());
 }
 
 static const char *yesMsgs[] = {"yes", "y", "1"};
-static const char *noMsgs[] = {"no", "n", "0"};
+static const char *noMsgs[]  = {"no", "n", "0"};
 
 /*
 ==================
@@ -2824,63 +2685,56 @@ Cmd_Vote_f
 void Cmd_Vote_f(gentity_t *ent) {
   char voteCmd[64]; // either 'vote' or 'rtvVote'
   char voteArg[64];
-  auto *client = ent->client;
-  const int clientNum = ClientNum(ent);
+  auto *client         = ent->client;
+  const int clientNum  = ClientNum(ent);
   const bool isRtvVote = game.rtv->rtvVoteActive();
 
   static const auto votedYes = [](const std::string &msg) {
-    return std::any_of(std::begin(yesMsgs), std::end(yesMsgs),
-                       [&msg](const char *ym) { return ym == msg; });
+    return std::any_of(std::begin(yesMsgs), std::end(yesMsgs), [&msg](const char *ym) {
+      return ym == msg;
+    });
   };
 
   static const auto votedNo = [](const std::string &msg) {
-    return std::any_of(std::begin(noMsgs), std::end(noMsgs),
-                       [&msg](const char *nm) { return nm == msg; });
+    return std::any_of(std::begin(noMsgs), std::end(noMsgs), [&msg](const char *nm) {
+      return nm == msg;
+    });
   };
 
   const auto printVoteMsgs = [&] {
-    std::string voteMsgs = "^7Invalid vote argument.\n";
-    voteMsgs += "  ^7Valid arguments for '^2Yes^7' are: ^3<" +
-                StringUtils::join(yesMsgs, "|") + "^3>\n";
-    voteMsgs += "  ^7Valid arguments for '^1No^7' are: ^3<" +
-                StringUtils::join(noMsgs, "|") + "^3>\n";
+    std::string voteMsgs  = "^7Invalid vote argument.\n";
+    voteMsgs             += "  ^7Valid arguments for '^2Yes^7' are: ^3<" + StringUtils::join(yesMsgs, "|") + "^3>\n";
+    voteMsgs             += "  ^7Valid arguments for '^1No^7' are: ^3<" + StringUtils::join(noMsgs, "|") + "^3>\n";
     Printer::console(clientNum, voteMsgs);
   };
 
   const auto printRtvVoteMsgs = [&] {
-    const auto *rtvMaps = game.rtv->getRtvMaps();
+    const auto *rtvMaps  = game.rtv->getRtvMaps();
     std::string voteMsgs = "^7Invalid vote argument.\n";
-    voteMsgs += StringUtils::format(
-        "^7Valid arguments for this vote are:\n  ^3rtvVote 1-%i\n",
-        rtvMaps->size());
-    voteMsgs += "  ^7Open map selection with: ^3vote <" +
-                StringUtils::join(yesMsgs, "|") + ">\n";
-    voteMsgs += "  ^7Vote '^1No^7' to keep current map with: ^3vote <" +
-                StringUtils::join(noMsgs, "|") + ">\n";
+    voteMsgs += StringUtils::format("^7Valid arguments for this vote are:\n  ^3rtvVote 1-%i\n", rtvMaps->size());
+    voteMsgs += "  ^7Open map selection with: ^3vote <" + StringUtils::join(yesMsgs, "|") + ">\n";
+    voteMsgs += "  ^7Vote '^1No^7' to keep current map with: ^3vote <" + StringUtils::join(noMsgs, "|") + ">\n";
     Printer::console(clientNum, voteMsgs);
   };
 
   static const auto cancelVote = [&] {
-    level.voteInfo.voteCanceled = qtrue;
-    level.voteInfo.voteNo = level.numConnectedClients;
-    level.voteInfo.voteNoSpectators = 0;
-    level.voteInfo.voteYes = 0;
+    level.voteInfo.voteCanceled      = qtrue;
+    level.voteInfo.voteNo            = level.numConnectedClients;
+    level.voteInfo.voteNoSpectators  = 0;
+    level.voteInfo.voteYes           = 0;
     level.voteInfo.voteYesSpectators = 0;
 
     Printer::popupAll("^7Vote canceled by caller.");
   };
 
   trap_Argv(0, voteCmd, sizeof(voteCmd));
-  const std::string voteCmdStr =
-      StringUtils::sanitize(std::string(voteCmd), true);
-  const bool isRtvVoteCmd = voteCmdStr == "rtvvote";
+  const std::string voteCmdStr = StringUtils::sanitize(std::string(voteCmd), true);
+  const bool isRtvVoteCmd      = voteCmdStr == "rtvvote";
 
   trap_Argv(1, voteArg, sizeof(voteArg));
-  const std::string voteArgStr =
-      StringUtils::sanitize(std::string(voteArg), true);
+  const std::string voteArgStr = StringUtils::sanitize(std::string(voteArg), true);
 
   if (ent->client->pers.applicationEndTime > level.time) {
-
     gclient_t *cl = g_entities[ent->client->pers.applicationClient].client;
 
     if (!cl) {
@@ -2892,30 +2746,27 @@ void Cmd_Vote_f(gentity_t *ent) {
 
     if (votedYes(voteArgStr)) {
       trap_SendServerCommand(clientNum, "application -4");
-      trap_SendServerCommand(ent->client->pers.applicationClient,
-                             "application -3");
+      trap_SendServerCommand(ent->client->pers.applicationClient, "application -3");
 
       G_AddClientToFireteam(ent->client->pers.applicationClient, clientNum);
     } else if (votedNo(voteArgStr)) {
       trap_SendServerCommand(clientNum, "application -4");
-      trap_SendServerCommand(ent->client->pers.applicationClient,
-                             "application -2");
+      trap_SendServerCommand(ent->client->pers.applicationClient, "application -2");
     } else {
       printVoteMsgs();
       return;
     }
 
     ent->client->pers.applicationEndTime = 0;
-    ent->client->pers.applicationClient = -1;
+    ent->client->pers.applicationClient  = -1;
 
     return;
   }
 
   ent->client->pers.applicationEndTime = 0;
-  ent->client->pers.applicationClient = -1;
+  ent->client->pers.applicationClient  = -1;
 
   if (ent->client->pers.invitationEndTime > level.time) {
-
     gclient_t *cl = g_entities[ent->client->pers.invitationClient].client;
     if (!cl) {
       return;
@@ -2926,27 +2777,25 @@ void Cmd_Vote_f(gentity_t *ent) {
 
     if (votedYes(voteArgStr)) {
       trap_SendServerCommand(clientNum, "invitation -4");
-      trap_SendServerCommand(ent->client->pers.invitationClient,
-                             "invitation -3");
+      trap_SendServerCommand(ent->client->pers.invitationClient, "invitation -3");
 
       G_AddClientToFireteam(clientNum, ent->client->pers.invitationClient);
     } else if (votedNo(voteArgStr)) {
       trap_SendServerCommand(clientNum, "invitation -4");
-      trap_SendServerCommand(ent->client->pers.invitationClient,
-                             "invitation -2");
+      trap_SendServerCommand(ent->client->pers.invitationClient, "invitation -2");
     } else {
       printVoteMsgs();
       return;
     }
 
     ent->client->pers.invitationEndTime = 0;
-    ent->client->pers.invitationClient = -1;
+    ent->client->pers.invitationClient  = -1;
 
     return;
   }
 
   ent->client->pers.invitationEndTime = 0;
-  ent->client->pers.invitationClient = -1;
+  ent->client->pers.invitationClient  = -1;
 
   if (ent->client->pers.propositionEndTime > level.time) {
     gclient_t *cl = g_entities[ent->client->pers.propositionClient].client;
@@ -2959,21 +2808,19 @@ void Cmd_Vote_f(gentity_t *ent) {
 
     if (votedYes(voteArgStr)) {
       trap_SendServerCommand(clientNum, "proposition -4");
-      trap_SendServerCommand(ent->client->pers.propositionClient2,
-                             "proposition -3");
+      trap_SendServerCommand(ent->client->pers.propositionClient2, "proposition -3");
 
       G_InviteToFireTeam(clientNum, ent->client->pers.propositionClient);
     } else if (votedNo(voteArgStr)) {
       trap_SendServerCommand(clientNum, "proposition -4");
-      trap_SendServerCommand(ent->client->pers.propositionClient2,
-                             "proposition -2");
+      trap_SendServerCommand(ent->client->pers.propositionClient2, "proposition -2");
     } else {
       printVoteMsgs();
       return;
     }
 
     ent->client->pers.propositionEndTime = 0;
-    ent->client->pers.propositionClient = -1;
+    ent->client->pers.propositionClient  = -1;
     ent->client->pers.propositionClient2 = -1;
 
     return;
@@ -3001,7 +2848,6 @@ void Cmd_Vote_f(gentity_t *ent) {
   }
 
   if (ent->client->pers.autofireteamCreateEndTime > level.time) {
-
     if (votedYes(voteArgStr)) {
       trap_SendServerCommand(clientNum, "aftc -2");
 
@@ -3041,7 +2887,7 @@ void Cmd_Vote_f(gentity_t *ent) {
   }
 
   ent->client->pers.propositionEndTime = 0;
-  ent->client->pers.propositionClient = -1;
+  ent->client->pers.propositionClient  = -1;
   ent->client->pers.propositionClient2 = -1;
 
   if (!level.voteInfo.voteTime) {
@@ -3051,11 +2897,11 @@ void Cmd_Vote_f(gentity_t *ent) {
 
   // this is sent as + 1 from cgame for user convenience
   // e.g. /rtvVote 3 = vote for 3rd map on the list
-  int mapNum = Q_atoi(voteArg) - 1;
+  int mapNum           = Q_atoi(voteArg) - 1;
   const size_t maxMaps = game.rtv->getRtvMaps()->size() - 1;
 
   if (isRtvVote && isRtvVoteCmd) {
-    if (!std::isdigit(voteArg[0]) || mapNum < 0 || mapNum > maxMaps) {
+    if (!std::isdigit(voteArg[0]) || mapNum < 0 || static_cast<size_t>(mapNum) > maxMaps) {
       printRtvVoteMsgs();
       return;
     }
@@ -3103,13 +2949,11 @@ void Cmd_Vote_f(gentity_t *ent) {
     }
 
     // so it's first 10s if vote time set to 30s
-    const int allowedRevoteTimeRange =
-        level.voteInfo.voteTime + (VOTE_TIME / 3);
+    const int allowedRevoteTimeRange = level.voteInfo.voteTime + (VOTE_TIME / 3);
 
     // don't allow to re-vote anymore if time range is passed or
     // there are no attempts left
-    if (level.time > allowedRevoteTimeRange ||
-        client->pers.votingInfo.attempts > ETJump::VOTING_ATTEMPTS) {
+    if (level.time > allowedRevoteTimeRange || client->pers.votingInfo.attempts > ETJump::VOTING_ATTEMPTS) {
       if (client->pers.votingInfo.time + ETJump::VOTING_TIMEOUT > level.time) {
         // stops excessive spam from server if user keeps voting in timeouts
         if (!client->pers.votingInfo.isWarned) {
@@ -3119,7 +2963,7 @@ void Cmd_Vote_f(gentity_t *ent) {
         return;
       }
 
-      client->pers.votingInfo.time = level.time;
+      client->pers.votingInfo.time     = level.time;
       client->pers.votingInfo.isWarned = false;
       return;
     }
@@ -3131,11 +2975,8 @@ void Cmd_Vote_f(gentity_t *ent) {
         client->pers.votingInfo.isWarned = true;
         // if vote timeout ever gets changed to other than 1s,
         // this will need to be adjusted!
-        Printer::popup(
-            clientNum,
-            StringUtils::format(
-                "^7You must wait for ^3%s ^7before re-voting.",
-                StringUtils::getSecondsString(ETJump::VOTING_TIMEOUT / 1000)));
+        Printer::popup(clientNum, "^7You must wait for ^3%s ^7before re-voting.",
+                       StringUtils::getSecondsString(ETJump::VOTING_TIMEOUT / 1000));
       }
       return;
     }
@@ -3151,8 +2992,7 @@ void Cmd_Vote_f(gentity_t *ent) {
         // to always allow opening the menu, even when past re-vote period
         if (votedNo(voteArgStr)) {
           if (client->pers.votingInfo.isVotedYes) {
-            ETJump::updateVotingInfo(ent, mapNum,
-                                     ETJump::VotingTypes::RevoteNo);
+            ETJump::updateVotingInfo(ent, mapNum, ETJump::VotingTypes::RevoteNo);
           }
         } else {
           printRtvVoteMsgs();
@@ -3174,17 +3014,13 @@ void Cmd_Vote_f(gentity_t *ent) {
       }
     }
 
-    Printer::popup(clientNum, StringUtils::format(
-                                  "Vote cast, you can change your vote %s.",
-                                  StringUtils::getPluralizedString(
-                                      ETJump::VOTING_ATTEMPTS + 1 -
-                                          client->pers.votingInfo.attempts,
-                                      "time")));
+    Printer::popup(
+      clientNum, "Vote cast, you can change your vote %s.",
+      StringUtils::getPluralizedString(ETJump::VOTING_ATTEMPTS + 1 - client->pers.votingInfo.attempts, "time"));
     return;
   }
 
-  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
-      !g_spectatorVote.integer) {
+  if (ent->client->sess.sessionTeam == TEAM_SPECTATOR && !g_spectatorVote.integer) {
     Printer::popup(clientNum, "You are not allowed to vote as a spectator.");
     return;
   }
@@ -3225,8 +3061,8 @@ void Cmd_Vote_f(gentity_t *ent) {
 
   Printer::console(clientNum, "Vote cast.\n");
 
-  ent->client->ps.eFlags |= EF_VOTED;
-  level.voteInfo.voteCanceled = qfalse;
+  ent->client->ps.eFlags      |= EF_VOTED;
+  level.voteInfo.voteCanceled  = qfalse;
 
   CalculateRanks();
 }
@@ -3235,6 +3071,7 @@ qboolean G_canPickupMelee(gentity_t *ent) {
   // JPW NERVE -- no "melee" weapons in net play
   return qfalse;
 }
+
 // jpw
 
 /*
@@ -3251,8 +3088,7 @@ void Cmd_SetViewpos_f(gentity_t *ent) {
   const int argc = trap_Argc();
 
   if (argc != 4 && argc != 7) {
-    Printer::console(
-        ent, "Usage:\nsetviewpos x y z\nsetviewpos x y z pitch yaw roll\n");
+    Printer::console(ent, "Usage:\nsetviewpos x y z\nsetviewpos x y z pitch yaw roll\n");
     return;
   }
 
@@ -3280,15 +3116,14 @@ Cmd_StartCamera_f
 =================
 */
 void Cmd_StartCamera_f(gentity_t *ent) {
-
   if (ent->client->cameraPortal) {
     G_FreeEntity(ent->client->cameraPortal);
   }
   ent->client->cameraPortal = G_Spawn();
 
-  ent->client->cameraPortal->s.eType = ET_CAMERA;
-  ent->client->cameraPortal->s.apos.trType = TR_STATIONARY;
-  ent->client->cameraPortal->s.apos.trTime = 0;
+  ent->client->cameraPortal->s.eType           = ET_CAMERA;
+  ent->client->cameraPortal->s.apos.trType     = TR_STATIONARY;
+  ent->client->cameraPortal->s.apos.trTime     = 0;
   ent->client->cameraPortal->s.apos.trDuration = 0;
   VectorClear(ent->client->cameraPortal->s.angles);
   VectorClear(ent->client->cameraPortal->s.apos.trDelta);
@@ -3297,11 +3132,11 @@ void Cmd_StartCamera_f(gentity_t *ent) {
 
   ent->client->cameraPortal->s.frame = 0;
 
-  ent->client->cameraPortal->r.svFlags |= (SVF_PORTAL | SVF_SINGLECLIENT);
-  ent->client->cameraPortal->r.singleClient = ent->client->ps.clientNum;
+  ent->client->cameraPortal->r.svFlags      |= (SVF_PORTAL | SVF_SINGLECLIENT);
+  ent->client->cameraPortal->r.singleClient  = ent->client->ps.clientNum;
 
   ent->client->ps.eFlags |= EF_VIEWING_CAMERA;
-  ent->s.eFlags |= EF_VIEWING_CAMERA;
+  ent->s.eFlags          |= EF_VIEWING_CAMERA;
 
   VectorCopy(ent->r.currentOrigin,
              ent->client->cameraOrigin); // backup our origin
@@ -3317,14 +3152,12 @@ Cmd_StopCamera_f
 =================
 */
 void Cmd_StopCamera_f(gentity_t *ent) {
-  if (ent->client->cameraPortal &&
-      (ent->client->ps.eFlags & EF_VIEWING_CAMERA)) {
-
+  if (ent->client->cameraPortal && (ent->client->ps.eFlags & EF_VIEWING_CAMERA)) {
     // go back into noclient mode
     G_FreeEntity(ent->client->cameraPortal);
     ent->client->cameraPortal = NULL;
 
-    ent->s.eFlags &= ~EF_VIEWING_CAMERA;
+    ent->s.eFlags          &= ~EF_VIEWING_CAMERA;
     ent->client->ps.eFlags &= ~EF_VIEWING_CAMERA;
   }
 }
@@ -3401,52 +3234,43 @@ Cmd_Activate_f
 qboolean Do_Activate2_f(gentity_t *ent, gentity_t *traceEnt) {
   qboolean found = qfalse;
 
-  if (ent->client->sess.playerType == PC_COVERTOPS &&
-      !ent->client->ps.powerups[PW_OPS_DISGUISED] && ent->health > 0) {
-    if (!ent->client->ps.powerups[PW_BLUEFLAG] &&
-        !ent->client->ps.powerups[PW_REDFLAG]) {
+  if (ent->client->sess.playerType == PC_COVERTOPS && !ent->client->ps.powerups[PW_OPS_DISGUISED] && ent->health > 0) {
+    if (!ent->client->ps.powerups[PW_BLUEFLAG] && !ent->client->ps.powerups[PW_REDFLAG]) {
       if (traceEnt->s.eType == ET_CORPSE) {
-        if (level.time - traceEnt->s.time >= DEFAULT_SV_FRAMETIME &&
-            BODY_TEAM(traceEnt) < 4 &&
+        if (level.time - traceEnt->s.time >= DEFAULT_SV_FRAMETIME && BODY_TEAM(traceEnt) < 4 &&
             BODY_TEAM(traceEnt) != ent->client->sess.sessionTeam) {
           found = qtrue;
 
           if (BODY_VALUE(traceEnt) >= 250) {
-
             traceEnt->nextthink = traceEnt->timestamp + BODY_TIME;
 
             ent->client->ps.powerups[PW_OPS_DISGUISED] = 1;
-            ent->client->ps.powerups[PW_OPS_CLASS_1] = BODY_CLASS(traceEnt) & 1;
-            ent->client->ps.powerups[PW_OPS_CLASS_2] = BODY_CLASS(traceEnt) & 2;
-            ent->client->ps.powerups[PW_OPS_CLASS_3] = BODY_CLASS(traceEnt) & 4;
+            ent->client->ps.powerups[PW_OPS_CLASS_1]   = BODY_CLASS(traceEnt) & 1;
+            ent->client->ps.powerups[PW_OPS_CLASS_2]   = BODY_CLASS(traceEnt) & 2;
+            ent->client->ps.powerups[PW_OPS_CLASS_3]   = BODY_CLASS(traceEnt) & 4;
 
             BODY_TEAM(traceEnt) += 4;
-            traceEnt->activator = ent;
+            traceEnt->activator  = ent;
 
             traceEnt->s.time2 = 1;
 
             // sound effect
             G_AddEvent(ent, EV_DISGUISE_SOUND, 0);
 
-            G_AddSkillPoints(ent, SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS,
-                             5.f);
-            G_DebugAddSkillPoints(
-                ent, SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS, 5,
-                "stealing "
-                "uniform");
+            G_AddSkillPoints(ent, SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS, 5.f);
+            G_DebugAddSkillPoints(ent, SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS, 5,
+                                  "stealing "
+                                  "uniform");
 
-            Q_strncpyz(ent->client->disguiseNetname,
-                       g_entities[traceEnt->s.clientNum].client->pers.netname,
+            Q_strncpyz(ent->client->disguiseNetname, g_entities[traceEnt->s.clientNum].client->pers.netname,
                        sizeof(ent->client->disguiseNetname));
             ent->client->disguiseRank =
-                g_entities[traceEnt->s.clientNum].client
-                    ? g_entities[traceEnt->s.clientNum].client->sess.rank
-                    : 0;
+              g_entities[traceEnt->s.clientNum].client ? g_entities[traceEnt->s.clientNum].client->sess.rank : 0;
 
             ClientUserinfoChanged(ent->s.clientNum);
           } else {
             BODY_VALUE(traceEnt) += 5;
-            traceEnt->s.time = level.time;
+            traceEnt->s.time      = level.time;
           }
         }
       }
@@ -3461,7 +3285,7 @@ qboolean Do_Activate2_f(gentity_t *ent, gentity_t *traceEnt) {
 //		so we can force bots to use items, without worrying that they
 // are looking EXACTLY at the target
 qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
-  qboolean found = qfalse;
+  qboolean found   = qfalse;
   qboolean walking = qfalse;
   vec3_t forward; //, offset, end;
   // trace_t		tr;
@@ -3473,8 +3297,7 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
 
   // Arnout: invisible entities can't be used
 
-  if (traceEnt->entstate == STATE_INVISIBLE ||
-      traceEnt->entstate == STATE_UNDERCONSTRUCTION) {
+  if (traceEnt->entstate == STATE_INVISIBLE || traceEnt->entstate == STATE_UNDERCONSTRUCTION) {
     return qfalse;
   }
 
@@ -3519,18 +3342,16 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
       }
 
       found = qtrue;
-    } else if (traceEnt->s.eType == ET_MOVER &&
-               G_TankIsMountable(traceEnt, ent)) {
+    } else if (traceEnt->s.eType == ET_MOVER && G_TankIsMountable(traceEnt, ent)) {
       G_Script_ScriptEvent(traceEnt, "mg42", "mount");
       ent->tagParent = traceEnt->nextTrain;
       Q_strncpyz(ent->tagName, "tag_player", MAX_QPATH);
-      ent->backupWeaponTime = ent->client->ps.weaponTime;
-      ent->client->ps.weaponTime = traceEnt->backupWeaponTime;
-      ent->client->pmext.weapHeat[WP_DUMMY_MG42] =
-          static_cast<float>(traceEnt->mg42weapHeat);
-      ent->client->ps.ammo[WP_DUMMY_MG42] = traceEnt->mg42weapHeat;
+      ent->backupWeaponTime                      = ent->client->ps.weaponTime;
+      ent->client->ps.weaponTime                 = traceEnt->backupWeaponTime;
+      ent->client->pmext.weapHeat[WP_DUMMY_MG42] = static_cast<float>(traceEnt->mg42weapHeat);
+      ent->client->ps.ammo[WP_DUMMY_MG42]        = traceEnt->mg42weapHeat;
 
-      ent->tankLink = traceEnt;
+      ent->tankLink      = traceEnt;
       traceEnt->tankLink = ent;
 
       G_ProcessTagConnect(ent, qtrue);
@@ -3550,8 +3371,8 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
       VectorCopy(vec3_origin, ent->client->ps.velocity);
       VectorCopy(vec3_origin, ent->s.pos.trDelta);
 
-      traceEnt->active = qtrue;
-      ent->active = qtrue;
+      traceEnt->active     = qtrue;
+      ent->active          = qtrue;
       traceEnt->r.ownerNum = ent->s.number;
       VectorCopy(traceEnt->s.angles, traceEnt->TargetAngles);
       traceEnt->s.otherEntityNum = ent->s.number;
@@ -3559,18 +3380,14 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
       cl->pmext.harc = traceEnt->harc;
       cl->pmext.varc = traceEnt->varc;
       VectorCopy(traceEnt->s.angles, cl->pmext.centerangles);
-      cl->pmext.centerangles[PITCH] =
-          AngleNormalize180(cl->pmext.centerangles[PITCH]);
-      cl->pmext.centerangles[YAW] =
-          AngleNormalize180(cl->pmext.centerangles[YAW]);
-      cl->pmext.centerangles[ROLL] =
-          AngleNormalize180(cl->pmext.centerangles[ROLL]);
+      cl->pmext.centerangles[PITCH] = AngleNormalize180(cl->pmext.centerangles[PITCH]);
+      cl->pmext.centerangles[YAW]   = AngleNormalize180(cl->pmext.centerangles[YAW]);
+      cl->pmext.centerangles[ROLL]  = AngleNormalize180(cl->pmext.centerangles[ROLL]);
 
-      ent->backupWeaponTime = ent->client->ps.weaponTime;
-      ent->client->ps.weaponTime = traceEnt->backupWeaponTime;
-      ent->client->pmext.weapHeat[WP_DUMMY_MG42] =
-          static_cast<float>(traceEnt->mg42weapHeat);
-      ent->client->ps.ammo[WP_DUMMY_MG42] = traceEnt->mg42weapHeat;
+      ent->backupWeaponTime                      = ent->client->ps.weaponTime;
+      ent->client->ps.weaponTime                 = traceEnt->backupWeaponTime;
+      ent->client->pmext.weapHeat[WP_DUMMY_MG42] = static_cast<float>(traceEnt->mg42weapHeat);
+      ent->client->ps.ammo[WP_DUMMY_MG42]        = traceEnt->mg42weapHeat;
 
       G_UseTargets(traceEnt,
                    ent); //----(SA)	added for Mike so
@@ -3591,12 +3408,11 @@ qboolean Do_Activate_f(gentity_t *ent, gentity_t *traceEnt) {
         traceEnt->health++;
       }
       found = qtrue;
-    } else if (!Q_stricmp(traceEnt->classname, "func_button") &&
-               !traceEnt->active) {
+    } else if (!Q_stricmp(traceEnt->classname, "func_button") && !traceEnt->active) {
       if (ETJump::activateButton(traceEnt)) {
         Use_BinaryMover(traceEnt, ent, ent);
         traceEnt->active = qtrue;
-        found = qtrue;
+        found            = qtrue;
       }
     } else if (!Q_stricmp(traceEnt->classname, "func_invisible_user")) {
       if (walking) {
@@ -3627,7 +3443,6 @@ void G_LeaveTank(gentity_t *ent, qboolean position) {
   }
 
   if (position) {
-
     AnglesToAxis(tank->s.angles, axis);
 
     VectorMA(ent->client->ps.origin, 128, axis[1], pos);
@@ -3656,25 +3471,23 @@ void G_LeaveTank(gentity_t *ent, qboolean position) {
       }
     }
 
-    VectorClear(
-        ent->client->ps.velocity); // Gordon: dont want them to fly away ;D
+    VectorClear(ent->client->ps.velocity); // Gordon: dont want them to fly away ;D
     TeleportPlayer(ent, pos, ent->client->ps.viewangles);
   }
 
-  tank->mg42weapHeat =
-      static_cast<int>(ent->client->pmext.weapHeat[WP_DUMMY_MG42]);
-  tank->backupWeaponTime = ent->client->ps.weaponTime;
+  tank->mg42weapHeat         = static_cast<int>(ent->client->pmext.weapHeat[WP_DUMMY_MG42]);
+  tank->backupWeaponTime     = ent->client->ps.weaponTime;
   ent->client->ps.weaponTime = ent->backupWeaponTime;
 
   G_Script_ScriptEvent(tank, "mg42", "unmount");
-  ent->tagParent = NULL;
-  *ent->tagName = '\0';
-  ent->s.eFlags &= ~EF_MOUNTEDTANK;
+  ent->tagParent          = NULL;
+  *ent->tagName           = '\0';
+  ent->s.eFlags          &= ~EF_MOUNTEDTANK;
   ent->client->ps.eFlags &= ~EF_MOUNTEDTANK;
-  tank->s.powerups = -1;
+  tank->s.powerups        = -1;
 
   tank->tankLink = NULL;
-  ent->tankLink = NULL;
+  ent->tankLink  = NULL;
 }
 
 void Cmd_Activate_f(gentity_t *ent) {
@@ -3699,8 +3512,8 @@ void Cmd_Activate_f(gentity_t *ent) {
     if (ent->client->ps.persistant[PERS_HWEAPON_USE]) {
       // DHM - Nerve :: Restore original position if
       // current position is bad
-      trap_Trace(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
-                 ent->r.currentOrigin, ent->s.number, MASK_PLAYERSOLID);
+      trap_Trace(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, ent->r.currentOrigin, ent->s.number,
+                 MASK_PLAYERSOLID);
       if (tr.startsolid) {
         VectorCopy(ent->TargetAngles, ent->client->ps.origin);
         VectorCopy(ent->TargetAngles, ent->r.currentOrigin);
@@ -3714,13 +3527,11 @@ void Cmd_Activate_f(gentity_t *ent) {
       ent->client->ps.eFlags &= ~EF_AAGUN_ACTIVE;
 
       ent->client->ps.persistant[PERS_HWEAPON_USE] = 0;
-      ent->active = qfalse;
+      ent->active                                  = qfalse;
 
       for (i = 0; i < level.num_entities; i++) {
-        if (g_entities[i].s.eType == ET_MG42_BARREL &&
-            g_entities[i].r.ownerNum == ent->s.number) {
-          g_entities[i].mg42weapHeat =
-              static_cast<int>(ent->client->pmext.weapHeat[WP_DUMMY_MG42]);
+        if (g_entities[i].s.eType == ET_MG42_BARREL && g_entities[i].r.ownerNum == ent->s.number) {
+          g_entities[i].mg42weapHeat     = static_cast<int>(ent->client->pmext.weapHeat[WP_DUMMY_MG42]);
           g_entities[i].backupWeaponTime = ent->client->ps.weaponTime;
           break;
         }
@@ -3730,8 +3541,7 @@ void Cmd_Activate_f(gentity_t *ent) {
       ent->active = qfalse;
     }
     return;
-  } else if (ent->client->ps.eFlags & EF_MOUNTEDTANK &&
-             ent->s.eFlags & EF_MOUNTEDTANK && !level.disableTankExit) {
+  } else if (ent->client->ps.eFlags & EF_MOUNTEDTANK && ent->s.eFlags & EF_MOUNTEDTANK && !level.disableTankExit) {
     G_LeaveTank(ent, qtrue);
     return;
   }
@@ -3750,13 +3560,11 @@ void Cmd_Activate_f(gentity_t *ent) {
   VectorMA(offset, 96, forward, end);
 
   trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number,
-             (CONTENTS_SOLID | CONTENTS_MISSILECLIP | CONTENTS_BODY |
-              CONTENTS_CORPSE));
+             (CONTENTS_SOLID | CONTENTS_MISSILECLIP | CONTENTS_BODY | CONTENTS_CORPSE));
 
   if (tr.surfaceFlags & SURF_NOIMPACT || tr.entityNum == ENTITYNUM_WORLD) {
     trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number,
-               (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE |
-                CONTENTS_MISSILECLIP | CONTENTS_TRIGGER));
+               (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_MISSILECLIP | CONTENTS_TRIGGER));
     pass2 = qtrue;
   }
 
@@ -3773,8 +3581,7 @@ tryagain:
   if (!found && !pass2) {
     pass2 = qtrue;
     trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number,
-               (CONTENTS_SOLID | CONTENTS_MISSILECLIP | CONTENTS_BODY |
-                CONTENTS_CORPSE | CONTENTS_TRIGGER));
+               (CONTENTS_SOLID | CONTENTS_MISSILECLIP | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
     goto tryagain;
   }
 
@@ -3800,13 +3607,11 @@ void Cmd_Activate2_f(gentity_t *ent) {
   CalcMuzzlePointForActivate(ent, forward, right, up, offset);
   VectorMA(offset, 96, forward, end);
 
-  trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number,
-             (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE));
+  trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number, (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE));
 
   if (tr.surfaceFlags & SURF_NOIMPACT || tr.entityNum == ENTITYNUM_WORLD) {
-    trap_Trace(
-        &tr, offset, NULL, NULL, end, ent->s.number,
-        (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
+    trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number,
+               (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
     pass2 = qtrue;
   }
 
@@ -3822,9 +3627,8 @@ tryagain:
 
   if (!found && !pass2) {
     pass2 = qtrue;
-    trap_Trace(
-        &tr, offset, NULL, NULL, end, ent->s.number,
-        (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
+    trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number,
+               (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
     goto tryagain;
   }
 }
@@ -3835,10 +3639,7 @@ bool allowQuickFollow(gentity_t *ent, gentity_t *traceEnt) {
     return false;
   }
   if (!G_AllowFollow(ent, traceEnt)) {
-    auto clientNum = ClientNum(ent);
-    std::string specLockMsg = StringUtils::format(
-        "%s is speclocked.", traceEnt->client->pers.netname);
-    Printer::popup(clientNum, specLockMsg);
+    Printer::popup(ent, "%s ^7is speclocked.", traceEnt->client->pers.netname);
     return false;
   }
   if (!ent->client->pers.quickFollow) {
@@ -3862,8 +3663,7 @@ void longRangeActivate(gentity_t *ent) {
   VectorMA(offset, MAX_DISTANCE, forward, end);
 
   trap_Trace(&tr, offset, NULL, NULL, end, ent->s.number,
-             CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_MISSILECLIP |
-                 CONTENTS_BODY | CONTENTS_CORPSE);
+             CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_MISSILECLIP | CONTENTS_BODY | CONTENTS_CORPSE);
 
   if (tr.surfaceFlags & SURF_NOIMPACT || tr.entityNum == ENTITYNUM_WORLD) {
     return;
@@ -3873,11 +3673,10 @@ void longRangeActivate(gentity_t *ent) {
 
   if (ETJump::allowQuickFollow(ent, traceEnt)) {
     if (ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
-      SetTeam(ent, "spectator", qfalse, static_cast<weapon_t>(-1),
-              static_cast<weapon_t>(-1), qfalse);
+      SetTeam(ent, "spectator", qfalse, static_cast<weapon_t>(-1), static_cast<weapon_t>(-1), qfalse);
     }
 
-    ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
+    ent->client->sess.spectatorState  = SPECTATOR_FOLLOW;
     ent->client->sess.spectatorClient = ClientNum(traceEnt);
   }
 }
@@ -3935,27 +3734,24 @@ void G_UpdateSpawnCounts(void) {
     trap_GetConfigstring(CS_MULTI_SPAWNTARGETS + i, cs, sizeof(cs));
 
     current = Q_atoi(Info_ValueForKey(cs, "c"));
-    team = Q_atoi(Info_ValueForKey(cs, "t")) & ~256;
+    team    = Q_atoi(Info_ValueForKey(cs, "t")) & ~256;
 
     count = 0;
     for (j = 0; j < level.numConnectedClients; j++) {
       gclient_t *client = &level.clients[level.sortedClients[j]];
 
-      if (client->sess.sessionTeam != TEAM_AXIS &&
-          client->sess.sessionTeam != TEAM_ALLIES) {
+      if (client->sess.sessionTeam != TEAM_AXIS && client->sess.sessionTeam != TEAM_ALLIES) {
         continue;
       }
 
-      if (client->sess.sessionTeam == team &&
-          client->sess.spawnObjectiveIndex == i + 1) {
+      if (client->sess.sessionTeam == team && client->sess.spawnObjectiveIndex == i + 1) {
         count++;
         continue;
       }
 
       if (client->sess.spawnObjectiveIndex == 0) {
         if (client->sess.autoSpawnObjectiveIndex > 0) {
-          if (client->sess.sessionTeam == team &&
-              client->sess.autoSpawnObjectiveIndex == i + 1) {
+          if (client->sess.sessionTeam == team && client->sess.autoSpawnObjectiveIndex == i + 1) {
             count++;
             continue;
           }
@@ -3991,8 +3787,7 @@ Cmd_SetSpawnPoint_f
 */
 void SetPlayerSpawn(gentity_t *ent, int spawn, qboolean update) {
   ent->client->sess.spawnObjectiveIndex = spawn;
-  if (ent->client->sess.spawnObjectiveIndex >= MAX_MULTI_SPAWNTARGETS ||
-      ent->client->sess.spawnObjectiveIndex < 0) {
+  if (ent->client->sess.spawnObjectiveIndex >= MAX_MULTI_SPAWNTARGETS || ent->client->sess.spawnObjectiveIndex < 0) {
     ent->client->sess.spawnObjectiveIndex = 0;
   }
 
@@ -4021,22 +3816,15 @@ void Cmd_SetSpawnPoint_f(gentity_t *ent) {
   //	}
 
   for (i = 0; i < level.numLimboCams; i++) {
-    int x = (g_entities[level.limboCams[i].targetEnt].count -
-             CS_MULTI_SPAWNTARGETS) +
-            1;
+    int x = (g_entities[level.limboCams[i].targetEnt].count - CS_MULTI_SPAWNTARGETS) + 1;
     if (level.limboCams[i].spawn && x == val) {
       VectorCopy(level.limboCams[i].origin, ent->s.origin2);
       ent->r.svFlags |= SVF_SELF_PORTAL_EXCLUSIVE;
-      trap_SendServerCommand(
-          ent - g_entities,
-          va("portalcampos %i %i %i %i %i %i %i %i", val - 1,
-             (int)level.limboCams[i].origin[0],
-             (int)level.limboCams[i].origin[1],
-             (int)level.limboCams[i].origin[2],
-             (int)level.limboCams[i].angles[0],
-             (int)level.limboCams[i].angles[1],
-             (int)level.limboCams[i].angles[2],
-             level.limboCams[i].hasEnt ? level.limboCams[i].targetEnt : -1));
+      trap_SendServerCommand(ent - g_entities, va("portalcampos %i %i %i %i %i %i %i %i", val - 1,
+                                                  (int)level.limboCams[i].origin[0], (int)level.limboCams[i].origin[1],
+                                                  (int)level.limboCams[i].origin[2], (int)level.limboCams[i].angles[0],
+                                                  (int)level.limboCams[i].angles[1], (int)level.limboCams[i].angles[2],
+                                                  level.limboCams[i].hasEnt ? level.limboCams[i].targetEnt : -1));
       break;
     }
   }
@@ -4065,7 +3853,7 @@ void Cmd_SetSniperSpot_f(gentity_t *clent) {
     return; // only allow locally playing client
   }
   // drop a sniper spot here
-  spot = G_Spawn();
+  spot            = G_Spawn();
   spot->classname = "bot_sniper_spot";
   VectorCopy(clent->r.currentOrigin, spot->s.origin);
   VectorCopy(clent->client->ps.viewangles, spot->s.angles);
@@ -4074,8 +3862,7 @@ void Cmd_SetSniperSpot_f(gentity_t *clent) {
   // output to text file
   trap_Cvar_Register(&cvar_mapname, "mapname", "", CVAR_SERVERINFO | CVAR_ROM);
 
-  Com_sprintf(filename, sizeof(filename), "maps/%s.botents",
-              cvar_mapname.string);
+  Com_sprintf(filename, sizeof(filename), "maps/%s.botents", cvar_mapname.string);
   if (trap_FS_FOpenFile(filename, &f, FS_APPEND) < 0) {
     G_Error("Cmd_SetSniperSpot_f: cannot open %s for writing", filename);
   }
@@ -4083,9 +3870,8 @@ void Cmd_SetSniperSpot_f(gentity_t *clent) {
   Com_sprintf(buf, sizeof(buf),
               "{\n\"classname\" \"%s\"\n\"origin\" \"%.3f %.3f "
               "%.3f\"\n\"angles\" \"%.2f %.2f %.2f\"\n\"aiTeam\" \"%i\"\n}\n\n",
-              spot->classname, spot->s.origin[0], spot->s.origin[1],
-              spot->s.origin[2], spot->s.angles[0], spot->s.angles[1],
-              spot->s.angles[2], spot->aiTeam);
+              spot->classname, spot->s.origin[0], spot->s.origin[1], spot->s.origin[2], spot->s.angles[0],
+              spot->s.angles[1], spot->s.angles[2], spot->aiTeam);
   trap_FS_Write(buf, strlen(buf), f);
 
   trap_FS_FCloseFile(f);
@@ -4164,10 +3950,8 @@ void Cmd_WeaponStat_f(gentity_t *ent) {
   trap_Argv(1, buffer, 16);
   stat = static_cast<extWeaponStats_t>(Q_atoi(buffer));
   if (stat >= 0 && stat < WS_MAX) {
-    trap_SendServerCommand(ent - g_entities,
-                           va("rws %i %i",
-                              ent->client->sess.aWeaponStats[stat].atts,
-                              ent->client->sess.aWeaponStats[stat].hits));
+    trap_SendServerCommand(ent - g_entities, va("rws %i %i", ent->client->sess.aWeaponStats[stat].atts,
+                                                ent->client->sess.aWeaponStats[stat].hits));
   }
 }
 
@@ -4199,14 +3983,14 @@ void Cmd_IntermissionWeaponStats_f(gentity_t *ent) {
 
 void G_MakeReady(gentity_t *ent) {
   ent->client->ps.eFlags |= EF_READY;
-  ent->s.eFlags |= EF_READY;
+  ent->s.eFlags          |= EF_READY;
   // rain - #105 - moved this set here
   ent->client->pers.ready = qtrue;
 }
 
 void G_MakeUnready(gentity_t *ent) {
   ent->client->ps.eFlags &= ~EF_READY;
-  ent->s.eFlags &= ~EF_READY;
+  ent->s.eFlags          &= ~EF_READY;
   // rain - #105 - moved this set here
   ent->client->pers.ready = qfalse;
 }
@@ -4230,9 +4014,7 @@ void Cmd_IntermissionPlayerKillsDeaths_f(gentity_t *ent) {
   Q_strncpyz(buffer, "impkd ", sizeof(buffer));
   for (i = 0; i < MAX_CLIENTS; i++) {
     if (g_entities[i].inuse) {
-      Q_strcat(buffer, sizeof(buffer),
-               va("%i %i ", level.clients[i].sess.kills,
-                  level.clients[i].sess.deaths));
+      Q_strcat(buffer, sizeof(buffer), va("%i %i ", level.clients[i].sess.kills, level.clients[i].sess.deaths));
     } else {
       Q_strcat(buffer, sizeof(buffer), "0 0 ");
     }
@@ -4247,12 +4029,12 @@ void G_CalcClientAccuracies(void) {
 
   for (i = 0; i < MAX_CLIENTS; i++) {
     shots = 0;
-    hits = 0;
+    hits  = 0;
 
     if (g_entities[i].inuse) {
       for (j = 0; j < WS_MAX; j++) {
         shots += level.clients[i].sess.aWeaponStats[j].atts;
-        hits += level.clients[i].sess.aWeaponStats[j].hits;
+        hits  += level.clients[i].sess.aWeaponStats[j].hits;
       }
 
       level.clients[i].acc = shots ? (100 * hits) / (float)shots : 0;
@@ -4301,12 +4083,10 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
   if (!level.numLimboCams) {
     VectorCopy(level.intermission_origin, ent->s.origin2);
     ent->r.svFlags |= SVF_SELF_PORTAL_EXCLUSIVE;
-    trap_SendServerCommand(
-        ClientNum(ent),
-        va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1,
-           level.intermission_origin[0], level.intermission_origin[1],
-           level.intermission_origin[2], level.intermission_angle[0],
-           level.intermission_angle[1], level.intermission_angle[2], -1));
+    trap_SendServerCommand(ClientNum(ent),
+                           va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1, level.intermission_origin[0],
+                              level.intermission_origin[1], level.intermission_origin[2], level.intermission_angle[0],
+                              level.intermission_angle[1], level.intermission_angle[2], -1));
     return;
   }
 
@@ -4315,20 +4095,17 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
       if (!level.limboCams[i].hasEnt) {
         VectorCopy(level.limboCams[i].origin, ent->s.origin2);
         ent->r.svFlags |= SVF_SELF_PORTAL_EXCLUSIVE;
-        trap_SendServerCommand(
-            ClientNum(ent),
-            va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1,
-               level.limboCams[i].origin[0], level.limboCams[i].origin[1],
-               level.limboCams[i].origin[2], level.limboCams[i].angles[0],
-               level.limboCams[i].angles[1], level.limboCams[i].angles[2],
-               level.limboCams[i].hasEnt ? level.limboCams[i].targetEnt : -1));
+        trap_SendServerCommand(ClientNum(ent), va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1,
+                                                  level.limboCams[i].origin[0], level.limboCams[i].origin[1],
+                                                  level.limboCams[i].origin[2], level.limboCams[i].angles[0],
+                                                  level.limboCams[i].angles[1], level.limboCams[i].angles[2],
+                                                  level.limboCams[i].hasEnt ? level.limboCams[i].targetEnt : -1));
         break;
       } else {
-        dist = VectorDistanceSquared(
-            level.limboCams[i].origin,
-            g_entities[level.limboCams[i].targetEnt].r.currentOrigin);
+        dist =
+          VectorDistanceSquared(level.limboCams[i].origin, g_entities[level.limboCams[i].targetEnt].r.currentOrigin);
         if (nearest == -1 || dist < neardist) {
-          nearest = i;
+          nearest  = i;
           neardist = dist;
         }
       }
@@ -4340,13 +4117,11 @@ void Cmd_SelectedObjective_f(gentity_t *ent) {
 
     VectorCopy(level.limboCams[i].origin, ent->s.origin2);
     ent->r.svFlags |= SVF_SELF_PORTAL_EXCLUSIVE;
-    trap_SendServerCommand(
-        ClientNum(ent),
-        va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1,
-           level.limboCams[i].origin[0], level.limboCams[i].origin[1],
-           level.limboCams[i].origin[2], level.limboCams[i].angles[0],
-           level.limboCams[i].angles[1], level.limboCams[i].angles[2],
-           level.limboCams[i].hasEnt ? level.limboCams[i].targetEnt : -1));
+    trap_SendServerCommand(ClientNum(ent),
+                           va("portalcampos %i %.0f %.0f %.0f %.0f %.0f %.0f %i", val - 1, level.limboCams[i].origin[0],
+                              level.limboCams[i].origin[1], level.limboCams[i].origin[2], level.limboCams[i].angles[0],
+                              level.limboCams[i].angles[1], level.limboCams[i].angles[2],
+                              level.limboCams[i].hasEnt ? level.limboCams[i].targetEnt : -1));
   }
 }
 
@@ -4357,8 +4132,7 @@ void Cmd_Ignore_f(gentity_t *ent) {
   trap_Argv(1, cmd, sizeof(cmd));
 
   if (!*cmd) {
-    trap_SendServerCommand(ent - g_entities,
-                           "print \"usage: Ignore <clientname>.\n\"\n");
+    trap_SendServerCommand(ent - g_entities, "print \"usage: Ignore <clientname>.\n\"\n");
     return;
   }
 
@@ -4392,8 +4166,7 @@ void Cmd_UnIgnore_f(gentity_t *ent) {
   trap_Argv(1, cmd, sizeof(cmd));
 
   if (!*cmd) {
-    trap_SendServerCommand(ent - g_entities,
-                           "print \"usage: Unignore <clientname>.\n\"\n");
+    trap_SendServerCommand(ent - g_entities, "print \"usage: Unignore <clientname>.\n\"\n");
     return;
   }
 
@@ -4481,12 +4254,8 @@ void Cmd_Goto_f(gentity_t *ent) {
   VectorCopy(other->client->ps.origin, ent->client->ps.origin);
   VectorClear(ent->client->ps.velocity);
 
-  Printer::popup(ClientNum(ent),
-                 StringUtils::format("%s ^7-> %s", ent->client->pers.netname,
-                                     other->client->pers.netname));
-  Printer::popup(ClientNum(other),
-                 StringUtils::format("%s ^7-> %s", ent->client->pers.netname,
-                                     other->client->pers.netname));
+  Printer::popup(ent, "%s ^7-> %s", ent->client->pers.netname, other->client->pers.netname);
+  Printer::popup(other, "%s ^7-> %s", ent->client->pers.netname, other->client->pers.netname);
 }
 
 void Cmd_Call_f(gentity_t *ent) {
@@ -4566,23 +4335,21 @@ void Cmd_Call_f(gentity_t *ent) {
   VectorClear(other->client->ps.velocity);
   VectorCopy(ent->client->ps.origin, other->client->ps.origin);
 
-  Printer::popup(ClientNum(ent),
-                 StringUtils::format("%s ^7-> %s", other->client->pers.netname,
-                                     ent->client->pers.netname));
-  Printer::popup(ClientNum(other),
-                 StringUtils::format("%s ^7-> %s", other->client->pers.netname,
-                                     ent->client->pers.netname));
+  Printer::popup(ent, "%s ^7-> %s", other->client->pers.netname, ent->client->pers.netname);
+  Printer::popup(other, "%s ^7-> %s", other->client->pers.netname, ent->client->pers.netname);
 }
 
 void Cmd_PrivateMessage_f(gentity_t *ent) {
-  int clientNum = -1;
+  int clientNum             = -1;
   char cmd[MAX_TOKEN_CHARS] = "\0";
-  gentity_t *other = nullptr;
-  char *msg = nullptr;
-  auto selfNum = ClientNum(ent);
+  gentity_t *other          = nullptr;
+  char *msg                 = nullptr;
+  auto selfNum              = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+
+  trap_Argv(0, cmd, sizeof(cmd));
 
   if (trap_Argc() < 3) {
-    Printer::console(selfNum, "^7usage: ^3m ^7<name> <message>.\n");
+    Printer::console(selfNum, StringUtils::format("^7usage: ^3%s ^7<name> <message>\n", cmd));
     return;
   }
 
@@ -4591,43 +4358,54 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
     return;
   }
 
+  const bool enc = !Q_stricmp(cmd, "enc_m");
+
   trap_Argv(1, cmd, sizeof(cmd));
   if ((clientNum = ClientNumberFromString(ent, cmd)) == -1) {
     return;
   }
 
-  other = g_entities + clientNum;
+  other              = g_entities + clientNum;
   const int otherNum = ClientNum(other);
 
   if (!ent) {
     msg = ConcatArgs(2);
-    Printer::chat(ClientNum(other),
-                  va("^7Private message from server console: ^3%s", msg));
-    trap_SendServerCommand(otherNum, "pmFlashWindow");
 
-    G_Printf("Private message to %s^7: ^3%s\n", other->client->pers.netname,
-             msg);
+    if (enc) {
+      Printer::chatEnc(other, "^7Private message from server console: ^3%s", msg);
+    } else {
+      Printer::chat(other, "^7Private message from server console: ^3%s", msg);
+    }
+
+    trap_SendServerCommand(otherNum, "pmFlashWindow");
+    G_Printf("Private message to %s^7: ^3%s\n", other->client->pers.netname, msg);
     return;
   }
 
   if (!COM_BitCheck(other->client->sess.ignoreClients, ClientNum(ent))) {
     msg = ConcatArgs(2);
-    Printer::chat(otherNum, va("^7Private message from %s^7: ^3%s",
-                               ent->client->pers.netname, msg));
+
+    if (enc) {
+      Printer::chatEnc(otherNum, "^7Private message from %s^7: ^3%s", ent->client->pers.netname, msg);
+    } else {
+      Printer::chat(otherNum, "^7Private message from %s^7: ^3%s", ent->client->pers.netname, msg);
+    }
+
     trap_SendServerCommand(otherNum, "pmFlashWindow");
 
     if (ent) {
-      Printer::chat(selfNum, va("^7Private message to %s^7: ^3%s",
-                                other->client->pers.netname, msg));
+      if (enc) {
+        Printer::chatEnc(selfNum, "^7Private message to %s^7: ^3%s", other->client->pers.netname, msg);
+      } else {
+        Printer::chat(selfNum, "^7Private message to %s^7: ^3%s", other->client->pers.netname, msg);
+      }
 
       if (ent->client->sess.inactive) {
         ETJump::InactivityTimer::clearClientInactivity(ent);
       }
     }
   } else {
-    Printer::console(selfNum,
-                     va("Private message to %s was ignored by the player.\n",
-                        other->client->pers.netname));
+    Printer::console(selfNum, "Private message to %s was ignored by the player.\n", other->client->pers.netname);
   }
 }
 
@@ -4635,10 +4413,10 @@ void Cmd_noGoto_f(gentity_t *ent) {
   const char *msg;
   if (ent->client->sess.noGoto == qtrue) {
     ent->client->sess.noGoto = qfalse;
-    msg = "enabled";
+    msg                      = "enabled";
   } else {
     ent->client->sess.noGoto = qtrue;
-    msg = "disabled";
+    msg                      = "disabled";
   }
   CP(va("print \"^7You have %s ^3goto^7.\n\"", msg));
 }
@@ -4647,10 +4425,10 @@ void Cmd_noCall_f(gentity_t *ent) {
   const char *msg;
   if (ent->client->sess.noCall == qtrue) {
     ent->client->sess.noCall = qfalse;
-    msg = "enabled";
+    msg                      = "enabled";
   } else {
     ent->client->sess.noCall = qtrue;
-    msg = "disabled";
+    msg                      = "disabled";
   }
   CP(va("print \"^7You have %s ^3call^7.\n\"", msg));
 }
@@ -4660,10 +4438,9 @@ void Cmd_noCall_f(gentity_t *ent) {
  */
 qboolean G_AllowFollow(gentity_t *ent, gentity_t *other) {
   // Check if target is speclocked, if it is check if we're invited
-  return (!other->client->sess.specLocked ||
-          COM_BitCheck(other->client->sess.specInvitedClients, ClientNum(ent)))
-             ? qtrue
-             : qfalse;
+  return (!other->client->sess.specLocked || COM_BitCheck(other->client->sess.specInvitedClients, ClientNum(ent)))
+           ? qtrue
+           : qfalse;
 }
 
 /*
@@ -4671,10 +4448,9 @@ qboolean G_AllowFollow(gentity_t *ent, gentity_t *other) {
  */
 qboolean G_DesiredFollow(gentity_t *ent, gentity_t *other) {
   return (G_AllowFollow(ent, other) &&
-          (ent->client->sess.spec_team == 0 ||
-           ent->client->sess.spec_team == other->client->sess.sessionTeam))
-             ? qtrue
-             : qfalse;
+          (ent->client->sess.spec_team == 0 || ent->client->sess.spec_team == other->client->sess.sessionTeam))
+           ? qtrue
+           : qfalse;
 }
 
 namespace ETJump {
@@ -4691,22 +4467,6 @@ static int getPlayerClassId(const std::string &string) {
     case 's':
     default:
       return PC_SOLDIER;
-  }
-}
-
-static char getPlayerClassSymbol(const int num) {
-  switch (num) {
-    case PC_MEDIC:
-      return 'm';
-    case PC_ENGINEER:
-      return 'e';
-    case PC_FIELDOPS:
-      return 'f';
-    case PC_COVERTOPS:
-      return 'c';
-    case PC_SOLDIER:
-    default:
-      return 's';
   }
 }
 
@@ -4728,58 +4488,57 @@ struct classLoadout {
 };
 
 static classLoadout availableLoadouts[]{
-    {PC_MEDIC, 1, "Medic with SMG"},
-    {PC_MEDIC, 2, "Medic with Rifle"},
-    {PC_MEDIC, 3, "Medic with Sniper Rifle"},
-    {PC_ENGINEER, 1, "Engineer with SMG"},
-    {PC_ENGINEER, 2, "Engineer with Rifle"},
-    {PC_ENGINEER, 3, "Engineer with Sniper Rifle"},
-    {PC_FIELDOPS, 1, "Field ops with SMG"},
-    {PC_FIELDOPS, 2, "Field ops with Rifle"},
-    {PC_FIELDOPS, 3, "Field ops with Sniper Rifle"},
-    {PC_COVERTOPS, 1, "Covert ops with Sten"},
-    {PC_COVERTOPS, 2, "Covert ops with FG42"},
-    {PC_COVERTOPS, 3, "Covert ops with Sniper Rifle"},
-    {PC_COVERTOPS, 4, "Covert ops with Rifle"},
-    {PC_SOLDIER, 1, "Soldier with SMG"},
-    {PC_SOLDIER, 2, "Soldier with MG42"},
-    {PC_SOLDIER, 3, "Soldier with Flamethrower"},
-    {PC_SOLDIER, 4, "Soldier with Panzerfaust"},
-    {PC_SOLDIER, 5, "Soldier with Mortar"},
-    {PC_SOLDIER, 6, "Soldier with Rifle"},
-    {PC_SOLDIER, 7, "Soldier with Sniper Rifle"},
+  {PC_MEDIC,     1, "Medic with SMG"              },
+  {PC_MEDIC,     2, "Medic with Rifle"            },
+  {PC_MEDIC,     3, "Medic with Sniper Rifle"     },
+  {PC_ENGINEER,  1, "Engineer with SMG"           },
+  {PC_ENGINEER,  2, "Engineer with Rifle"         },
+  {PC_ENGINEER,  3, "Engineer with Sniper Rifle"  },
+  {PC_FIELDOPS,  1, "Field ops with SMG"          },
+  {PC_FIELDOPS,  2, "Field ops with Rifle"        },
+  {PC_FIELDOPS,  3, "Field ops with Sniper Rifle" },
+  {PC_COVERTOPS, 1, "Covert ops with Sten"        },
+  {PC_COVERTOPS, 2, "Covert ops with FG42"        },
+  {PC_COVERTOPS, 3, "Covert ops with Sniper Rifle"},
+  {PC_COVERTOPS, 4, "Covert ops with Rifle"       },
+  {PC_SOLDIER,   1, "Soldier with SMG"            },
+  {PC_SOLDIER,   2, "Soldier with MG42"           },
+  {PC_SOLDIER,   3, "Soldier with Flamethrower"   },
+  {PC_SOLDIER,   4, "Soldier with Panzerfaust"    },
+  {PC_SOLDIER,   5, "Soldier with Mortar"         },
+  {PC_SOLDIER,   6, "Soldier with Rifle"          },
+  {PC_SOLDIER,   7, "Soldier with Sniper Rifle"   },
 };
 } // namespace ETJump
 
 static void Cmd_Class_f(gentity_t *ent) {
-  const auto *const args = GetArgs();
+  const auto *const args                   = GetArgs();
   static constexpr int DEFAULT_WEAPON_SLOT = 1; // weapon argument default value
 
   // not enough arguments were specified, generate usage text
   if (args->size() < 2) {
-    const std::string usageText =
-        "^3usage: ^7class <s|m|e|f|c> [primary] [secondary]\n\n"
-        "Valid loadouts:\n"
-        "^7Soldier:\n"
-        "^3 1 ^7- SMG\n"
-        "^3 2 ^7- MG42\n"
-        "^3 3 ^7- Flamethrower\n"
-        "^3 4 ^7- Panzerfaust\n"
-        "^3 5 ^7- Mortar\n"
-        "^3 6 ^7- Rifle\n"
-        "^3 7 ^7- Sniper Rifle\n\n"
-        "^7Medic/Engineer/Field Ops:\n"
-        "^3 1 ^7- SMG\n"
-        "^3 2 ^7- Rifle\n"
-        "^3 3 ^7- Sniper Rifle\n\n"
-        "^7Covert Ops:\n"
-        "^3 1 ^7- Sten\n"
-        "^3 2 ^7- FG42\n"
-        "^3 3 ^7- Sniper Rifle\n"
-        "^3 4 ^7- Rifle\n\n"
-        "^7Secondary:\n"
-        "^3 1 ^7- Pistol\n"
-        "^3 2 ^7- Akimbo Pistols\n";
+    const std::string usageText = "^3usage: ^7class <s|m|e|f|c> [primary] [secondary]\n\n"
+                                  "Valid loadouts:\n"
+                                  "^7Soldier:\n"
+                                  "^3 1 ^7- SMG\n"
+                                  "^3 2 ^7- MG42\n"
+                                  "^3 3 ^7- Flamethrower\n"
+                                  "^3 4 ^7- Panzerfaust\n"
+                                  "^3 5 ^7- Mortar\n"
+                                  "^3 6 ^7- Rifle\n"
+                                  "^3 7 ^7- Sniper Rifle\n\n"
+                                  "^7Medic/Engineer/Field Ops:\n"
+                                  "^3 1 ^7- SMG\n"
+                                  "^3 2 ^7- Rifle\n"
+                                  "^3 3 ^7- Sniper Rifle\n\n"
+                                  "^7Covert Ops:\n"
+                                  "^3 1 ^7- Sten\n"
+                                  "^3 2 ^7- FG42\n"
+                                  "^3 3 ^7- Sniper Rifle\n"
+                                  "^3 4 ^7- Rifle\n\n"
+                                  "^7Secondary:\n"
+                                  "^3 1 ^7- Pistol\n"
+                                  "^3 2 ^7- Akimbo Pistols\n";
 
     Printer::console(ent, usageText);
     return;
@@ -4797,20 +4556,17 @@ static void Cmd_Class_f(gentity_t *ent) {
   int weaponSlot = DEFAULT_WEAPON_SLOT;
 
   if (args->size() > 2) {
-    weaponSlot = std::clamp(Q_atoi((*args)[2]), DEFAULT_WEAPON_SLOT,
-                            MAX_WEAPS_PER_CLASS);
+    weaponSlot = std::clamp(Q_atoi((*args)[2]), DEFAULT_WEAPON_SLOT, MAX_WEAPS_PER_CLASS);
   }
 
   int32_t secondarySlot = DEFAULT_WEAPON_SLOT;
 
   if (args->size() > 3) {
-    secondarySlot = std::clamp(Q_atoi((*args)[3]), DEFAULT_WEAPON_SLOT,
-                               MAX_WEAPS_PER_CLASS);
+    secondarySlot = std::clamp(Q_atoi((*args)[3]), DEFAULT_WEAPON_SLOT, MAX_WEAPS_PER_CLASS);
   }
 
   // out of bounds check - if no weapon is set in specified slot
-  const auto *const classInfo =
-      BG_GetPlayerClassInfo(ent->client->sess.sessionTeam, classId);
+  const auto *const classInfo = BG_GetPlayerClassInfo(ent->client->sess.sessionTeam, classId);
 
   if (classInfo->classWeapons[weaponSlot - 1] == WP_NONE) {
     weaponSlot = DEFAULT_WEAPON_SLOT;
@@ -4821,19 +4577,15 @@ static void Cmd_Class_f(gentity_t *ent) {
   }
 
   // fetch weapons
-  const auto primaryWeapon = classInfo->classWeapons[weaponSlot - 1];
-  const auto secondaryWeapon =
-      classInfo->classSecondaryWeapons[secondarySlot - 1];
+  const auto primaryWeapon   = classInfo->classWeapons[weaponSlot - 1];
+  const auto secondaryWeapon = classInfo->classSecondaryWeapons[secondarySlot - 1];
 
   // display center print message
   for (const auto &loadout : ETJump::availableLoadouts) {
     if (loadout.classId == classId && loadout.weaponSlot == weaponSlot) {
-      Printer::center(ent,
-                      StringUtils::format("You will spawn as an %s %s",
-                                          ETJump::getPlayerTeamName(
-                                              ent->client->sess.sessionTeam),
-                                          loadout.description),
-                      false);
+      Printer::centerNoLog(ent, "You will spawn as an %s %s", ETJump::getPlayerTeamName(ent->client->sess.sessionTeam),
+                           loadout.description);
+
       break;
     }
   }
@@ -4845,9 +4597,7 @@ static void Cmd_Class_f(gentity_t *ent) {
 
 // Little easter egg :]
 void Cmd_shrug_f(gentity_t *ent) {
-  BG_AnimScriptEvent(&ent->client->ps,
-                     ent->client->pers.character->animModelInfo,
-                     ANIM_ET_NOPOWER, qtrue, qfalse);
+  BG_AnimScriptEvent(&ent->client->ps, ent->client->pers.character->animModelInfo, ANIM_ET_NOPOWER, qtrue, qfalse);
 }
 
 // sends back timerun specific information, used to restore runtimer after
@@ -4888,19 +4638,17 @@ void Cmd_SwapPlacesWithBot_f(gentity_t *ent, int botNum) {
   }
   //
   if (client->sess.sessionTeam != botent->client->sess.sessionTeam) {
-    trap_SendServerCommand(ent - g_entities,
-                           "print \"Bot is on different team, "
-                           "cannot swap places.\n\"");
+    trap_SendServerCommand(ent - g_entities, "print \"Bot is on different team, "
+                                             "cannot swap places.\n\"");
     return;
   }
   //
   // copy the client information
   cl = *botent->client;
   //
-  G_DPrintf("Swapping places: %s in for %s\n", ent->client->pers.netname,
-            botent->client->pers.netname);
+  G_DPrintf("Swapping places: %s in for %s\n", ent->client->pers.netname, botent->client->pers.netname);
   // kill the bot
-  botent->flags &= ~FL_GODMODE;
+  botent->flags                         &= ~FL_GODMODE;
   botent->client->ps.stats[STAT_HEALTH] = botent->health = 0;
   player_die(botent, ent, ent, 100000, MOD_SWAP_PLACES);
   // make sure they go into limbo mode right away, and dont show a
@@ -4914,25 +4662,22 @@ void Cmd_SwapPlacesWithBot_f(gentity_t *ent, int botNum) {
   // copy session data, so we spawn in as the same class
   // save items
   saved = client->pers;
-  sess = client->sess;
+  sess  = client->sess;
   memcpy(persistant, ent->client->ps.persistant, sizeof(persistant));
   // give them the right weapons/etc
-  *client = cl;
-  client->sess = sess;
-  client->sess.playerType = ent->client->sess.latchPlayerType =
-      cl.sess.playerType;
-  client->sess.playerWeapon = ent->client->sess.latchPlayerWeapon =
-      cl.sess.playerWeapon;
-  client->sess.playerWeapon2 = ent->client->sess.latchPlayerWeapon2 =
-      cl.sess.playerWeapon2;
+  *client                 = cl;
+  client->sess            = sess;
+  client->sess.playerType = ent->client->sess.latchPlayerType = cl.sess.playerType;
+  client->sess.playerWeapon = ent->client->sess.latchPlayerWeapon = cl.sess.playerWeapon;
+  client->sess.playerWeapon2 = ent->client->sess.latchPlayerWeapon2 = cl.sess.playerWeapon2;
   // spawn them in
   ClientSpawn(ent, qtrue);
   // restore items
   client->pers = saved;
   memcpy(ent->client->ps.persistant, persistant, sizeof(persistant));
-  client->ps = cl.ps;
+  client->ps           = cl.ps;
   client->ps.clientNum = ent->s.number;
-  ent->health = client->ps.stats[STAT_HEALTH];
+  ent->health          = client->ps.stats[STAT_HEALTH];
   SetClientViewAngle(ent, cl.ps.viewangles);
   // make sure they dont respawn immediately after they die
   client->pers.lastReinforceTime = 0;
@@ -4945,56 +4690,57 @@ typedef struct {
 } command_t;
 
 static const command_t anyTimeCommands[] = {
-    {"score", qfalse, Cmd_Score_f},
-    {"vote", qtrue, Cmd_Vote_f},
-    {"fireteam", qfalse, Cmd_FireTeam_MP_f},
-    {"showstats", qfalse, G_PrintAccuracyLog},
-    {"ignore", qfalse, Cmd_Ignore_f},
-    {"unignore", qfalse, Cmd_UnIgnore_f},
-    {"obj", qfalse, Cmd_SelectedObjective_f},
-    {"impkd", qfalse, Cmd_IntermissionPlayerKillsDeaths_f},
-    {"imwa", qfalse, Cmd_IntermissionWeaponAccuracies_f},
-    {"imws", qfalse, Cmd_IntermissionWeaponStats_f},
-    {"imready", qfalse, Cmd_IntermissionReady_f},
-    {"ws", qfalse, Cmd_WeaponStat_f},
-    {"rs", qfalse, Cmd_ResetSetup_f},
-    {"m", qtrue, Cmd_PrivateMessage_f},
-    {"nogoto", qfalse, Cmd_noGoto_f},
-    {"nocall", qfalse, Cmd_noCall_f},
-    {"rtvVote", qfalse, Cmd_Vote_f},
+  {"score",     qfalse, Cmd_Score_f                        },
+  {"vote",      qtrue,  Cmd_Vote_f                         },
+  {"fireteam",  qfalse, Cmd_FireTeam_MP_f                  },
+  {"showstats", qfalse, G_PrintAccuracyLog                 },
+  {"ignore",    qfalse, Cmd_Ignore_f                       },
+  {"unignore",  qfalse, Cmd_UnIgnore_f                     },
+  {"obj",       qfalse, Cmd_SelectedObjective_f            },
+  {"impkd",     qfalse, Cmd_IntermissionPlayerKillsDeaths_f},
+  {"imwa",      qfalse, Cmd_IntermissionWeaponAccuracies_f },
+  {"imws",      qfalse, Cmd_IntermissionWeaponStats_f      },
+  {"imready",   qfalse, Cmd_IntermissionReady_f            },
+  {"ws",        qfalse, Cmd_WeaponStat_f                   },
+  {"rs",        qfalse, Cmd_ResetSetup_f                   },
+  {"m",         qtrue,  Cmd_PrivateMessage_f               },
+  {"enc_m",     qtrue,  Cmd_PrivateMessage_f               },
+  {"nogoto",    qfalse, Cmd_noGoto_f                       },
+  {"nocall",    qfalse, Cmd_noCall_f                       },
+  {"rtvVote",   qfalse, Cmd_Vote_f                         },
 };
 
 static const command_t noIntermissionCommands[] = {
-    {"class", qfalse, Cmd_Class_f},
-    {"give", qfalse, Cmd_Give_f},
-    {"god", qfalse, Cmd_God_f},
-    {"notarget", qfalse, Cmd_Notarget_f},
-    {"noclip", qfalse, Cmd_Noclip_f},
-    {"kill", qtrue, Cmd_Kill_f},
-    {"team", qtrue, Cmd_Team_f},
-    {"where", qfalse, Cmd_Where_f},
-    //{ "startcamera",		qfalse,	Cmd_StartCamera_f },
-    {"stopcamera", qfalse, Cmd_StopCamera_f},
-    {"setcameraorigin", qfalse, Cmd_SetCameraOrigin_f},
-    {"setviewpos", qfalse, Cmd_SetViewpos_f},
-    {"setspawnpt", qfalse, Cmd_SetSpawnPoint_f},
+  {"class",           qfalse, Cmd_Class_f            },
+  {"give",            qfalse, Cmd_Give_f             },
+  {"god",             qfalse, Cmd_God_f              },
+  {"notarget",        qfalse, Cmd_Notarget_f         },
+  {"noclip",          qfalse, Cmd_Noclip_f           },
+  {"kill",            qtrue,  Cmd_Kill_f             },
+  {"team",            qtrue,  Cmd_Team_f             },
+  {"where",           qfalse, Cmd_Where_f            },
+  //{ "startcamera",		qfalse,	Cmd_StartCamera_f },
+  {"stopcamera",      qfalse, Cmd_StopCamera_f       },
+  {"setcameraorigin", qfalse, Cmd_SetCameraOrigin_f  },
+  {"setviewpos",      qfalse, Cmd_SetViewpos_f       },
+  {"setspawnpt",      qfalse, Cmd_SetSpawnPoint_f    },
 
-    // tj related cmds
-    {"goto", qtrue, Cmd_Goto_f},
-    {"call", qtrue, Cmd_Call_f},
-    {"iwant", qtrue, Cmd_Call_f},
-    //{ "load",				qfalse,	Cmd_Load_f },
-    //{ "backup",             qfalse, Cmd_BackupLoad_f },
-    //{ "save",				qfalse,	Cmd_Save_f },
-    {"shrug", qfalse, Cmd_shrug_f},
-    //{ "savereset",          qfalse, Cmd_SaveReset_f },
-    {"timerun_status", qfalse, Cmd_timerunStatus_f},
-    {"setoffset", qtrue, ETJump::setPlayerOffset},
-    {"interruptRun", qtrue, ETJump::interruptRun},
-    {"tracker_print", qtrue, ETJump::printTracker},
-    {"tracker_set", qtrue, ETJump::setTracker},
-    {"clearsaves", qtrue, ETJump::clearSaves},
-    {"dumpEntities", qtrue, ETJump::dumpEntities},
+  // tj related cmds
+  {"goto",            qtrue,  Cmd_Goto_f             },
+  {"call",            qtrue,  Cmd_Call_f             },
+  {"iwant",           qtrue,  Cmd_Call_f             },
+  //{ "load",				qfalse,	Cmd_Load_f },
+  //{ "backup",             qfalse, Cmd_BackupLoad_f },
+  //{ "save",				qfalse,	Cmd_Save_f },
+  {"shrug",           qfalse, Cmd_shrug_f            },
+  //{ "savereset",          qfalse, Cmd_SaveReset_f },
+  {"timerun_status",  qfalse, Cmd_timerunStatus_f    },
+  {"setoffset",       qtrue,  ETJump::setPlayerOffset},
+  {"interruptRun",    qtrue,  ETJump::interruptRun   },
+  {"tracker_print",   qtrue,  ETJump::printTracker   },
+  {"tracker_set",     qtrue,  ETJump::setTracker     },
+  {"clearsaves",      qtrue,  ETJump::clearSaves     },
+  {"dumpEntities",    qtrue,  ETJump::dumpEntities   },
 };
 
 qboolean ClientIsFlooding(gentity_t *ent) {
@@ -5141,24 +4887,20 @@ void ClientCommand(int clientNum) {
 #else
     } else if (!ETJump::session->HasPermission(ent, CommandFlags::ADMINCHAT)) {
 #endif
-      Printer::chat(
-          clientNum,
-          "You don't have permission to use adminchat on this server.");
+      Printer::chat(clientNum, "You don't have permission to use adminchat on this server.");
     } else if (ClientIsFlooding(ent)) {
-      Printer::console(clientNum,
-                       StringUtils::format(
-                           "^1Spam Protection: ^7command %s ^7ignored\n", cmd));
+      Printer::console(clientNum, "^1Spam Protection: ^7command %s ^7ignored\n", cmd);
     } else if (!ent->client->sess.muted) {
       Cmd_Say_f(ent, SAY_ADMIN, qfalse, enc);
     }
+
     return;
   }
 
   // forcetapout
   if (!Q_stricmp(cmd, "forcetapout")) {
     if (ent->client->ps.stats[STAT_HEALTH] <= 0 &&
-        (ent->client->sess.sessionTeam == TEAM_AXIS ||
-         ent->client->sess.sessionTeam == TEAM_ALLIES)) {
+        (ent->client->sess.sessionTeam == TEAM_AXIS || ent->client->sess.sessionTeam == TEAM_ALLIES)) {
       limbo(ent, qtrue);
     }
     return;
@@ -5182,9 +4924,7 @@ void ClientCommand(int clientNum) {
   }
 
   // regular anytime commands
-  for (i = 0; i < static_cast<int>(sizeof(anyTimeCommands) /
-                                   sizeof(anyTimeCommands[0]));
-       i++) {
+  for (i = 0; i < static_cast<int>(sizeof(anyTimeCommands) / sizeof(anyTimeCommands[0])); i++) {
     if (!Q_stricmp(cmd, anyTimeCommands[i].cmd)) {
       if (anyTimeCommands[i].floodProtected && ClientIsFlooding(ent)) {
         CP(va("print \"^1Spam Protection:^7 "
@@ -5216,8 +4956,7 @@ void ClientCommand(int clientNum) {
   }
 
   if (!Q_stricmp(cmd, "mod_information")) {
-    Printer::console(ent,
-                     va("%s %s %s", GAME_NAME, GAME_VERSION_DATED, __TIME__));
+    Printer::console(ent, "%s %s %s", GAME_NAME, GAME_VERSION_DATED, __TIME__);
     return;
   }
 
@@ -5226,9 +4965,7 @@ void ClientCommand(int clientNum) {
   }
 
   // regular no intermission commands
-  for (i = 0; i < static_cast<int>(sizeof(noIntermissionCommands) /
-                                   sizeof(noIntermissionCommands[0]));
-       i++) {
+  for (i = 0; i < static_cast<int>(sizeof(noIntermissionCommands) / sizeof(noIntermissionCommands[0])); i++) {
     if (!Q_stricmp(cmd, noIntermissionCommands[i].cmd)) {
       if (noIntermissionCommands[i].floodProtected && ClientIsFlooding(ent)) {
         CP(va("print \"^1Spam Protection:^7 "
@@ -5247,8 +4984,7 @@ void ClientCommand(int clientNum) {
 
   // if we execute a `vid_restart`, UI will send these while cgame isn't loaded,
   // and they end up here as unrecognized console commands
-  if (!Q_stricmp(cmd, "forceMaplistRefresh") ||
-      !Q_stricmp(cmd, "forceCustomvoteRefresh")) {
+  if (!Q_stricmp(cmd, "forceMaplistRefresh") || !Q_stricmp(cmd, "forceCustomvoteRefresh")) {
     return;
   }
 
@@ -5276,7 +5012,8 @@ int Q_SayArgc() {
         c++;
         continue;
       }
-      while (*s && *s == ' ') s++;
+      while (*s && *s == ' ')
+        s++;
       c++;
     }
     s++;
@@ -5292,7 +5029,7 @@ int Q_SayArgc() {
 // and the former when the message is typed in the chat popup
 qboolean Q_SayArgv(int n, char *buffer, int bufferLength) {
   int bc = 1;
-  int c = 0;
+  int c  = 0;
   char *s;
 
   if (bufferLength < 1) {
@@ -5302,7 +5039,7 @@ qboolean Q_SayArgv(int n, char *buffer, int bufferLength) {
     return qfalse;
   }
   *buffer = '\0';
-  s = ConcatArgs(0);
+  s       = ConcatArgs(0);
   while (*s) {
     if (c == n) {
       while (*s && (bc < bufferLength)) {
@@ -5324,7 +5061,8 @@ qboolean Q_SayArgv(int n, char *buffer, int bufferLength) {
         c++;
         continue;
       }
-      while (*s && *s == ' ') s++;
+      while (*s && *s == ' ')
+        s++;
       c++;
     }
     s++;
@@ -5347,7 +5085,8 @@ char *Q_SayConcatArgs(int start) {
         c++;
         continue;
       }
-      while (*s && *s == ' ') s++;
+      while (*s && *s == ' ')
+        s++;
       c++;
     }
     s++;

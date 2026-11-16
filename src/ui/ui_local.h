@@ -1,18 +1,19 @@
 #ifndef __UI_LOCAL_H__
 #define __UI_LOCAL_H__
 
-#include <vector>
+#include <map>
 #include <stack>
 #include <string>
-#include <map>
+#include <vector>
 
-#include "../game/q_shared.h"
-#include "../cgame/tr_types.h"
 #include "ui_public.h"
-#include "../game/bg_public.h"
 #include "ui_shared.h"
+
+#include "../cgame/tr_types.h"
+#include "../game/bg_public.h"
 #include "../game/etj_custom_map_votes.h"
 #include "../game/etj_syscalls.h"
+#include "../game/q_shared.h"
 
 extern vmCvar_t ui_ffa_fraglimit;
 extern vmCvar_t ui_ffa_timelimit;
@@ -316,8 +317,7 @@ void UI_LoadArenas(void);
 mapInfo *UI_FindMapInfoByMapname(const char *name);
 void UI_ReadableSize(char *buf, int bufsize, int value);
 void UI_PrintTime(char *buf, int bufsize, int time);
-void Text_Paint_Ext(float x, float y, float scalex, float scaley,
-                    const vec4_t color, const char *text, float adjust,
+void Text_Paint_Ext(float x, float y, float scalex, float scaley, const vec4_t color, const char *text, float adjust,
                     int limit, int style, fontInfo_t *font);
 extern void UI_RegisterCvars(void);
 extern void UI_UpdateCvars(void);
@@ -329,8 +329,7 @@ inline constexpr int GLINFO_LINES = 128;
 // ui_loadpanel.c
 //
 void UI_LoadPanel_Init();
-extern void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw,
-                             qboolean uihack);
+extern void UI_DrawLoadPanel(qboolean forcerefresh, qboolean ownerdraw, qboolean uihack);
 
 //
 // ui_atoms.c
@@ -370,21 +369,21 @@ typedef struct {
 } uiStatic_t;
 
 // new ui stuff
-inline constexpr int MAX_HEADS = 64;
+inline constexpr int MAX_HEADS   = 64;
 inline constexpr int MAX_ALIASES = 64;
-inline constexpr int MAX_TEAMS = 64;
-inline constexpr int MAX_MAPS = 8192;
+inline constexpr int MAX_TEAMS   = 64;
+inline constexpr int MAX_MAPS    = 8192;
 
-inline constexpr int MAX_ADDRESSLENGTH = 64;
-inline constexpr int MAX_DISPLAY_SERVERS = 2048;
-inline constexpr int MAX_SERVERSTATUS_LINES = 128;
-inline constexpr int MAX_SERVERSTATUS_TEXT = 2048;
+inline constexpr int MAX_ADDRESSLENGTH       = 64;
+inline constexpr int MAX_DISPLAY_SERVERS     = 2048;
+inline constexpr int MAX_SERVERSTATUS_LINES  = 128;
+inline constexpr int MAX_SERVERSTATUS_TEXT   = 2048;
 inline constexpr int MAX_FOUNDPLAYER_SERVERS = 16;
 
 inline constexpr int TEAM_MEMBERS = 5;
 
-inline constexpr int MAX_MODS = 64;
-inline constexpr int MAX_MOVIES = 256;
+inline constexpr int MAX_MODS         = 64;
+inline constexpr int MAX_MOVIES       = 256;
 inline constexpr int MAX_PLAYERMODELS = 256;
 
 inline constexpr int MAX_PROFILES = 64;
@@ -481,7 +480,10 @@ typedef struct {
   const char *modDescr;
 } modInfo_t;
 
-enum class FileSystemObjectType { Item, Folder };
+enum class FileSystemObjectType {
+  Item,
+  Folder
+};
 
 struct FileSystemObjectInfo {
   FileSystemObjectInfo() : type(FileSystemObjectType::Item), name("") {};
@@ -632,27 +634,20 @@ extern void UI_MouseEvent(int dx, int dy);
 extern void UI_Refresh(int realtime);
 extern qboolean UI_ConsoleCommand(int realTime);
 extern float UI_ClampCvar(float min, float max, float value);
-extern void UI_DrawNamedPic(float x, float y, float width, float height,
-                            const char *picname);
-extern void UI_DrawHandlePic(float x, float y, float w, float h,
-                             qhandle_t hShader);
-extern void UI_FillRect(float x, float y, float width, float height,
-                        const float *color);
-extern void UI_DrawRect(float x, float y, float width, float height,
-                        const float *color);
+extern void UI_DrawNamedPic(float x, float y, float width, float height, const char *picname);
+extern void UI_DrawHandlePic(float x, float y, float w, float h, qhandle_t hShader);
+extern void UI_FillRect(float x, float y, float width, float height, const float *color);
+extern void UI_DrawRect(float x, float y, float width, float height, const float *color);
 extern void UI_DrawTopBottom(float x, float y, float w, float h);
 extern void UI_DrawSides(float x, float y, float w, float h);
 extern void UI_UpdateScreen(void);
 extern void UI_SetColor(const float *rgba);
 extern void UI_LerpColor(vec4_t a, vec4_t b, vec4_t c, float t);
-extern void UI_DrawBannerString(int x, int y, const char *str, int style,
-                                vec4_t color);
+extern void UI_DrawBannerString(int x, int y, const char *str, int style, vec4_t color);
 extern float UI_ProportionalSizeScale(int style);
-extern void UI_DrawProportionalString(int x, int y, const char *str, int style,
-                                      vec4_t color);
+extern void UI_DrawProportionalString(int x, int y, const char *str, int style, vec4_t color);
 extern int UI_ProportionalStringWidth(const char *str);
-extern void UI_DrawString(int x, int y, const char *str, int style,
-                          vec4_t color);
+extern void UI_DrawString(int x, int y, const char *str, int style, vec4_t color);
 extern void UI_DrawChar(int x, int y, int ch, int style, vec4_t color);
 extern qboolean UI_CursorInRect(int x, int y, int width, int height);
 extern void UI_AdjustFrom640(float *x, float *y, float *w, float *h);
@@ -676,15 +671,12 @@ extern uiStatic_t uis;
 void trap_Print(const char *string);
 [[noreturn]] void trap_Error(const char *string);
 int trap_Milliseconds(void);
-void trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName,
-                        const char *defaultValue, int flags);
+void trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags);
 void trap_Cvar_Update(vmCvar_t *vmCvar);
 void trap_Cvar_Set(const char *var_name, const char *value);
 float trap_Cvar_VariableValue(const char *var_name);
-void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer,
-                                    int bufsize);
-void trap_Cvar_LatchedVariableStringBuffer(const char *var_name, char *buffer,
-                                           int bufsize);
+void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer, int bufsize);
+void trap_Cvar_LatchedVariableStringBuffer(const char *var_name, char *buffer, int bufsize);
 void trap_Cvar_SetValue(const char *var_name, float value);
 void trap_Cvar_Reset(const char *name);
 void trap_Cvar_Create(const char *var_name, const char *var_value, int flags);
@@ -698,33 +690,27 @@ int trap_FS_FOpenFile(const char *qpath, fileHandle_t *f, fsMode_t mode);
 void trap_FS_Read(void *buffer, int len, fileHandle_t f);
 void trap_FS_Write(const void *buffer, int len, fileHandle_t f);
 void trap_FS_FCloseFile(fileHandle_t f);
-int trap_FS_GetFileList(const char *path, const char *extension, char *listbuf,
-                        int bufsize);
+int trap_FS_GetFileList(const char *path, const char *extension, char *listbuf, int bufsize);
 int trap_FS_Delete(const char *filename);
 qhandle_t trap_R_RegisterModel(const char *name);
 qhandle_t trap_R_RegisterSkin(const char *name);
 qhandle_t trap_R_RegisterShaderNoMip(const char *name);
 void trap_R_ClearScene(void);
 void trap_R_AddRefEntityToScene(const refEntity_t *re);
-void trap_R_AddPolyToScene(qhandle_t hShader, int numVerts,
-                           const polyVert_t *verts);
-void trap_R_AddLightToScene(const vec3_t org, float radius, float intensity,
-                            float r, float g, float b, qhandle_t hShader,
-                            int flags);
-void trap_R_AddCoronaToScene(const vec3_t org, float r, float g, float b,
-                             float scale, int id, qboolean visible);
+void trap_R_AddPolyToScene(qhandle_t hShader, int numVerts, const polyVert_t *verts);
+void trap_R_AddLightToScene(const vec3_t org, float radius, float intensity, float r, float g, float b,
+                            qhandle_t hShader, int flags);
+void trap_R_AddCoronaToScene(const vec3_t org, float r, float g, float b, float scale, int id, qboolean visible);
 void trap_R_RenderScene(const refdef_t *fd);
 void trap_R_SetColor(const float *rgba);
 void trap_R_Add2dPolys(polyVert_t *verts, int numverts, qhandle_t hShader);
-void trap_R_DrawStretchPic(float x, float y, float w, float h, float s1,
-                           float t1, float s2, float t2, qhandle_t hShader);
-void trap_R_DrawRotatedPic(float x, float y, float w, float h, float s1,
-                           float t1, float s2, float t2, qhandle_t hShader,
-                           float angle);
+void trap_R_DrawStretchPic(float x, float y, float w, float h, float s1, float t1, float s2, float t2,
+                           qhandle_t hShader);
+void trap_R_DrawRotatedPic(float x, float y, float w, float h, float s1, float t1, float s2, float t2,
+                           qhandle_t hShader, float angle);
 void trap_R_ModelBounds(clipHandle_t model, vec3_t mins, vec3_t maxs);
 void trap_UpdateScreen(void);
-int trap_CM_LerpTag(orientation_t *tag, const refEntity_t *refent,
-                    const char *tagName, int startIndex);
+int trap_CM_LerpTag(orientation_t *tag, const refEntity_t *refent, const char *tagName, int startIndex);
 void trap_S_StartLocalSound(sfxHandle_t sfx, int channelNum);
 sfxHandle_t trap_S_RegisterSound(const char *sample, qboolean compressed);
 void trap_Key_KeynumToStringBuf(int keynum, char *buf, int buflen);
@@ -757,16 +743,14 @@ qboolean trap_LAN_UpdateVisiblePings(int source);
 void trap_LAN_MarkServerVisible(int source, int n, qboolean visible);
 void trap_LAN_ResetPings(int n);
 void trap_LAN_SaveCachedServers();
-int trap_LAN_CompareServers(int source, int sortKey, int sortDir, int s1,
-                            int s2);
+int trap_LAN_CompareServers(int source, int sortKey, int sortDir, int s1, int s2);
 void trap_LAN_GetServerAddressString(int source, int n, char *buf, int buflen);
 void trap_LAN_GetServerInfo(int source, int n, char *buf, int buflen);
 int trap_LAN_AddServer(int source, const char *name, const char *addr);
 void trap_LAN_RemoveServer(int source, const char *addr);
 int trap_LAN_GetServerPing(int source, int n);
 int trap_LAN_ServerIsVisible(int source, int n);
-int trap_LAN_ServerStatus(const char *serverAddress, char *serverStatus,
-                          int maxLen);
+int trap_LAN_ServerStatus(const char *serverAddress, char *serverStatus, int maxLen);
 void trap_LAN_SaveCachedServers();
 void trap_LAN_LoadCachedServers();
 qboolean trap_LAN_ServerIsInFavoriteList(int source, int n);
@@ -778,21 +762,17 @@ void trap_SetPbSvStatus(int status); // TTimo
 
 void trap_GetCDKey(char *buf, int buflen);
 void trap_SetCDKey(char *buf);
-void trap_R_RegisterFont(const char *pFontname, int pointSize,
-                         fontInfo_t *font);
+void trap_R_RegisterFont(const char *pFontname, int pointSize, fontInfo_t *font);
 void trap_S_StopBackgroundTrack(void);
-void trap_S_StartBackgroundTrack(const char *intro, const char *loop,
-                                 int fadeupTime);
+void trap_S_StartBackgroundTrack(const char *intro, const char *loop, int fadeupTime);
 void trap_S_FadeAllSound(float targetvol, int time, qboolean stopsound);
-int trap_CIN_PlayCinematic(const char *arg0, int xpos, int ypos, int width,
-                           int height, int bits);
+int trap_CIN_PlayCinematic(const char *arg0, int xpos, int ypos, int width, int height, int bits);
 e_status trap_CIN_StopCinematic(int handle);
 e_status trap_CIN_RunCinematic(int handle);
 void trap_CIN_DrawCinematic(int handle);
 void trap_CIN_SetExtents(int handle, int x, int y, int w, int h);
 int trap_RealTime(qtime_t *qtime);
-void trap_R_RemapShader(const char *oldShader, const char *newShader,
-                        const char *timeOffset);
+void trap_R_RemapShader(const char *oldShader, const char *newShader, const char *timeOffset);
 qboolean trap_VerifyCDKey(const char *key, const char *chksum);
 qboolean trap_GetLimboString(int index, char *buf); // NERVE - SMF
 void trap_CheckAutoUpdate(void);                    // DHM - Nerve

@@ -4,12 +4,12 @@
 // rhea@OrangeSmoothie.org
 //
 #include "cg_local.h"
-#include "../ui/ui_shared.h"
+
 #include "../game/bg_local.h"
+#include "../ui/ui_shared.h"
 
 void CG_CalcVrect(void);
-void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted,
-                             int align, vec4_t *refcolor);
+void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted, int align, vec4_t *refcolor);
 
 // Explicit server command to add a view to the client's snapshot
 void CG_mvNew_f(void) {
@@ -62,8 +62,7 @@ void CG_mvSwapViews_f(void) {
 
 // Shut down a window view for a particular MV client
 void CG_mvHideView_f(void) {
-  if (cg.mvCurrentActive == NULL ||
-      cg.mvCurrentMainview == cg.mvCurrentActive) {
+  if (cg.mvCurrentActive == NULL || cg.mvCurrentMainview == cg.mvCurrentActive) {
     return;
   }
 
@@ -131,17 +130,17 @@ void CG_mvCreate(int pID) {
   }
 
   // Window specific
-  w->id = WID_NONE;
-  w->x = (cg.mv_cnt == 0) ? 0 : 30 + (12 * pID);
-  w->y = (cg.mv_cnt == 0) ? 0 : 300 + (5 * pID);
-  w->w = (cg.mv_cnt == 0) ? 640 : 128;
-  w->h = (cg.mv_cnt == 0) ? 480 : 96;
+  w->id     = WID_NONE;
+  w->x      = (cg.mv_cnt == 0) ? 0 : 30 + (12 * pID);
+  w->y      = (cg.mv_cnt == 0) ? 0 : 300 + (5 * pID);
+  w->w      = (cg.mv_cnt == 0) ? 640 : 128;
+  w->h      = (cg.mv_cnt == 0) ? 480 : 96;
   w->mvInfo = (pID & MV_PID) | MV_SELECTED;
-  w->state = (cg.mv_cnt == 0) ? WSTATE_COMPLETE : WSTATE_START;
+  w->state  = (cg.mv_cnt == 0) ? WSTATE_COMPLETE : WSTATE_START;
 
   if (cg.mv_cnt == 0) {
     cg.mvCurrentMainview = w;
-    cg.mvCurrentActive = cg.mvCurrentMainview;
+    cg.mvCurrentActive   = cg.mvCurrentMainview;
 
     if (cg_specHelp.integer > 0 && !cg.demoPlayback) {
       CG_ShowHelp_On(&cg.spechelpWindow);
@@ -160,8 +159,8 @@ void CG_mvFree(int pID) {
   if (w != NULL) {
     // Free it in mvDraw()
     w->targetTime = 100;
-    w->time = trap_Milliseconds();
-    w->state = WSTATE_SHUTDOWN;
+    w->time       = trap_Milliseconds();
+    w->state      = WSTATE_SHUTDOWN;
   }
 }
 
@@ -184,9 +183,8 @@ cg_window_t *CG_mvClientLocate(int pID) {
 void CG_mvMainviewSwap(cg_window_t *av) {
   int swap_pID = (cg.mvCurrentMainview->mvInfo & MV_PID);
 
-  cg.mvCurrentMainview->mvInfo =
-      (cg.mvCurrentMainview->mvInfo & ~MV_PID) | (av->mvInfo & MV_PID);
-  av->mvInfo = (av->mvInfo & ~MV_PID) | swap_pID;
+  cg.mvCurrentMainview->mvInfo = (cg.mvCurrentMainview->mvInfo & ~MV_PID) | (av->mvInfo & MV_PID);
+  av->mvInfo                   = (av->mvInfo & ~MV_PID) | swap_pID;
 
   CG_mvOverlayUpdate();
 }
@@ -246,8 +244,7 @@ cg_window_t *CG_mvFindNonMainview(void) {
   // First, find a non-windowed client
   for (i = 0; i < cg.mvTotalClients; i++) {
     if (cg.mvOverlay[i].w == NULL) {
-      cg.mvCurrentMainview->mvInfo = (cg.mvCurrentMainview->mvInfo & ~MV_PID) |
-                                     (cg.mvOverlay[i].pID & MV_PID);
+      cg.mvCurrentMainview->mvInfo = (cg.mvCurrentMainview->mvInfo & ~MV_PID) | (cg.mvOverlay[i].pID & MV_PID);
 
       CG_mvOverlayClientUpdate(cg.mvOverlay[i].pID, i);
       return (cg.mvCurrentMainview);
@@ -276,36 +273,29 @@ cg_window_t *CG_mvFindNonMainview(void) {
 // Update all info for a merged client
 //
 void CG_mvUpdateClientInfo(int pID) {
-
   if (pID >= 0 && pID < MAX_MVCLIENTS && (cg.mvClientList & (1 << pID))) {
-    int weap = cg_entities[pID].currentState.weapon;
-    int id = MAX_WEAPONS - 1 - (pID * 2);
-    clientInfo_t *ci = &cgs.clientinfo[pID];
+    int weap          = cg_entities[pID].currentState.weapon;
+    int id            = MAX_WEAPONS - 1 - (pID * 2);
+    clientInfo_t *ci  = &cgs.clientinfo[pID];
     playerState_t *ps = &cg.snap->ps;
 
-    ci->health = (ps->ammo[id]) & 0xFF;
+    ci->health   = (ps->ammo[id]) & 0xFF;
     ci->hintTime = (ps->ammo[id] >> 8) & 0x0F;
     ci->weapHeat = (ps->ammo[id] >> 12) & 0x0F;
 
-    ci->ammo = (ps->ammo[id - 1]) & 0x3FF;
+    ci->ammo        = (ps->ammo[id - 1]) & 0x3FF;
     ci->weaponState = (ps->ammo[id - 1] >> 11) & 0x03;
-    ci->fCrewgun = ((ps->ammo[id - 1] >> 13) & 0x01) ? qtrue : qfalse;
-    ci->cursorHint = (ps->ammo[id - 1] >> 14) & 0x03;
+    ci->fCrewgun    = ((ps->ammo[id - 1] >> 13) & 0x01) ? qtrue : qfalse;
+    ci->cursorHint  = (ps->ammo[id - 1] >> 14) & 0x03;
 
-    ci->ammoclip = (ps->ammoclip[id - 1]) & 0x1FF;
+    ci->ammoclip   = (ps->ammoclip[id - 1]) & 0x1FF;
     ci->chargeTime = (ps->ammoclip[id - 1] >> 9) & 0x0F;
     ci->sprintTime = (ps->ammoclip[id - 1] >> 13) & 0x07;
 
-    ci->weapHeat = (int)(100.0f * (float)ci->weapHeat / 15.0f);
-    ci->chargeTime = (ci->chargeTime == 0)
-                         ? -1
-                         : (int)(100.0f * (float)(ci->chargeTime - 1) / 15.0f);
-    ci->hintTime = (ci->hintTime == 0)
-                       ? -1
-                       : (int)(100.0f * (float)(ci->hintTime - 1) / 15.0f);
-    ci->sprintTime = (ci->sprintTime == 0)
-                         ? -1
-                         : (int)(100.0f * (float)(ci->sprintTime - 1) / 7.0f);
+    ci->weapHeat   = (int)(100.0f * (float)ci->weapHeat / 15.0f);
+    ci->chargeTime = (ci->chargeTime == 0) ? -1 : (int)(100.0f * (float)(ci->chargeTime - 1) / 15.0f);
+    ci->hintTime   = (ci->hintTime == 0) ? -1 : (int)(100.0f * (float)(ci->hintTime - 1) / 15.0f);
+    ci->sprintTime = (ci->sprintTime == 0) ? -1 : (int)(100.0f * (float)(ci->sprintTime - 1) / 7.0f);
 
     if (ci->health == 0) {
       ci->weaponState = WSTATE_IDLE;
@@ -315,14 +305,12 @@ void CG_mvUpdateClientInfo(int pID) {
     if (ci->weaponState != ci->weaponState_last) {
       ci->weaponState_last = ci->weaponState;
       ci->grenadeTimeStart =
-          (ci->weaponState == WSTATE_FIRE &&
-           (weap == WP_GRENADE_LAUNCHER || weap == WP_GRENADE_PINEAPPLE))
-              ? 4000 + cg.time
-              : 0;
+        (ci->weaponState == WSTATE_FIRE && (weap == WP_GRENADE_LAUNCHER || weap == WP_GRENADE_PINEAPPLE))
+          ? 4000 + cg.time
+          : 0;
     }
 
-    if (ci->weaponState == WSTATE_FIRE &&
-        (weap == WP_GRENADE_LAUNCHER || weap == WP_GRENADE_PINEAPPLE)) {
+    if (ci->weaponState == WSTATE_FIRE && (weap == WP_GRENADE_LAUNCHER || weap == WP_GRENADE_PINEAPPLE)) {
       ci->grenadeTimeLeft = ci->grenadeTimeStart - cg.time;
       if (ci->grenadeTimeLeft < 0) {
         ci->grenadeTimeLeft = 0;
@@ -338,21 +326,18 @@ void CG_mvUpdateClientInfo(int pID) {
 //
 void CG_mvTransitionPlayerState(playerState_t *ps) {
   int x, mult, pID = (cg.mvCurrentMainview->mvInfo & MV_PID);
-  centity_t *cent = &cg_entities[pID];
+  centity_t *cent  = &cg_entities[pID];
   clientInfo_t *ci = &cgs.clientinfo[pID];
 
   cg.predictedPlayerEntity.currentState = cent->currentState;
-  ps->clientNum = pID;
-  ps->weapon = cent->currentState.weapon;
-  cg.weaponSelect = ps->weapon;
+  ps->clientNum                         = pID;
+  ps->weapon                            = cent->currentState.weapon;
+  cg.weaponSelect                       = ps->weapon;
 
-  cent->currentState.eType = ET_PLAYER;
-  ps->eFlags = cent->currentState.eFlags;
+  cent->currentState.eType       = ET_PLAYER;
+  ps->eFlags                     = cent->currentState.eFlags;
   cg.predictedPlayerState.eFlags = cent->currentState.eFlags;
-  cg.zoomedBinoc =
-      ((cent->currentState.eFlags & EF_ZOOMING) != 0 && ci->health > 0)
-          ? qtrue
-          : qfalse;
+  cg.zoomedBinoc                 = ((cent->currentState.eFlags & EF_ZOOMING) != 0 && ci->health > 0) ? qtrue : qfalse;
 
   x = cent->currentState.teamNum;
   if (x == PC_MEDIC) {
@@ -367,33 +352,28 @@ void CG_mvTransitionPlayerState(playerState_t *ps) {
     mult = cg.soldierChargeTime[ci->team - 1];
   }
 
-  ps->curWeapHeat = (int)((float)ci->weapHeat * 255.0f / 100.0f);
-  ps->classWeaponTime =
-      (ci->chargeTime < 0)
-          ? -1
-          : cg.time - (int)((float)(mult * ci->chargeTime) / 100.0f);
+  ps->curWeapHeat     = (int)((float)ci->weapHeat * 255.0f / 100.0f);
+  ps->classWeaponTime = (ci->chargeTime < 0) ? -1 : cg.time - (int)((float)(mult * ci->chargeTime) / 100.0f);
 
   // FIXME: moved to pmext
   //	ps->sprintTime = (ci->sprintTime < 0) ? 20000 :
   //(int)((float)ci->sprintTime / 100.0f * 20000.0f);
 
   ps->serverCursorHintVal = (ci->hintTime < 0) ? 0 : ci->hintTime * 255 / 100;
-  ps->serverCursorHint =
-      BG_simpleHintsExpand(ci->cursorHint, ((x == 2) ? ci->hintTime : -1));
+  ps->serverCursorHint    = BG_simpleHintsExpand(ci->cursorHint, ((x == 2) ? ci->hintTime : -1));
 
-  ps->stats[STAT_HEALTH] = ci->health;
+  ps->stats[STAT_HEALTH]       = ci->health;
   ps->stats[STAT_PLAYER_CLASS] = x;
 
   // Grenade ticks
   ps->grenadeTimeLeft = ci->grenadeTimeLeft;
 
   // Safe as we've already pull data before clobbering
-  ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ps->weapon))] = ci->ammo;
-  ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(ps->weapon))] =
-      ci->ammoclip;
+  ps->ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ps->weapon))]     = ci->ammo;
+  ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(ps->weapon))] = ci->ammoclip;
 
   ps->persistant[PERS_SCORE] = ci->score;
-  ps->persistant[PERS_TEAM] = ci->team;
+  ps->persistant[PERS_TEAM]  = ci->team;
 
   VectorCopy(cent->lerpOrigin, ps->origin);
   VectorCopy(cent->lerpAngles, ps->viewangles);
@@ -410,7 +390,7 @@ void CG_mvDraw(cg_window_t *sw) {
   refdef_t refdef;
   float rd_x, rd_y, rd_w, rd_h;
   float b_x, b_y, b_w, b_h;
-  float s = 1.0f;
+  float s         = 1.0f;
   centity_t *cent = &cg_entities[pID];
 
   memset(&refdef, 0, sizeof(refdef_t));
@@ -430,7 +410,7 @@ void CG_mvDraw(cg_window_t *sw) {
 
     if (sw->state == WSTATE_START) {
       if (tmp < sw->targetTime) {
-        s = (float)tmp / (float)sw->targetTime;
+        s     = (float)tmp / (float)sw->targetTime;
         rd_x += rd_w * 0.5f * (1.0f - s);
         rd_y += rd_h * 0.5f * (1.0f - s);
         rd_w *= s;
@@ -440,10 +420,10 @@ void CG_mvDraw(cg_window_t *sw) {
       }
     } else if (sw->state == WSTATE_SHUTDOWN) {
       if (tmp < sw->targetTime) {
-        s = (float)tmp / (float)sw->targetTime;
+        s     = (float)tmp / (float)sw->targetTime;
         rd_x += rd_w * 0.5f * s;
         rd_y += rd_h * 0.5f * s;
-        s = 1.0f - s;
+        s     = 1.0f - s;
         rd_w *= s;
         rd_h *= s;
         if (sw == cg.mvCurrentMainview) {
@@ -457,8 +437,8 @@ void CG_mvDraw(cg_window_t *sw) {
           sw = CG_mvFindNonMainview();
           if (cg.mvTotalClients > 0) {
             cg.mvCurrentMainview->targetTime = 100;
-            cg.mvCurrentMainview->time = trap_Milliseconds();
-            cg.mvCurrentMainview->state = WSTATE_START;
+            cg.mvCurrentMainview->time       = trap_Milliseconds();
+            cg.mvCurrentMainview->state      = WSTATE_START;
           }
 
           // If we swap with a window,
@@ -479,7 +459,7 @@ void CG_mvDraw(cg_window_t *sw) {
         // ahead and shut down the mainview
         // window *sniff*
         if (--cg.mv_cnt <= 0) {
-          cg.mv_cnt = 0;
+          cg.mv_cnt            = 0;
           cg.mvCurrentMainview = NULL;
 
           if (cg.spechelpWindow == SHOW_ON) {
@@ -500,26 +480,24 @@ void CG_mvDraw(cg_window_t *sw) {
 
   CG_AdjustFrom640(&rd_x, &rd_y, &rd_w, &rd_h);
 
-  refdef.x = rd_x;
-  refdef.y = rd_y;
-  refdef.width = rd_w;
+  refdef.x      = rd_x;
+  refdef.y      = rd_y;
+  refdef.width  = rd_w;
   refdef.height = rd_h;
 
-  refdef.fov_x =
-      (cgs.clientinfo[pID].health > 0 &&
-       (/*cent->currentState.weapon == WP_SNIPERRIFLE ||*/ // ARNOUT:
-                                                           // this needs
-                                                           // updating?
-        (cent->currentState.eFlags & EF_ZOOMING)))
-          ? cg_zoomDefaultSniper.value
-      : (cgs.clientinfo[pID].fCrewgun) ? 55
-                                       : cg_fov.integer;
+  refdef.fov_x = (cgs.clientinfo[pID].health > 0 && (/*cent->currentState.weapon == WP_SNIPERRIFLE ||*/ // ARNOUT:
+                                                                                                        // this needs
+                                                                                                        // updating?
+                                                     (cent->currentState.eFlags & EF_ZOOMING)))
+                   ? cg_zoomDefaultSniper.value
+                 : (cgs.clientinfo[pID].fCrewgun) ? 55
+                                                  : cg_fov.integer;
 
-  x = refdef.width / tan(refdef.fov_x / 360 * M_PI);
+  x            = refdef.width / tan(refdef.fov_x / 360 * M_PI);
   refdef.fov_y = atan2(refdef.height, x) * 360 / M_PI;
 
   refdef.rdflags = cg.refdef.rdflags;
-  refdef.time = cg.time;
+  refdef.time    = cg.time;
 
   AnglesToAxis(cent->lerpAngles, refdef.viewaxis);
   VectorCopy(cent->lerpOrigin, refdef.vieworg);
@@ -535,10 +513,8 @@ void CG_mvDraw(cg_window_t *sw) {
     CG_OffsetThirdPersonView();
     AnglesToAxis(cg.refdefViewAngles, refdef.viewaxis);
   } else {
-    cg.renderingThirdPerson = qfalse;
-    refdef.vieworg[2] += (cent->currentState.eFlags & EF_CROUCHING)
-                             ? CROUCH_VIEWHEIGHT
-                             : DEFAULT_VIEWHEIGHT;
+    cg.renderingThirdPerson  = qfalse;
+    refdef.vieworg[2]       += (cent->currentState.eFlags & EF_CROUCHING) ? CROUCH_VIEWHEIGHT : DEFAULT_VIEWHEIGHT;
   }
 
   CG_SetupFrustum();
@@ -546,7 +522,6 @@ void CG_mvDraw(cg_window_t *sw) {
 
   if (!cg.hyperspace) {
     CG_AddPacketEntities();
-    CG_AddMarks();
     CG_AddParticles();
     CG_AddLocalEntities();
 
@@ -561,20 +536,18 @@ void CG_mvDraw(cg_window_t *sw) {
   if (sw == cg.mvCurrentMainview) {
     CG_DrawActive(STEREO_CENTER);
     if (cg.mvCurrentActive == cg.mvCurrentMainview) {
-      trap_S_Respatialize(cg.clientNum, refdef.vieworg, refdef.viewaxis,
-                          qfalse);
+      trap_S_Respatialize(cg.clientNum, refdef.vieworg, refdef.viewaxis, qfalse);
     }
 
-    cg.snap->ps.clientNum = base_pID;
-    cg.refdef_current = &cg.refdef;
+    cg.snap->ps.clientNum   = base_pID;
+    cg.refdef_current       = &cg.refdef;
     cg.renderingThirdPerson = qfalse;
     return;
   }
 
   memcpy(refdef.areamask, cg.snap->areamask, sizeof(refdef.areamask));
   refdef.time = cg.time;
-  trap_SetClientLerpOrigin(refdef.vieworg[0], refdef.vieworg[1],
-                           refdef.vieworg[2]);
+  trap_SetClientLerpOrigin(refdef.vieworg[0], refdef.vieworg[1], refdef.vieworg[2]);
 
   trap_R_RenderScene(&refdef);
 
@@ -586,8 +559,7 @@ void CG_mvDraw(cg_window_t *sw) {
 	cg.refdef_current = &cg.refdef;
 #endif
 
-  CG_mvWindowOverlay(pID, b_x, b_y, b_w, b_h, s, sw->state,
-                     (sw == cg.mvCurrentActive) ? qtrue : qfalse);
+  CG_mvWindowOverlay(pID, b_x, b_y, b_w, b_h, s, sw->state, (sw == cg.mvCurrentActive) ? qtrue : qfalse);
   if (sw == cg.mvCurrentActive) {
     trap_S_Respatialize(cg.clientNum, refdef.vieworg, refdef.viewaxis, qfalse);
   }
@@ -598,14 +570,13 @@ void CG_mvDraw(cg_window_t *sw) {
 ////////////////////////////////////////////
 // Simpler overlay for windows
 //
-void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h,
-                        float s, int wState, qboolean fSelected) {
+void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h, float s, int wState, qboolean fSelected) {
   int x;
   rectDef_t rect;
   float fw = 8.0f, fh = 8.0f;
-  centity_t *cent = &cg_entities[pID];
-  clientInfo_t *ci = &cgs.clientinfo[pID];
-  const char *p_class = "?";
+  centity_t *cent              = &cg_entities[pID];
+  clientInfo_t *ci             = &cgs.clientinfo[pID];
+  const char *p_class          = "?";
   const vec4_t *noSelectBorder = &colorDkGrey;
 
   // Overlays for zoomed views
@@ -621,73 +592,67 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h,
   // Text info
   fw *= s;
   fh *= s;
-  x = cent->currentState.teamNum;
+  x   = cent->currentState.teamNum;
   if (x == PC_SOLDIER) {
-    p_class = "^1S";
+    p_class        = "^1S";
     noSelectBorder = &colorMdRed;
   } else if (x == PC_MEDIC) {
-    p_class = "^7M";
+    p_class        = "^7M";
     noSelectBorder = &colorMdGrey;
   } else if (x == PC_ENGINEER) {
-    p_class = "^5E";
+    p_class        = "^5E";
     noSelectBorder = &colorMdBlue;
   } else if (x == PC_FIELDOPS) {
-    p_class = "^2F";
+    p_class        = "^2F";
     noSelectBorder = &colorMdGreen;
   } else if (x == PC_COVERTOPS) {
-    p_class = "^3C";
+    p_class        = "^3C";
     noSelectBorder = &colorMdYellow;
   }
 
-  CG_DrawStringExt(b_x + 1, b_y + b_h - (fh * 2 + 1 + 2), ci->name, colorWhite,
-                   qfalse, qtrue, fw, fh, 0);
-  CG_DrawStringExt(b_x + 1, b_y + b_h - (fh + 2),
-                   va("%s^7%d", p_class, ci->health), colorWhite, qfalse, qtrue,
-                   fw, fh, 0);
+  CG_DrawStringExt(b_x + 1, b_y + b_h - (fh * 2 + 1 + 2), ci->name, colorWhite, qfalse, qtrue, fw, fh, 0);
+  CG_DrawStringExt(b_x + 1, b_y + b_h - (fh + 2), va("%s^7%d", p_class, ci->health), colorWhite, qfalse, qtrue, fw, fh,
+                   0);
 
   p_class = va("%d^1/^7%d", ci->ammoclip, ci->ammo);
-  x = CG_DrawStrlen(p_class);
-  CG_DrawStringExt(b_x + b_w - (x * fw + 1), b_y + b_h - (fh + 2), p_class,
-                   colorWhite, qfalse, qtrue, fw, fh, 0);
+  x       = CG_DrawStrlen(p_class);
+  CG_DrawStringExt(b_x + b_w - (x * fw + 1), b_y + b_h - (fh + 2), p_class, colorWhite, qfalse, qtrue, fw, fh, 0);
 
   // Weapon icon
-  rect.x = b_x + b_w - (50 + 1);
-  rect.y = b_y + b_h - (25 + fh + 1 + 2);
-  rect.w = 50;
-  rect.h = 25;
+  rect.x                                  = b_x + b_w - (50 + 1);
+  rect.y                                  = b_y + b_h - (25 + fh + 1 + 2);
+  rect.w                                  = 50;
+  rect.h                                  = 25;
   cg.predictedPlayerState.grenadeTimeLeft = 0;
-  cg.predictedPlayerState.weapon = cent->currentState.weapon;
-  CG_DrawPlayerWeaponIcon(
-      &rect, (ci->weaponState > WSTATE_IDLE) ? qtrue : qfalse, ITEM_ALIGN_RIGHT,
-      ((ci->weaponState == WSTATE_SWITCH) ? &colorWhite
-       : (ci->weaponState == WSTATE_FIRE) ? &colorRed
-                                          : &colorYellow));
+  cg.predictedPlayerState.weapon          = cent->currentState.weapon;
+  CG_DrawPlayerWeaponIcon(&rect, (ci->weaponState > WSTATE_IDLE) ? qtrue : qfalse, ITEM_ALIGN_RIGHT,
+                          ((ci->weaponState == WSTATE_SWITCH) ? &colorWhite
+                           : (ci->weaponState == WSTATE_FIRE) ? &colorRed
+                                                              : &colorYellow));
 
   // Sprint charge info
   if (ci->sprintTime >= 0) {
-    p_class = va("^2S^7%d%%", ci->sprintTime);
-    rect.y -= (fh + 1);
-    x = CG_DrawStrlen(p_class);
-    CG_DrawStringExt(b_x + b_w - (x * fw + 1), rect.y, p_class, colorWhite,
-                     qfalse, qtrue, fw, fh, 0);
+    p_class  = va("^2S^7%d%%", ci->sprintTime);
+    rect.y  -= (fh + 1);
+    x        = CG_DrawStrlen(p_class);
+    CG_DrawStringExt(b_x + b_w - (x * fw + 1), rect.y, p_class, colorWhite, qfalse, qtrue, fw, fh, 0);
   }
 
   // Weapon charge info
   if (ci->chargeTime >= 0) {
-    p_class = va("^1C^7%d%%", ci->chargeTime);
-    rect.y -= (fh + 1);
-    x = CG_DrawStrlen(p_class);
-    CG_DrawStringExt(b_x + b_w - (x * fw + 1), rect.y, p_class, colorWhite,
-                     qfalse, qtrue, fw, fh, 0);
+    p_class  = va("^1C^7%d%%", ci->chargeTime);
+    rect.y  -= (fh + 1);
+    x        = CG_DrawStrlen(p_class);
+    CG_DrawStringExt(b_x + b_w - (x * fw + 1), rect.y, p_class, colorWhite, qfalse, qtrue, fw, fh, 0);
   }
 
   // Cursorhint work
   if (ci->hintTime >= 0) {
-    p_class = va("^3W:^7%d%%", ci->hintTime);
-    rect.y -= (fh + 1);
-    x = CG_DrawStrlen(p_class);
-    CG_DrawStringExt(b_x + (b_w - (x * (fw - 1))) / 2, b_y + b_h - (fh + 2),
-                     p_class, colorWhite, qfalse, qtrue, fw - 1, fh - 1, 0);
+    p_class  = va("^3W:^7%d%%", ci->hintTime);
+    rect.y  -= (fh + 1);
+    x        = CG_DrawStrlen(p_class);
+    CG_DrawStringExt(b_x + (b_w - (x * (fw - 1))) / 2, b_y + b_h - (fh + 2), p_class, colorWhite, qfalse, qtrue, fw - 1,
+                     fh - 1, 0);
   }
 
   // Finally, the window border
@@ -706,13 +671,10 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h,
       borderColor[1] *= scale;
       borderColor[2] *= scale;
     } else {
-      scale -= 1.0;
-      borderColor[0] =
-          (borderColor[0] + scale > 1.0) ? 1.0 : borderColor[0] + scale;
-      borderColor[1] =
-          (borderColor[1] + scale > 1.0) ? 1.0 : borderColor[1] + scale;
-      borderColor[2] =
-          (borderColor[2] + scale > 1.0) ? 1.0 : borderColor[2] + scale;
+      scale          -= 1.0;
+      borderColor[0]  = (borderColor[0] + scale > 1.0) ? 1.0 : borderColor[0] + scale;
+      borderColor[1]  = (borderColor[1] + scale > 1.0) ? 1.0 : borderColor[1] + scale;
+      borderColor[2]  = (borderColor[2] + scale > 1.0) ? 1.0 : borderColor[2] + scale;
     }
     CG_DrawRect(b_x - 1, b_y - 1, b_w + 2, b_h + 2, 2, borderColor);
   } else {
@@ -727,37 +689,31 @@ void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h,
 ////////////////////////////////////////////////////
 
 const char *strClassHighlights[] = {
-    S_COLOR_RED,    S_COLOR_MDRED,   // Soldier
-    S_COLOR_WHITE,  S_COLOR_MDGREY,  // Medic
-    S_COLOR_BLUE,   S_COLOR_MDBLUE,  // Engineer
-    S_COLOR_GREEN,  S_COLOR_MDGREEN, // Lt.
-    S_COLOR_YELLOW, S_COLOR_MDYELLOW // CovertOps
+  S_COLOR_RED,    S_COLOR_MDRED,   // Soldier
+  S_COLOR_WHITE,  S_COLOR_MDGREY,  // Medic
+  S_COLOR_BLUE,   S_COLOR_MDBLUE,  // Engineer
+  S_COLOR_GREEN,  S_COLOR_MDGREEN, // Lt.
+  S_COLOR_YELLOW, S_COLOR_MDYELLOW // CovertOps
 };
 
 // Update a particular client's info
 void CG_mvOverlayClientUpdate(int pID, int index) {
   cg_window_t *w;
 
-  cg.mvOverlay[index].pID = pID;
+  cg.mvOverlay[index].pID     = pID;
   cg.mvOverlay[index].classID = cg_entities[pID].currentState.teamNum;
-  w = CG_mvClientLocate(pID);
-  cg.mvOverlay[index].w = w;
+  w                           = CG_mvClientLocate(pID);
+  cg.mvOverlay[index].w       = w;
   if (w != nullptr) {
     const char *mvClientInfoStr =
-        va("%s%s%2d", strClassHighlights[cg.mvOverlay[index].classID * 2],
-           (w == cg.mvCurrentMainview) ? "*" : "", pID);
-    Q_strncpyz(cg.mvOverlay[index].info, mvClientInfoStr,
-               sizeof(cg.mvOverlay[index].info));
+      va("%s%s%2d", strClassHighlights[cg.mvOverlay[index].classID * 2], (w == cg.mvCurrentMainview) ? "*" : "", pID);
+    Q_strncpyz(cg.mvOverlay[index].info, mvClientInfoStr, sizeof(cg.mvOverlay[index].info));
   } else {
-    const char *mvClientInfoStr =
-        va("%s%2d", strClassHighlights[(cg.mvOverlay[index].classID * 2) + 1],
-           pID);
-    Q_strncpyz(cg.mvOverlay[index].info, mvClientInfoStr,
-               sizeof(cg.mvOverlay[index].info));
+    const char *mvClientInfoStr = va("%s%2d", strClassHighlights[(cg.mvOverlay[index].classID * 2) + 1], pID);
+    Q_strncpyz(cg.mvOverlay[index].info, mvClientInfoStr, sizeof(cg.mvOverlay[index].info));
   }
 
-  cg.mvOverlay[index].width =
-      CG_DrawStrlen(cg.mvOverlay[index].info) * MVINFO_TEXTSIZE;
+  cg.mvOverlay[index].width = CG_DrawStrlen(cg.mvOverlay[index].info) * MVINFO_TEXTSIZE;
 }
 
 // Update info on all clients received for display/cursor interaction
@@ -798,7 +754,7 @@ void CG_mvOverlayDisplay(void) {
   for (j = TEAM_AXIS; j <= TEAM_ALLIES; j++) {
     cg.mvTotalTeam[j] = 0;
     for (i = 0; i < cg.mvTotalClients; i++) {
-      o = &cg.mvOverlay[i];
+      o   = &cg.mvOverlay[i];
       pID = o->pID;
 
       if (cgs.clientinfo[pID].team != j) {
@@ -806,11 +762,10 @@ void CG_mvOverlayDisplay(void) {
       }
 
       if (cg.mvTotalTeam[j] == 0) {
-        const char *flag = (j == TEAM_AXIS) ? "ui/assets/ger_flag.tga"
-                                            : "ui/assets/usa_flag.tga";
-        y += 2 * (MVINFO_TEXTSIZE + 1);
-        CG_DrawPic(MVINFO_RIGHT - (2 * MVINFO_TEXTSIZE), y, 2 * MVINFO_TEXTSIZE,
-                   MVINFO_TEXTSIZE, trap_R_RegisterShaderNoMip(flag));
+        const char *flag  = (j == TEAM_AXIS) ? "ui/assets/ger_flag.tga" : "ui/assets/usa_flag.tga";
+        y                += 2 * (MVINFO_TEXTSIZE + 1);
+        CG_DrawPic(MVINFO_RIGHT - (2 * MVINFO_TEXTSIZE), y, 2 * MVINFO_TEXTSIZE, MVINFO_TEXTSIZE,
+                   trap_R_RegisterShaderNoMip(flag));
       }
 
       // Update team list info for mouse detection
@@ -822,7 +777,7 @@ void CG_mvOverlayDisplay(void) {
         CG_mvOverlayClientUpdate(o->pID, i);
       }
 
-      x = MVINFO_RIGHT - o->width;
+      x  = MVINFO_RIGHT - o->width;
       y += MVINFO_TEXTSIZE + 1;
 
       if (o->fActive) {
@@ -830,21 +785,16 @@ void CG_mvOverlayDisplay(void) {
 
         // Draw name info only if we're hovering
         // over the text element
-        if (!(cg.mvCurrentActive->mvInfo & MV_SELECTED) ||
-            cg.mvCurrentActive == cg.mvCurrentMainview) {
-          int w =
-              CG_DrawStrlen(cgs.clientinfo[pID].name) * (MVINFO_TEXTSIZE - 1);
+        if (!(cg.mvCurrentActive->mvInfo & MV_SELECTED) || cg.mvCurrentActive == cg.mvCurrentMainview) {
+          int w = CG_DrawStrlen(cgs.clientinfo[pID].name) * (MVINFO_TEXTSIZE - 1);
 
-          CG_FillRect(x - 1 - w - 6, y + 1, w + 2, MVINFO_TEXTSIZE - 1 + 2,
-                      colorMdGrey);
-          CG_DrawStringExt(x - w - 6, y + 1, cgs.clientinfo[pID].name,
-                           colorYellow, qtrue, qtrue, MVINFO_TEXTSIZE - 1,
+          CG_FillRect(x - 1 - w - 6, y + 1, w + 2, MVINFO_TEXTSIZE - 1 + 2, colorMdGrey);
+          CG_DrawStringExt(x - w - 6, y + 1, cgs.clientinfo[pID].name, colorYellow, qtrue, qtrue, MVINFO_TEXTSIZE - 1,
                            MVINFO_TEXTSIZE - 1, 0);
         }
       }
 
-      CG_DrawStringExt(x, y, o->info, colorWhite, qfalse, qtrue,
-                       MVINFO_TEXTSIZE, MVINFO_TEXTSIZE, 0);
+      CG_DrawStringExt(x, y, o->info, colorWhite, qfalse, qtrue, MVINFO_TEXTSIZE, MVINFO_TEXTSIZE, 0);
     }
   }
 }
@@ -864,8 +814,7 @@ void CG_mvZoomSniper(float x, float y, float w, float h) {
 
   // center
   if (cgs.media.reticleShaderSimple) {
-    CG_DrawPic(x + 80.0f * ws, y, 480.0f * ws, 480.0f * hs,
-               cgs.media.reticleShaderSimple);
+    CG_DrawPic(x + 80.0f * ws, y, 480.0f * ws, 480.0f * hs, cgs.media.reticleShaderSimple);
   }
 
   // hairs

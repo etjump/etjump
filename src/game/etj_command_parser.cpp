@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
-#include <stdexcept>
 #include "etj_command_parser.h"
+
+#include <stdexcept>
 
 #include "etj_string_utilities.h"
 
-const ETJump::CommandParser::OptionDefinition *
-ETJump::CommandParser::getOptionOrNull() {
+const ETJump::CommandParser::OptionDefinition *ETJump::CommandParser::getOptionOrNull() {
   if (StringUtils::startsWith(*_current, "--")) {
     const auto optionName = (*_current).substr(2);
 
@@ -48,8 +48,7 @@ ETJump::CommandParser::getOptionOrNull() {
   return nullptr;
 }
 
-void ETJump::CommandParser::expectBoolean(
-    const OptionDefinition *optionDefinition) {
+void ETJump::CommandParser::expectBoolean(const OptionDefinition *optionDefinition) {
   Option option(optionDefinition->name);
 
   option.boolean = true;
@@ -57,35 +56,30 @@ void ETJump::CommandParser::expectBoolean(
   _cmd.options[option.name] = option;
 }
 
-void ETJump::CommandParser::expectToken(
-    const OptionDefinition *optionDefinition) {
+void ETJump::CommandParser::expectToken(const OptionDefinition *optionDefinition) {
   ++_current;
 
   if (_current == end(_args)) {
-    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`",
-                                              optionDefinition->name));
+    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`", optionDefinition->name));
     return;
   }
 
-  _cmd.options[optionDefinition->name] =
-      createTokenOption(optionDefinition, *_current);
+  _cmd.options[optionDefinition->name] = createTokenOption(optionDefinition, *_current);
 }
 
-ETJump::CommandParser::Option ETJump::CommandParser::createTokenOption(
-    const OptionDefinition *optionDefinition, const std::string &text) {
+ETJump::CommandParser::Option ETJump::CommandParser::createTokenOption(const OptionDefinition *optionDefinition,
+                                                                       const std::string &text) {
   Option option(optionDefinition->name);
   option.text = text;
 
   return option;
 }
 
-void ETJump::CommandParser::expectMultipleTokens(
-    const OptionDefinition *optionDefinition) {
+void ETJump::CommandParser::expectMultipleTokens(const OptionDefinition *optionDefinition) {
   ++_current;
 
   if (_current == end(_args)) {
-    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`",
-                                              optionDefinition->name));
+    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`", optionDefinition->name));
     return;
   }
 
@@ -104,8 +98,7 @@ void ETJump::CommandParser::expectMultipleTokens(
   }
 
   if (tokens.empty()) {
-    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`",
-                                              optionDefinition->name));
+    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`", optionDefinition->name));
     return;
   }
 
@@ -114,98 +107,84 @@ void ETJump::CommandParser::expectMultipleTokens(
   _cmd.options[optionDefinition->name] = std::move(option);
 }
 
-void ETJump::CommandParser::expectInteger(
-    const OptionDefinition *optionDefinition) {
+void ETJump::CommandParser::expectInteger(const OptionDefinition *optionDefinition) {
   ++_current;
 
   if (_current == end(_args)) {
-    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`",
-                                              optionDefinition->name));
+    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`", optionDefinition->name));
     return;
   }
 
-  _cmd.options[optionDefinition->name] =
-      createIntegerOption(optionDefinition, *_current);
+  _cmd.options[optionDefinition->name] = createIntegerOption(optionDefinition, *_current);
 }
 
-ETJump::CommandParser::Option ETJump::CommandParser::createIntegerOption(
-    const OptionDefinition *optionDefinition, const std::string &text) {
+ETJump::CommandParser::Option ETJump::CommandParser::createIntegerOption(const OptionDefinition *optionDefinition,
+                                                                         const std::string &text) {
   Option option(optionDefinition->name);
   option.text = text;
 
   try {
     option.integer = std::stoi(text);
   } catch (const std::invalid_argument &) {
-    _cmd.errors.push_back(StringUtils::format(
-        "`%s` is not an integer. Expected an integer for parameter `%s`", text,
-        option.name));
+    _cmd.errors.push_back(
+      StringUtils::format("`%s` is not an integer. Expected an integer for parameter `%s`", text, option.name));
   } catch (const std::out_of_range &) {
-    _cmd.errors.push_back(StringUtils::format(
-        "`%s` is out of range. Expected an integer for parameter `%s`", text,
-        option.name));
+    _cmd.errors.push_back(
+      StringUtils::format("`%s` is out of range. Expected an integer for parameter `%s`", text, option.name));
   }
 
   return option;
 }
 
-void ETJump::CommandParser::expectDecimal(
-    const OptionDefinition *optionDefinition) {
+void ETJump::CommandParser::expectDecimal(const OptionDefinition *optionDefinition) {
   ++_current;
 
   if (_current == end(_args)) {
-    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`",
-                                              optionDefinition->name));
+    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`", optionDefinition->name));
     return;
   }
 
-  _cmd.options[optionDefinition->name] =
-      createDecimalOption(optionDefinition, *_current);
+  _cmd.options[optionDefinition->name] = createDecimalOption(optionDefinition, *_current);
 }
 
-ETJump::CommandParser::Option ETJump::CommandParser::createDecimalOption(
-    const OptionDefinition *optionDefinition, const std::string &text) {
+ETJump::CommandParser::Option ETJump::CommandParser::createDecimalOption(const OptionDefinition *optionDefinition,
+                                                                         const std::string &text) {
   Option option(optionDefinition->name);
   option.text = text;
 
   try {
     option.decimal = std::stod(text);
   } catch (const std::invalid_argument &) {
-    _cmd.errors.push_back(StringUtils::format(
-        "`%s` is not a decimal. Expected a decimal for parameter `%s`", text,
-        option.name));
+    _cmd.errors.push_back(
+      StringUtils::format("`%s` is not a decimal. Expected a decimal for parameter `%s`", text, option.name));
   } catch (const std::out_of_range &) {
-    _cmd.errors.push_back(StringUtils::format(
-        "`%s` is out of range. Expected a decimal for parameter `%s`", text,
-        option.name));
+    _cmd.errors.push_back(
+      StringUtils::format("`%s` is out of range. Expected a decimal for parameter `%s`", text, option.name));
   }
 
   return option;
 }
 
-void ETJump::CommandParser::expectDate(
-    const OptionDefinition *optionDefinition) {
+void ETJump::CommandParser::expectDate(const OptionDefinition *optionDefinition) {
   ++_current;
 
   if (_current == end(_args)) {
-    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`",
-                                              optionDefinition->name));
+    _cmd.errors.push_back(StringUtils::format("Missing parameter for `%s`", optionDefinition->name));
     return;
   }
 
-  _cmd.options[optionDefinition->name] =
-      createDateOption(optionDefinition, *_current);
+  _cmd.options[optionDefinition->name] = createDateOption(optionDefinition, *_current);
 }
 
-ETJump::CommandParser::Option ETJump::CommandParser::createDateOption(
-    const OptionDefinition *optionDefinition, const std::string &text) {
+ETJump::CommandParser::Option ETJump::CommandParser::createDateOption(const OptionDefinition *optionDefinition,
+                                                                      const std::string &text) {
   Option option(optionDefinition->name);
   option.text = text;
 
   try {
     option.date = TimeUtils::Date::fromString(text);
   } catch (const std::invalid_argument &) {
-    _cmd.errors.push_back(StringUtils::format(
-        "`%s` does not match the expected format of `YYYY-MM-DD`", text));
+    _cmd.errors.push_back(StringUtils::format("`%s` does not match the expected format of `YYYY-MM-DD`", text));
   }
 
   return option;
@@ -272,22 +251,18 @@ void ETJump::CommandParser::processPositionalArguments() {
           case OptionDefinition::Type::Boolean:
             continue;
           case OptionDefinition::Type::Token:
-            _cmd.options[optDef.second.name] =
-                createTokenOption(&optDef.second, _cmd.extraArgs[pos]);
+            _cmd.options[optDef.second.name] = createTokenOption(&optDef.second, _cmd.extraArgs[pos]);
             break;
           case OptionDefinition::Type::MultiToken:
             continue;
           case OptionDefinition::Type::Integer:
-            _cmd.options[optDef.second.name] =
-                createIntegerOption(&optDef.second, _cmd.extraArgs[pos]);
+            _cmd.options[optDef.second.name] = createIntegerOption(&optDef.second, _cmd.extraArgs[pos]);
             break;
           case OptionDefinition::Type::Decimal:
-            _cmd.options[optDef.second.name] =
-                createDecimalOption(&optDef.second, _cmd.extraArgs[pos]);
+            _cmd.options[optDef.second.name] = createDecimalOption(&optDef.second, _cmd.extraArgs[pos]);
             break;
           case OptionDefinition::Type::Date:
-            _cmd.options[optDef.second.name] =
-                createDateOption(&optDef.second, _cmd.extraArgs[pos]);
+            _cmd.options[optDef.second.name] = createDateOption(&optDef.second, _cmd.extraArgs[pos]);
             break;
         }
       }
@@ -298,8 +273,7 @@ void ETJump::CommandParser::processPositionalArguments() {
 void ETJump::CommandParser::validateCommand() {
   for (const auto &option : _def.options) {
     if (option.second.required && _cmd.options.count(option.first) == 0) {
-      _cmd.errors.push_back(StringUtils::format(
-          "Required option `%s` was not specified.", option.first));
+      _cmd.errors.push_back(StringUtils::format("Required option `%s` was not specified.", option.first));
     }
   }
 }
@@ -330,32 +304,27 @@ ETJump::CommandParser::Command ETJump::CommandParser::parse() {
 
     return _cmd;
   } catch (const std::runtime_error &e) {
-    _cmd.errors.push_back(
-        StringUtils::format("Unknown runtime error: `%s`", e.what()));
+    _cmd.errors.push_back(StringUtils::format("Unknown runtime error: `%s`", e.what()));
     return _cmd;
   }
 }
-std::string ETJump::CommandParser::formatCommandHelpString(
-    const std::string &name, const std::string &shortname,
-    OptionDefinition::Type optionType, const std::string &description,
-    bool required, std::optional<int> position) {
+
+std::string ETJump::CommandParser::formatCommandHelpString(const std::string &name, const std::string &shortname,
+                                                           OptionDefinition::Type optionType,
+                                                           const std::string &description, bool required,
+                                                           std::optional<int> position) {
   // console line width varies a bit depending on engine and resolution,
   // but this should be fine for most scenarios
   const size_t maxLineLen = 120;
-  const size_t flagPad = 23 - shortname.length();
+  const size_t flagPad    = 23 - shortname.length();
 
   const std::string &opTypeStr = OptionDefinition::typeToString(optionType);
-  const std::string &positionStr = StringUtils::format(
-      "%s", position.has_value()
-                ? StringUtils::format(" (pos: %d) ", position.value())
-                : "");
-  const std::string &requiredStr =
-      StringUtils::format("%s", required ? " [required] " : "");
+  const std::string &positionStr =
+    StringUtils::format("%s", position.has_value() ? StringUtils::format(" (pos: %d) ", position.value()) : "");
+  const std::string &requiredStr = StringUtils::format("%s", required ? " [required] " : "");
 
-  const std::string &flagStr =
-      StringUtils::format("    ^7-%s, --%-*s", shortname, flagPad, name);
-  const std::string &descStr = StringUtils::format(
-      "^z(%s) ^7%s%s%s", opTypeStr, description, requiredStr, positionStr);
+  const std::string &flagStr = StringUtils::format("    ^7-%s, --%-*s", shortname, flagPad, name);
+  const std::string &descStr = StringUtils::format("^z(%s) ^7%s%s%s", opTypeStr, description, requiredStr, positionStr);
 
   std::string combinedStr = flagStr + descStr;
 
@@ -365,10 +334,7 @@ std::string ETJump::CommandParser::formatCommandHelpString(
     const size_t lastWhiteSpace = combinedStr.find_last_of(' ', maxLineLen);
 
     if (lastWhiteSpace != std::string::npos) {
-      combinedStr.replace(
-          lastWhiteSpace, 1,
-          '\n' +
-              std::string(StringUtils::sanitize(flagStr, false).length(), ' '));
+      combinedStr.replace(lastWhiteSpace, 1, '\n' + std::string(StringUtils::sanitize(flagStr, false).length(), ' '));
     }
   }
 

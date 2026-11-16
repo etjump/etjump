@@ -1,3 +1,91 @@
+# ETJump 3.7.0
+
+## Added
+* `etj_lerpPmove` cvar to interpolate between physics frames when `pmove_fixed 1` is set [#1994](https://github.com/etjump/etjump/pull/1994)
+  * this should smooth out `pmove_fixed 1` gameplay, and bring the feeling closer to `pmove_fixed 0`
+  * physics are not interpolated, only the rendered view
+* historical timerun record tracking [#2028](https://github.com/etjump/etjump/pull/2028)
+  * every PB improvement is now preserved in the timerun database, rather than just the latest record
+  * record progression can be viewed with `record-history` command
+* `remove-record`, `restore-record` and `list-removed-records` commands for timerun records [#1997](https://github.com/etjump/etjump/pull/1997)
+  * removed records are archived in the timerun database
+  * anyone can remove/restore their own records, admins with `T` flag can remove/restore records from other players
+  * records removed by admins can only be restored by admins
+* best segment tracking for timeruns [#2038](https://github.com/etjump/etjump/pull/2038)
+  * every completion records its best segments, both personal and server-wide
+  * gold splits are shown on the checkpoint timer, configurable with `etj_checkpointsShowGold`
+  * best segments can be viewed with `best-segments` and `best-segments-history`
+* `remove-segment`, `restore-segment` and `list-removed-segments` commands for timerun best segments [#2038](https://github.com/etjump/etjump/pull/2038)
+  * removed segments are archived in the timerun database
+  * anyone can remove/restore their own segments, admins with `T` flag can remove/restore segments from other players
+  * segments removed by admins can only be restored by admins
+* `target_wskey_overrides` entity to override effective worldspawn keys under specific circumstances [#2015](https://github.com/etjump/etjump/pull/2015)
+* client-side prediction for portal gun portal spawning [#2025](https://github.com/etjump/etjump/pull/2025)
+  * portals appear immediately when fired, rather than after a round trip to the server
+  * requires portal prediction to be enabled via `g_portalPredict` or `portalpredict` worldspawn key
+* new supported values for `nonoclip/noprone/nosave` worldspawn keys [#2015](https://github.com/etjump/etjump/pull/2015)
+  * **2** - always allow, regardless of area brushes
+  * **3** - never allow, regardless of area brushes
+* left/right arrow key & mouse wheel support for adjusting slider values [#2033](https://github.com/etjump/etjump/pull/2033)
+* `etj_drawYaw` to display an indicator when turning view left/right [#1390](https://github.com/etjump/etjump/pull/1390)
+* `etj_drawFallDamageDetector` to display fall damage the player would take if falling/jumping to the aimed surface [#2016](https://github.com/etjump/etjump/pull/2016)
+* `editentity` script action to modify an entity without a `scriptname` via mapscripting [#1972](https://github.com/etjump/etjump/pull/1972)
+* bundled mapscripts for `dreamwork` and `the_biome_expedition` [#1992](https://github.com/etjump/etjump/pull/1992) [#2008](https://github.com/etjump/etjump/pull/2008)
+
+## Changed
+* numerous tweaks to default cvar values to improve the out-of-box experience [#1990](https://github.com/etjump/etjump/pull/1990)
+
+## Deprecated
+* `etj_smoothAngles` is deprecated in favor of `etj_lerpPmove`, will be removed in a future version
+
+## Fixed
+* error messages should now correctly display on Windows instead of crashing the game to desktop [#2022](https://github.com/etjump/etjump/pull/2022)
+* autoload slots were not correctly invalidated on timerun start [#2037](https://github.com/etjump/etjump/pull/2037)
+* fireteam chat could be visible to players who were not in the senders fireteam [#2014](https://github.com/etjump/etjump/pull/2014)
+* potential crash on timerun completion if active seasons changed during a map [#1996](https://github.com/etjump/etjump/pull/1996)
+* crash if trickjump line file writing failed for some reason [#2003](https://github.com/etjump/etjump/pull/2003)
+* potential crash when issuing timerun season or custom vote management commands from server console [#2009](https://github.com/etjump/etjump/pull/2009)
+* timerun start or `target_init` could force a non-existing weapon for the player [#2017](https://github.com/etjump/etjump/pull/2017)
+* rankings were calculated with different tie-break rules than records [#2023](https://github.com/etjump/etjump/pull/2023)
+* crash if fetching user data from database failed [#2004](https://github.com/etjump/etjump/pull/2004)
+* HUD calculations broke inside `noprone` brushes when cheats were enabled [#2013](https://github.com/etjump/etjump/pull/2013)
+* `record-details` help text was missing an angle bracket on `map name` field [#2027](https://github.com/etjump/etjump/pull/2027)
+* potential crash when viewing particle effects or trails with extreme lag [#2012](https://github.com/etjump/etjump/pull/2012)
+* flamethrower nozzle was flickering on high speeds [#2011](https://github.com/etjump/etjump/pull/2011)
+* rain particles were calculating the blue color channel for top left vertex incorrectly [#2019](https://github.com/etjump/etjump/pull/2019)
+* debris spawned by `spawnrubble` script command was not rotating correctly [#2019](https://github.com/etjump/etjump/pull/2019)
+* unexpected behavior could occur with timerun events if the database failed to initialize [#2029](https://github.com/etjump/etjump/pull/2029) [#2032](https://github.com/etjump/etjump/pull/2032)
+* sped up timerun database migration check that ran on every map load [#2024](https://github.com/etjump/etjump/pull/2024)
+* potential crash on `ENTER/KP_ENTER` when a dropdown menu was open with no highlighted item [#2034](https://github.com/etjump/etjump/pull/2034)
+* potential crash when trying to focus next item in a menu with keyboard in some scenarios [#2000](https://github.com/etjump/etjump/pull/2000)
+* potential crash when trying to iterate menu item with no options [#1999](https://github.com/etjump/etjump/pull/1999)
+
+# ETJump 3.6.2
+
+## Changed
+* limited prints about failed timerun start conditions to one print per **200ms**, to avoid server command overflow with high ping [#1986](https://github.com/etjump/etjump/pull/1986)
+
+## Fixed
+* some HUD elements displayed incorrectly when traveling through nonsolid players [#1982](https://github.com/etjump/etjump/pull/1982)
+* `etj_jumpSpeedsX` shifted extra columns incorrectly to the right [#1980](https://github.com/etjump/etjump/pull/1980)
+* packet loss broke some HUD elements [#1985](https://github.com/etjump/etjump/pull/1985)
+* accel meter/advanced accel coloring flickered when FPS dropped below 125 [#1988](https://github.com/etjump/etjump/pull/1988)
+* `previous/next` actions in fireteam `propose/kick/warn` menus executed keybinds while pressing the corresponding buttons [#1981](https://github.com/etjump/etjump/pull/1981)
+* trickjump lines were not rendering [#1987](https://github.com/etjump/etjump/pull/1987)
+* `etj_speedColorUsesAccel 2` calculated color with wrong accel values for 1 frame after noclip ended [#1989](https://github.com/etjump/etjump/pull/1989)
+* crosshair names were not drawing through `func_static_client` entities that were in an off-state [#1983](https://github.com/etjump/etjump/pull/1983)
+
+# ETJump 3.6.1
+
+## Changed
+* unregistered upmove values in jump speeds list now show `-` as placeholder string [#1975](https://github.com/etjump/etjump/pull/1975)
+
+## Fixed
+* crash when switching spectated player while previous player was holding jump, and jump speed list was enabled [#1971](https://github.com/etjump/etjump/pull/1971)
+* latest jump speed showed **0** as upmove value if turning on jump speeds list mid-session [#1975](https://github.com/etjump/etjump/pull/1975)
+* `join server` button in quick connect server info menu was not working [#1974](https://github.com/etjump/etjump/pull/1974)
+* `etj_speedColorUsesAccel 2` broke on high frame rates with sub-optimal network settings [#1978](github.com/etjump/etjump/pull/1978)
+
 # ETJump 3.6.0
 
 ## Added
@@ -5,12 +93,31 @@
 * `etj_ccMenu_showEmptyPages` cvar to toggle showing empty pages in custom command menu (default **0**) [#1918](https://github.com/etjump/etjump/pull/1918)
 * `etj_ccMenu_browseWithOpen` cvar to make `openCustomCommandMenu` command browse to next page when custom command menu is open [#1917](https://github.com/etjump/etjump/pull/1917)
 * left/right arrow navigation for previous/next page in custom command menu, respectively [#1917](https://github.com/etjump/etjump/pull/1917)
+* server info button in quick connect menu [#1933](https://github.com/etjump/etjump/pull/1933)
+* new portal trail shaders [#1928](https://github.com/etjump/etjump/pull/1928)
+* `etj_snapHUDCrop` cvar to crop snaphud drawing against the current strafe direction [#1952](https://github.com/etjump/etjump/pull/1952)
+  * **1** - crop when moving, **2** - crop always
+  * `etj_snapHUDCropOffsets <center> <edge>` offsets the cropping points (**0 - 320**, two values required)
+* `record-details` command to view detailed information about a timerun record [#1927](https://github.com/etjump/etjump/pull/1927)
 * `etj_jumpSpeedsMaxJumps` cvar to set maximum number of jumps in jump speeds list (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_jumpSpeedsMaxJumpsPerColumn` cvar to set maximum number of jumps in jump speeds list column (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
 * `etj_jumpSpeedsMaxJumpsPerRow` cvar to set maximum number of jumps in jump speeds list row (**1-100**) [#1922](https://github.com/etjump/etjump/pull/1922)
+* `etj_jumpSpeedsShowUpmove` cvar to display full upmove values next to jump speeds [#1959](https://github.com/etjump/etjump/pull/1959)
 * `etj_drawCHS3` + related cvars - same as CHS2, just a different set of data [#1924](https://github.com/etjump/etjump/pull/1924)
 * `etj_CHS2/3HideLabels` cvar to toggle drawing info labels on CHS2/3, respectively [#1924](https://github.com/etjump/etjump/pull/1924)
+* CHS infos **70 - 74** to display upmove values [#1953](https://github.com/etjump/etjump/pull/1953)
+* `modelscale/modelscale_vec` support for `func_static_client` [#1965](https://github.com/etjump/etjump/pull/1965)
+* `angle/angles` support for `func_static_client` (sets model angle) [#1965](https://github.com/etjump/etjump/pull/1965)
+* `enabled/disabled` mapscript triggers for `func_static_client` [#1962](https://github.com/etjump/etjump/pull/1962)
+* spawnflag **32** for `func_static_client` to mimic behavior of `func_portaltarget` [#1966](https://github.com/etjump/etjump/pull/1966)
+  * if set, `portalsize`  key is also supported
+* in-game menu for sending private messages, opens with `privateMessage` console command [#1938](https://github.com/etjump/etjump/pull/1938)
+  * allows sending extended ASCII characters in private messages
+* dynamically sized scrollbars for UI [#1958](https://github.com/etjump/etjump/pull/1958)
+* `etj_speed/MaxSpeedPrecision` cvar to set the number of decimals on speed/max speed meter, respectively (**0 - 6**, default **0**) [#1940](https://github.com/etjump/etjump/pull/1940)
 * `etj_CHS1DistanceScale` cvar to scale the distance of CHS1 infos from crosshair (**0.25 - 10.0**) [#1924](https://github.com/etjump/etjump/pull/1924)
+* `etj_portalTrailTime` cvar to set lifetime of portal trails (in milliseconds, **0 - 10000**, default **400**) [#1928](https://github.com/etjump/etjump/pull/1928)
+* tab completion support for arguments to some mod commands (ET: Legacy only) [#1958](https://github.com/etjump/etjump/pull/1968)
 * `etj/g_mapAutoexecDir` cvar to set directory to load map-specific autoexec files from (client/server, respectively) [#1916](https://github.com/etjump/etjump/pull/1916)
 
 ## Changed
@@ -24,6 +131,10 @@
   * only enabled if demo was recorded at `sv_fps/snaps 125`, and not spectating
 * snaphud shows proper zones for crouch/prone while on ground [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_drawspeed2` turns white if `etj_speedColorUsesAccel` is enabled while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
+* scrollbar no longer draws on listboxes if it's not needed [#1958](https://github.com/etjump/etjump/pull/1958)
+* server info menu displays more characters for values/player names [#1933](https://github.com/etjump/etjump/pull/1933)
+* removed quotes from player names in server info menu [#1933](https://github.com/etjump/etjump/pull/1933)
+* mod bundled mapscript fixes are now always loaded unless server overrides them [#1964](https://github.com/etjump/etjump/pull/1964)
 
 ## Fixed
 * CGaz was rendering 1 frame behind while playing [#1921](https://github.com/etjump/etjump/pull/1921)
@@ -32,13 +143,32 @@
 * strafe quality scored frames with upmove held with full score [#1921](https://github.com/etjump/etjump/pull/1921)
   * as a result, overall scores are now slightly lower, on average ~0.7% with a decent sample size
 * interpolated strafe quality broke non-interpolated CGaz [#1921](https://github.com/etjump/etjump/pull/1921)
-* first respawn after joining to a team after inactivity drop spawned players at the latest save slot [#1915](https://github.com/etjump/etjump/pull/1915)
 * jump speed list showed unrelated jump speeds when joining team/switching followed client [#1922](https://github.com/etjump/etjump/pull/1922)
 * jump speed list colors were not updating for existing jumps, and required a jump event to trigger color change [#1922](https://github.com/etjump/etjump/pull/1922)
+* options -> game menu updated player name on every keypress, triggering kick for rename spam [#1956](https://github.com/etjump/etjump/pull/1956)
 * `etj_speedAlpha` and `etj_accelAlpha` were calculated incorrectly [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_accelColorUsesAccel` ignored `etj_accelAlpha` while noclipping [#1921](https://github.com/etjump/etjump/pull/1921)
 * `etj_drawAccel` showed incorrect accel values for 1 frame after noclip ended [#1921](https://github.com/etjump/etjump/pull/1921)
+* `!tokens delete` did not work for token indices > 6 [#1948](https://github.com/etjump/etjump/pull/1948)
+* `!kick` did not concatenate arguments for `reason` parameter [#1949](https://github.com/etjump/etjump/pull/1949)
+* server side `autoexec_mapname.cfg` leaked a file handle [#1939](https://github.com/etjump/etjump/pull/1939)
+* `fireteam` usage print was missing some options [#1969](https://github.com/etjump/etjump/pull/1969)
+* server info menu could not be refreshed on localhost [#1933](https://github.com/etjump/etjump/pull/1933)
+* help print for private messages was not working if sent from server console [#1945](https://github.com/etjump/etjump/pull/1945)
+* various feedback prints were colored by user input [#1947](https://github.com/etjump/etjump/pull/1947) [#1951](https://github.com/etjump/etjump/pull/1951)
+* potential crash when `callvote map` vote passed [#1954](https://github.com/etjump/etjump/pull/1954)
+
+# ETJump 3.5.3
+
+## Fixed
+* first respawn after joining to a team after inactivity drop spawned players at the latest save slot [#1915](https://github.com/etjump/etjump/pull/1915)
+* disconnecting/connecting clients were counted as valid voters for vote checks [#1932](https://github.com/etjump/etjump/pull/1932)
+* selection rectangle for `vote no` was misaligned if spectator voting was disabled [#1932](https://github.com/etjump/etjump/pull/1932)
+* quick connect servers were refreshing in the background when in-game menus were open [#1934](https://github.com/etjump/etjump/pull/1934)
 * spectator info list could show old, outdated data in some scenarios [#1926](https://github.com/etjump/etjump/pull/1926)
+* multiline text boxes (e.g. chat window) were drawing cursor when out of focus [#1937](https://github.com/etjump/etjump/pull/1937)
+* misleading tooltip in chat window [#1937](https://github.com/etjump/etjump/pull/1937)
+* potential crash when trying to browse an empty listbox menu item [#1935](https://github.com/etjump/etjump/pull/1935)
 
 # ETJump 3.5.2
 

@@ -23,28 +23,25 @@
  */
 
 #include "etj_menu_integrity_checker.h"
+
 #include "ui_local.h"
 
-#include "../game/etj_string_utilities.h"
-#include "../game/etj_filesystem.h"
-#include "../game/etj_file.h"
 #include "../game/etj_crypto.h"
+#include "../game/etj_file.h"
+#include "../game/etj_filesystem.h"
+#include "../game/etj_string_utilities.h"
 
 #if !defined(MENU_HASH_LIST)
   #define MENU_HASH_LIST "N/A"
 #endif
 
 namespace ETJump {
-inline constexpr char INTEGRITY_VIOLATION_TEXT_LINE1[] =
-    "^1MENU INTEGRITY VIOLATION DETECTED";
-inline constexpr char INTEGRITY_VIOLATION_TEXT_LINE2[] =
-    "^1CHECK CONSOLE FOR MORE INFORMATION";
+inline constexpr char INTEGRITY_VIOLATION_TEXT_LINE1[] = "^1MENU INTEGRITY VIOLATION DETECTED";
+inline constexpr char INTEGRITY_VIOLATION_TEXT_LINE2[] = "^1CHECK CONSOLE FOR MORE INFORMATION";
 
 bool MenuIntegrityChecker::checkIntegrity() {
   if (!Q_stricmp(MENU_HASH_LIST, "N/A")) {
-    uiInfo.uiDC.Print(
-        S_COLOR_YELLOW
-        "WARNING: unable to check menu integrity - hashes not generated!\n");
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "WARNING: unable to check menu integrity - hashes not generated!\n");
     return false;
   }
 
@@ -58,17 +55,15 @@ bool MenuIntegrityChecker::checkIntegrity() {
     try {
       File f("ui/" + file);
 
-      const auto contents = f.readString();
+      const auto contents    = f.readString();
       const auto currentHash = Crypto::sha1(contents);
 
       if (!StringUtils::iEqual(currentHash, hash)) {
-        Com_DPrintf("Integrity check failed on file '%s' - invalid hash!\n",
-                    file.c_str());
+        Com_DPrintf("Integrity check failed on file '%s' - invalid hash!\n", file.c_str());
         return false;
       }
     } catch (const File::FileIOException &) {
-      Com_DPrintf("Integrity check failed on file '%s' - file not found!\n",
-                  file.c_str());
+      Com_DPrintf("Integrity check failed on file '%s' - file not found!\n", file.c_str());
       return false;
     }
   }
@@ -76,8 +71,7 @@ bool MenuIntegrityChecker::checkIntegrity() {
   return true;
 }
 
-std::vector<std::pair<std::string, std::string>>
-MenuIntegrityChecker::generateFileHashList() {
+std::vector<std::pair<std::string, std::string>> MenuIntegrityChecker::generateFileHashList() {
   std::vector<std::pair<std::string, std::string>> list;
 
   const auto fileHashKvp = StringUtils::split(MENU_HASH_LIST, ",");
@@ -86,9 +80,7 @@ MenuIntegrityChecker::generateFileHashList() {
     const size_t pos = kvp.find(':');
 
     if (pos == std::string::npos) {
-      uiInfo.uiDC.Print(
-          S_COLOR_YELLOW
-          "WARNING: unable to check menu integrity - malformed hash string!\n");
+      uiInfo.uiDC.Print(S_COLOR_YELLOW "WARNING: unable to check menu integrity - malformed hash string!\n");
       return {};
     }
 
@@ -106,18 +98,17 @@ void MenuIntegrityChecker::printIntegrityViolation() {
   msg += "\n^1*                                             *";
   msg += "\n^1***********************************************\n\n";
 
-  msg +=
-      "You are running menu files not officially supported by this version "
-      "of ETJump.\nThis might break some parts of the the user interface!\n\n";
+  msg += "You are running menu files not officially supported by this version "
+         "of ETJump.\nThis might break some parts of the the user interface!\n\n";
 
   uiInfo.uiDC.Print(msg.c_str());
 
   const auto badPaks = getBadPaks();
 
   if (badPaks.empty()) {
-    msg = "^1Make sure '" + uiInfo.fsGame +
-          "' directory does not contain any '.menu' files outside of pk3 files "
-          "(usually inside 'ui' directory).\n";
+    msg  = "^1Make sure '" + uiInfo.fsGame +
+           "' directory does not contain any '.menu' files outside of pk3 files "
+           "(usually inside 'ui' directory).\n";
     msg += "^1If any are present, try removing them to restore menu integrity "
            "and remove this warning.\n\n";
     uiInfo.uiDC.Print(msg.c_str());
@@ -138,11 +129,9 @@ void MenuIntegrityChecker::printIntegrityViolation() {
 
 std::vector<std::string> MenuIntegrityChecker::getBadPaks() {
   // see if we can find the offending packs
-  const auto files =
-      FileSystem::getFileList("../" + uiInfo.fsGame, ".pk3", true);
-  const auto pk3name =
-      std::string(GAME_NAME) + "-" + std::string(GAME_VERSION) + ".pk3";
-  const auto it = std::find(files.cbegin(), files.cend(), pk3name);
+  const auto files   = FileSystem::getFileList("../" + uiInfo.fsGame, ".pk3", true);
+  const auto pk3name = std::string(GAME_NAME) + "-" + std::string(GAME_VERSION) + ".pk3";
+  const auto it      = std::find(files.cbegin(), files.cend(), pk3name);
 
   if (it == files.end()) {
     return {};
@@ -170,21 +159,15 @@ void MenuIntegrityChecker::printIntegrityWatermark() {
   constexpr float size1 = 0.2f;
   constexpr float size2 = 0.16f;
 
-  const auto w1 = static_cast<float>(
-      uiInfo.uiDC.textWidthExt(INTEGRITY_VIOLATION_TEXT_LINE1, size1, 0, font));
-  const auto w2 = static_cast<float>(
-      uiInfo.uiDC.textWidthExt(INTEGRITY_VIOLATION_TEXT_LINE2, size2, 0, font));
+  const auto w1 = static_cast<float>(uiInfo.uiDC.textWidthExt(INTEGRITY_VIOLATION_TEXT_LINE1, size1, 0, font));
+  const auto w2 = static_cast<float>(uiInfo.uiDC.textWidthExt(INTEGRITY_VIOLATION_TEXT_LINE2, size2, 0, font));
 
   constexpr vec4_t color = {1, 1, 1, 0.75f};
 
-  uiInfo.uiDC.drawTextExt(uiInfo.uiDC.screenWidth / 2 - (w1 * 0.5f),
-                          uiInfo.uiDC.screenHeight - 20, size1, size1, color,
-                          INTEGRITY_VIOLATION_TEXT_LINE1, 0, 0,
-                          ITEM_TEXTSTYLE_SHADOWED, font);
+  uiInfo.uiDC.drawTextExt(uiInfo.uiDC.screenWidth / 2 - (w1 * 0.5f), uiInfo.uiDC.screenHeight - 20, size1, size1, color,
+                          INTEGRITY_VIOLATION_TEXT_LINE1, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
-  uiInfo.uiDC.drawTextExt(uiInfo.uiDC.screenWidth / 2 - (w2 * 0.5f),
-                          uiInfo.uiDC.screenHeight - 12, size2, size2, color,
-                          INTEGRITY_VIOLATION_TEXT_LINE2, 0, 0,
-                          ITEM_TEXTSTYLE_SHADOWED, font);
+  uiInfo.uiDC.drawTextExt(uiInfo.uiDC.screenWidth / 2 - (w2 * 0.5f), uiInfo.uiDC.screenHeight - 12, size2, size2, color,
+                          INTEGRITY_VIOLATION_TEXT_LINE2, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 }
 } // namespace ETJump

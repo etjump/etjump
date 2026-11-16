@@ -23,6 +23,7 @@
  */
 
 #include "etj_crosshair.h"
+
 #include "cg_local.h"
 #include "etj_color_parser.h"
 #include "etj_crosshair_drawer.h"
@@ -31,8 +32,7 @@
 #include "etj_utilities.h"
 
 namespace ETJump {
-Crosshair::Crosshair(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : cvarUpdate(cvarUpdate) {
+Crosshair::Crosshair(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate) : cvarUpdate(cvarUpdate) {
   startListeners();
   parseColor(&cg_crosshairColor, crosshair.color);
   parseColor(&cg_crosshairColorAlt, crosshair.colorAlt);
@@ -56,10 +56,12 @@ void Crosshair::startListeners() {
   });
 
   // position
-  cvarUpdate->subscribe(&cg_crosshairX,
-                        [this](const vmCvar_t *) { adjustPosition(); });
-  cvarUpdate->subscribe(&cg_crosshairY,
-                        [this](const vmCvar_t *) { adjustPosition(); });
+  cvarUpdate->subscribe(&cg_crosshairX, [this](const vmCvar_t *) {
+    adjustPosition();
+  });
+  cvarUpdate->subscribe(&cg_crosshairY, [this](const vmCvar_t *) {
+    adjustPosition();
+  });
 }
 
 void Crosshair::parseColor(const vmCvar_t *cvar, vec4_t &out) {
@@ -67,12 +69,11 @@ void Crosshair::parseColor(const vmCvar_t *cvar, vec4_t &out) {
 }
 
 void Crosshair::adjustSize() {
-  const auto size =
-      CvarValueParser::parse<CvarValue::Size>(cg_crosshairSize, -256, 256);
-  crosshair.w = size.x;
-  crosshair.h = size.y;
-  crosshair.f = 0.0f;
-  crosshair.t = std::clamp(etj_crosshairThickness.value, 0.0f, 5.0f);
+  const auto size = CvarValueParser::parse<CvarValue::Size>(cg_crosshairSize, -256, 256);
+  crosshair.w     = size.x;
+  crosshair.h     = size.y;
+  crosshair.f     = 0.0f;
+  crosshair.t     = std::clamp(etj_crosshairThickness.value, 0.0f, 5.0f);
 
   if (crosshair.current < 10) {
     // using abs makes sure negative scale will flip correctly
@@ -86,9 +87,9 @@ void Crosshair::adjustSize() {
   }
 
   if (cg_crosshairPulse.integer) {
-    crosshair.f = static_cast<float>(cg.snap->ps.aimSpreadScale) / 255.0f;
+    crosshair.f  = static_cast<float>(cg.snap->ps.aimSpreadScale) / 255.0f;
     crosshair.w *= 1 + crosshair.f * 2.0f;
-    crosshair.h = crosshair.w;
+    crosshair.h  = crosshair.w;
   }
 }
 
@@ -112,14 +113,14 @@ bool Crosshair::beforeRender() {
   }
 
   // alpha adjustment here to make it work with crosshair health too
-  crosshair.color[3] = std::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
+  crosshair.color[3]    = std::clamp(cg_crosshairAlpha.value, 0.0f, 1.0f);
   crosshair.colorAlt[3] = std::clamp(cg_crosshairAlphaAlt.value, 0.0f, 1.0f);
 
   return true;
 }
 
 void Crosshair::render() const {
-  const qhandle_t shader = cgs.media.crosshairShader[crosshair.current];
+  const qhandle_t shader    = cgs.media.crosshairShader[crosshair.current];
   const qhandle_t shaderAlt = cg.crosshairShaderAlt[crosshair.current];
 
   // standard crosshairs (0-9)
@@ -134,10 +135,10 @@ void Crosshair::render() const {
     // width/height is negative, we need to do some manual x/y coordinate
     // shifting for some crosshairs to ensure negative x/y scale will flip
     // the crosshair correctly instead of shifting its position
-    const bool flipX = crosshair.w < 0;
-    const bool flipY = crosshair.h < 0;
-    const bool outline = etj_crosshairOutline.integer;
-    const bool fill = cg_crosshairAlphaAlt.value != 0;
+    const bool flipX      = crosshair.w < 0;
+    const bool flipY      = crosshair.h < 0;
+    const bool outline    = etj_crosshairOutline.integer;
+    const bool fill       = cg_crosshairAlphaAlt.value != 0;
     auto crosshairOutline = crosshair;
 
     if (outline) {
@@ -220,14 +221,12 @@ bool Crosshair::canSkipDraw() {
     }
   }
 
-  if (cg.predictedPlayerState.weapon == WP_MORTAR_SET &&
-      cg.predictedPlayerState.weaponstate != WEAPON_RAISING) {
+  if (cg.predictedPlayerState.weapon == WP_MORTAR_SET && cg.predictedPlayerState.weaponstate != WEAPON_RAISING) {
     return true;
   }
 
   // pretty sure these hints are bogus but keeping it here just in case
-  if (cg.snap->ps.serverCursorHint >= HINT_EXIT &&
-      cg.snap->ps.serverCursorHint <= HINT_NOEXIT) {
+  if (cg.snap->ps.serverCursorHint >= HINT_EXIT && cg.snap->ps.serverCursorHint <= HINT_NOEXIT) {
     return true;
   }
 

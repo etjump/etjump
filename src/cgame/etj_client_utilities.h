@@ -28,7 +28,7 @@
 
 class ClientUtilities {
 public:
-  ClientUtilities() = delete;
+  ClientUtilities()  = delete;
   ~ClientUtilities() = delete;
   // Duplication, look at game/Utilities.cpp
   // Should refactor these..

@@ -23,11 +23,10 @@
  */
 
 #pragma once
-#include <array>
 #include <map>
 #include <set>
 
-#include "etj_log.h"
+#include "g_local.h"
 
 namespace ETJump {
 class TimerunEntity {
@@ -40,11 +39,15 @@ protected:
   static void setTimerunIndex(gentity_t *self);
   static bool canActivate(gentity_t *activator);
   static int getOrSetTimerunIndex(const std::string &runName);
-  static bool canStartTimerun(const gentity_t *self, const gentity_t *activator,
-                              int clientNum, float speed);
+  static bool canStartTimerun(const gentity_t *self, const gentity_t *activator, int clientNum, float speed);
 
 public:
   static void validateTimerunEntities();
+
+  // must be called before the entities of a map are spawned, as the module
+  // might be loaded again into the same image, which keeps these (see
+  // FatalErrorBoundary), and some builds never unload it at all
+  static void resetTimerunIndices();
 };
 
 /**
@@ -61,8 +64,7 @@ public:
 /**
  * TriggerStartTimer
  */
-class TriggerStartTimer : virtual public TimerunEntity,
-                          virtual public TargetStartTimer {
+class TriggerStartTimer : virtual public TimerunEntity, virtual public TargetStartTimer {
 public:
   static void spawn(gentity_t *self);
 };
@@ -70,8 +72,7 @@ public:
 /**
  * TriggerStartTimerExt
  */
-class TriggerStartTimerExt : virtual public TimerunEntity,
-                             virtual public TargetStartTimer {
+class TriggerStartTimerExt : virtual public TimerunEntity, virtual public TargetStartTimer {
 public:
   static void spawn(gentity_t *self);
 };
@@ -90,8 +91,7 @@ public:
 /**
  * TriggerStopTimer
  */
-class TriggerStopTimer : virtual public TimerunEntity,
-                         virtual public TargetStopTimer {
+class TriggerStopTimer : virtual public TimerunEntity, virtual public TargetStopTimer {
 public:
   static void spawn(gentity_t *self);
 };
@@ -99,8 +99,7 @@ public:
 /**
  * TriggerStopTimerExt
  */
-class TriggerStopTimerExt : virtual public TimerunEntity,
-                            virtual public TargetStopTimer {
+class TriggerStopTimerExt : virtual public TimerunEntity, virtual public TargetStopTimer {
 public:
   static void spawn(gentity_t *self);
 };
@@ -119,8 +118,7 @@ public:
 /**
  * TriggerCheckpoint
  */
-class TriggerCheckpoint : virtual public TimerunEntity,
-                          virtual public TargetCheckpoint {
+class TriggerCheckpoint : virtual public TimerunEntity, virtual public TargetCheckpoint {
 public:
   static void spawn(gentity_t *self);
 };
@@ -128,8 +126,7 @@ public:
 /**
  * TriggerCheckpointExt
  */
-class TriggerCheckpointExt : virtual public TimerunEntity,
-                             virtual public TargetCheckpoint {
+class TriggerCheckpointExt : virtual public TimerunEntity, virtual public TargetCheckpoint {
 public:
   static void spawn(gentity_t *self);
 };

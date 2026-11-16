@@ -31,15 +31,14 @@ struct gentity_s;
 typedef gentity_s gentity_t;
 #endif
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 class Levels {
 public:
   struct Level {
-    Level(int level, const std::string &name, const std::string &greeting,
-          const std::string &commands);
+    Level(int level, const std::string &name, const std::string &greeting, const std::string &commands);
 
     int level;
     std::string name;
@@ -50,14 +49,11 @@ public:
   Levels();
   ~Levels();
 
-  bool Add(int level, const std::string name, const std::string commands,
-           const std::string greeting);
-  bool Edit(int level, std::string const &name, std::string const &commands,
-            std::string const &greeting, int updated);
+  bool Add(int level, const std::string name, const std::string commands, const std::string greeting);
+  bool Edit(int level, std::string const &name, std::string const &commands, std::string const &greeting, int updated);
   bool Delete(int level);
   bool ReadFromConfig();
-  static bool SortByLevel(const std::shared_ptr<Level> &lhs,
-                          const std::shared_ptr<Level> &rhs);
+  static bool SortByLevel(const std::shared_ptr<Level> &lhs, const std::shared_ptr<Level> &rhs);
   bool WriteToConfig();
   std::string ErrorMessage() const;
   void PrintLevels();

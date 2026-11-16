@@ -30,23 +30,16 @@ namespace ETJump {
 class TraceUtils {
 public:
   // 'G_Trace'
-  static void filteredTrace(int32_t clientNum, trace_t *results,
-                            const vec3_t start, const vec3_t mins,
-                            const vec3_t maxs, const vec3_t end,
-                            int32_t passEntityNum, int32_t contentmask);
+  static void filteredTrace(int32_t clientNum, trace_t *results, const vec3_t start, const vec3_t mins,
+                            const vec3_t maxs, const vec3_t end, int32_t passEntityNum, int32_t contentmask);
 
   // 'G_HistoricalTrace'
-  static void filteredHistoricalTrace(int32_t clientNum, trace_t *results,
-                                      const vec3_t start, const vec3_t mins,
-                                      const vec3_t maxs, const vec3_t end,
-                                      int32_t passEntityNum,
-                                      int32_t contentmask);
+  static void filteredHistoricalTrace(int32_t clientNum, trace_t *results, const vec3_t start, const vec3_t mins,
+                                      const vec3_t maxs, const vec3_t end, int32_t passEntityNum, int32_t contentmask);
 
   // 'trap_Trace'
-  static void filteredTraceNoBody(int32_t clientNum, trace_t *results,
-                                  const vec3_t start, const vec3_t mins,
-                                  const vec3_t maxs, const vec3_t end,
-                                  int32_t passEntityNum, int32_t contentmask);
+  static void filteredTraceNoBody(int32_t clientNum, trace_t *results, const vec3_t start, const vec3_t mins,
+                                  const vec3_t maxs, const vec3_t end, int32_t passEntityNum, int32_t contentmask);
 
   // special trace for bullets to account for them traveling
   // through 'func_explosive' entities when they are shot and destroyed
@@ -55,17 +48,13 @@ public:
   // will be the entityNum of the entity that was broken
   // see 'Bullet_Fire_Extended' for more details
   // NOTE: this doesn't take mins/maxs as it's always 'nullptr' for bullets
-  static void filteredBulletTrace(int32_t sourceNum, int32_t attackerNum,
-                                  trace_t *results, const vec3_t start,
-                                  const vec3_t end, int32_t passEntityNum,
-                                  int32_t contentmask);
+  static void filteredBulletTrace(int32_t sourceNum, int32_t attackerNum, trace_t *results, const vec3_t start,
+                                  const vec3_t end, int32_t passEntityNum, int32_t contentmask);
 
   // projectiles might be spawned by entities in the map,
   // e.g. shooter entities or 'props_flamethrower', which don't need filtering
-  static void projectileTrace(int32_t clientNum, trace_t *results,
-                              const vec3_t start, const vec3_t mins,
-                              const vec3_t maxs, const vec3_t end,
-                              int32_t passEntityNum, int32_t contentmask);
+  static void projectileTrace(int32_t clientNum, trace_t *results, const vec3_t start, const vec3_t mins,
+                              const vec3_t maxs, const vec3_t end, int32_t passEntityNum, int32_t contentmask);
 
   static void setupIgnoredEntities(int32_t clientNum);
 };

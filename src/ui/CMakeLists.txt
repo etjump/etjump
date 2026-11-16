@@ -3,6 +3,7 @@ file(GLOB UI_HEADERS "*.h" "*.hpp")
 add_library(ui MODULE
 	"etj_colorpicker.cpp"
 	"etj_demo_queue.cpp"
+	"etj_keep_alive.cpp"
 	"etj_main.cpp"
 	"etj_menu_integrity_checker.cpp"
 	"etj_quick_connect.cpp"
@@ -19,6 +20,7 @@ add_library(ui MODULE
 	"../game/bg_misc.cpp"
 	"../game/q_math.cpp"
 	"../game/q_shared.cpp"
+	"../game/etj_fatal_error_shared.cpp"
 	"../game/etj_file.cpp"
 	"../game/etj_filesystem.cpp"
 	"../game/etj_json_utilities.cpp"
@@ -33,6 +35,12 @@ include(GenerateMenuHashes)
 generate_menu_hashes(ui)
 
 target_compile_definitions(ui PRIVATE UIDLL)
+
+if (USE_TEST_FAULTS)
+	target_sources(ui PRIVATE "../game/etj_test_fault.cpp")
+	target_compile_definitions(ui PRIVATE USE_TEST_FAULTS)
+endif ()
+
 target_link_libraries(ui PRIVATE cxx_compiler_opts libjson libsha1 picosha2 fmt::fmt)
 set_target_properties(ui PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY "${BASE_DIR_PATH}"

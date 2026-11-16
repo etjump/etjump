@@ -26,8 +26,8 @@
 
 #include <list>
 
-#include "../game/q_shared.h"
 #include "../game/bg_local.h"
+#include "../game/q_shared.h"
 
 namespace ETJump {
 class AccelColorV2 {
@@ -38,20 +38,18 @@ public:
   };
 
   enum class Style {
-    NONE = 0,
-    SIMPLE = 1,
+    NONE     = 0,
+    SIMPLE   = 1,
     ADVANCED = 2,
   };
 
   static constexpr float ACCEL_FOR_SOLID_COLOR = 100.0f;
 
-  static void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
-                                 int32_t time);
+  static void popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds, int32_t time);
   static float calcAvgAccel(const std::list<StoredSpeed> &storedSpeeds);
-  static void calcAdvancedAccelColor(const pmove_t &pm, const pml_t &pml,
-                                     const vec2_t accelVec, float wishspeed,
-                                     const vec2_t wishvel, float velAngle,
-                                     float optAngle, float accel,
+  static void normalizeAccelVec(vec2_t accelVec, int32_t elapsedMs, int32_t pmoveMsec);
+  static void calcAdvancedAccelColor(const pmove_t &pm, const pml_t &pml, const vec2_t accelVec, float wishspeed,
+                                     const vec2_t wishvel, float velAngle, float optAngle, float accel,
                                      vec4_t outColor);
   static bool lowSpeedOnGround(float speed, int32_t groundEntityNum);
 };

@@ -25,35 +25,31 @@
 #pragma once
 
 #include "json/json.h"
+
 #include "etj_string_utilities.h"
 
 class JsonUtils {
 public:
   // returns true on successful read
-  static bool readFile(const std::string &file, Json::Value &root,
-                       std::string *errors = nullptr);
+  static bool readFile(const std::string &file, Json::Value &root, std::string *errors = nullptr);
 
   // returns true on successful write
-  static bool writeFile(const std::string &file, const Json::Value &root,
-                        std::string *errors = nullptr);
+  static bool writeFile(const std::string &file, const Json::Value &root, std::string *errors = nullptr);
 
   // tries to parse a JSON value
   // returns true if parse was successful, otherwise false
   // if provided, any errors are written to 'errors'
   // 'field' can be provided as the key for more descriptive error messages
   template <typename T>
-  static bool parseValue(T &value, const Json::Value &jsonValue,
-                         std::string *errors = nullptr,
+  static bool parseValue(T &value, const Json::Value &jsonValue, std::string *errors = nullptr,
                          const std::string &field = "") {
     try {
       value = jsonValue.as<T>();
       return true;
     } catch (const Json::LogicError &e) {
       if (errors) {
-        *errors = StringUtils::format(
-            "Failed to parse JSON value%s: %s",
-            field.empty() ? "" : StringUtils::format(" for field '%s'", field),
-            e.what());
+        *errors = StringUtils::format("Failed to parse JSON value%s: %s",
+                                      field.empty() ? "" : StringUtils::format(" for field '%s'", field), e.what());
       }
 
       return false;

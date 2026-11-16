@@ -1,24 +1,24 @@
 #ifndef __UI_SHARED_H
 #define __UI_SHARED_H
 
-#include <vector>
-#include <string>
 #include <functional>
 #include <memory>
+#include <string>
+#include <vector>
 
-#include "../game/q_shared.h"
-#include "../cgame/tr_types.h"
 #include "keycodes.h"
 
 #include "../../assets/ui/menudef.h"
 #include "../../assets/ui/menudef_ext.h"
+#include "../cgame/tr_types.h"
+#include "../game/q_shared.h"
 
-inline constexpr int MAX_MENUDEFFILE = 4096;
-inline constexpr int MAX_MENUFILE = 32768;
-inline constexpr int MAX_MENUS = 256;     // was 128
-inline constexpr int MAX_MENUITEMS = 128; // JPW NERVE q3ta was 96
+inline constexpr int MAX_MENUDEFFILE  = 4096;
+inline constexpr int MAX_MENUFILE     = 32768;
+inline constexpr int MAX_MENUS        = 256; // was 128
+inline constexpr int MAX_MENUITEMS    = 128; // JPW NERVE q3ta was 96
 inline constexpr int MAX_COLOR_RANGES = 10;
-inline constexpr int MAX_MODAL_MENUS = 16;
+inline constexpr int MAX_MODAL_MENUS  = 16;
 
 // mouse is over it, non-exclusive
 inline constexpr uint32_t WINDOW_MOUSEOVER = 1 << 0;
@@ -72,10 +72,10 @@ inline constexpr uint32_t WINDOW_TIMEDVISIBLE = 1 << 23;
 inline constexpr uint32_t WINDOW_IGNORE_HUDALPHA = 1 << 24;
 inline constexpr uint32_t WINDOW_DRAWALWAYSONTOP = 1 << 25;
 // window is modal, the window to go back to is stored in a stack
-inline constexpr uint32_t WINDOW_MODAL = 1 << 26;
-inline constexpr uint32_t WINDOW_FOCUSPULSE = 1 << 27;
-inline constexpr uint32_t WINDOW_TEXTASINT = 1 << 28;
-inline constexpr uint32_t WINDOW_TEXTASFLOAT = 1 << 29;
+inline constexpr uint32_t WINDOW_MODAL        = 1 << 26;
+inline constexpr uint32_t WINDOW_FOCUSPULSE   = 1 << 27;
+inline constexpr uint32_t WINDOW_TEXTASINT    = 1 << 28;
+inline constexpr uint32_t WINDOW_TEXTASFLOAT  = 1 << 29;
 inline constexpr uint32_t WINDOW_LB_SOMEWHERE = 1 << 30;
 // horizontally centered
 inline constexpr uint32_t WINDOW_CENTERED = 1 << 31;
@@ -88,43 +88,48 @@ inline constexpr int STRING_POOL_SIZE = 384 * 2048;
 
 inline constexpr int MAX_EDITFIELD = 256;
 
-inline constexpr char ART_FX_BASE[] = "menu/art/fx_base";
-inline constexpr char ART_FX_BLUE[] = "menu/art/fx_blue";
-inline constexpr char ART_FX_CYAN[] = "menu/art/fx_cyan";
-inline constexpr char ART_FX_GREEN[] = "menu/art/fx_grn";
-inline constexpr char ART_FX_RED[] = "menu/art/fx_red";
-inline constexpr char ART_FX_TEAL[] = "menu/art/fx_teal";
-inline constexpr char ART_FX_WHITE[] = "menu/art/fx_white";
+inline constexpr char ART_FX_BASE[]   = "menu/art/fx_base";
+inline constexpr char ART_FX_BLUE[]   = "menu/art/fx_blue";
+inline constexpr char ART_FX_CYAN[]   = "menu/art/fx_cyan";
+inline constexpr char ART_FX_GREEN[]  = "menu/art/fx_grn";
+inline constexpr char ART_FX_RED[]    = "menu/art/fx_red";
+inline constexpr char ART_FX_TEAL[]   = "menu/art/fx_teal";
+inline constexpr char ART_FX_WHITE[]  = "menu/art/fx_white";
 inline constexpr char ART_FX_YELLOW[] = "menu/art/fx_yel";
 
 inline constexpr char ASSET_GRADIENTBAR[] = "ui/assets/gradientbar2.tga";
-inline constexpr char ASSET_SCROLLBAR[] = "ui/assets/scrollbar.tga";
-inline constexpr char ASSET_SCROLLBAR_ARROWDOWN[] =
-    "ui/assets/scrollbar_arrow_dwn_a.tga";
-inline constexpr char ASSET_SCROLLBAR_ARROWUP[] =
-    "ui/assets/scrollbar_arrow_up_a.tga";
-inline constexpr char ASSET_SCROLLBAR_ARROWLEFT[] =
-    "ui/assets/scrollbar_arrow_left.tga";
-inline constexpr char ASSET_SCROLLBAR_ARROWRIGHT[] =
-    "ui/assets/scrollbar_arrow_right.tga";
-inline constexpr char ASSET_SCROLL_THUMB[] = "ui/assets/scrollbar_thumb.tga";
-inline constexpr char ASSET_SLIDER_BAR[] = "ui/assets/slider2.tga";
-inline constexpr char ASSET_SLIDER_THUMB[] = "ui/assets/sliderbutt_1.tga";
-inline constexpr char ASSET_CHECKBOX_CHECK[] = "ui/assets/check.tga";
+inline constexpr char ASSET_SCROLLBAR[]   = "ui/assets/scrollbar.tga";
+
+inline constexpr char ASSET_SCROLLBAR_ARROWDOWN[]  = "ui/assets/scrollbar_arrow_dwn_a.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWUP[]    = "ui/assets/scrollbar_arrow_up_a.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWLEFT[]  = "ui/assets/scrollbar_arrow_left.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWRIGHT[] = "ui/assets/scrollbar_arrow_right.tga";
+
+inline constexpr char ASSET_SCROLLBAR_ARROWDOWN_ACTIVE[]  = "ui/assets/scrollbar_arrow_dwn_a_active.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWUP_ACTIVE[]    = "ui/assets/scrollbar_arrow_up_a_active.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWLEFT_ACTIVE[]  = "ui/assets/scrollbar_arrow_left_active.tga";
+inline constexpr char ASSET_SCROLLBAR_ARROWRIGHT_ACTIVE[] = "ui/assets/scrollbar_arrow_right_active.tga";
+
+inline constexpr char ASSET_SLIDER_BAR[]         = "ui/assets/slider2.tga";
+inline constexpr char ASSET_SLIDER_THUMB[]       = "ui/assets/sliderbutt_1.tga";
+inline constexpr char ASSET_CHECKBOX_CHECK[]     = "ui/assets/check.tga";
 inline constexpr char ASSET_CHECKBOX_CHECK_NOT[] = "ui/assets/check_not.tga";
-inline constexpr char ASSET_CHECKBOX_CHECK_NO[] = "ui/assets/check_no.tga";
+inline constexpr char ASSET_CHECKBOX_CHECK_NO[]  = "ui/assets/check_no.tga";
 
 inline constexpr char ASSET_REPLAY_DIRECTORY[] = "gfx/2d/directory";
-inline constexpr char ASSET_REPLAY_HOME[] = "gfx/2d/home";
-inline constexpr char ASSET_REPLAY_UP[] = "gfx/2d/up";
+inline constexpr char ASSET_REPLAY_HOME[]      = "gfx/2d/home";
+inline constexpr char ASSET_REPLAY_UP[]        = "gfx/2d/up";
 
 inline constexpr char ASSET_COLORPICKER_MASK[] = "gfx/2d/colorpicker_mask";
 
-inline constexpr float SCROLLBAR_SIZE = 16.0f;
-inline constexpr float SCROLLBAR_SIZE_COMBO = 10.0f;
-inline constexpr float SLIDER_WIDTH = 96.0f;
-inline constexpr float SLIDER_HEIGHT = 10.0f;
-inline constexpr float SLIDER_THUMB_WIDTH = 12.0f;
+inline constexpr float SCROLLBAR_SIZE                     = 16.0f;
+inline constexpr float SCROLLBAR_THUMB_HANDLE_WIDTH       = SCROLLBAR_SIZE / 2.0f;
+inline constexpr float SCROLLBAR_SIZE_COMBO               = 10.0f;
+inline constexpr float SCROLLBAR_COMBO_THUMB_HANDLE_WIDTH = SCROLLBAR_SIZE_COMBO / 2.0f;
+
+inline constexpr float SLIDER_WIDTH        = 96.0f;
+inline constexpr float SLIDER_HEIGHT       = 10.0f;
+inline constexpr float SLIDER_THUMB_WIDTH  = 12.0f;
 inline constexpr float SLIDER_THUMB_HEIGHT = 12.0f;
 
 inline constexpr float CURSOR_SIZE = 32.0f;
@@ -180,6 +185,12 @@ typedef struct {
 } colorRangeDef_t;
 
 inline constexpr int MAX_LB_COLUMNS = 16;
+// these are hardcoded for now to match the images, doubt we'd ever need to
+// adjust the colors for these since the up/down arrows are images anyway
+inline constexpr vec4_t scrollbarThumbColor         = {0.3f, 0.3f, 0.3f, 1.0f};
+inline constexpr vec4_t scrollbarThumbHlColor       = {0.5f, 0.5f, 0.5f, 1.0f};
+inline constexpr vec4_t scrollBarThumbBorderColor   = {0.15f, 0.15f, 0.15f, 1.0f};
+inline constexpr vec4_t scrollBarThumbBorderHlColor = {0.25f, 0.25f, 0.25f, 1.0f};
 
 typedef struct columnInfo_s {
   int pos;
@@ -243,16 +254,16 @@ typedef struct modelDef_s {
   int frameTime;
 } modelDef_t;
 
-struct comboDef_t {
-  // note: rect height is NOT the dropdown height, it's merely the height of
+struct ComboDef {
+  // NOTE: rect height is NOT the dropdown height, it's merely the height of
   // the actual dropdown entry, comboData.height contains the dropdown height
   rectDef_t rect;
+  float height; // height of the dropdown part of the menu
   int maxItems;
+  int startPos;
   bool bitflag;  // is this a bitflag selection dropdown?
   bool reversed; // should we draw this bottom to top?
-  int startPos;
   bool scrollbar;
-  float height; // height of the dropdown part of the menu
 };
 
 struct colorSliderDef_t {
@@ -280,32 +291,32 @@ struct textScroll_t {
   bool scrolling;
 };
 
-inline constexpr int CVAR_ENABLE = 0x00000001;
-inline constexpr int CVAR_DISABLE = 0x00000002;
-inline constexpr int CVAR_SHOW = 0x00000004;
-inline constexpr int CVAR_HIDE = 0x00000008;
+inline constexpr int CVAR_ENABLE   = 0x00000001;
+inline constexpr int CVAR_DISABLE  = 0x00000002;
+inline constexpr int CVAR_SHOW     = 0x00000004;
+inline constexpr int CVAR_HIDE     = 0x00000008;
 inline constexpr int CVAR_NOTOGGLE = 0x00000010;
 
 // OSP - "setting" flags for items
 inline constexpr int SVS_DISABLED_SHOW = 0x01;
-inline constexpr int SVS_ENABLED_SHOW = 0x02;
+inline constexpr int SVS_ENABLED_SHOW  = 0x02;
 
 inline constexpr float DEFAULT_LINEHEIGHT = 11.0f;
 
 typedef struct itemDef_s {
   Window window;      // common positional, border, style, layout info
   rectDef_t textRect; // rectangle the text ( if any ) consumes
-  int type;          // text, button, radiobutton, checkbox, textfield, listbox,
-                     // combo
-  int alignment;     // left center right
-  int textalignment; // ( optional ) alignment for text within rect
-                     // based on text width
-  float textalignx;  // ( optional ) text alignment x coord
-  float textaligny;  // ( optional ) text alignment y coord
-  float textscale;   // scale percentage from 72pts
-  int font;          // (SA)
-  int textStyle;     // ( optional ) style, normal and shadowed are it for
-                     // now
+  int type;           // text, button, radiobutton, checkbox, textfield, listbox,
+                      // combo
+  int alignment;      // left center right
+  int textalignment;  // ( optional ) alignment for text within rect
+                      // based on text width
+  float textalignx;   // ( optional ) text alignment x coord
+  float textaligny;   // ( optional ) text alignment y coord
+  float textscale;    // scale percentage from 72pts
+  int font;           // (SA)
+  int textStyle;      // ( optional ) style, normal and shadowed are it for
+                      // now
   float lineHeight;
   const char *text;           // display text
   void *parent;               // menu owner
@@ -364,15 +375,17 @@ typedef struct itemDef_s {
   const char *hOffset;
   const char *yOffset;
 
-  comboDef_t comboData;
+  ComboDef comboData;
 
   colorSliderDef_t colorSliderData;
   bool tooltipAbove;
 
   textScroll_t textScroll;
 
-  bool cacheCvar; // update cvar value only when itemCapture ends
-  const char *cacheCvarValue;
+  // sliders & editfields - update cvar value only when itemCapture/edit ends
+  bool cacheCvar;
+  // allocated if 'cacheCvar' is used on an item, 'MAX_CVAR_VALUE_STRING' bytes
+  char *cacheCvarValue;
 } itemDef_t;
 
 typedef struct {
@@ -443,8 +456,11 @@ typedef struct {
   qhandle_t scrollBarArrowDown;
   qhandle_t scrollBarArrowLeft;
   qhandle_t scrollBarArrowRight;
+  qhandle_t scrollBarArrowUpActive;
+  qhandle_t scrollBarArrowDownActive;
+  qhandle_t scrollBarArrowLeftActive;
+  qhandle_t scrollBarArrowRightActive;
   qhandle_t scrollBar;
-  qhandle_t scrollBarThumb;
   qhandle_t buttonMiddle;
   qhandle_t buttonInside;
   qhandle_t solidBox;
@@ -488,29 +504,23 @@ typedef struct {
   qhandle_t (*registerShaderNoMip)(const char *p);
   void (*setColor)(const vec4_t v);
   void (*drawHandlePic)(float x, float y, float w, float h, qhandle_t asset);
-  void (*drawStretchPic)(float x, float y, float w, float h, float s1, float t1,
-                         float s2, float t2, qhandle_t hShader);
-  void (*drawText)(float x, float y, float scale, const vec4_t color,
-                   const char *text, float adjust, int limit, int style);
-  void (*drawTextExt)(float x, float y, float scalex, float scaley,
-                      const vec4_t color, const char *text, float adjust,
+  void (*drawStretchPic)(float x, float y, float w, float h, float s1, float t1, float s2, float t2, qhandle_t hShader);
+  void (*drawText)(float x, float y, float scale, const vec4_t color, const char *text, float adjust, int limit,
+                   int style);
+  void (*drawTextExt)(float x, float y, float scalex, float scaley, const vec4_t color, const char *text, float adjust,
                       int limit, int style, fontInfo_t *font);
   int (*textWidth)(const char *text, float scale, int limit);
-  int (*textWidthExt)(const char *text, float scale, int limit,
-                      fontInfo_t *font);
+  int (*textWidthExt)(const char *text, float scale, int limit, fontInfo_t *font);
   int (*multiLineTextWidth)(const char *text, float scale, int limit);
   int (*textHeight)(const char *text, float scale, int limit);
-  int (*textHeightExt)(const char *text, float scale, int limit,
-                       fontInfo_t *font);
+  int (*textHeightExt)(const char *text, float scale, int limit, fontInfo_t *font);
   int (*multiLineTextHeight)(const char *text, float scale, int limit);
   void (*textFont)(int font); // NERVE - SMF
   qhandle_t (*registerModel)(const char *p);
   void (*modelBounds)(qhandle_t model, vec3_t min, vec3_t max);
   void (*fillRect)(float x, float y, float w, float h, const vec4_t color);
-  void (*drawRect)(float x, float y, float w, float h, float size,
-                   const vec4_t color);
-  void (*drawRectFixed)(float x, float y, float w, float h, float border,
-                        const vec4_t color);
+  void (*drawRect)(float x, float y, float w, float h, float size, const vec4_t color);
+  void (*drawRectFixed)(float x, float y, float w, float h, float border, const vec4_t color);
   void (*drawSides)(float x, float y, float w, float h, float size);
   void (*drawTopBottom)(float x, float y, float w, float h, float size);
   void (*drawSidesNoScale)(float x, float y, float w, float h, float size);
@@ -519,10 +529,9 @@ typedef struct {
   void (*addRefEntityToScene)(const refEntity_t *re);
   void (*renderScene)(const refdef_t *fd);
   void (*registerFont)(const char *pFontname, int pointSize, fontInfo_t *font);
-  void (*ownerDrawItem)(float x, float y, float w, float h, float text_x,
-                        float text_y, int ownerDraw, int ownerDrawFlags,
-                        int align, float special, float scale, vec4_t color,
-                        qhandle_t shader, int textStyle);
+  void (*ownerDrawItem)(float x, float y, float w, float h, float text_x, float text_y, int ownerDraw,
+                        int ownerDrawFlags, int align, float special, float scale, vec4_t color, qhandle_t shader,
+                        int textStyle);
   float (*getValue)(int ownerDraw, int type);
   qboolean (*ownerDrawVisible)(int flags);
   void (*runScript)(const char **p);
@@ -530,17 +539,14 @@ typedef struct {
   void (*getCVarString)(const char *cvar, char *buffer, int bufsize);
   float (*getCVarValue)(const char *cvar);
   void (*setCVar)(const char *cvar, const char *value);
-  void (*drawTextWithCursor)(float x, float y, float scale, vec4_t color,
-                             vec4_t cursorColor, const char *text,
+  void (*drawTextWithCursor)(float x, float y, float scale, vec4_t color, vec4_t cursorColor, const char *text,
                              int cursorPos, char cursor, int limit, int style);
   void (*setOverstrikeMode)(qboolean b);
   qboolean (*getOverstrikeMode)();
   void (*startLocalSound)(sfxHandle_t sfx, int channelNum);
-  qboolean (*ownerDrawHandleKey)(int ownerDraw, int flags, float *special,
-                                 int key);
+  qboolean (*ownerDrawHandleKey)(int ownerDraw, int flags, float *special, int key);
   int (*feederCount)(float feederID);
-  const char *(*feederItemText)(float feederID, int index, int column,
-                                qhandle_t *handles, int *numhandles);
+  const char *(*feederItemText)(float feederID, int index, int column, qhandle_t *handles, int *numhandles);
   const char *(*fileText)(char *flieName);
   qhandle_t (*feederItemImage)(float feederID, int index);
   void (*feederSelection)(float feederID, int index);
@@ -563,8 +569,7 @@ typedef struct {
   void (*Pause)(qboolean b);
   int (*ownerDrawWidth)(int ownerDraw, float scale);
   sfxHandle_t (*registerSound)(const char *name, qboolean compressed);
-  void (*startBackgroundTrack)(const char *intro, const char *loop,
-                               int fadeupTime);
+  void (*startBackgroundTrack)(const char *intro, const char *loop, int fadeupTime);
   void (*stopBackgroundTrack)();
   int (*playCinematic)(const char *name, float x, float y, float w, float h);
   void (*stopCinematic)(int handle);
@@ -602,8 +607,7 @@ typedef struct {
   std::function<void(itemDef_t *)> updateSliderState;
   std::function<void(const std::string &)> cvarToColorPickerState;
   std::function<void()> resetColorPickerState;
-  std::function<void(itemDef_t *, const float, const float, const int)>
-      colorPickerDragFunc;
+  std::function<void(itemDef_t *, const float, const float, const int)> colorPickerDragFunc;
   std::function<void()> toggleRGBSliderValues;
   std::function<bool()> RGBSlidersAreNormalized;
 
@@ -650,6 +654,7 @@ void scaleMenuSensitivity(int x, int y, float *mdx, float *mdy);
 void computeCursorPosition(int dx, int dy);
 void drawCursor();
 qhandle_t shaderForCrosshair(int crosshairNum, bool isAltShader);
+bool listboxNeedsScrollbar(const itemDef_t *item);
 } // namespace ETJump
 
 int Menu_Count();
@@ -674,8 +679,7 @@ void Display_HandleKey(int key, qboolean down, int x, int y);
 void LerpColor(const vec4_t a, const vec4_t b, vec4_t c, float t);
 void Menus_CloseAll();
 void Menu_Paint(menuDef_t *menu, qboolean forcePaint);
-void Menu_SetFeederSelection(menuDef_t *menu, int feeder, int index,
-                             const char *name);
+void Menu_SetFeederSelection(menuDef_t *menu, int feeder, int index, const char *name);
 void Display_CacheAll();
 
 // TTimo
@@ -747,38 +751,32 @@ struct panel_button_s {
 
 void BG_PanelButton_RenderEdit(panel_button_t *button);
 qboolean BG_PanelButton_EditClick(panel_button_t *button, int key);
-qboolean BG_PanelButtonsKeyEvent(int key, qboolean down,
-                                 std::vector<panel_button_t> &buttons);
+qboolean BG_PanelButtonsKeyEvent(int key, qboolean down, std::vector<panel_button_t> &buttons);
 void BG_PanelButtonsSetup(std::vector<panel_button_t> &buttons);
 void BG_PanelButtonsSetupWide(std::vector<panel_button_t> &buttons);
 void BG_PanelButtonsRender(std::vector<panel_button_t> &buttons);
 void BG_PanelButtonsRender_Text(panel_button_t *button);
 void BG_PanelButtonsRender_TextExt(panel_button_t *button, const char *text);
 void BG_PanelButtonsRender_Img(panel_button_t *button);
-panel_button_t *
-BG_PanelButtonsGetHighlightButton(std::vector<panel_button_t> &buttons);
+panel_button_t *BG_PanelButtonsGetHighlightButton(std::vector<panel_button_t> &buttons);
 void BG_PanelButtons_SetFocusButton(panel_button_t *button);
 panel_button_t *BG_PanelButtons_GetFocusButton(void);
 
-qboolean BG_RectContainsPoint(float x, float y, float w, float h, float px,
-                              float py);
+qboolean BG_RectContainsPoint(float x, float y, float w, float h, float px, float py);
 qboolean BG_CursorInRect(rectDef_t *rect);
 qboolean BG_CursorInRectWide(rectDef_t *rect);
 
-void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size,
-                           fontInfo_t *font);
-void BG_FitTextToWidth_Ext(std::string &instr, float scale, float w,
-                           fontInfo_t *font);
+void BG_FitTextToWidth_Ext(char *instr, float scale, float w, int size, fontInfo_t *font);
+void BG_FitTextToWidth_Ext(std::string &instr, float scale, float w, fontInfo_t *font);
 
 void AdjustFrom640(float *x, float *y, float *w, float *h);
-void SetupRotatedThing(polyVert_t *verts, vec2_t org, float w, float h,
-                       vec_t angle);
+void SetupRotatedThing(polyVert_t *verts, vec2_t org, float w, float h, vec_t angle);
 
 void BG_HSVtoRGB(const vec4_t hsv, vec4_t rgb, bool normalize);
 void BG_RGBtoHSV(const vec4_t rgb, vec4_t hsv);
 
-#define SCREEN_WIDTH DC->screenWidth
-#define SCREEN_HEIGHT DC->screenHeight
+#define SCREEN_WIDTH    DC->screenWidth
+#define SCREEN_HEIGHT   DC->screenHeight
 #define SCREEN_OFFSET_X ((SCREEN_WIDTH - 640) / 2.f)
 #define SCREEN_CENTER_X (SCREEN_WIDTH / 2.f)
 #define SCREEN_CENTER_Y (SCREEN_HEIGHT / 2.f)

@@ -23,6 +23,7 @@
  */
 
 #include "etj_autodemo_recorder.h"
+
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_demo_recorder.h"
@@ -35,19 +36,18 @@
 
 namespace ETJump {
 // constants
-inline constexpr int DEMO_SAVE_DELAY = 500;
+inline constexpr int DEMO_SAVE_DELAY     = 500;
 inline constexpr int DEMO_MAX_SAVE_DELAY = 10000;
-inline constexpr int DEMO_START_TIMEOUT = 500;
-inline constexpr int MAX_TEMP = 20;
-inline constexpr char TEMP_PATH[] = "temp";
+inline constexpr int DEMO_START_TIMEOUT  = 500;
+inline constexpr int MAX_TEMP            = 20;
+inline constexpr char TEMP_PATH[]        = "temp";
 
 inline constexpr int32_t AUTODEMO_TIMERUN_ONLY = 1;
-inline constexpr int32_t AUTODEMO_ALWAYS = 2;
+inline constexpr int32_t AUTODEMO_ALWAYS       = 2;
 
-AutoDemoRecorder::AutoDemoRecorder(
-    const std::shared_ptr<PlayerEventsHandler> &playerEvents,
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
-    : playerEvents(playerEvents), consoleCommands(consoleCommands) {
+AutoDemoRecorder::AutoDemoRecorder(const std::shared_ptr<PlayerEventsHandler> &playerEvents,
+                                   const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+  : playerEvents(playerEvents), consoleCommands(consoleCommands) {
   if (cg.demoPlayback) {
     return;
   }
@@ -75,23 +75,21 @@ void AutoDemoRecorder::startListeners() {
     }
   });
 
-  playerEvents->subscribe(
-      "respawn",
-      [this](const std::vector<std::string> &args) { onRespawn(args); });
+  playerEvents->subscribe("respawn", [this](const std::vector<std::string> &args) {
+    onRespawn(args);
+  });
 
-  playerEvents->subscribe("timerun:completion",
-                          [this](const std::vector<std::string> &args) {
-                            onTimerunEnd(args, false);
-                          });
+  playerEvents->subscribe("timerun:completion", [this](const std::vector<std::string> &args) {
+    onTimerunEnd(args, false);
+  });
 
-  playerEvents->subscribe("timerun:record",
-                          [this](const std::vector<std::string> &args) {
-                            onTimerunEnd(args, true);
-                          });
+  playerEvents->subscribe("timerun:record", [this](const std::vector<std::string> &args) {
+    onTimerunEnd(args, true);
+  });
 
-  consoleCommands->subscribe(
-      "ad_save",
-      [this](const std::vector<std::string> &args) { onManualSave(args); });
+  consoleCommands->subscribe("ad_save", [this](const std::vector<std::string> &args) {
+    onManualSave(args);
+  });
 }
 
 void AutoDemoRecorder::onRespawn(const std::vector<std::string> &args) {
@@ -115,8 +113,7 @@ void AutoDemoRecorder::onRespawn(const std::vector<std::string> &args) {
   }
 }
 
-void AutoDemoRecorder::onTimerunEnd(const std::vector<std::string> &args,
-                                    const bool record) {
+void AutoDemoRecorder::onTimerunEnd(const std::vector<std::string> &args, const bool record) {
   if (!etj_autoDemo.integer || args.size() < 3) {
     return;
   }
@@ -138,14 +135,12 @@ void AutoDemoRecorder::onManualSave(const std::vector<std::string> &args) {
   }
 
   if (!cl_demorecording.integer) {
-    CG_AddPMItem(PM_MESSAGE, "^7Not recording a demo.\n",
-                 cgs.media.voiceChatShader);
+    CG_AddPMItem(PM_MESSAGE, "^7Not recording a demo.\n", cgs.media.voiceChatShader);
     return;
   }
 
   if (!DemoRecorder::recordingAutoDemo()) {
-    CG_AddPMItem(PM_MESSAGE, "Not recording an autodemo.\n",
-                 cgs.media.voiceChatShader);
+    CG_AddPMItem(PM_MESSAGE, "Not recording an autodemo.\n", cgs.media.voiceChatShader);
     return;
   }
 
@@ -165,8 +160,7 @@ std::string AutoDemoRecorder::TempNameGenerator::pop() {
 }
 
 std::string AutoDemoRecorder::TempNameGenerator::next() {
-  const std::string name = StringUtils::format("%s/temp_%02d", TEMP_PATH,
-                                               (nameCounter++ % MAX_TEMP) + 1);
+  const std::string name = StringUtils::format("%s/temp_%02d", TEMP_PATH, (nameCounter++ % MAX_TEMP) + 1);
   names.push(name);
   return name;
 }
@@ -217,8 +211,7 @@ void AutoDemoRecorder::restart() {
   }
 }
 
-void AutoDemoRecorder::trySaveTimerunDemo(const std::string &runName,
-                                          const std::string &runTime) {
+void AutoDemoRecorder::trySaveTimerunDemo(const std::string &runName, const std::string &runTime) {
   if (delayedTimerId || !DemoRecorder::recordingAutoDemo()) {
     return;
   }
@@ -230,23 +223,26 @@ void AutoDemoRecorder::trySaveTimerunDemo(const std::string &runName,
   saveTimerunDemo(src, dst);
 }
 
-void AutoDemoRecorder::saveTimerunDemo(const std::string &src,
-                                       const std::string &dst) {
-  const int delay =
-      std::clamp(etj_ad_stopDelay.integer, 0, DEMO_MAX_SAVE_DELAY);
+void AutoDemoRecorder::saveTimerunDemo(const std::string &src, const std::string &dst) {
+  const int delay = std::clamp(etj_ad_stopDelay.integer, 0, DEMO_MAX_SAVE_DELAY);
 
-  delayedTimerId =
-      setTimeout([this, src, dst] { saveDemoWithRestart(src, dst); }, delay);
+  delayedTimerId = setTimeout(
+    [this, src, dst] {
+      saveDemoWithRestart(src, dst);
+    },
+    delay);
 }
 
-void AutoDemoRecorder::saveDemo(const std::string &src,
-                                const std::string &dst) {
+void AutoDemoRecorder::saveDemo(const std::string &src, const std::string &dst) {
   maybeCancelDelayedSave();
-  setTimeout([src, dst] { FileSystem::safeCopy(src, dst); }, DEMO_SAVE_DELAY);
+  setTimeout(
+    [src, dst] {
+      FileSystem::safeCopy(src, dst);
+    },
+    DEMO_SAVE_DELAY);
 }
 
-void AutoDemoRecorder::saveDemoWithRestart(const std::string &src,
-                                           const std::string &dst) {
+void AutoDemoRecorder::saveDemoWithRestart(const std::string &src, const std::string &dst) {
   saveDemo(src, dst);
   CG_AddPMItem(PM_MESSAGE, "^7Demo saved!\n", cgs.media.voiceChatShader);
   CG_Printf("^7Demo saved to %s\n", dst.c_str());
@@ -254,22 +250,16 @@ void AutoDemoRecorder::saveDemoWithRestart(const std::string &src,
 }
 
 std::string AutoDemoRecorder::createDemoPath(const std::string &name) {
-  return StringUtils::format(
-      "demos/%s/%s_%s_%s[%s].dm_84",
-      FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
-      FileSystem::Path::sanitize(cgs.clientinfo[cg.clientNum].cleanname),
-      cgs.rawmapname, FileSystem::Path::sanitize(name), createTimeString());
+  return StringUtils::format("demos/%s/%s_%s_%s[%s].dm_84", FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
+                             FileSystem::Path::sanitize(cgs.clientinfo[cg.clientNum].cleanname), cgs.rawmapname,
+                             FileSystem::Path::sanitize(name), createTimeString());
 }
 
-std::string
-AutoDemoRecorder::createTimerunDemoPath(const std::string &runName,
-                                        const std::string &runTime) {
+std::string AutoDemoRecorder::createTimerunDemoPath(const std::string &runName, const std::string &runTime) {
   return StringUtils::format(
-      "demos/%s/%s_%s_%s_%s[%s].dm_84",
-      FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
-      FileSystem::Path::sanitize(cgs.clientinfo[cg.clientNum].cleanname),
-      cgs.rawmapname, FileSystem::Path::sanitize(runName),
-      formatRunTime(Q_atoi(runTime.c_str())), createTimeString());
+    "demos/%s/%s_%s_%s_%s[%s].dm_84", FileSystem::Path::sanitizeFolder(etj_ad_targetPath.string),
+    FileSystem::Path::sanitize(cgs.clientinfo[cg.clientNum].cleanname), cgs.rawmapname,
+    FileSystem::Path::sanitize(runName), formatRunTime(Q_atoi(runTime.c_str())), createTimeString());
 }
 
 std::string AutoDemoRecorder::createDemoTempPath(const std::string &name) {
@@ -278,9 +268,8 @@ std::string AutoDemoRecorder::createDemoTempPath(const std::string &name) {
 
 std::string AutoDemoRecorder::createTimeString() {
   TimeUtils::Time time = TimeUtils::getCurrentTime(true);
-  return StringUtils::format("%02d-%02d-%d-%02d%02d%02d", time.date.day,
-                             time.date.mon, time.date.year, time.clock.hours,
-                             time.clock.min, time.clock.sec);
+  return StringUtils::format("%02d-%02d-%d-%02d%02d%02d", time.date.day, time.date.mon, time.date.year,
+                             time.clock.hours, time.clock.min, time.clock.sec);
 }
 
 std::string AutoDemoRecorder::formatRunTime(int millis) {

@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
+#include "etj_async_operation.h"
+
 #include <thread>
 
-#include "etj_async_operation.h"
 #include "etj_filesystem.h"
 
 void *AsyncOperation::StartThread(void *data) {
@@ -65,29 +66,29 @@ bool AsyncOperation::BindInt(int index, int value) {
   return true;
 }
 
-sqlite3_stmt *AsyncOperation::GetStatement() { return stmt_; }
+sqlite3_stmt *AsyncOperation::GetStatement() {
+  return stmt_;
+}
 
 void AsyncOperation::PrintOpenError(std::string const &operation) {
-  G_LogPrintf("ERROR: failed to open database on %s %s\n", operation.c_str(),
-              GetMessage().c_str());
+  G_LogPrintf("ERROR: failed to open database on %s %s\n", operation.c_str(), GetMessage().c_str());
 }
 
 void AsyncOperation::PrintPrepareError(std::string const &operation) {
-  G_LogPrintf("ERROR: failed to prepare %s statement. %s\n", operation.c_str(),
-              GetMessage().c_str());
+  G_LogPrintf("ERROR: failed to prepare %s statement. %s\n", operation.c_str(), GetMessage().c_str());
 }
 
 void AsyncOperation::PrintBindError(std::string const &operation) {
-  G_LogPrintf("ERROR: failed to bind value to %s statement. %s\n",
-              operation.c_str(), GetMessage().c_str());
+  G_LogPrintf("ERROR: failed to bind value to %s statement. %s\n", operation.c_str(), GetMessage().c_str());
 }
 
 void AsyncOperation::PrintExecuteError(std::string const &operation) {
-  G_LogPrintf("ERROR: failed to execute %s. %s\n", operation.c_str(),
-              GetMessage().c_str());
+  G_LogPrintf("ERROR: failed to execute %s. %s\n", operation.c_str(), GetMessage().c_str());
 }
 
-std::string AsyncOperation::GetMessage() const { return errorMessage_; }
+std::string AsyncOperation::GetMessage() const {
+  return errorMessage_;
+}
 
 bool AsyncOperation::ExecuteStatement() {
   int rc = sqlite3_step(stmt_);
@@ -103,8 +104,7 @@ int AsyncOperation::GetParameterIndex(std::string const &param) {
 }
 
 bool AsyncOperation::BindString(int index, std::string const &value) {
-  int rc = sqlite3_bind_text(stmt_, index, value.c_str(), value.length(),
-                             SQLITE_STATIC);
+  int rc = sqlite3_bind_text(stmt_, index, value.c_str(), value.length(), SQLITE_STATIC);
   if (rc != SQLITE_OK) {
     errorMessage_ = sqlite3_errmsg(db_);
     return false;

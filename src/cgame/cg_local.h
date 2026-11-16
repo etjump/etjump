@@ -14,27 +14,29 @@
 #ifndef CG_LOCAL_H
 #define CG_LOCAL_H
 
-#include "../game/q_shared.h"
-#include "../game/bg_public.h"
-#include "../ui/ui_shared.h"
+#include <optional>
 
-#include "tr_types.h"
 #include "cg_public.h"
 #include "etj_local.h"
+#include "tr_types.h"
+
+#include "../game/bg_public.h"
+#include "../game/q_shared.h"
+#include "../ui/ui_shared.h"
 
 inline constexpr float STATS_FADE_TIME = 200.0f;
-inline constexpr int FADE_TIME = 200;
+inline constexpr int FADE_TIME         = 200;
 
 inline constexpr int DAMAGE_DEFLECT_TIME = 100;
-inline constexpr int DAMAGE_RETURN_TIME = 400;
-inline constexpr int DAMAGE_TIME = 500;
-inline constexpr int LAND_DEFLECT_TIME = 150;
-inline constexpr int LAND_RETURN_TIME = 300;
-inline constexpr int STEP_TIME = 200;
-inline constexpr int DUCK_TIME = 100;
-inline constexpr int PAIN_TWITCH_TIME = 200;
-inline constexpr int ZOOM_TIME = 150;
-inline constexpr int MUZZLE_FLASH_TIME = 30;
+inline constexpr int DAMAGE_RETURN_TIME  = 400;
+inline constexpr int DAMAGE_TIME         = 500;
+inline constexpr int LAND_DEFLECT_TIME   = 150;
+inline constexpr int LAND_RETURN_TIME    = 300;
+inline constexpr int STEP_TIME           = 200;
+inline constexpr int DUCK_TIME           = 100;
+inline constexpr int PAIN_TWITCH_TIME    = 200;
+inline constexpr int ZOOM_TIME           = 150;
+inline constexpr int MUZZLE_FLASH_TIME   = 30;
 // time for fragments to sink into ground before going away
 inline constexpr int SINK_TIME = 1000;
 
@@ -42,25 +44,22 @@ inline constexpr int PRONE_TIME = 500;
 
 inline constexpr int MAX_STEP_CHANGE = 32;
 
-inline constexpr int MAX_VERTS_ON_POLY = 10;
-inline constexpr int MAX_MARK_POLYS = 256; // JPW NERVE was 1024
-
-inline constexpr int TEAMCHAT_WIDTH = 200;
+inline constexpr int TEAMCHAT_WIDTH  = 200;
 inline constexpr int TEAMCHAT_HEIGHT = 64;
 
-inline constexpr int NOTIFY_WIDTH = 80;
+inline constexpr int NOTIFY_WIDTH  = 80;
 inline constexpr int NOTIFY_HEIGHT = 5;
 
 // Ridah, trails
 inline constexpr int STYPE_STRETCH = 0;
-inline constexpr int STYPE_REPEAT = 1;
+inline constexpr int STYPE_REPEAT  = 1;
 
-inline constexpr int TJFL_FADEIN = 1 << 0;
-inline constexpr int TJFL_CROSSOVER = 1 << 1;
-inline constexpr int TJFL_NOCULL = 1 << 2;
-inline constexpr int TJFL_FIXDISTORT = 1 << 3;
+inline constexpr int TJFL_FADEIN         = 1 << 0;
+inline constexpr int TJFL_CROSSOVER      = 1 << 1;
+inline constexpr int TJFL_NOCULL         = 1 << 2;
+inline constexpr int TJFL_FIXDISTORT     = 1 << 3;
 inline constexpr int TJFL_SPARKHEADFLARE = 1 << 4;
-inline constexpr int TJFL_NOPOLYMERGE = 1 << 5;
+inline constexpr int TJFL_NOPOLYMERGE    = 1 << 5;
 // done.
 
 // OSP
@@ -68,23 +67,23 @@ inline constexpr int TJFL_NOPOLYMERGE = 1 << 5;
 // FIXME: remove
 inline constexpr int AA_DEMORECORD = 0x01;
 inline constexpr int AA_SCREENSHOT = 0x02;
-inline constexpr int AA_STATSDUMP = 0x04;
+inline constexpr int AA_STATSDUMP  = 0x04;
 
 // Demo controls
 inline constexpr int DEMO_THIRDPERSONUPDATE = 0;
-inline constexpr int DEMO_RANGEDELTA = 6;
-inline constexpr int DEMO_ANGLEDELTA = 4;
+inline constexpr int DEMO_RANGEDELTA        = 6;
+inline constexpr int DEMO_ANGLEDELTA        = 4;
 
 // MV overlay
 // FIXME: remove
 inline constexpr int MVINFO_TEXTSIZE = 10;
-inline constexpr int MVINFO_RIGHT = 640 - 3;
-inline constexpr int MVINFO_TOP = 100;
+inline constexpr int MVINFO_RIGHT    = 640 - 3;
+inline constexpr int MVINFO_TOP      = 100;
 
 inline constexpr int MAX_WINDOW_COUNT = 10;
 inline constexpr int MAX_WINDOW_LINES = 64;
 
-inline constexpr int MAX_STRINGS = 80;
+inline constexpr int MAX_STRINGS            = 80;
 inline constexpr int MAX_STRING_POOL_LENGTH = 128;
 
 // For non-true-type: width to scale from
@@ -92,7 +91,7 @@ inline constexpr int WINDOW_FONTWIDTH = 8;
 // For non-true-type: height to scale from
 inline constexpr int WINDOW_FONTHEIGHT = 8;
 
-inline constexpr int WID_NONE = 0x00;  // General window
+inline constexpr int WID_NONE  = 0x00; // General window
 inline constexpr int WID_STATS = 0x01; // Stats (reusable due to scroll effect)
 
 // Size the window based on text/font setting
@@ -133,22 +132,22 @@ inline constexpr int MV_PID = 0x00FF;
 inline constexpr int MV_SELECTED = 0x0100;
 
 typedef struct {
-  vec4_t colorBorder;      // Window border color
-  vec4_t colorBackground;  // Window fill color
-  vec4_t colorBackground2; // Window fill color2 (for flashing)
-  int curX;                // Scrolling X position
-  int curY;                // Scrolling Y position
-  int effects;             // Window effects
-  int flashMidpoint;       // Flashing transition point (in ms)
-  int flashPeriod;         // Background flashing period (in ms)
-  int fontHeight;          // For non-truetype font drawing
-  float fontScaleX;        // Font scale factor
-  float fontScaleY;        // Font scale factor
-  int fontWidth;           // For non-truetype font drawing
-  float h;                 // Height
-  int id;         // Window ID for special handling (i.e. stats, motd, etc.)
-  qboolean inuse; // Activity flag
-  int lineCount;  // Number of lines to display
+  vec4_t colorBorder;               // Window border color
+  vec4_t colorBackground;           // Window fill color
+  vec4_t colorBackground2;          // Window fill color2 (for flashing)
+  int curX;                         // Scrolling X position
+  int curY;                         // Scrolling Y position
+  int effects;                      // Window effects
+  int flashMidpoint;                // Flashing transition point (in ms)
+  int flashPeriod;                  // Background flashing period (in ms)
+  int fontHeight;                   // For non-truetype font drawing
+  float fontScaleX;                 // Font scale factor
+  float fontScaleY;                 // Font scale factor
+  int fontWidth;                    // For non-truetype font drawing
+  float h;                          // Height
+  int id;                           // Window ID for special handling (i.e. stats, motd, etc.)
+  qboolean inuse;                   // Activity flag
+  int lineCount;                    // Number of lines to display
   int lineHeight[MAX_WINDOW_LINES]; // Height property for each line
   char *lineText[MAX_WINDOW_LINES]; // Text info
   float m_x;                        // Mouse X position
@@ -159,11 +158,11 @@ typedef struct {
   int time;                         // Current window time
   float w;                          // Width
   float x;                          // Target x-coordinate
-           //    negative values will align the window from the right
-           //    minus the (window width + offset(x))
-  float y; // Target y-coordinate
-           //    negative values will align the window from the bottom
-           //    minus the (window height + offset(y))
+                                    //    negative values will align the window from the right
+                                    //    minus the (window width + offset(x))
+  float y;                          // Target y-coordinate
+                                    //    negative values will align the window from the bottom
+                                    //    minus the (window height + offset(y))
 } cg_window_t;
 
 typedef struct {
@@ -185,6 +184,7 @@ typedef struct {
   qboolean fActive; // Overlay element is active
   cg_window_t *w;   // Window handle (may be NULL)
 } cg_mvinfo_t;
+
 // OSP
 
 //=================================================
@@ -367,18 +367,6 @@ typedef struct centity_s {
 // local entities are created as a result of events or predicted actions,
 // and live independantly from all server transmitted entities
 
-typedef struct markPoly_s {
-  struct markPoly_s *prevMark, *nextMark;
-  int time;
-  qhandle_t markShader;
-  qboolean alphaFade; // fade alpha instead of rgb
-  float color[4];
-  poly_t poly;
-  polyVert_t verts[MAX_VERTS_ON_POLY];
-
-  int duration; // Ridah
-} markPoly_t;
-
 //----(SA)	moved in from cg_view.c
 typedef enum {
   ZOOM_NONE,
@@ -420,13 +408,13 @@ typedef enum {
 
 typedef enum {
   LEF_PUFF_DONT_SCALE = 0x0001 // do not scale size over time
-  ,
+    ,
   LEF_TUMBLE = 0x0002 // tumble over time, used for ejecting shells
-  ,
+    ,
   LEF_NOFADEALPHA = 0x0004 // Ridah, sparks
-  ,
+    ,
   LEF_SMOKING = 0x0008 // (SA) smoking
-  ,
+    ,
   LEF_TUMBLE_SLOW = 0x0010 // slow down tumble on hitting ground
 } leFlag_t;
 
@@ -704,14 +692,14 @@ inline constexpr int MAX_REWARDSTACK = 5;
 
 inline constexpr int MAX_PREDICTED_EVENTS = 16;
 
-inline constexpr int MAX_SPAWN_VARS = 128;
+inline constexpr int MAX_SPAWN_VARS       = 128;
 inline constexpr int MAX_SPAWN_VARS_CHARS = 2048;
 
 inline constexpr int MAX_SPAWNPOINTS = 32;
-inline constexpr int MAX_SPAWNDESC = 128;
+inline constexpr int MAX_SPAWNDESC   = 128;
 
 inline constexpr int MAX_BUFFERED_SOUNDSCRIPTS = 16;
-inline constexpr int MAX_SOUNDSCRIPT_SOUNDS = 16;
+inline constexpr int MAX_SOUNDSCRIPT_SOUNDS    = 16;
 
 typedef struct soundScriptHandle_s {
   char filename[MAX_QPATH];
@@ -739,8 +727,7 @@ typedef struct soundScript_s {
   soundScriptSound_t *soundList; // pointer into the global list of
                                  // soundScriptSounds (defined below)
 
-  struct soundScript_s
-      *nextHash; // next soundScript in our hashTable list position
+  struct soundScript_s *nextHash; // next soundScript in our hashTable list position
 } soundScript_t;
 
 typedef struct {
@@ -758,7 +745,11 @@ typedef struct {
   team_t team;
 } mapEntityData_t;
 
-typedef enum { SHOW_OFF, SHOW_SHUTDOWN, SHOW_ON } showView_t;
+typedef enum {
+  SHOW_OFF,
+  SHOW_SHUTDOWN,
+  SHOW_ON
+} showView_t;
 
 void CG_ParseMapEntityInfo(int axis_number, int allied_number);
 
@@ -840,9 +831,6 @@ typedef struct {
   // view rendering
   refdef_t refdef;
   vec3_t refdefViewAngles; // will be converted to refdef.viewaxis
-
-  // for etj_smoothAngles, used in place of ps.delta_angles
-  int refdefDeltaAngles[3];
 
   // zoom key
   qboolean zoomed;
@@ -1108,12 +1096,11 @@ typedef struct {
   cg_window_t *motdWindow;
   cg_window_t *msgWstatsWindow;
   cg_window_t *msgWtopshotsWindow;
-  int mv_cnt;       // Number of active MV windows
-  int mvClientList; // Cached client listing of who is merged
-  cg_window_t
-      *mvCurrentActive; // Client ID of current active window (-1 = none)
-  cg_window_t *mvCurrentMainview; // Client ID used in the main display (should
-                                  // always be set if mv_cnt > 0)
+  int mv_cnt;                           // Number of active MV windows
+  int mvClientList;                     // Cached client listing of who is merged
+  cg_window_t *mvCurrentActive;         // Client ID of current active window (-1 = none)
+  cg_window_t *mvCurrentMainview;       // Client ID used in the main display (should
+                                        // always be set if mv_cnt > 0)
   cg_mvinfo_t mvOverlay[MAX_MVCLIENTS]; // Cached info for MV overlay
   int mvTeamList[TEAM_NUM_TEAMS][MAX_MVCLIENTS];
   int mvTotalClients; // Total # of clients available for MV processing
@@ -1303,7 +1290,7 @@ typedef struct {
   qhandle_t ProneNotPressedShader;
 } keys_set_t;
 
-inline constexpr int MAX_LOCKER_DEBRIS = 5;
+inline constexpr int MAX_LOCKER_DEBRIS     = 5;
 inline constexpr int MAX_COMMANDMAP_LAYERS = 4;
 
 // all of the model, shader, and sound references that are
@@ -1397,14 +1384,6 @@ typedef struct {
   // JPW NERVE
   qhandle_t fleshSmokePuffShader; // JPW NERVE for bullet hit flesh
                                   // smoke puffs
-  qhandle_t nerveTestShader;
-  qhandle_t idTestShader;
-  qhandle_t hud1Shader;
-  qhandle_t hud2Shader;
-  qhandle_t hud3Shader;
-  qhandle_t hud4Shader;
-  qhandle_t hud5Shader;
-  // jpw
   qhandle_t smokePuffShader;
   qhandle_t smokePuffRageProShader;
   qhandle_t shotgunSmokePuffShader;
@@ -1840,7 +1819,8 @@ typedef struct {
   qhandle_t portalBlueShader;   // Portal 1
   qhandle_t portalRedShader;    // Portal 2
   qhandle_t portalGreenShader;  // Portal 1 equivalent for other players
-  qhandle_t portalYellowShader; // Portal 2 equivalent for other players
+  qhandle_t portalYellowShader; // Portal 1 equivalent for other players
+  qhandle_t portalTrailShader;
 
   qhandle_t simplePlayersShader;
   qhandle_t saveIcon;
@@ -1864,8 +1844,8 @@ typedef struct {
 } arenaInfo_t;
 
 inline constexpr int MAX_STATIC_GAMEMODELS = 1024;
-inline constexpr int MAX_STATIC_CORONAS = 1024;
-inline constexpr int MAX_STATIC_DLIGHTS = 1024;
+inline constexpr int MAX_STATIC_CORONAS    = 1024;
+inline constexpr int MAX_STATIC_DLIGHTS    = 1024;
 
 typedef struct cg_gamemodel_s {
   qhandle_t model;
@@ -1951,7 +1931,6 @@ typedef struct {
   gametype_t gametype;
   int antilag;
 
-  int shared;
   int pmove_msec;
   int cheats;
 #ifdef ALLOW_GSYNC
@@ -2089,9 +2068,9 @@ typedef struct {
   int cursorUpdate;                 // Timeout for mouse pointer view
   fileHandle_t dumpStatsFile;       // File to dump stats
   char *dumpStatsFileName;          // Name of file to dump stats
-  int dumpStatsTime;    // Next stats command that comes back will be
-                        // written to a logfile
-  int game_versioninfo; // game base version
+  int dumpStatsTime;                // Next stats command that comes back will be
+                                    // written to a logfile
+  int game_versioninfo;             // game base version
   gameStats_t gamestats;
   topshotStats_t topshots;
   qboolean fResize;          // MV window "resize" status
@@ -2155,7 +2134,6 @@ extern cg_t cg;
 extern centity_t cg_entities[MAX_GENTITIES];
 extern weaponInfo_t cg_weapons[MAX_WEAPONS];
 extern itemInfo_t cg_items[MAX_ITEMS];
-extern markPoly_t cg_markPolys[MAX_MARK_POLYS];
 
 extern vmCvar_t cg_centertime;
 extern vmCvar_t cg_runpitch;
@@ -2408,12 +2386,15 @@ extern vmCvar_t etj_speedSize;
 extern vmCvar_t etj_speedColor;
 extern vmCvar_t etj_speedAlpha;
 extern vmCvar_t etj_speedShadow;
+extern vmCvar_t etj_speedColorUsesAccel;
+extern vmCvar_t etj_speedAlign;
+extern vmCvar_t etj_speedPrecision;
+
 extern vmCvar_t etj_drawMaxSpeed;
 extern vmCvar_t etj_maxSpeedX;
 extern vmCvar_t etj_maxSpeedY;
 extern vmCvar_t etj_maxSpeedDuration;
-extern vmCvar_t etj_speedColorUsesAccel;
-extern vmCvar_t etj_speedAlign;
+extern vmCvar_t etj_maxSpeedPrecision;
 
 extern vmCvar_t etj_drawAccel;
 extern vmCvar_t etj_accelX;
@@ -2439,6 +2420,7 @@ extern vmCvar_t etj_popupPosY;
 // Feen: PGM client cvars
 // Enable/Disable viewing other player portals
 extern vmCvar_t etj_viewPlayerPortals;
+extern vmCvar_t etj_portalTrailTime;
 extern vmCvar_t etj_portalDebug;
 extern vmCvar_t etj_portalPredict;
 extern vmCvar_t etj_portalTeam;
@@ -2556,6 +2538,7 @@ extern vmCvar_t etj_checkpointsSize;
 extern vmCvar_t etj_checkpointsShadow;
 extern vmCvar_t etj_checkpointsStyle;
 extern vmCvar_t etj_checkpointsCount;
+extern vmCvar_t etj_checkpointsShowGold;
 
 extern vmCvar_t etj_checkpointsPopup;
 extern vmCvar_t etj_checkpointsPopupX;
@@ -2599,8 +2582,6 @@ extern vmCvar_t etj_explosivesShake;
 extern vmCvar_t etj_realFov;
 extern vmCvar_t etj_stretchCgaz;
 extern vmCvar_t etj_noActivateLean;
-
-extern vmCvar_t shared;
 
 extern vmCvar_t etj_drawObWatcher;
 extern vmCvar_t etj_obWatcherX;
@@ -2691,6 +2672,8 @@ extern vmCvar_t etj_snapHUDTrueness;
 extern vmCvar_t etj_snapHUDEdgeThickness;
 extern vmCvar_t etj_snapHUDBorderThickness;
 extern vmCvar_t etj_snapHUDActiveIsPrimary;
+extern vmCvar_t etj_snapHUDCrop;
+extern vmCvar_t etj_snapHUDCropOffsets;
 
 extern vmCvar_t etj_gunSway;
 extern vmCvar_t etj_drawScoreboardInactivity;
@@ -2711,6 +2694,7 @@ extern vmCvar_t etj_jumpSpeedsTextSize;
 extern vmCvar_t etj_jumpSpeedsMaxJumps;
 extern vmCvar_t etj_jumpSpeedsMaxJumpsPerColumn;
 extern vmCvar_t etj_jumpSpeedsMaxJumpsPerRow;
+extern vmCvar_t etj_jumpSpeedsShowUpmove;
 
 // Strafe quality
 extern vmCvar_t etj_drawStrafeQuality;
@@ -2778,6 +2762,7 @@ extern vmCvar_t etj_drawRecordingStatus;
 extern vmCvar_t etj_recordingStatusX;
 extern vmCvar_t etj_recordingStatusY;
 
+extern vmCvar_t etj_lerpPmove;
 extern vmCvar_t etj_smoothAngles;
 extern vmCvar_t etj_autoSprint;
 
@@ -2799,6 +2784,18 @@ extern vmCvar_t etj_ccMenu_autoClose;
 extern vmCvar_t etj_ccMenu_width;
 extern vmCvar_t etj_ccMenu_browseWithOpen;
 extern vmCvar_t etj_ccMenu_showEmptyPages;
+
+extern vmCvar_t etj_drawYaw;
+extern vmCvar_t etj_yawX;
+extern vmCvar_t etj_yawY;
+extern vmCvar_t etj_yawColor;
+extern vmCvar_t etj_yawShadow;
+extern vmCvar_t etj_yawSize;
+extern vmCvar_t etj_yawWidth;
+
+extern vmCvar_t etj_drawFallDamageDetector;
+extern vmCvar_t etj_fallDamageDetectorX;
+extern vmCvar_t etj_fallDamageDetectorY;
 
 //
 // cg_main.c
@@ -2825,17 +2822,21 @@ void CG_UpdateCvars(void);
 
 int CG_CrosshairPlayer(void);
 int CG_LastAttacker(void);
-void CG_LoadMenus(const char *menuFile);
 void CG_KeyEvent(int key, qboolean down);
 void CG_MouseEvent(int x, int y);
 void CG_EventHandling(int type, qboolean fForced);
 
 qboolean CG_GetTag(int clientNum, char *tagname, orientation_t *orientation);
-qboolean CG_GetWeaponTag(int clientNum, const char *tagname,
-                         orientation_t *orientation);
+qboolean CG_GetWeaponTag(int clientNum, const char *tagname, orientation_t *orientation);
 
 void CG_EncodeQP(const char *in, char *out, int maxlen);
 void CG_DecodeQP(char *line);
+
+namespace ETJump {
+const char *cvarName(const vmCvar_t *cvar);
+const char *cvarDefaultString(const vmCvar_t *cvar);
+void resetCvar(const vmCvar_t *cvar);
+} // namespace ETJump
 
 //
 // cg_view.c
@@ -2855,8 +2856,7 @@ void CG_SetupFrustum(void);
 qboolean CG_CullPoint(vec3_t pt);
 qboolean CG_CullPointAndRadius(const vec3_t pt, vec_t radius);
 
-void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView,
-                        qboolean demoPlayback);
+void CG_DrawActiveFrame(int serverTime, stereoFrame_t stereoView, qboolean demoPlayback);
 void CG_DrawSkyBoxPortal(qboolean fLocalView);
 void CG_Concussive(centity_t *cent);
 
@@ -2868,55 +2868,39 @@ void CG_SetupDlightstyles();
 //
 void CG_AdjustFrom640(float *x, float *y, float *w, float *h);
 void CG_FillRect(const rectDef_t &rect, const float *color);
-void CG_FillRect(float x, float y, float width, float height,
-                 const float *color);
-void CG_FillAngleYaw(float start, float end, float yaw, float y, float h,
-                     float fov, vec4_t const color);
-void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h,
-                        float fov, vec4_t const color, bool borderOnly,
-                        float borderThickness);
+void CG_FillRect(float x, float y, float width, float height, const float *color);
+void CG_FillAngleYaw(float start, float end, float yaw, float y, float h, float fov, vec4_t const color);
+void CG_FillAngleYawExt(float start, float end, float yaw, float y, float h, float fov, vec4_t const color,
+                        bool borderOnly, float borderThickness, std::optional<float> minX, std::optional<float> maxX);
 void drawLineDDA(float x0, float y0, float x1, float y1, const vec4_t color);
-void drawLineDDA(float x0, float y0, float x1, float y1, float w,
-                 const vec4_t color);
-void drawLineWu(float x0, float y0, float x1, float y1, float w,
-                const vec4_t color);
+void drawLineDDA(float x0, float y0, float x1, float y1, float w, const vec4_t color);
+void drawLineWu(float x0, float y0, float x1, float y1, float w, const vec4_t color);
 void drawLineWu(float x0, float y0, float x1, float y1, const vec4_t color);
-void DrawTriangle(float x, float y, float w, float h, float lineW, float angle,
-                  bool fill, const vec4_t color,
+void DrawTriangle(float x, float y, float w, float h, float lineW, float angle, bool fill, const vec4_t color,
                   const vec4_t fillColor = nullptr);
 float AngleToScreenX(float angle, float fov);
 range_t AnglesToRange(float start, float end, float yaw, float fov);
-void CG_HorizontalPercentBar(float x, float y, float width, float height,
-                             float percent);
+void CG_HorizontalPercentBar(float x, float y, float width, float height, float percent);
 void drawPicNoScale(float x, float y, float w, float h, qhandle_t shader);
 void CG_DrawPic(float x, float y, float width, float height, qhandle_t hShader);
-void CG_DrawPicST(float x, float y, float width, float height, float s0,
-                  float t0, float s1, float t1, qhandle_t hShader);
-void CG_DrawRotatedPic(float x, float y, float width, float height,
-                       qhandle_t hShader, float angle); // NERVE - SMF
-void CG_DrawChar(int x, int y, int width, int height, int ch,
-                 qboolean isShadow);
-void CG_FilledBar(float x, float y, float w, float h, const float *startColor,
-                  const float *endColor, const float *bgColor, float frac,
-                  int flags);
+void CG_DrawPicST(float x, float y, float width, float height, float s0, float t0, float s1, float t1,
+                  qhandle_t hShader);
+void CG_DrawRotatedPic(float x, float y, float width, float height, qhandle_t hShader, float angle); // NERVE - SMF
+void CG_DrawChar(int x, int y, int width, int height, int ch, qboolean isShadow);
+void CG_FilledBar(float x, float y, float w, float h, const float *startColor, const float *endColor,
+                  const float *bgColor, float frac, int flags);
 // JOSEPH 10-26-99
-void CG_DrawStretchPic(float x, float y, float width, float height,
-                       qhandle_t hShader);
+void CG_DrawStretchPic(float x, float y, float width, float height, qhandle_t hShader);
 // END JOSEPH
-void CG_DrawString(float x, float y, const char *string, float charWidth,
-                   float charHeight, const float *modulate);
+void CG_DrawString(float x, float y, const char *string, float charWidth, float charHeight, const float *modulate);
 
-void CG_DrawStringExt(int x, int y, const char *string, const float *setColor,
-                      qboolean forceColor, qboolean shadow, int charWidth,
-                      int charHeight, int maxChars);
+void CG_DrawStringExt(int x, int y, const char *string, const float *setColor, qboolean forceColor, qboolean shadow,
+                      int charWidth, int charHeight, int maxChars);
 // JOSEPH 4-17-00
-void CG_DrawStringExt2(int x, int y, const char *string, const float *setColor,
-                       qboolean forceColor, qboolean shadow, int charWidth,
-                       int charHeight, int maxChars);
-void CG_DrawStringExt_Shadow(int x, int y, const char *string,
-                             const float *setColor, qboolean forceColor,
-                             int shadow, int charWidth, int charHeight,
-                             int maxChars);
+void CG_DrawStringExt2(int x, int y, const char *string, const float *setColor, qboolean forceColor, qboolean shadow,
+                       int charWidth, int charHeight, int maxChars);
+void CG_DrawStringExt_Shadow(int x, int y, const char *string, const float *setColor, qboolean forceColor, int shadow,
+                             int charWidth, int charHeight, int maxChars);
 // END JOSEPH
 void CG_DrawBigString(int x, int y, const char *s, float alpha);
 void CG_DrawBigStringColor(int x, int y, const char *s, vec4_t color);
@@ -2933,16 +2917,13 @@ int CG_DrawStrlen(const char *str);
 namespace ETJump {
 int DrawStringWidth(const char *text, float scalex);
 int DrawStringHeight(const char *text, float scalex);
-int MaxCharsForWidth(const char *text, float scalex, float width,
-                     fontInfo_t *font);
-void DrawString(float x, float y, float scalex, float scaley,
-                const vec4_t color, qboolean forceColor, const char *text,
+int MaxCharsForWidth(const char *text, float scalex, float width, fontInfo_t *font);
+void DrawString(float x, float y, float scalex, float scaley, const vec4_t color, qboolean forceColor, const char *text,
                 int limit, int style);
 void DrawMiniString(int x, int y, const char *s, float alpha);
 void DrawSmallString(int x, int y, const char *s, float alpha);
 void DrawBigString(int x, int y, const char *s, float alpha);
-void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader,
-             const vec4_t mainColor = nullptr,
+void drawPic(float x, float y, float sizex, float sizey, qhandle_t hShader, const vec4_t mainColor = nullptr,
              const vec4_t shadowColor = nullptr);
 } // namespace ETJump
 
@@ -2953,15 +2934,12 @@ void CG_TileClear(void);
 void CG_ColorForHealth(vec4_t hcolor);
 void CG_GetColorForHealth(int health, vec4_t hcolor);
 
-void UI_DrawProportionalString(int x, int y, const char *str, int style,
-                               vec4_t color);
+void UI_DrawProportionalString(int x, int y, const char *str, int style, vec4_t color);
 
 // new hud stuff
 void CG_DrawRect(const rectDef_t &rect, float size, const float *color);
-void CG_DrawRect(float x, float y, float width, float height, float size,
-                 const float *color);
-void CG_DrawRect_FixedBorder(float x, float y, float width, float height,
-                             float border, const vec4_t color);
+void CG_DrawRect(float x, float y, float width, float height, float size, const float *color);
+void CG_DrawRect_FixedBorder(float x, float y, float width, float height, float border, const vec4_t color);
 void CG_DrawSides(float x, float y, float w, float h, float size);
 void CG_DrawSides_NoScale(float x, float y, float w, float h, float size);
 void CG_DrawTopBottom(float x, float y, float w, float h, float size);
@@ -2970,8 +2948,6 @@ void CG_DrawTopBottom_NoScale(float x, float y, float w, float h, float size);
 //
 // cg_draw.c, cg_newDraw.c
 //
-extern char cg_fxflags; // JPW NERVE
-
 void CG_InitStatsDebug(void);
 void CG_StatsDebugAddText(const char *text);
 
@@ -2984,40 +2960,26 @@ void CG_ObjectivePrint(const char *str, int charWidth); // NERVE - SMF
 void CG_DrawActive(stereoFrame_t stereoView);
 void CG_CheckForCursorHints(void);
 void CG_DrawTeamBackground(int x, int y, int w, int h, float alpha, int team);
-void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
-                       const vec4_t color, const char *text, float adjust,
+void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley, const vec4_t color, const char *text, float adjust,
                        int limit, int style, fontInfo_t *font);
-void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley,
-                       const vec4_t color, const std::string &text,
+void CG_Text_Paint_Ext(float x, float y, float scalex, float scaley, const vec4_t color, const std::string &text,
                        float adjust, int limit, int style, fontInfo_t *font);
-void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
-                               const vec4_t color, const char *text,
-                               float adjust, int limit, int style,
-                               fontInfo_t *font);
-void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley,
-                               const vec4_t color, const std::string &text,
-                               float adjust, int limit, int style,
-                               fontInfo_t *font);
-void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
-                                    float scaley, const vec4_t color,
-                                    const char *text, float adjust, int limit,
-                                    int style, fontInfo_t *font);
-void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex,
-                                    float scaley, const vec4_t color,
-                                    const std::string &text, float adjust,
-                                    int limit, int style, fontInfo_t *font);
-void CG_Text_Paint(float x, float y, float scale, const vec4_t color,
-                   const char *text, float adjust, int limit, int style);
+void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley, const vec4_t color, const char *text,
+                               float adjust, int limit, int style, fontInfo_t *font);
+void CG_Text_Paint_Centred_Ext(float x, float y, float scalex, float scaley, const vec4_t color,
+                               const std::string &text, float adjust, int limit, int style, fontInfo_t *font);
+void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex, float scaley, const vec4_t color, const char *text,
+                                    float adjust, int limit, int style, fontInfo_t *font);
+void CG_Text_Paint_RightAligned_Ext(float x, float y, float scalex, float scaley, const vec4_t color,
+                                    const std::string &text, float adjust, int limit, int style, fontInfo_t *font);
+void CG_Text_Paint(float x, float y, float scale, const vec4_t color, const char *text, float adjust, int limit,
+                   int style);
 void CG_Text_SetActiveFont(int font);
-int CG_Text_Width_Ext(const char *text, float scale, int limit,
-                      fontInfo_t *font);
-int CG_Text_Width_Ext(const std::string &text, float scale, int limit,
-                      fontInfo_t *font);
+int CG_Text_Width_Ext(const char *text, float scale, int limit, fontInfo_t *font);
+int CG_Text_Width_Ext(const std::string &text, float scale, int limit, fontInfo_t *font);
 int CG_Text_Width(const char *text, float scale, int limit);
-int CG_Text_Height_Ext(const char *text, float scale, int limit,
-                       fontInfo_t *font);
-int CG_Text_Height_Ext(const std::string &text, float scale, int limit,
-                       fontInfo_t *font);
+int CG_Text_Height_Ext(const char *text, float scale, int limit, fontInfo_t *font);
+int CG_Text_Height_Ext(const std::string &text, float scale, int limit, fontInfo_t *font);
 int CG_Text_Height(const char *text, float scale, int limit);
 float CG_GetValue(int ownerDraw,
                   int type); // 'type' is relative or absolute (fractional-'0.5'
@@ -3025,20 +2987,17 @@ float CG_GetValue(int ownerDraw,
 qboolean CG_OwnerDrawVisible(int flags);
 void CG_RunMenuScript(const char **args);
 void CG_GetTeamColor(vec4_t *color);
-void CG_Draw3DModel(float x, float y, float w, float h, qhandle_t model,
-                    qhandle_t skin, vec3_t origin, vec3_t angles);
-void CG_Text_PaintChar_Ext(float x, float y, float w, float h, float scalex,
-                           float scaley, float s, float t, float s2, float t2,
-                           qhandle_t hShader);
-void CG_Text_PaintChar(float x, float y, float width, float height, float scale,
-                       float s, float t, float s2, float t2, qhandle_t hShader);
+void CG_Draw3DModel(float x, float y, float w, float h, qhandle_t model, qhandle_t skin, vec3_t origin, vec3_t angles);
+void CG_Text_PaintChar_Ext(float x, float y, float w, float h, float scalex, float scaley, float s, float t, float s2,
+                           float t2, qhandle_t hShader);
+void CG_Text_PaintChar(float x, float y, float width, float height, float scale, float s, float t, float s2, float t2,
+                       qhandle_t hShader);
 qboolean CG_YourTeamHasFlag();
 qboolean CG_OtherTeamHasFlag();
 void CG_DrawCursorhint(rectDef_t *rect);
 void CG_DrawWeapStability(rectDef_t *rect);
 void CG_DrawWeapHeat(rectDef_t *rect, int align);
-void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted,
-                             int align, const vec4_t *refcolor);
+void CG_DrawPlayerWeaponIcon(rectDef_t *rect, qboolean drawHighlighted, int align, const vec4_t *refcolor);
 int CG_CalculateReinfTime(qboolean menu);
 float CG_CalculateReinfTime_Float(qboolean menu);
 void CG_Fade(int r, int g, int b, int a, int time, int duration);
@@ -3048,17 +3007,17 @@ void CG_DrawMortarReticle();
 
 // flags for CG_FilledBar
 enum FilledBarFlags {
-  BAR_LEFT = 1 << 0,
-  BAR_CENTER = 1 << 1,
-  BAR_VERT = 1 << 2,
+  BAR_LEFT       = 1 << 0,
+  BAR_CENTER     = 1 << 1,
+  BAR_VERT       = 1 << 2,
   BAR_NOHUDALPHA = 1 << 3,
-  BAR_BG = 1 << 4,
+  BAR_BG         = 1 << 4,
   // different spacing modes for use w/ BAR_BG
   BAR_BGSPACING_X0Y5 = 1 << 5,
   BAR_BGSPACING_X0Y0 = 1 << 6,
 
-  BAR_LERP_COLOR = 1 << 8,
-  BAR_BORDER = 1 << 9,
+  BAR_LERP_COLOR   = 1 << 8,
+  BAR_BORDER       = 1 << 9,
   BAR_BORDER_SMALL = 1 << 10,
 };
 
@@ -3068,15 +3027,13 @@ enum FilledBarFlags {
 qboolean CG_EntOnFire(centity_t *cent); // Ridah
 void CG_Player(centity_t *cent);
 void CG_ResetPlayerEntity(centity_t *cent);
-void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team,
-                                 entityState_t *es, const vec3_t fireRiseDir);
+void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team, entityState_t *es, const vec3_t fireRiseDir);
 void CG_NewClientInfo(int clientNum);
 sfxHandle_t CG_CustomSound(int clientNum, const char *soundName);
 void CG_ParseTeamXPs(int n);
 // etjump transparency stuff
 void ETJump_SetEntityAutoTransparency(refEntity_t *ent);
-void ETJump_SetEntityRGBA(refEntity_t *ent, float red, float green, float blue,
-                          float alpha);
+void ETJump_SetEntityRGBA(refEntity_t *ent, float red, float green, float blue, float alpha);
 
 // Rafael particles
 extern qboolean initparticles;
@@ -3087,15 +3044,14 @@ int CG_NewParticleArea(int num);
 //
 void CG_BuildSolidList(void);
 int CG_PointContents(const vec3_t point, int passEntityNum);
-void CG_Trace(trace_t *result, const vec3_t start, const vec3_t mins,
-              const vec3_t maxs, const vec3_t end, int skipNumber, int mask);
-void CG_FTTrace(trace_t *result, const vec3_t start, const vec3_t mins,
-                const vec3_t maxs, const vec3_t end, int skipNumber, int mask);
+void CG_Trace(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
+              int skipNumber, int mask);
+void CG_FTTrace(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
+                int skipNumber, int mask);
 void CG_PredictPlayerState(void);
 // void CG_LoadDeferredPlayers( void );
-void CG_TraceCapsule(trace_t *result, const vec3_t start, const vec3_t mins,
-                     const vec3_t maxs, const vec3_t end, int skipNumber,
-                     int mask);
+void CG_TraceCapsule(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
+                     int skipNumber, int mask);
 
 void CG_RunBindingBuf(int key, qboolean down, char *buf);
 void CG_RunBinding(int key, qboolean down);
@@ -3115,17 +3071,16 @@ void CG_PrecacheFXSounds(void);
 void CG_SetEntitySoundPosition(centity_t *cent);
 void CG_AddPacketEntities(void);
 void CG_Beam(centity_t *cent);
-void CG_AdjustPositionForMover(const vec3_t in, int moverNum, int fromTime,
-                               int toTime, vec3_t out, vec3_t outDeltaAngles);
+void CG_AdjustPositionForMover(const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out,
+                               vec3_t outDeltaAngles);
 void CG_AddCEntity(centity_t *cent);
 qboolean CG_AddCEntity_Filter(centity_t *cent);
 qboolean CG_AddLinkedEntity(centity_t *cent, qboolean ignoreframe, int atTime);
-void CG_PositionEntityOnTag(refEntity_t *entity, const refEntity_t *parent,
-                            const char *tagName, int startIndex,
+void CG_PositionEntityOnTag(refEntity_t *entity, const refEntity_t *parent, const char *tagName, int startIndex,
                             vec3_t *offset);
-void CG_PositionRotatedEntityOnTag(refEntity_t *entity,
-                                   const refEntity_t *parent,
-                                   const char *tagName);
+// 'spawnTime' is the start time of the portal spawn animation
+void CG_DrawPortalGate(const entityState_t *es, int spawnTime);
+void CG_PositionRotatedEntityOnTag(refEntity_t *entity, const refEntity_t *parent, const char *tagName);
 void CG_Corona(centity_t *cent);
 void CG_AddLightstyle(centity_t *cent);
 
@@ -3154,8 +3109,7 @@ void CG_MissileHitWall(int weapon, int clientNum, vec3_t origin, vec3_t dir,
                        int surfaceFlags); //	(SA) modified to send
                                           // missilehitwall surface parameters
 
-void CG_MissileHitWallSmall(int weapon, int clientNum, vec3_t origin,
-                            vec3_t dir);
+void CG_MissileHitWallSmall(int weapon, int clientNum, vec3_t origin, vec3_t dir);
 void CG_DrawTracer(vec3_t start, vec3_t finish);
 
 // Rafael
@@ -3172,38 +3126,32 @@ qboolean CG_MonsterUsingWeapon(centity_t *cent, int aiChar, int weaponNum);
 void CG_MissileHitWall2(int weapon, int clientNum, vec3_t origin, vec3_t dir);
 // done
 
-void CG_MissileHitPlayer(centity_t *cent, int weapon, vec3_t origin, vec3_t dir,
-                         int entityNum);
+void CG_MissileHitPlayer(centity_t *cent, int weapon, vec3_t origin, vec3_t dir, int entityNum);
 qboolean CG_CalcMuzzlePoint(int entityNum, vec3_t muzzle);
-void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh,
-               int fleshEntityNum, int otherEntNum2, float waterfraction,
-               int seed);
+void CG_Bullet(vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, int fleshEntityNum, int otherEntNum2,
+               float waterfraction, int seed);
 
-void CG_RailTrail(const vec3_t start, const vec3_t end, bool box,
-                  const vec3_t color);
+void CG_RailTrail(const vec3_t start, const vec3_t end, bool box, const vec3_t color);
 void CG_RailTrail2(const vec3_t start, const vec3_t end, const vec3_t color);
 void CG_GrappleTrail(centity_t *ent, const weaponInfo_t *wi);
 void CG_AddViewWeapon(playerState_t *ps);
-void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps,
-                        centity_t *cent);
+void CG_AddPlayerWeapon(refEntity_t *parent, playerState_t *ps, centity_t *cent);
 
 void CG_OutOfAmmoChange(qboolean allowforceswitch);
 
 //----(SA) added to header to access from outside cg_weapons.c
-void CG_AddDebris(vec3_t origin, vec3_t dir, int speed, int duration,
-                  int count);
+void CG_AddDebris(vec3_t origin, vec3_t dir, int speed, int duration, int count);
 //----(SA) done
 
-// void CG_ClientDamage( int entnum, int enemynum, int id );
+namespace ETJump {
+void portalTrail(const vec3_t start, const vec3_t end, const vec3_t color);
+}
 
 //
 // cg_marks.c
 //
-void CG_InitMarkPolys(void);
-void CG_AddMarks(void);
-void CG_ImpactMark(qhandle_t markShader, vec3_t origin, vec4_t projection,
-                   float radius, float orientation, float r, float g, float b,
-                   float a, int lifeTime);
+void CG_ImpactMark(qhandle_t markShader, const vec3_t origin, vec4_t projection, float radius, float orientation,
+                   float r, float g, float b, float a, int lifeTime);
 
 // Rafael particles
 //
@@ -3211,26 +3159,21 @@ void CG_ImpactMark(qhandle_t markShader, vec3_t origin, vec4_t projection,
 //
 void CG_ClearParticles(void);
 void CG_AddParticles(void);
-void CG_ParticleSnow(qhandle_t pshader, vec3_t origin, vec3_t origin2, int turb,
-                     float range, int snum);
+void CG_ParticleSnow(qhandle_t pshader, vec3_t origin, vec3_t origin2, int turb, float range, int snum);
 void CG_ParticleSmoke(qhandle_t pshader, centity_t *cent);
 void CG_AddParticleShrapnel(localEntity_t *le);
 void CG_ParticleSnowFlurry(qhandle_t pshader, centity_t *cent);
 void CG_ParticleBulletDebris(vec3_t org, vec3_t vel, int duration);
 void CG_ParticleDirtBulletDebris(vec3_t org, vec3_t vel,
                                  int duration); // DHM - Nerve
-void CG_ParticleDirtBulletDebris_Core(vec3_t org, vec3_t vel, int duration,
-                                      float width, float height, float alpha,
+void CG_ParticleDirtBulletDebris_Core(vec3_t org, vec3_t vel, int duration, float width, float height, float alpha,
                                       qhandle_t shader);
-void CG_ParticleSparks(vec3_t org, vec3_t vel, int duration, float x, float y,
-                       float speed);
+void CG_ParticleSparks(vec3_t org, vec3_t vel, int duration, float x, float y, float speed);
 void CG_ParticleDust(centity_t *cent, vec3_t origin, vec3_t dir);
-void CG_ParticleMisc(qhandle_t pshader, vec3_t origin, int size, int duration,
-                     float alpha);
+void CG_ParticleMisc(qhandle_t pshader, vec3_t origin, int size, int duration, float alpha);
 
 // Ridah
-void CG_ParticleExplosion(const char *animStr, vec3_t origin, vec3_t vel,
-                          int duration, int sizeStart, int sizeEnd,
+void CG_ParticleExplosion(const char *animStr, vec3_t origin, vec3_t vel, int duration, int sizeStart, int sizeEnd,
                           qboolean dlight);
 
 // Rafael snow pvs check
@@ -3238,17 +3181,13 @@ void CG_SnowLink(centity_t *cent, qboolean particleOn);
 // done.
 
 void CG_ParticleImpactSmokePuff(qhandle_t pshader, vec3_t origin);
-void CG_ParticleImpactSmokePuffExtended(
-    qhandle_t pshader, vec3_t origin, int lifetime, int vel, int acc,
-    int maxroll, float alpha,
-    float size); // (SA) so I can add more parameters without screwing up the
-                 // one that's there
-void CG_Particle_Bleed(qhandle_t pshader, vec3_t start, vec3_t dir,
-                       int fleshEntityNum, int duration);
-void CG_GetBleedOrigin(vec3_t head_origin, vec3_t body_origin,
-                       int fleshEntityNum);
-void CG_Particle_OilParticle(qhandle_t pshader, vec3_t origin, vec3_t origin2,
-                             int ptime, int snum);
+void CG_ParticleImpactSmokePuffExtended(qhandle_t pshader, vec3_t origin, int lifetime, int vel, int acc, int maxroll,
+                                        float alpha,
+                                        float size); // (SA) so I can add more parameters without screwing up the
+                                                     // one that's there
+void CG_Particle_Bleed(qhandle_t pshader, vec3_t start, vec3_t dir, int fleshEntityNum, int duration);
+void CG_GetBleedOrigin(vec3_t head_origin, vec3_t body_origin, int fleshEntityNum);
+void CG_Particle_OilParticle(qhandle_t pshader, vec3_t origin, vec3_t origin2, int ptime, int snum);
 void CG_Particle_OilSlick(qhandle_t pshader, centity_t *cent);
 void CG_OilSlickRemove(centity_t *cent);
 void CG_ParticleBloodCloudZombie(centity_t *cent, vec3_t origin, vec3_t dir);
@@ -3260,17 +3199,13 @@ void CG_ParticleBloodCloud(centity_t *cent, vec3_t origin, vec3_t dir);
 // cg_trails.c
 //
 // rain - usedby for zinx's trail fixes
-int CG_AddTrailJunc(int headJuncIndex, void *usedby, qhandle_t shader,
-                    int spawnTime, int sType, vec3_t pos, int trailLife,
-                    float alphaStart, float alphaEnd, float startWidth,
-                    float endWidth, int flags, vec3_t colorStart,
-                    vec3_t colorEnd, float sRatio, float animSpeed);
-int CG_AddSparkJunc(int headJuncIndex, void *usedby, qhandle_t shader,
-                    vec3_t pos, int trailLife, float alphaStart, float alphaEnd,
+int CG_AddTrailJunc(int headJuncIndex, void *usedby, qhandle_t shader, int spawnTime, int sType, vec3_t pos,
+                    int trailLife, float alphaStart, float alphaEnd, float startWidth, float endWidth, int flags,
+                    vec3_t colorStart, vec3_t colorEnd, float sRatio, float animSpeed);
+int CG_AddSparkJunc(int headJuncIndex, void *usedby, qhandle_t shader, vec3_t pos, int trailLife, float alphaStart,
+                    float alphaEnd, float startWidth, float endWidth);
+int CG_AddSmokeJunc(int headJuncIndex, void *usedby, qhandle_t shader, vec3_t pos, int trailLife, float alpha,
                     float startWidth, float endWidth);
-int CG_AddSmokeJunc(int headJuncIndex, void *usedby, qhandle_t shader,
-                    vec3_t pos, int trailLife, float alpha, float startWidth,
-                    float endWidth);
 void CG_AddTrails(void);
 void CG_ClearTrails(void);
 // done.
@@ -3281,8 +3216,7 @@ void CG_ClearTrails(void);
 
 // Ridah, sound scripting
 int CG_SoundScriptPrecache(const char *name);
-int CG_SoundPlaySoundScript(const char *name, vec3_t org, int entnum,
-                            qboolean buffer);
+int CG_SoundPlaySoundScript(const char *name, vec3_t org, int entnum, qboolean buffer);
 void CG_UpdateBufferedSoundScripts(void);
 // TTimo: prototype must match animScriptData_t::playSound
 void CG_SoundPlayIndexedScript(int index, vec3_t org, int entnum);
@@ -3302,8 +3236,7 @@ void CG_SetActiveOnScriptSpeaker(int index);
 void CG_AddScriptSpeakers(void);
 
 // Ridah, flamethrower
-void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles,
-                        float speedScale, qboolean firing);
+void CG_FireFlameChunks(centity_t *cent, vec3_t origin, vec3_t angles, float speedScale, qboolean firing);
 void CG_InitFlameChunks(void);
 void CG_AddFlameChunks(void);
 void CG_UpdateFlamethrowerSounds(void);
@@ -3320,13 +3253,10 @@ void CG_AddLocalEntities(void);
 //
 // cg_effects.c
 //
-int CG_GetOriginForTag(centity_t *cent, refEntity_t *parent,
-                       const char *tagName, int startIndex, vec3_t org,
+int CG_GetOriginForTag(centity_t *cent, refEntity_t *parent, const char *tagName, int startIndex, vec3_t org,
                        vec3_t axis[3]);
-localEntity_t *CG_SmokePuff(const vec3_t p, const vec3_t vel, float radius,
-                            float r, float g, float b, float a, float duration,
-                            int startTime, int fadeInTime, int leFlags,
-                            qhandle_t hShader);
+localEntity_t *CG_SmokePuff(const vec3_t p, const vec3_t vel, float radius, float r, float g, float b, float a,
+                            float duration, int startTime, int fadeInTime, int leFlags, qhandle_t hShader);
 
 void CG_BubbleTrail(vec3_t start, vec3_t end, float size, float spacing);
 void CG_SpawnEffect(vec3_t org);
@@ -3335,8 +3265,8 @@ void CG_LoseHat(centity_t *cent, vec3_t dir); //----(SA)	added
 
 void CG_Bleed(vec3_t origin, int entityNum);
 
-localEntity_t *CG_MakeExplosion(vec3_t origin, vec3_t dir, qhandle_t hModel,
-                                qhandle_t shader, int msec, qboolean isSprite);
+localEntity_t *CG_MakeExplosion(vec3_t origin, vec3_t dir, qhandle_t hModel, qhandle_t shader, int msec,
+                                qboolean isSprite);
 // Ridah
 void CG_SparklerSparks(vec3_t origin, int count);
 void CG_ClearFlameChunks(void);
@@ -3544,14 +3474,11 @@ void trap_Print(const char *fmt);
 [[noreturn]] void trap_Error(const char *fmt);
 
 // console variable interaction
-void trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName,
-                        const char *defaultValue, int flags);
+void trap_Cvar_Register(vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags);
 void trap_Cvar_Update(vmCvar_t *vmCvar);
 void trap_Cvar_Set(const char *var_name, const char *value);
-void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer,
-                                    int bufsize);
-void trap_Cvar_LatchedVariableStringBuffer(const char *var_name, char *buffer,
-                                           int bufsize);
+void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer, int bufsize);
+void trap_Cvar_LatchedVariableStringBuffer(const char *var_name, char *buffer, int bufsize);
 
 // ServerCommand and ConsoleCommand parameter access
 int trap_Argc(void);
@@ -3564,8 +3491,7 @@ int trap_FS_FOpenFile(const char *qpath, fileHandle_t *f, fsMode_t mode);
 void trap_FS_Read(void *buffer, int len, fileHandle_t f);
 int trap_FS_Write(const void *buffer, int len, fileHandle_t f);
 void trap_FS_FCloseFile(fileHandle_t f);
-int trap_FS_GetFileList(const char *path, const char *extension, char *listbuf,
-                        int bufsize);
+int trap_FS_GetFileList(const char *path, const char *extension, char *listbuf, int bufsize);
 int trap_FS_Delete(const char *filename);
 
 // add commands to the local console as if they were typed in
@@ -3594,49 +3520,35 @@ clipHandle_t trap_CM_InlineModel(int index); // 0 = world, 1+ = bmodels
 clipHandle_t trap_CM_TempBoxModel(const vec3_t mins, const vec3_t maxs);
 clipHandle_t trap_CM_TempCapsuleModel(const vec3_t mins, const vec3_t maxs);
 int trap_CM_PointContents(const vec3_t p, clipHandle_t model);
-int trap_CM_TransformedPointContents(const vec3_t p, clipHandle_t model,
-                                     const vec3_t origin, const vec3_t angles);
-void trap_CM_BoxTrace(trace_t *results, const vec3_t start, const vec3_t end,
-                      const vec3_t mins, const vec3_t maxs, clipHandle_t model,
-                      int brushmask);
-void trap_CM_TransformedBoxTrace(trace_t *results, const vec3_t start,
-                                 const vec3_t end, const vec3_t mins,
-                                 const vec3_t maxs, clipHandle_t model,
-                                 int brushmask, const vec3_t origin,
+int trap_CM_TransformedPointContents(const vec3_t p, clipHandle_t model, const vec3_t origin, const vec3_t angles);
+void trap_CM_BoxTrace(trace_t *results, const vec3_t start, const vec3_t end, const vec3_t mins, const vec3_t maxs,
+                      clipHandle_t model, int brushmask);
+void trap_CM_TransformedBoxTrace(trace_t *results, const vec3_t start, const vec3_t end, const vec3_t mins,
+                                 const vec3_t maxs, clipHandle_t model, int brushmask, const vec3_t origin,
                                  const vec3_t angles);
 
-void trap_CM_CapsuleTrace(trace_t *results, const vec3_t start,
-                          const vec3_t end, const vec3_t mins,
-                          const vec3_t maxs, clipHandle_t model, int brushmask);
-void trap_CM_TransformedCapsuleTrace(trace_t *results, const vec3_t start,
-                                     const vec3_t end, const vec3_t mins,
-                                     const vec3_t maxs, clipHandle_t model,
-                                     int brushmask, const vec3_t origin,
+void trap_CM_CapsuleTrace(trace_t *results, const vec3_t start, const vec3_t end, const vec3_t mins, const vec3_t maxs,
+                          clipHandle_t model, int brushmask);
+void trap_CM_TransformedCapsuleTrace(trace_t *results, const vec3_t start, const vec3_t end, const vec3_t mins,
+                                     const vec3_t maxs, clipHandle_t model, int brushmask, const vec3_t origin,
                                      const vec3_t angles);
 
 // Returns the projection of a polygon onto the solid brushes in the world
-int trap_CM_MarkFragments(int numPoints, const vec3_t *points,
-                          const vec3_t projection, int maxPoints,
-                          vec3_t pointBuffer, int maxFragments,
-                          markFragment_t *fragmentBuffer);
+int trap_CM_MarkFragments(int numPoints, const vec3_t *points, const vec3_t projection, int maxPoints,
+                          vec3_t pointBuffer, int maxFragments, markFragment_t *fragmentBuffer);
 
 // ydnar: projects a decal onto brush model surfaces
-void trap_R_ProjectDecal(qhandle_t hShader, int numPoints, vec3_t *points,
-                         vec4_t projection, vec4_t color, int lifeTime,
-                         int fadeTime);
+void trap_R_ProjectDecal(qhandle_t hShader, int numPoints, vec3_t *points, vec4_t projection, vec4_t color,
+                         int lifeTime, int fadeTime);
 void trap_R_ClearDecals(void);
 
 // normal sounds will have their volume dynamically changed as their entity
 // moves and the listener moves
 constexpr int DEFAULT_VOLUME = 127;
-void trap_S_StartSound(vec3_t origin, int entityNum, int entchannel,
-                       sfxHandle_t sfx);
-void trap_S_StartSoundVControl(vec3_t origin, int entityNum, int entchannel,
-                               sfxHandle_t sfx, int volume);
-void trap_S_StartSoundEx(vec3_t origin, int entityNum, int entchannel,
-                         sfxHandle_t sfx, int flags);
-void trap_S_StartSoundExVControl(vec3_t origin, int entityNum, int entchannel,
-                                 sfxHandle_t sfx, int flags, int volume);
+void trap_S_StartSound(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx);
+void trap_S_StartSoundVControl(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx, int volume);
+void trap_S_StartSoundEx(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx, int flags);
+void trap_S_StartSoundExVControl(vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx, int flags, int volume);
 void trap_S_StopStreamingSound(int entnum); // usually AI.  character is talking
                                             // and needs to be shut up /now/
 int trap_S_GetSoundLength(sfxHandle_t sfx);
@@ -3644,14 +3556,11 @@ int trap_S_GetCurrentSoundTime(void); // ydnar
 
 // a local sound is always played full volume
 void trap_S_StartLocalSound(sfxHandle_t sfx, int channelNum);
-void trap_S_StartLocalSoundVControl(sfxHandle_t sfx, int channelNum,
-                                    int volume);
+void trap_S_StartLocalSoundVControl(sfxHandle_t sfx, int channelNum, int volume);
 void trap_S_ClearLoopingSounds(void);
 void trap_S_ClearSounds(qboolean killmusic);
-void trap_S_AddLoopingSound(const vec3_t origin, const vec3_t velocity,
-                            sfxHandle_t sfx, int volume, int soundTime);
-void trap_S_AddRealLoopingSound(const vec3_t origin, const vec3_t velocity,
-                                sfxHandle_t sfx, int range, int volume,
+void trap_S_AddLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
+void trap_S_AddRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume,
                                 int soundTime);
 void trap_S_UpdateEntityPosition(int entityNum, const vec3_t origin);
 
@@ -3661,31 +3570,24 @@ int trap_S_GetVoiceAmplitude(int entityNum);
 
 // repatialize recalculates the volumes of sound as they should be heard by
 // the given entityNum and position
-void trap_S_Respatialize(int entityNum, const vec3_t origin, vec3_t axis[3],
-                         int inwater);
-sfxHandle_t
-trap_S_RegisterSound(const char *sample,
-                     qboolean compressed); // returns buzz if not found
+void trap_S_Respatialize(int entityNum, const vec3_t origin, vec3_t axis[3], int inwater);
+sfxHandle_t trap_S_RegisterSound(const char *sample,
+                                 qboolean compressed); // returns buzz if not found
 void trap_S_StartBackgroundTrack(const char *intro, const char *loop,
                                  int fadeupTime); // empty name stops music
 void trap_S_FadeBackgroundTrack(float targetvol, int time, int num);
 void trap_S_StopBackgroundTrack(void);
-int trap_S_StartStreamingSound(const char *intro, const char *loop, int entnum,
-                               int channel, int attenuation);
+int trap_S_StartStreamingSound(const char *intro, const char *loop, int entnum, int channel, int attenuation);
 void trap_S_FadeAllSound(float targetvol, int time, qboolean stopsounds);
 
 void trap_R_LoadWorldMap(const char *mapname);
 
 // all media should be registered during level startup to prevent
 // hitches during gameplay
-qhandle_t
-trap_R_RegisterModel(const char *name); // returns rgb axis if not found
-qhandle_t
-trap_R_RegisterSkin(const char *name); // returns all white if not found
-qhandle_t
-trap_R_RegisterShader(const char *name); // returns all white if not found
-qhandle_t
-trap_R_RegisterShaderNoMip(const char *name); // returns all white if not found
+qhandle_t trap_R_RegisterModel(const char *name);       // returns rgb axis if not found
+qhandle_t trap_R_RegisterSkin(const char *name);        // returns all white if not found
+qhandle_t trap_R_RegisterShader(const char *name);      // returns all white if not found
+qhandle_t trap_R_RegisterShaderNoMip(const char *name); // returns all white if not found
 
 qboolean trap_R_GetSkinModel(qhandle_t skinid, const char *type,
                              char *name); //----(SA) added
@@ -3699,36 +3601,27 @@ void trap_R_AddRefEntityToScene(const refEntity_t *re);
 
 // polys are intended for simple wall marks, not really for doing
 // significant construction
-void trap_R_AddPolyToScene(qhandle_t hShader, int numVerts,
-                           const polyVert_t *verts);
+void trap_R_AddPolyToScene(qhandle_t hShader, int numVerts, const polyVert_t *verts);
 void trap_R_AddPolyBufferToScene(polyBuffer_t *pPolyBuffer);
 // Ridah
-void trap_R_AddPolysToScene(qhandle_t hShader, int numVerts,
-                            const polyVert_t *verts, int numPolys);
+void trap_R_AddPolysToScene(qhandle_t hShader, int numVerts, const polyVert_t *verts, int numPolys);
 // done.
-void trap_R_AddLightToScene(const vec3_t org, float radius, float intensity,
-                            float r, float g, float b, qhandle_t hShader,
-                            int flags);
-void trap_R_AddCoronaToScene(const vec3_t org, float r, float g, float b,
-                             float scale, int id, qboolean visible);
+void trap_R_AddLightToScene(const vec3_t org, float radius, float intensity, float r, float g, float b,
+                            qhandle_t hShader, int flags);
+void trap_R_AddCoronaToScene(const vec3_t org, float r, float g, float b, float scale, int id, qboolean visible);
 void trap_R_RenderScene(const refdef_t *fd);
 void trap_R_SetColor(const float *rgba); // NULL = 1,1,1,1
-void trap_R_DrawStretchPic(float x, float y, float w, float h, float s1,
-                           float t1, float s2, float t2, qhandle_t hShader);
-void trap_R_DrawRotatedPic(float x, float y, float w, float h, float s1,
-                           float t1, float s2, float t2, qhandle_t hShader,
+void trap_R_DrawStretchPic(float x, float y, float w, float h, float s1, float t1, float s2, float t2,
+                           qhandle_t hShader);
+void trap_R_DrawRotatedPic(float x, float y, float w, float h, float s1, float t1, float s2, float t2,
+                           qhandle_t hShader,
                            float angle); // NERVE - SMF
-void trap_R_DrawStretchPicGradient(float x, float y, float w, float h, float s1,
-                                   float t1, float s2, float t2,
-                                   qhandle_t hShader,
-                                   const float *gradientColor,
-                                   int gradientType);
+void trap_R_DrawStretchPicGradient(float x, float y, float w, float h, float s1, float t1, float s2, float t2,
+                                   qhandle_t hShader, const float *gradientColor, int gradientType);
 void trap_R_Add2dPolys(polyVert_t *verts, int numverts, qhandle_t hShader);
 void trap_R_ModelBounds(clipHandle_t model, vec3_t mins, vec3_t maxs);
-int trap_R_LerpTag(orientation_t *tag, const refEntity_t *refent,
-                   const char *tagName, int startIndex);
-void trap_R_RemapShader(const char *oldShader, const char *newShader,
-                        const char *timeOffset);
+int trap_R_LerpTag(orientation_t *tag, const refEntity_t *refent, const char *tagName, int startIndex);
+void trap_R_RemapShader(const char *oldShader, const char *newShader, const char *timeOffset);
 
 // Save out the old render info so we don't kill the LOD system here
 void trap_R_SaveViewParms();
@@ -3743,10 +3636,8 @@ void trap_R_SaveViewParms();
 void trap_R_RestoreViewParms();
 
 // Set fog
-void trap_R_SetFog(int fogvar, int var1, int var2, float r, float g, float b,
-                   float density);
-void trap_R_SetGlobalFog(qboolean restore, int duration, float r, float g,
-                         float b, float depthForOpaque);
+void trap_R_SetFog(int fogvar, int var1, int var2, float r, float g, float b, float density);
+void trap_R_SetGlobalFog(qboolean restore, int duration, float r, float g, float b, float depthForOpaque);
 
 // The glconfig_t will not change during the life of a cgame.
 // If it needs to change, the entire cgame will be restarted, because
@@ -3781,8 +3672,7 @@ int trap_GetCurrentCmdNumber(void);
 qboolean trap_GetUserCmd(int cmdNumber, usercmd_t *ucmd);
 
 // used for the weapon/holdable select and zoom
-void trap_SetUserCmdValue(int stateValue, int flags, float sensitivityScale,
-                          int mpIdentClient);
+void trap_SetUserCmdValue(int stateValue, int flags, float sensitivityScale, int mpIdentClient);
 void trap_SetClientLerpOrigin(float x, float y, float z); // DHM - Nerve
 
 // aids for VM testing
@@ -3806,15 +3696,13 @@ void trap_SendMoveSpeedsToGame(int entnum, char *movespeeds);
 void trap_UI_Popup(int arg0);
 
 // NERVE - SMF
-qhandle_t getTestShader(void); // JPW NERVE shhh
 void trap_UI_ClosePopup(const char *arg0);
 void trap_Key_GetBindingBuf(int keynum, char *buf, int buflen);
 void trap_Key_SetBinding(int keynum, const char *binding);
 void trap_Key_KeynumToStringBuf(int keynum, char *buf, int buflen);
 // -NERVE - SMF
 
-int trap_CIN_PlayCinematic(const char *arg0, int xpos, int ypos, int width,
-                           int height, int bits);
+int trap_CIN_PlayCinematic(const char *arg0, int xpos, int ypos, int width, int height, int bits);
 e_status trap_CIN_StopCinematic(int handle);
 e_status trap_CIN_RunCinematic(int handle);
 void trap_CIN_DrawCinematic(int handle);
@@ -3831,8 +3719,7 @@ void trap_SendMessage(char *buf, int buflen);
 messageStatus_t trap_MessageStatus(void);
 
 // bani - dynamic shaders
-qboolean trap_R_LoadDynamicShader(const char *shadername,
-                                  const char *shadertext);
+qboolean trap_R_LoadDynamicShader(const char *shadername, const char *shadertext);
 // fretn - render to texture
 void trap_R_RenderToTexture(int textureid, int x, int y, int w, int h);
 int trap_R_GetTextureId(const char *name);
@@ -3844,8 +3731,7 @@ inline constexpr int CAM_PRIMARY = 0; // the main camera for cutscenes, etc.
 qboolean trap_loadCamera(int camNum, const char *name);
 void trap_startCamera(int camNum, int time);
 void trap_stopCamera(int camNum);
-qboolean trap_getCameraInfo(int camNum, int time, vec3_t *origin,
-                            vec3_t *angles, float *fov);
+qboolean trap_getCameraInfo(int camNum, int time, vec3_t *origin, vec3_t *angles, float *fov);
 void CG_SetInitialCamera(const char *name, qboolean startBlack);
 void CG_StartCamera(const char *name, qboolean startBlack);
 void CG_StartInitialCamera();
@@ -3856,19 +3742,17 @@ int CG_LoadCamera(const char *name);
 void CG_FreeCamera(int camNum);
 //----(SA)	end
 
-bg_playerclass_t *CG_PlayerClassForClientinfo(clientInfo_t *ci,
-                                              centity_t *cent);
+bg_playerclass_t *CG_PlayerClassForClientinfo(clientInfo_t *ci, centity_t *cent);
 
-void CG_FitTextToWidth_Ext(char *instr, float scale, float w, int size,
-                           fontInfo_t *font);
+void CG_FitTextToWidth_Ext(char *instr, float scale, float w, int size, fontInfo_t *font);
 int CG_TrimLeftPixels(char *instr, float scale, float w, int size);
 
 void CG_LocateArena(void);
 void CG_CloseMenus();
 void CG_LimboMenu_f(void);
 
-void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
-                         int time, clientInfo_t *ci, qboolean animatedHead);
+void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi, int time, clientInfo_t *ci,
+                         qboolean animatedHead);
 animation_t *CG_GetLimboAnimation(playerInfo_t *pi, const char *name);
 
 typedef struct {
@@ -3884,20 +3768,18 @@ extern animation_t *lastLegsAnim;
 extern qboolean ccInitial;
 
 void CG_MenuCheckPendingAnimation(playerInfo_t *pi);
-void CG_MenuPendingAnimation(playerInfo_t *pi, const char *legsAnim,
-                             const char *torsoAnim, int delay);
-void CG_MenuSetAnimation(playerInfo_t *pi, const char *legsAnim,
-                         const char *torsoAnim, qboolean force,
+void CG_MenuPendingAnimation(playerInfo_t *pi, const char *legsAnim, const char *torsoAnim, int delay);
+void CG_MenuSetAnimation(playerInfo_t *pi, const char *legsAnim, const char *torsoAnim, qboolean force,
                          qboolean clearpending);
 
-inline constexpr int CC_FILTER_AXIS = 1 << 0;
-inline constexpr int CC_FILTER_ALLIES = 1 << 1;
-inline constexpr int CC_FILTER_SPAWNS = 1 << 2;
-inline constexpr int CC_FILTER_CMDPOST = 1 << 3;
-inline constexpr int CC_FILTER_HACABINETS = 1 << 4;
+inline constexpr int CC_FILTER_AXIS          = 1 << 0;
+inline constexpr int CC_FILTER_ALLIES        = 1 << 1;
+inline constexpr int CC_FILTER_SPAWNS        = 1 << 2;
+inline constexpr int CC_FILTER_CMDPOST       = 1 << 3;
+inline constexpr int CC_FILTER_HACABINETS    = 1 << 4;
 inline constexpr int CC_FILTER_CONSTRUCTIONS = 1 << 5;
-inline constexpr int CC_FILTER_DESTRUCTIONS = 1 << 6;
-inline constexpr int CC_FILTER_OBJECTIVES = 1 << 7;
+inline constexpr int CC_FILTER_DESTRUCTIONS  = 1 << 6;
+inline constexpr int CC_FILTER_OBJECTIVES    = 1 << 7;
 
 typedef struct {
   qhandle_t shader;
@@ -3913,8 +3795,7 @@ fireteamData_t *CG_IsOnSameFireteam(int clientNum, int clientNum2);
 // Gordon: Fireteam stuff
 
 // fireteamData_t* CG_IsOnFireteam(		int clientNum );
-#define /*fireteamData_t**/ CG_IsOnFireteam(/*int*/ clientNum) /*{ return*/    \
-  cgs.clientinfo[clientNum].fireteamData                       /*}*/
+#define /*fireteamData_t**/ CG_IsOnFireteam(/*int*/ clientNum) /*{ return*/ cgs.clientinfo[clientNum].fireteamData /*}*/
 fireteamData_t *CG_IsOnSameFireteam(int clientNum, int clientNum2);
 fireteamData_t *CG_IsFireTeamLeader(int clientNum);
 
@@ -3930,9 +3811,8 @@ qboolean CG_FireteamHasClass(int classnum, qboolean selectedonly);
 const char *CG_BuildSelectedFirteamString(void);
 
 // OSP
-#define Pri(x) CG_Printf("[cgnotify]%s", x)
-#define CPri(x)                                                                \
-  CG_CenterPrint(x, SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.2), SMALLCHAR_WIDTH);
+#define Pri(x)  CG_Printf("[cgnotify]%s", x)
+#define CPri(x) CG_CenterPrint(x, SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.2), SMALLCHAR_WIDTH);
 
 // cg_multiview.c
 void CG_mvDelete_f(void);
@@ -3957,8 +3837,7 @@ void CG_mvOverlayClientUpdate(int pID, int index);
 void CG_mvProcessClientList(void);
 void CG_mvTransitionPlayerState(playerState_t *ps);
 void CG_mvUpdateClientInfo(int pID);
-void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h,
-                        float s, int wState, qboolean fSelected);
+void CG_mvWindowOverlay(int pID, float b_x, float b_y, float b_w, float b_h, float s, int wState, qboolean fSelected);
 void CG_mvZoomBinoc(float x, float y, float w, float h);
 void CG_mvZoomSniper(float x, float y, float w, float h);
 
@@ -3991,18 +3870,15 @@ void CG_ParseTagConnects(void);
 // cg_ents.c
 //
 
-void CG_AttachBitsToTank(centity_t *tank, refEntity_t *mg42base,
-                         refEntity_t *mg42upper, refEntity_t *mg42gun,
-                         refEntity_t *player, refEntity_t *flash,
-                         vec_t *playerangles, const char *tagName,
+void CG_AttachBitsToTank(centity_t *tank, refEntity_t *mg42base, refEntity_t *mg42upper, refEntity_t *mg42gun,
+                         refEntity_t *player, refEntity_t *flash, vec_t *playerangles, const char *tagName,
                          qboolean browning);
 
 //
 // cg_character.c
 //
 
-qboolean CG_RegisterCharacter(const char *characterFile,
-                              bg_character_t *character);
+qboolean CG_RegisterCharacter(const char *characterFile, bg_character_t *character);
 bg_character_t *CG_CharacterForClientinfo(clientInfo_t *ci, centity_t *cent);
 bg_character_t *CG_CharacterForPlayerstate(playerState_t *ps);
 void CG_RegisterPlayerClasses(void);
@@ -4011,8 +3887,7 @@ void CG_RegisterPlayerClasses(void);
 // cg_polybus.c
 //
 
-polyBuffer_t *CG_PB_FindFreePolyBuffer(qhandle_t shader, int numVerts,
-                                       int numIndicies);
+polyBuffer_t *CG_PB_FindFreePolyBuffer(qhandle_t shader, int numVerts, int numIndicies);
 void CG_PB_ClearPolyBuffers(void);
 void CG_PB_RenderPolyBuffers(void);
 
@@ -4060,9 +3935,8 @@ void CG_LimboPanel_NameEditFinish(panel_button_t *button);
 void CG_LimboPanel_Setup(void);
 void CG_LimboPanel_Init(void);
 
-void CG_LimboPanel_GetWeaponCardIconData(weapon_t weap, qhandle_t *shader,
-                                         float *w, float *h, float *s0,
-                                         float *t0, float *s1, float *t1);
+void CG_LimboPanel_GetWeaponCardIconData(weapon_t weap, qhandle_t *shader, float *w, float *h, float *s0, float *t0,
+                                         float *s1, float *t1);
 void CG_LimboPanel_RequestObjective(void);
 void CG_LimboPanel_RequestWeaponStats(void);
 qboolean CG_LimboPanel_Draw(void);
@@ -4076,8 +3950,7 @@ int CG_LimboPanel_GetSelectedWeaponNum(void);
 void CG_LimboPanel_SetSelectedWeaponNum(int number);
 bg_playerclass_t *CG_LimboPanel_GetPlayerClass(void);
 weapon_t CG_LimboPanel_GetSelectedWeapon(void);
-weapon_t CG_LimboPanel_GetWeaponForNumber(int number, int slot,
-                                          qboolean ignoreDisabled);
+weapon_t CG_LimboPanel_GetWeaponForNumber(int number, int slot, qboolean ignoreDisabled);
 extWeaponStats_t CG_LimboPanel_GetSelectedWeaponStat(void);
 qboolean CG_LimboPanel_WeaponIsDisabled(int weap);
 qboolean CG_LimboPanel_RealWeaponIsDisabled(weapon_t weap);
@@ -4098,13 +3971,10 @@ typedef struct mapScissor_s {
 } mapScissor_t;
 
 int CG_CurLayerForZ(int z);
-void CG_DrawMap(float x, float y, float w, float h, int mEntFilter,
-                mapScissor_t *scissor, qboolean interactive, float alpha,
-                qboolean borderblend);
-int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
-                          mapScissor_t *scissor, int expand);
-void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw,
-                         mapScissor_t *scissor, int expand);
+void CG_DrawMap(float x, float y, float w, float h, int mEntFilter, mapScissor_t *scissor, qboolean interactive,
+                float alpha, qboolean borderblend);
+int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw, mapScissor_t *scissor, int expand);
+void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw, mapScissor_t *scissor, int expand);
 void CG_CommandMap_SetHighlightText(const char *text, float x, float y);
 void CG_CommandMap_DrawHighlightText(void);
 qboolean CG_CommandCentreSpawnPointClick(void);
@@ -4121,10 +3991,9 @@ inline constexpr int CC_2D_Y = 23;
 inline constexpr int CC_2D_W = 352;
 inline constexpr int CC_2D_H = 352;
 
-void CG_DrawPlayerHead(rectDef_t *rect, bg_character_t *character,
-                       bg_character_t *headcharacter, float yaw, float pitch,
-                       qboolean drawHat, hudHeadAnimNumber_t animation,
-                       qhandle_t painSkin, int rank, qboolean spectator);
+void CG_DrawPlayerHead(rectDef_t *rect, bg_character_t *character, bg_character_t *headcharacter, float yaw,
+                       float pitch, qboolean drawHat, hudHeadAnimNumber_t animation, qhandle_t painSkin, int rank,
+                       qboolean spectator);
 
 //
 // cg_popupmessages.c
@@ -4133,10 +4002,8 @@ void CG_DrawPlayerHead(rectDef_t *rect, bg_character_t *character,
 void CG_InitPM(void);
 void CG_InitPMGraphics(void);
 void CG_UpdatePMLists(void);
-void CG_AddPMItem(popupMessageType_t type, const char *message,
-                  qhandle_t shader);
-void CG_AddPMItemBig(popupMessageBigType_t type, const char *message,
-                     qhandle_t shader);
+void CG_AddPMItem(popupMessageType_t type, const char *message, qhandle_t shader);
+void CG_AddPMItemBig(popupMessageBigType_t type, const char *message, qhandle_t shader);
 void CG_DrawPMItems(void);
 void CG_DrawPMItemsBig(void);
 const char *CG_GetPMItemText(centity_t *cent);
@@ -4147,8 +4014,7 @@ void CG_DrawKeyHint(rectDef_t *rect, const char *binding);
 const char *CG_PickupItemText(int item);
 
 void CG_LoadPanel_Init();
-void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx,
-                          float sy, qhandle_t shader, float pinsize,
+void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float sy, qhandle_t shader, float pinsize,
                           float backheight);
 void CG_LoadPanel_RenderMapPin(panel_button_t *button);
 void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button);
@@ -4157,8 +4023,7 @@ void CG_LoadPanel_RenderLoadingBar(panel_button_t *button);
 void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh);
 
 int CG_CalcViewValues(void);
-void CG_HudHeadAnimation(bg_character_t *ch, lerpFrame_t *lf, int *oldframe,
-                         int *frame, float *backlerp,
+void CG_HudHeadAnimation(bg_character_t *ch, lerpFrame_t *lf, int *oldframe, int *frame, float *backlerp,
                          hudHeadAnimNumber_t animation);
 
 //
@@ -4181,7 +4046,7 @@ void CG_BannerPrint(const char *str);
 void ETJump_DrawDrawables();
 void ETJump_ClearDrawables();
 
-void ETJump_LerpColors(vec4_t *from, vec4_t *to, vec4_t *color, float step);
+void ETJump_LerpColors(const vec4_t *from, const vec4_t *to, vec4_t *color, float step);
 void ETJump_AdjustPosition(float *x);
 float ETJump_AdjustPosition(float x);
 void ETJump_EnableWidthScale(bool enable);

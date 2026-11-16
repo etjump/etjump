@@ -23,14 +23,16 @@
  */
 
 #include "etj_entity_events_handler.h"
+
 #include "../game/etj_string_utilities.h"
 
-ETJump::EntityEventsHandler::EntityEventsHandler() { _callbacks.clear(); }
+ETJump::EntityEventsHandler::EntityEventsHandler() {
+  _callbacks.clear();
+}
 
-bool ETJump::EntityEventsHandler::check(const std::string &eventName,
-                                        centity_t *cent) {
+bool ETJump::EntityEventsHandler::check(const std::string &eventName, centity_t *cent) {
   auto lowercasedCommand = StringUtils::toLowerCase(eventName);
-  auto match = _callbacks.find(lowercasedCommand);
+  auto match             = _callbacks.find(lowercasedCommand);
   if (match != end(_callbacks)) {
     for (const auto &callback : match->second) {
       callback(cent);
@@ -45,23 +47,21 @@ bool ETJump::EntityEventsHandler::check(int event, centity_t *cent) {
   return check(eventName, cent);
 }
 
-bool ETJump::EntityEventsHandler::subscribe(
-    const std::string &eventName,
-    const std::function<void(centity_t *cent)> &callback) {
+bool ETJump::EntityEventsHandler::subscribe(const std::string &eventName,
+                                            const std::function<void(centity_t *cent)> &callback) {
   auto lowercasedCommand = StringUtils::toLowerCase(eventName);
   _callbacks[lowercasedCommand].push_back(callback);
   return true;
 }
 
-bool ETJump::EntityEventsHandler::subscribe(
-    int event, const std::function<void(centity_t *cent)> &callback) {
+bool ETJump::EntityEventsHandler::subscribe(int event, const std::function<void(centity_t *cent)> &callback) {
   auto eventName = StringUtils::format("__event__%d", event);
   return subscribe(eventName, callback);
 }
 
 bool ETJump::EntityEventsHandler::unsubscribe(const std::string &eventName) {
   auto lowercasedCommand = StringUtils::toLowerCase(eventName);
-  auto callback = _callbacks.find(lowercasedCommand);
+  auto callback          = _callbacks.find(lowercasedCommand);
   if (callback == end(_callbacks)) {
     return false;
   }

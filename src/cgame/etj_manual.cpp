@@ -25,9 +25,9 @@
 #include "cg_local.h"
 
 void CG_Manual_f(void) {
-  int i = 0;
-  int argc = trap_Argc();
-  int len = sizeof(commandManuals) / sizeof(commandManuals[0]);
+  int i           = 0;
+  int argc        = trap_Argc();
+  int len         = sizeof(commandManuals) / sizeof(commandManuals[0]);
   const char *cmd = NULL;
 
   if (argc != 2) {
@@ -43,8 +43,7 @@ void CG_Manual_f(void) {
 
   for (; i < len; i++) {
     if (!Q_stricmp(cmd, commandManuals[i].cmd)) {
-      CG_Printf("%s\n\nUsage:\n%s\n\nDescription:\n%s\n", cmd,
-                commandManuals[i].usage, commandManuals[i].description);
+      CG_Printf("%s\n\nUsage:\n%s\n\nDescription:\n%s\n", cmd, commandManuals[i].usage, commandManuals[i].description);
       return;
     }
   }

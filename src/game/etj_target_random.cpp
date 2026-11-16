@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-#include <random>
-
 #include "etj_target_random.h"
+
+#include <random>
 
 namespace ETJump {
 void TargetRandom::spawn(gentity_t *ent) {
@@ -40,8 +40,7 @@ void TargetRandom::spawn(gentity_t *ent) {
   }
 
   if (ent->count2 < ent->count) {
-    G_Error("target_random: 'total' (%i) must be higher than 'chance' (%i).",
-            ent->count2, ent->count);
+    G_Error("target_random: 'total' (%i) must be higher than 'chance' (%i).", ent->count2, ent->count);
   }
 
   ent->use = [](gentity_t *self, gentity_t *other, gentity_t *activator) {
@@ -55,9 +54,7 @@ void TargetRandom::use(gentity_t *self, gentity_t *activator) {
   std::uniform_int_distribution<int32_t> dist(1, self->count2);
 
   const int32_t result = dist(rng);
-  const bool success = self->spawnflags & SF_EXACT_NUMBER
-                           ? result == self->count
-                           : result <= self->count;
+  const bool success   = self->spawnflags & SF_EXACT_NUMBER ? result == self->count : result <= self->count;
 
   if (!success) {
     return;
@@ -66,14 +63,13 @@ void TargetRandom::use(gentity_t *self, gentity_t *activator) {
   // if scriptname is set, call the 'activate' script trigger
   if (self->scriptName) {
     const team_t team = activator->client->sess.sessionTeam;
-    self->activator = activator;
+    self->activator   = activator;
 
     // send team to script too to support 'activate axis/allies'
     // this simplifies usage for mappers so they don't have to create
     // separate entities to fire individual script triggers for either team
     if (team == TEAM_AXIS || team == TEAM_ALLIES) {
-      G_Script_ScriptEvent(self, "activate",
-                           team == TEAM_AXIS ? "axis" : "allies");
+      G_Script_ScriptEvent(self, "activate", team == TEAM_AXIS ? "axis" : "allies");
     } else {
       G_Script_ScriptEvent(self, "activate", nullptr);
     }

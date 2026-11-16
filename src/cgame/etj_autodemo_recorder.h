@@ -25,8 +25,8 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <queue>
+#include <string>
 
 #include "etj_demo_recorder.h"
 
@@ -61,24 +61,21 @@ class AutoDemoRecorder {
 
   void tryRestart();
   void restart();
-  void trySaveTimerunDemo(const std::string &runName,
-                          const std::string &runTime);
+  void trySaveTimerunDemo(const std::string &runName, const std::string &runTime);
   void saveTimerunDemo(const std::string &src, const std::string &dst);
   void saveDemo(const std::string &src, const std::string &dst);
   void saveDemoWithRestart(const std::string &src, const std::string &dst);
 
   static std::string createDemoPath(const std::string &name = "");
-  static std::string createTimerunDemoPath(const std::string &runName,
-                                           const std::string &runTime);
+  static std::string createTimerunDemoPath(const std::string &runName, const std::string &runTime);
   static std::string createDemoTempPath(const std::string &name);
   static std::string createTimeString();
   static std::string formatRunTime(int millis);
   void maybeCancelDelayedSave();
 
 public:
-  AutoDemoRecorder(
-      const std::shared_ptr<PlayerEventsHandler> &playerEvents,
-      const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
+  AutoDemoRecorder(const std::shared_ptr<PlayerEventsHandler> &playerEvents,
+                   const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
   ~AutoDemoRecorder();
 };
 } // namespace ETJump

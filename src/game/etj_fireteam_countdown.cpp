@@ -23,6 +23,7 @@
  */
 
 #include "etj_fireteam_countdown.h"
+
 #include "g_local.h"
 
 namespace ETJump {
@@ -49,9 +50,8 @@ void FireteamCountdown::runFrame() {
   }
 }
 
-void FireteamCountdown::addCountdown(const int clientNum,
-                                     const int8_t seconds) {
-  countdownCommands[clientNum].seconds = seconds;
+void FireteamCountdown::addCountdown(const int clientNum, const int8_t seconds) {
+  countdownCommands[clientNum].seconds         = seconds;
   countdownCommands[clientNum].nextMessageTime = level.time + level.frameTime;
 }
 
@@ -64,9 +64,8 @@ void FireteamCountdown::sendCountdownMessage(const int clientNum) {
   char message[MAX_SAY_TEXT]{};
 
   Com_sprintf(message, sizeof(message),
-              countdownCommands[clientNum].seconds > 0
-                  ? std::to_string(countdownCommands[clientNum].seconds).c_str()
-                  : "GO!");
+              countdownCommands[clientNum].seconds > 0 ? std::to_string(countdownCommands[clientNum].seconds).c_str()
+                                                       : "GO!");
   G_Say(ent, nullptr, SAY_BUDDY, qtrue, message);
 }
 } // namespace ETJump

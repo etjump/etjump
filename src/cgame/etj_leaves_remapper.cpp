@@ -22,21 +22,20 @@
  * SOFTWARE.
  */
 
+#include "etj_leaves_remapper.h"
+
 #include <string>
 
-#include "etj_leaves_remapper.h"
 #include "cg_local.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
 namespace ETJump {
-LeavesRemapper::LeavesRemapper(
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : cvarUpdate(cvarUpdate) {
-  auto shader = composeShader(
-      shaderName,
-      {{"map *white", "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
-        "alphaGen const 0.0"}});
+LeavesRemapper::LeavesRemapper(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate) : cvarUpdate(cvarUpdate) {
+  auto shader =
+    composeShader(shaderName, {
+                                {"map *white", "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA", "alphaGen const 0.0"}
+  });
   trap_R_LoadDynamicShader(shaderName, shader.c_str());
   trap_R_RegisterShader(shaderName);
 

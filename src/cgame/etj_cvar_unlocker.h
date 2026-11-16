@@ -38,8 +38,7 @@ class CvarUnlocker {
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
 
 public:
-  CvarUnlocker(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
-               const vmCvar_t *unlocker, std::string target);
+  CvarUnlocker(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate, const vmCvar_t *unlocker, std::string target);
   ~CvarUnlocker();
   void forceCvarSet(const vmCvar_t *cvar) const;
   void forceCvarSet() const;

@@ -23,13 +23,13 @@
  */
 
 #include "etj_client_rtv_handler.h"
+
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 
 namespace ETJump {
-ClientRtvHandler::ClientRtvHandler(
-    const std::shared_ptr<ClientCommandsHandler> &serverCommands)
-    : serverCommands(serverCommands) {
+ClientRtvHandler::ClientRtvHandler(const std::shared_ptr<ClientCommandsHandler> &serverCommands)
+  : serverCommands(serverCommands) {
   setRtvVoteStatus();
 
   if (rtvVoteActive()) {
@@ -38,11 +38,11 @@ ClientRtvHandler::ClientRtvHandler(
   }
 
   this->serverCommands->subscribe(
-      "openRtvMenu",
-      [](const std::vector<std::string> &) {
-        trap_SendConsoleCommand("openRtvMenu");
-      },
-      false);
+    "openRtvMenu",
+    [](const std::vector<std::string> &) {
+      trap_SendConsoleCommand("openRtvMenu");
+    },
+    false);
 }
 
 ClientRtvHandler::~ClientRtvHandler() {
@@ -51,7 +51,7 @@ ClientRtvHandler::~ClientRtvHandler() {
 
 void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
   char key[MAX_QPATH]; // these are map names so MAX_QPATH is sufficient
-  char value[6]; // can't exceed "MAX_CLIENTS,MAX_CLIENTS" + null terminator
+  char value[6];       // can't exceed "MAX_CLIENTS,MAX_CLIENTS" + null terminator
 
   rtvMaps.clear();
 
@@ -63,12 +63,12 @@ void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
     }
 
     // Parse "playerCount,spectatorCount"
-    int playerCount = 0;
+    int playerCount    = 0;
     int spectatorCount = 0;
-    char *comma = strchr(value, ',');
+    char *comma        = strchr(value, ',');
     if (comma) {
-      *comma = '\0';
-      playerCount = Q_atoi(value);
+      *comma         = '\0';
+      playerCount    = Q_atoi(value);
       spectatorCount = Q_atoi(comma + 1);
     } else {
       // fallback: treat all as player votes if no comma
@@ -76,21 +76,21 @@ void ClientRtvHandler::setRtvConfigStrings(const char *cs) {
       playerCount = Q_atoi(value);
     }
 
-    rtvMaps.emplace_back(
-        RtvMapVoteInfo{key, RtvVoteCountInfo{playerCount, spectatorCount}});
+    rtvMaps.emplace_back(RtvMapVoteInfo{
+      key, RtvVoteCountInfo{playerCount, spectatorCount}
+    });
   }
 }
 
 int ClientRtvHandler::getTotalVotesForMap(int mapIndex) {
-  return rtvMaps[mapIndex].voteCountInfo.playerCount +
-         rtvMaps[mapIndex].voteCountInfo.spectatorCount;
+  return rtvMaps[mapIndex].voteCountInfo.playerCount + rtvMaps[mapIndex].voteCountInfo.spectatorCount;
 }
 
 void ClientRtvHandler::countRtvVotes() {
   rtvVoteYes = {0, 0};
 
   for (size_t i = 0; i < rtvMaps.size(); ++i) {
-    rtvVoteYes.playerCount += rtvMaps[i].voteCountInfo.playerCount;
+    rtvVoteYes.playerCount    += rtvMaps[i].voteCountInfo.playerCount;
     rtvVoteYes.spectatorCount += rtvMaps[i].voteCountInfo.spectatorCount;
   }
 }
@@ -99,7 +99,9 @@ const std::vector<RtvMapVoteInfo> *ClientRtvHandler::getRtvMaps() {
   return &rtvMaps;
 }
 
-RtvVoteCountInfo ClientRtvHandler::getRtvYesVotes() const { return rtvVoteYes; }
+RtvVoteCountInfo ClientRtvHandler::getRtvYesVotes() const {
+  return rtvVoteYes;
+}
 
 void ClientRtvHandler::setRtvVoteStatus() {
   isRtvVote = !Q_stricmpn(cgs.voteString, "Rock The Vote", 13);

@@ -25,7 +25,9 @@
 #pragma once
 
 #include <list>
+
 #include "etj_log.h"
+#include "g_local.h"
 
 namespace ETJump {
 class ChatReplay {
@@ -46,7 +48,7 @@ class ChatReplay {
   };
 
   static constexpr int MAX_CHAT_REPLAY_BUFFER = 10;
-  const std::string chatReplayFile = "chatreplay.json";
+  const std::string chatReplayFile            = "chatreplay.json";
 
   std::unique_ptr<Log> logger;
   std::string errors{};
@@ -61,8 +63,7 @@ public:
   explicit ChatReplay(std::unique_ptr<Log> log);
   ~ChatReplay() = default;
 
-  void createChatMessage(int clientNum, const std::string &name,
-                         const std::string &message, bool encoded);
+  void createChatMessage(int clientNum, const std::string &name, const std::string &message, bool encoded);
 
   void sendChatMessages(gentity_t *ent);
 

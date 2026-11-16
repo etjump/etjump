@@ -62,6 +62,7 @@ menuDef {
         SLIDER              (SETTINGS_ITEM_POS(11), "Checkpoint popup Y:", 0.2, SETTINGS_ITEM_H, etj_checkpointsPopupY 200 0 480 10, "Sets Y position of checkpoint popup\netj_checkpointsPopupY")
         MULTI               (SETTINGS_ITEM_POS(12), "Checkpoint popup size:", 0.2, SETTINGS_ITEM_H, "etj_checkpointsPopupSize", cvarFloatList { "Tiny" 1 "Small" 2 "Medium" 3 "Big" 4 }, "Sets size of checkpoint popups\netj_checkpointsPopupSize")
         YESNO               (SETTINGS_ITEM_POS(13), "Checkpoint popup shadow:", 0.2, SETTINGS_ITEM_H, "etj_checkpointsPopupShadow", "Draw shadow on checkpoint popups\netj_checkpointsPopupShadow")
+        MULTI               (SETTINGS_ITEM_POS(14), "Show gold splits:", 0.2, SETTINGS_ITEM_H, "etj_checkpointsShowGold", cvarFloatList { "No" 0 "Personal bests" 1 "Global bests" 2 }, "Color checkpoint timer gold when matching or beating the best recorded time on a segment\netj_checkpointsShowGold")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

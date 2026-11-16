@@ -26,8 +26,8 @@
 
 #include <vector>
 
-#include "etj_irenderable.h"
 #include "cg_local.h"
+#include "etj_irenderable.h"
 
 namespace ETJump {
 class AreaIndicator : public IRenderable {
@@ -35,25 +35,28 @@ class AreaIndicator : public IRenderable {
   void checkPronePrint(trace_t &trace);
 
   enum class DrawMode {
-    Always = 1,
+    Always  = 1,
     Outside = 2,
-    Inside = 3,
+    Inside  = 3,
   };
 
   struct Indicator {
-    Indicator(vmCvar_t *controlCvar, vmCvar_t *controlCvarX,
-              vmCvar_t *controlCvarY, int contents, int shared,
-              qhandle_t iconShader);
+    Indicator(vmCvar_t *controlCvar, vmCvar_t *controlCvarX, vmCvar_t *controlCvarY, int contents,
+              const AreaOpts *areaOpts, qhandle_t iconShader)
+      : cvar(controlCvar), cvarX(controlCvarX), cvarY(controlCvarY), traceContents(contents), areaOpts(areaOpts),
+        shader(iconShader) {}
 
     vmCvar_t *cvar;
-    bool draw;
-    bool drawForbid;
+    bool draw{};
+    bool drawForbid{};
     vmCvar_t *cvarX;
     vmCvar_t *cvarY;
-    float x;
-    float y;
+    float x{};
+    float y{};
     int traceContents;
-    int sharedValue;
+    // this is a pointer to make sure it updates correctly based on
+    // team/timerun state, for worldspawn key overrides
+    const AreaOpts *areaOpts;
     qhandle_t shader;
   };
 
@@ -66,7 +69,7 @@ class AreaIndicator : public IRenderable {
   bool printProneMessage;
 
   // color for the base icons
-  const vec4_t color = {0.88f, 0.88f, 0.88f, 1.f};
+  const vec4_t color          = {0.88f, 0.88f, 0.88f, 1.f};
   static constexpr float size = 20.0f;
 
 public:

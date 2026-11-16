@@ -23,133 +23,108 @@
  */
 
 #include "etj_crosshair_drawer.h"
+
 #include "cg_local.h"
 
 namespace ETJump {
-void CrosshairDrawer::drawShader(const crosshair_t &crosshair,
-                                 qhandle_t shader) {
-  drawPic(crosshair.x - (crosshair.w * 0.5f),
-          crosshair.y - (crosshair.h * 0.5f), crosshair.w, crosshair.h, shader,
+void CrosshairDrawer::drawShader(const crosshair_t &crosshair, qhandle_t shader) {
+  drawPic(crosshair.x - (crosshair.w * 0.5f), crosshair.y - (crosshair.h * 0.5f), crosshair.w, crosshair.h, shader,
           crosshair.color);
 }
 
-void CrosshairDrawer::drawLineOutline(crosshair_t &crosshair, qhandle_t shader,
-                                      bool flipY) {
+void CrosshairDrawer::drawLineOutline(crosshair_t &crosshair, qhandle_t shader, bool flipY) {
   crosshair.w += crosshair.w > 0 ? 0.5f : -0.5f;
   crosshair.h += crosshair.h > 0 ? 0.5f : -0.5f;
   drawLine(crosshair, shader, flipY);
 }
 
-void CrosshairDrawer::drawLine(const crosshair_t &crosshair, qhandle_t shader,
-                               bool flipY) {
+void CrosshairDrawer::drawLine(const crosshair_t &crosshair, qhandle_t shader, bool flipY) {
   if (flipY) {
-    drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y, crosshair.t,
-            crosshair.h * 0.5f, shader, crosshair.color);
-    drawPic(crosshair.x - (crosshair.t * 0.5f),
-            crosshair.y + (crosshair.h * 0.5f), crosshair.t, crosshair.h * 0.5f,
+    drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y, crosshair.t, crosshair.h * 0.5f, shader, crosshair.color);
+    drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y + (crosshair.h * 0.5f), crosshair.t, crosshair.h * 0.5f,
             shader, crosshair.colorAlt);
   } else {
-    drawPic(crosshair.x - (crosshair.t * 0.5f),
-            crosshair.y - (crosshair.h * 0.5f), crosshair.t, crosshair.h * 0.5f,
+    drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y - (crosshair.h * 0.5f), crosshair.t, crosshair.h * 0.5f,
             shader, crosshair.color);
-    drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y, crosshair.t,
-            crosshair.h * 0.5f, shader, crosshair.colorAlt);
+    drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y, crosshair.t, crosshair.h * 0.5f, shader,
+            crosshair.colorAlt);
   }
 }
 
-void CrosshairDrawer::drawCrossOutline(crosshair_t &crosshair,
-                                       qhandle_t shader) {
+void CrosshairDrawer::drawCrossOutline(crosshair_t &crosshair, qhandle_t shader) {
   crosshair.w += crosshair.w > 0 ? 0.5f : -0.5f;
   crosshair.h += crosshair.h > 0 ? 0.5f : -0.5f;
   drawCross(crosshair, shader);
 }
 
-void CrosshairDrawer::drawCross(const crosshair_t &crosshair,
-                                qhandle_t shader) {
+void CrosshairDrawer::drawCross(const crosshair_t &crosshair, qhandle_t shader) {
   // horizontal line
-  drawPic(crosshair.x - std::abs(crosshair.w * 0.5f),
-          crosshair.y - (crosshair.t * 0.5f), crosshair.w, crosshair.t, shader,
-          crosshair.color);
+  drawPic(crosshair.x - std::abs(crosshair.w * 0.5f), crosshair.y - (crosshair.t * 0.5f), crosshair.w, crosshair.t,
+          shader, crosshair.color);
   // vertical line
-  drawPic(crosshair.x - (crosshair.t * 0.5f),
-          crosshair.y - std::abs(crosshair.h * 0.5f), crosshair.t, crosshair.h,
+  drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y - std::abs(crosshair.h * 0.5f), crosshair.t, crosshair.h,
           shader, crosshair.colorAlt);
 }
 
 void CrosshairDrawer::drawDiagCross(const crosshair_t &crosshair) {
   // top-left -> bottom-right
-  drawLineDDA(crosshair.x - (crosshair.w * 0.5f),
-              crosshair.y - (crosshair.h * 0.5f),
-              crosshair.x + (crosshair.w * 0.5f),
-              crosshair.y + (crosshair.h * 0.5f), crosshair.t, crosshair.color);
+  drawLineDDA(crosshair.x - (crosshair.w * 0.5f), crosshair.y - (crosshair.h * 0.5f),
+              crosshair.x + (crosshair.w * 0.5f), crosshair.y + (crosshair.h * 0.5f), crosshair.t, crosshair.color);
   // top-right -> bottom-left
-  drawLineDDA(
-      crosshair.x + (crosshair.w * 0.5f), crosshair.y - (crosshair.h * 0.5f),
-      crosshair.x - (crosshair.w * 0.5f), crosshair.y + (crosshair.h * 0.5f),
-      crosshair.t, crosshair.colorAlt);
+  drawLineDDA(crosshair.x + (crosshair.w * 0.5f), crosshair.y - (crosshair.h * 0.5f),
+              crosshair.x - (crosshair.w * 0.5f), crosshair.y + (crosshair.h * 0.5f), crosshair.t, crosshair.colorAlt);
 }
 
 void CrosshairDrawer::drawV(const crosshair_t &crosshair) {
   // left line
-  drawLineDDA(crosshair.x, crosshair.y, crosshair.x - (crosshair.w * 0.5f),
-              crosshair.y + crosshair.h, crosshair.t, crosshair.color);
+  drawLineDDA(crosshair.x, crosshair.y, crosshair.x - (crosshair.w * 0.5f), crosshair.y + crosshair.h, crosshair.t,
+              crosshair.color);
   // right line
-  drawLineDDA(crosshair.x, crosshair.y, crosshair.x + (crosshair.w * 0.5f),
-              crosshair.y + crosshair.h, crosshair.t, crosshair.colorAlt);
+  drawLineDDA(crosshair.x, crosshair.y, crosshair.x + (crosshair.w * 0.5f), crosshair.y + crosshair.h, crosshair.t,
+              crosshair.colorAlt);
 }
 
-void CrosshairDrawer::drawTriangle(const crosshair_t &crosshair,
-                                   const bool fill) {
-  DrawTriangle(crosshair.x - (crosshair.w * 0.5f), crosshair.y, crosshair.w,
-               crosshair.h, crosshair.t, 0, fill, crosshair.color,
-               crosshair.colorAlt);
+void CrosshairDrawer::drawTriangle(const crosshair_t &crosshair, const bool fill) {
+  DrawTriangle(crosshair.x - (crosshair.w * 0.5f), crosshair.y, crosshair.w, crosshair.h, crosshair.t, 0, fill,
+               crosshair.color, crosshair.colorAlt);
 }
 
-void CrosshairDrawer::drawTOutline(crosshair_t &crosshair, qhandle_t shader,
-                                   bool flipX, bool flipY) {
+void CrosshairDrawer::drawTOutline(crosshair_t &crosshair, qhandle_t shader, bool flipX, bool flipY) {
   crosshair.w += crosshair.w > 0 ? 0.5f : -0.5f;
   crosshair.h += crosshair.h > 0 ? 0.5f : -0.5f;
   crosshair.y += flipY ? -0.5f : 0.5f;
   drawT(crosshair, shader, flipX, flipY);
 }
 
-void CrosshairDrawer::drawT(const crosshair_t &crosshair, qhandle_t shader,
-                            bool flipX, bool flipY) {
+void CrosshairDrawer::drawT(const crosshair_t &crosshair, qhandle_t shader, bool flipX, bool flipY) {
   // middle line
   if (flipY) {
-    drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y, crosshair.t,
-            crosshair.h, shader, crosshair.color);
+    drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y, crosshair.t, crosshair.h, shader, crosshair.color);
   } else {
-    drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y - crosshair.h,
-            crosshair.t, crosshair.h, shader, crosshair.color);
+    drawPic(crosshair.x - (crosshair.t * 0.5f), crosshair.y - crosshair.h, crosshair.t, crosshair.h, shader,
+            crosshair.color);
   }
   // top line
   if (flipX) {
-    drawPic(crosshair.x + (crosshair.w * 0.5f),
-            crosshair.y - crosshair.h - (crosshair.t * 0.5f), crosshair.w,
+    drawPic(crosshair.x + (crosshair.w * 0.5f), crosshair.y - crosshair.h - (crosshair.t * 0.5f), crosshair.w,
             crosshair.t, shader, crosshair.colorAlt);
   } else {
-    drawPic(crosshair.x - (crosshair.w * 0.5f),
-            crosshair.y - crosshair.h - (crosshair.t * 0.5f), crosshair.w,
+    drawPic(crosshair.x - (crosshair.w * 0.5f), crosshair.y - crosshair.h - (crosshair.t * 0.5f), crosshair.w,
             crosshair.t, shader, crosshair.colorAlt);
   }
 }
 
-void CrosshairDrawer::drawTwoLinesOutline(crosshair_t &crosshair,
-                                          qhandle_t shader) {
+void CrosshairDrawer::drawTwoLinesOutline(crosshair_t &crosshair, qhandle_t shader) {
   crosshair.h += crosshair.h > 0 ? 0.5f : -0.5f;
   drawTwoLines(crosshair, shader);
 }
 
-void CrosshairDrawer::drawTwoLines(const crosshair_t &crosshair,
-                                   qhandle_t shader) {
+void CrosshairDrawer::drawTwoLines(const crosshair_t &crosshair, qhandle_t shader) {
   // left line
-  drawPic(crosshair.x - (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
-          crosshair.y - std::abs(crosshair.h * 0.5f), crosshair.t, crosshair.h,
-          shader, crosshair.color);
+  drawPic(crosshair.x - (crosshair.w * 0.5f) - (crosshair.t * 0.5f), crosshair.y - std::abs(crosshair.h * 0.5f),
+          crosshair.t, crosshair.h, shader, crosshair.color);
   // right line
-  drawPic(crosshair.x + (crosshair.w * 0.5f) - (crosshair.t * 0.5f),
-          crosshair.y - std::abs(crosshair.h * 0.5f), crosshair.t, crosshair.h,
-          shader, crosshair.colorAlt);
+  drawPic(crosshair.x + (crosshair.w * 0.5f) - (crosshair.t * 0.5f), crosshair.y - std::abs(crosshair.h * 0.5f),
+          crosshair.t, crosshair.h, shader, crosshair.colorAlt);
 }
 } // namespace ETJump

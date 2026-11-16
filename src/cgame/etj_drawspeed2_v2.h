@@ -55,22 +55,22 @@ private:
   static bool canSkipDraw();
 
   enum class Style {
-    NONE = 0,
-    SPEED = 1,                       // speed
-    SPEED_MAX = 2,                   // speed max
-    SPEED_MAX_COLOR = 3,             // speed ^zmax
-    SPEED_MAX_PARENTHESIS = 4,       // speed (max)
+    NONE                        = 0,
+    SPEED                       = 1, // speed
+    SPEED_MAX                   = 2, // speed max
+    SPEED_MAX_COLOR             = 3, // speed ^zmax
+    SPEED_MAX_PARENTHESIS       = 4, // speed (max)
     SPEED_MAX_COLOR_PARENTHESIS = 5, // speed ^z(max)
-    SPEED_MAX_COLOR_BRACKETS = 6,    // speed ^z[max]
-    SPEED_MAX_PIPE = 7,              // speed | max
-    SPEED_TEXT = 8,                  // Speed: speed
-    SPEED_TENS = 9,                  // "tens" only
+    SPEED_MAX_COLOR_BRACKETS    = 6, // speed ^z[max]
+    SPEED_MAX_PIPE              = 7, // speed | max
+    SPEED_TEXT                  = 8, // Speed: speed
+    SPEED_TENS                  = 9, // "tens" only
   };
 
   enum class Align {
     CENTER = 0,
-    LEFT = 1,
-    RIGHT = 2,
+    LEFT   = 1,
+    RIGHT  = 2,
   };
 
   std::string speedStr;

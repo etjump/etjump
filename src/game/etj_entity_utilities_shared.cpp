@@ -23,6 +23,7 @@
  */
 
 #include "etj_entity_utilities_shared.h"
+
 #include "bg_public.h"
 #include "etj_portalgun_shared.h"
 
@@ -33,8 +34,7 @@
 // Entity helper functions used by both games (client side predicted entities)
 
 namespace ETJump {
-void EntityUtilsShared::touchPusher(playerState_t *ps, const int time,
-                                    const entityState_t *pusher) {
+void EntityUtilsShared::touchPusher(playerState_t *ps, const int time, const entityState_t *pusher) {
   if (ps->pm_type != PM_NORMAL) {
     return;
   }
@@ -55,8 +55,7 @@ void EntityUtilsShared::touchPusher(playerState_t *ps, const int time,
     s = DotProduct(ps->velocity, dir);
 
     if (s < 500) {
-      BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND,
-                                          pusher->constantLight & 0xff, ps);
+      BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, pusher->constantLight & 0xff, ps);
     }
   }
 
@@ -72,41 +71,35 @@ void EntityUtilsShared::touchPusher(playerState_t *ps, const int time,
   }
 }
 
-void EntityUtilsShared::setPushVelocity(const playerState_t *ps,
-                                        const vec_t *origin2,
-                                        const int &spawnflags, vec_t *pushVel) {
+void EntityUtilsShared::setPushVelocity(const playerState_t *ps, const vec_t *origin2, const int &spawnflags,
+                                        vec_t *pushVel) {
   VectorCopy(ps->velocity, pushVel);
 
-  if (spawnflags & static_cast<int>(PusherSpawnFlags::AddXY) &&
-      spawnflags & static_cast<int>(PusherSpawnFlags::AddZ)) {
+  if (spawnflags & static_cast<int>(PusherSpawnFlags::AddXY) && spawnflags & static_cast<int>(PusherSpawnFlags::AddZ)) {
     VectorAdd(origin2, ps->velocity, pushVel);
   } else {
     if (spawnflags & static_cast<int>(PusherSpawnFlags::AddXY)) {
       pushVel[0] += origin2[0];
       pushVel[1] += origin2[1];
-      pushVel[2] = origin2[2];
+      pushVel[2]  = origin2[2];
     }
 
     if (spawnflags & static_cast<int>(PusherSpawnFlags::AddZ)) {
-      pushVel[0] = origin2[0];
-      pushVel[1] = origin2[1];
+      pushVel[0]  = origin2[0];
+      pushVel[1]  = origin2[1];
       pushVel[2] += origin2[2];
     }
   }
 }
 
-void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
-                                       entityState_t *teleporter,
-                                       usercmd_t *cmd, const vec3_t origin,
-                                       vec3_t angles,
-                                       bool &teleportBitFlipped) {
+void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player, entityState_t *teleporter,
+                                       usercmd_t *cmd, const vec3_t origin, vec3_t angles, bool &teleportBitFlipped) {
   // bits 8-31 contain the spawnflags
   const int spawnflags = (teleporter->constantLight >> 8) & 0xffffff;
 
   // first 8 bits hold noise key
   if (teleporter->constantLight & 0xff) {
-    BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND,
-                                        teleporter->constantLight & 0xff, ps);
+    BG_AddPredictableEventToPlayerstate(EV_GENERAL_SOUND, teleporter->constantLight & 0xff, ps);
   }
 
   // frame holds 'outspeed' key
@@ -122,14 +115,13 @@ void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
   }
 
   if (spawnflags & static_cast<int>(TeleporterSpawnflags::Knockback)) {
-    ps->pm_time = 160;
+    ps->pm_time   = 160;
     ps->pm_flags |= PMF_TIME_KNOCKBACK;
   }
 
   if (spawnflags & static_cast<int>(TeleporterSpawnflags::ResetSpeed)) {
     VectorClear(ps->velocity);
-  } else if (spawnflags &
-             static_cast<int>(TeleporterSpawnflags::ConvertSpeed)) {
+  } else if (spawnflags & static_cast<int>(TeleporterSpawnflags::ConvertSpeed)) {
     float speed = VectorLength(ps->velocity);
     AngleVectors(angles, ps->velocity, nullptr, nullptr);
     VectorScale(ps->velocity, speed, ps->velocity);
@@ -143,8 +135,8 @@ void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
 
   // toggle the teleport bit so the client knows to not lerp
   if (!teleportBitFlipped) {
-    ps->eFlags ^= EF_TELEPORT_BIT;
-    teleportBitFlipped = true;
+    ps->eFlags         ^= EF_TELEPORT_BIT;
+    teleportBitFlipped  = true;
   }
 
   // set angles
@@ -165,13 +157,12 @@ void EntityUtilsShared::teleportPlayer(playerState_t *ps, entityState_t *player,
 #endif
 }
 
-void EntityUtilsShared::setViewAngles(playerState_t *ps, entityState_t *es,
-                                      usercmd_t *cmd, const vec3_t angle) {
+void EntityUtilsShared::setViewAngles(playerState_t *ps, entityState_t *es, usercmd_t *cmd, const vec3_t angle) {
   // set the delta angles
   for (int i = 0; i < 3; i++) {
     int cmdAngle;
 
-    cmdAngle = ANGLE2SHORT(angle[i]);
+    cmdAngle            = ANGLE2SHORT(angle[i]);
     ps->delta_angles[i] = cmdAngle - cmd->angles[i];
   }
 
@@ -179,10 +170,8 @@ void EntityUtilsShared::setViewAngles(playerState_t *ps, entityState_t *es,
   VectorCopy(es->angles, ps->viewangles);
 }
 
-void EntityUtilsShared::portalTeleport(playerState_t *ps, entityState_t *player,
-                                       const entityState_t *portal,
-                                       usercmd_t *cmd, const int time,
-                                       bool &teleportBitFlipped) {
+void EntityUtilsShared::portalTeleport(playerState_t *ps, entityState_t *player, const entityState_t *portal,
+                                       usercmd_t *cmd, const int time, bool &teleportBitFlipped) {
   if (ps->powerups[PW_PORTALPREDICT] + PORTAL_TOUCH_COOLDOWN > time) {
     return;
   }
@@ -191,7 +180,7 @@ void EntityUtilsShared::portalTeleport(playerState_t *ps, entityState_t *player,
 
   // Feen: Extra little boost coming out of a portal...
   static constexpr float PORTAL_NUDGE = 50.0f;
-  const vec_t velocityLength = VectorLength(ps->velocity);
+  const vec_t velocityLength          = VectorLength(ps->velocity);
 
   vec3_t dstOrigin;
   vec3_t dstAngles;
@@ -210,14 +199,13 @@ void EntityUtilsShared::portalTeleport(playerState_t *ps, entityState_t *player,
 
   // toggle the teleport bit so the client knows to not lerp
   if (!teleportBitFlipped) {
-    ps->eFlags ^= EF_TELEPORT_BIT;
-    teleportBitFlipped = true;
+    ps->eFlags         ^= EF_TELEPORT_BIT;
+    teleportBitFlipped  = true;
   }
 
   // Adjust view angles so portals don't have you looking straight up or
   // down...
-  if ((dstAngles[PITCH] >= -105 && dstAngles[PITCH] <= -75) ||
-      (dstAngles[PITCH] >= -285 && dstAngles[PITCH] <= -255)) {
+  if ((dstAngles[PITCH] >= -105 && dstAngles[PITCH] <= -75) || (dstAngles[PITCH] >= -285 && dstAngles[PITCH] <= -255)) {
     // if the portal is in the ceiling, we need to offset the player more
     // so that their head doesn't get stuck inside the ceiling
     if (dstAngles[PITCH] >= -285 && dstAngles[PITCH] <= -255) {
@@ -227,8 +215,8 @@ void EntityUtilsShared::portalTeleport(playerState_t *ps, entityState_t *player,
     vec3_t viewAngles;
 
     viewAngles[PITCH] = ps->viewangles[PITCH];
-    viewAngles[YAW] = dstAngles[YAW];
-    viewAngles[ROLL] = dstAngles[ROLL];
+    viewAngles[YAW]   = dstAngles[YAW];
+    viewAngles[ROLL]  = dstAngles[ROLL];
 
     setViewAngles(ps, player, cmd, viewAngles);
   }
@@ -251,19 +239,17 @@ void EntityUtilsShared::portalTeleport(playerState_t *ps, entityState_t *player,
 #endif
 }
 
-void EntityUtilsShared::setPortalBBox(vec3_t mins, vec3_t maxs,
-                                      const vec3_t angles, const float scale) {
+void EntityUtilsShared::setPortalBBox(vec3_t mins, vec3_t maxs, const vec3_t angles, const float scale) {
   float width;
   float height;
   float depth;
 
   // vertical portal (on walls)
   if (angles[PITCH] == -0) {
-    depth = PORTAL_BBOX_VERT_DEPTH;
+    depth  = PORTAL_BBOX_VERT_DEPTH;
     height = width = PORTAL_BBOX_RADIUS * scale;
 
-    if ((angles[YAW] >= 45 && angles[YAW] <= 135) ||
-        (angles[YAW] >= 225 && angles[YAW] <= 315)) {
+    if ((angles[YAW] >= 45 && angles[YAW] <= 135) || (angles[YAW] >= 225 && angles[YAW] <= 315)) {
       VectorSet(mins, -height, -depth, -width);
       VectorSet(maxs, height, depth, width);
     } else {
@@ -272,21 +258,18 @@ void EntityUtilsShared::setPortalBBox(vec3_t mins, vec3_t maxs,
     }
   } else { // horizontal (including sloped surfaces)
     depth = width = PORTAL_BBOX_RADIUS * scale;
-    height = PORTAL_BBOX_HOR_DEPTH;
+    height        = PORTAL_BBOX_HOR_DEPTH;
 
     VectorSet(mins, -depth, -width, -height);
     VectorSet(maxs, depth, width, height);
   }
 }
 
-bool EntityUtilsShared::funcStaticClientIsHidden(const entityState_t *es,
-                                                 const int32_t clientNum) {
+bool EntityUtilsShared::funcStaticClientIsHidden(const entityState_t *es, const int32_t clientNum) {
   if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
     return false;
   }
 
-  return COM_BitCheck((clientNum < MAX_CLIENTS / 2) ? &es->effect1Time
-                                                    : &es->effect2Time,
-                      clientNum);
+  return COM_BitCheck((clientNum < MAX_CLIENTS / 2) ? &es->effect1Time : &es->effect2Time, clientNum);
 }
 } // namespace ETJump

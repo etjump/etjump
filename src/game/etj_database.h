@@ -25,27 +25,26 @@
 #ifndef DATABASE_HH
 #define DATABASE_HH
 
-#include <vector>
 #include <map>
-
 #include <sqlite3.h>
+#include <vector>
 
-#include "etj_local.h"
-#include "etj_iauthentication.h"
 #include "etj_async_operation.h"
+#include "etj_iauthentication.h"
+#include "etj_local.h"
 
 // Loads the data from SQLite database to memory as
 // some servers don't support threads making it impossible
 // to just query everything from database.
 
 namespace Updated {
-const int NONE = 0;
-const int LEVEL = 0x00001;
+const int NONE      = 0;
+const int LEVEL     = 0x00001;
 const int LAST_SEEN = 0x00002;
-const int NAME = 0x00004;
-const int TITLE = 0x00008;
-const int COMMANDS = 0x00010;
-const int GREETING = 0x00020;
+const int NAME      = 0x00004;
+const int TITLE     = 0x00008;
+const int COMMANDS  = 0x00010;
+const int GREETING  = 0x00020;
 } // namespace Updated
 
 struct Ban_s {
@@ -62,13 +61,13 @@ struct Ban_s {
   Ban_s() : id(0), expires(0) {}
 
   const char *ToChar() {
-    return va("%d %s %s %s %s %s %s %d %s", id, name.c_str(), guid.c_str(),
-              hwid.c_str(), ip.c_str(), bannedBy.c_str(), banDate.c_str(),
-              expires, reason.c_str());
+    return va("%d %s %s %s %s %s %s %d %s", id, name.c_str(), guid.c_str(), hwid.c_str(), ip.c_str(), bannedBy.c_str(),
+              banDate.c_str(), expires, reason.c_str());
   }
 };
 
 class DatabaseOperation;
+
 class Database : public IAuthentication {
 public:
   Database();
@@ -84,13 +83,10 @@ public:
    */
 
   const std::string GetMessage() const;
-  bool AddUser(const std::string &guid, const std::string &hwid,
-               const std::string &name);
+  bool AddUser(const std::string &guid, const std::string &hwid, const std::string &name);
   bool AddNewHardwareId(int id, const std::string &hwid);
-  bool BanUser(const std::string &name, const std::string &guid,
-               const std::string &hwid, const std::string &ip,
-               const std::string &bannedBy, const std::string &banDate,
-               unsigned expires, const std::string &reason);
+  bool BanUser(const std::string &name, const std::string &guid, const std::string &hwid, const std::string &ip,
+               const std::string &bannedBy, const std::string &banDate, unsigned expires, const std::string &reason);
   bool IsBanned(const std::string &guid, const std::string &hwid);
   bool IsIpBanned(const std::string &ip);
   bool UserExists(unsigned id);
@@ -129,9 +125,8 @@ public:
   bool UpdateLastSeenToSQLite(User user);
   void FindUser(gentity_t *ent, const std::string &user);
   void ListUserNames(gentity_t *ent, int id);
-  bool UpdateUser(gentity_t *ent, int id, const std::string &commands,
-                  const std::string &greeting, const std::string &title,
-                  int updated);
+  bool UpdateUser(gentity_t *ent, int id, const std::string &commands, const std::string &greeting,
+                  const std::string &title, int updated);
   int ResetUsersWithLevel(int level);
 
 private:

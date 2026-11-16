@@ -38,8 +38,7 @@ class PlayerEventsHandler;
 
 class StrafeQualityV2 : public IRenderable {
 public:
-  StrafeQualityV2(const std::shared_ptr<SnaphudData> &snaphudData,
-                  const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+  StrafeQualityV2(const std::shared_ptr<SnaphudData> &snaphudData, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
                   const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
                   const std::shared_ptr<PlayerEventsHandler> &playerEvents);
   ~StrafeQualityV2() override;
@@ -59,9 +58,9 @@ private:
   [[nodiscard]] bool canSkipDraw() const;
 
   enum class Style {
-    FULL = 0,
+    FULL    = 0,
     PERCENT = 1,
-    NUMBER = 2,
+    NUMBER  = 2,
   };
 
   uint32_t totalFrames{};

@@ -38,14 +38,14 @@ class PlayerBBox {
   };
 
   enum class DrawFlags {
-    Self = 1,
-    Others = 2,
+    Self     = 1,
+    Others   = 2,
     Fireteam = 4,
   };
 
   enum class PlayerType {
-    Self = 1,
-    Other = 2,
+    Self     = 1,
+    Other    = 2,
     Fireteam = 3,
   };
 

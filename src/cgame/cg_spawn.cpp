@@ -8,8 +8,7 @@
 
 #include "cg_local.h"
 
-qboolean CG_SpawnString(const char *key, const char *defaultString,
-                        char **out) {
+qboolean CG_SpawnString(const char *key, const char *defaultString, char **out) {
   int i;
 
   if (!cg.spawning) {
@@ -34,7 +33,7 @@ qboolean CG_SpawnFloat(const char *key, const char *defaultString, float *out) {
   qboolean present;
 
   present = CG_SpawnString(key, defaultString, &s);
-  *out = Q_atof(s);
+  *out    = Q_atof(s);
   return present;
 }
 
@@ -43,12 +42,11 @@ qboolean CG_SpawnInt(const char *key, const char *defaultString, int *out) {
   qboolean present;
 
   present = CG_SpawnString(key, defaultString, &s);
-  *out = Q_atoi(s);
+  *out    = Q_atoi(s);
   return present;
 }
 
-qboolean CG_SpawnVector(const char *key, const char *defaultString,
-                        float *out) {
+qboolean CG_SpawnVector(const char *key, const char *defaultString, float *out) {
   char *s;
   qboolean present;
 
@@ -57,8 +55,7 @@ qboolean CG_SpawnVector(const char *key, const char *defaultString,
   return present;
 }
 
-qboolean CG_SpawnVector2D(const char *key, const char *defaultString,
-                          float *out) {
+qboolean CG_SpawnVector2D(const char *key, const char *defaultString, float *out) {
   char *s;
   qboolean present;
 
@@ -67,8 +64,8 @@ qboolean CG_SpawnVector2D(const char *key, const char *defaultString,
   return present;
 }
 
-void SP_path_corner_2(void) {
-  char *targetname;
+static void SP_path_corner_2() {
+  char *targetname = nullptr;
   vec3_t origin;
 
   CG_SpawnString("targetname", "", &targetname);
@@ -76,12 +73,10 @@ void SP_path_corner_2(void) {
 
   if (!*targetname) {
     CG_Error("path_corner_2 with no targetname at %s\n", vtos(origin));
-    return;
   }
 
   if (numPathCorners >= MAX_PATH_CORNERS) {
     CG_Error("Maximum path_corners hit\n");
-    return;
   }
 
   BG_AddPathCorner(targetname, origin);
@@ -115,8 +110,7 @@ void SP_info_train_spline_main(void) {
   }
 
   for (i = 1;; i++) {
-    if (!CG_SpawnString(i == 1 ? va("control") : va("control%i", i), "",
-                        &control)) {
+    if (!CG_SpawnString(i == 1 ? va("control") : va("control%i", i), "", &control)) {
       break;
     }
 
@@ -138,8 +132,7 @@ void SP_misc_gamemodel(void) {
 
   int i;
 
-  if (CG_SpawnString("targetname", "", &model) ||
-      CG_SpawnString("scriptname", "", &model) ||
+  if (CG_SpawnString("targetname", "", &model) || CG_SpawnString("scriptname", "", &model) ||
       CG_SpawnString("spawnflags", "", &model)) {
     // Gordon: this model may not be static, so let the server
     // handle it
@@ -166,7 +159,7 @@ void SP_misc_gamemodel(void) {
     }
   }
 
-  gamemodel = &cgs.miscGameModels[cg.numMiscGameModels++];
+  gamemodel        = &cgs.miscGameModels[cg.numMiscGameModels++];
   gamemodel->model = trap_R_RegisterModel(model);
   AnglesToAxis(angles, gamemodel->axes);
   for (i = 0; i < 3; i++) {
@@ -187,8 +180,7 @@ void SP_misc_gamemodel(void) {
     gamemodel->radius = RadiusFromBounds(mins, maxs);
   } else {
     gamemodel->radius = 0;
-    CG_Printf(S_COLOR_YELLOW "WARNING: failed to register misc_gamemodel %s\n",
-              model);
+    CG_Printf(S_COLOR_YELLOW "WARNING: failed to register misc_gamemodel %s\n", model);
   }
 }
 
@@ -196,8 +188,7 @@ void SP_corona() {
   char *tmp;
 
   // server-side coronas
-  if (CG_SpawnString("targetname", "", &tmp) ||
-      CG_SpawnString("spawnflags", "", &tmp) ||
+  if (CG_SpawnString("targetname", "", &tmp) || CG_SpawnString("spawnflags", "", &tmp) ||
       CG_SpawnString("scriptname", "", &tmp)) {
     return;
   }
@@ -236,9 +227,8 @@ void SP_corona() {
 
   VectorScale(color, 255, color);
 
-  corona->currentState.dl_intensity = static_cast<int>(color[0]) |
-                                      static_cast<int>(color[1]) << 8 |
-                                      static_cast<int>(color[2]) << 16;
+  corona->currentState.dl_intensity =
+    static_cast<int>(color[0]) | static_cast<int>(color[1]) << 8 | static_cast<int>(color[2]) << 16;
 
   float scale;
   CG_SpawnFloat("scale", "1", &scale);
@@ -265,15 +255,13 @@ void SP_dlight() {
   // server-side dlight
   // TODO: see if we could make sound work?
   //  pretty sure it requires a proper entitynum but need to investigate
-  if (CG_SpawnString("targetname", "", &s) ||
-      CG_SpawnString("scriptname", "", &s) ||
+  if (CG_SpawnString("targetname", "", &s) || CG_SpawnString("scriptname", "", &s) ||
       CG_SpawnString("spawnflags", "", &s)) {
     return;
   }
 
   if (cg.numDlights >= MAX_STATIC_DLIGHTS) {
-    CG_Error("%s: MAX_STATIC_DLIGHTS (%i) exceeded\n", __func__,
-             MAX_STATIC_DLIGHTS);
+    CG_Error("%s: MAX_STATIC_DLIGHTS (%i) exceeded\n", __func__, MAX_STATIC_DLIGHTS);
   }
 
   centity_t *dlight = &cgs.dlights[cg.numDlights];
@@ -305,16 +293,13 @@ void SP_dlight() {
       styleString = styleString.substr(0, MAX_DLIGHT_STYLESTRING - 1);
     }
 
-    Q_strncpyz(dlight->dl_stylestring, styleString.c_str(),
-               sizeof(dlight->dl_stylestring));
+    Q_strncpyz(dlight->dl_stylestring, styleString.c_str(), sizeof(dlight->dl_stylestring));
   } else if (style) {
     style = std::clamp(style, 1, NUM_PREDEF_DLIGHT_STRINGS);
-    Q_strncpyz(dlight->dl_stylestring, predef_lightstyles[style - 1],
-               sizeof(dlight->dl_stylestring));
+    Q_strncpyz(dlight->dl_stylestring, predef_lightstyles[style - 1], sizeof(dlight->dl_stylestring));
   } else {
     // default to a strobe to call attention to this not being set
-    Q_strncpyz(dlight->dl_stylestring, "mmmaaa",
-               sizeof(dlight->dl_stylestring));
+    Q_strncpyz(dlight->dl_stylestring, "mmmaaa", sizeof(dlight->dl_stylestring));
   }
 
   const auto styleStringLen = static_cast<int>(strlen(dlight->dl_stylestring));
@@ -325,13 +310,12 @@ void SP_dlight() {
       //  the clamping to behave unexpectedly, but that's VET behavior
       //  https://github.com/etjump/etjump/issues/1667
       dlight->dl_stylestring[i] += dlight->dl_atten;
-      dlight->dl_stylestring[i] =
-          std::clamp(dlight->dl_stylestring[i], 'a', 'z');
+      dlight->dl_stylestring[i]  = std::clamp(dlight->dl_stylestring[i], 'a', 'z');
     }
   }
 
   CG_SpawnInt("offset", "0", &dlight->dl_frame);
-  dlight->dl_frame = dlight->dl_frame % styleStringLen;
+  dlight->dl_frame    = dlight->dl_frame % styleStringLen;
   dlight->dl_oldframe = dlight->dl_frame - 1;
 
   // wrap negative offset
@@ -349,17 +333,15 @@ void SP_dlight() {
 
   VectorScale(color, 255, color);
 
-  auto intensity =
-      static_cast<float>(dlight->dl_stylestring[dlight->dl_frame] - 'a');
-  intensity *= 1000.0f / 24.0f;
-  intensity = std::clamp(intensity / 4, 0.0f, 255.0f);
+  auto intensity  = static_cast<float>(dlight->dl_stylestring[dlight->dl_frame] - 'a');
+  intensity      *= 1000.0f / 24.0f;
+  intensity       = std::clamp(intensity / 4, 0.0f, 255.0f);
 
-  dlight->currentState.constantLight =
-      static_cast<int>(color[0]) | static_cast<int>(color[1]) << 8 |
-      static_cast<int>(color[2]) << 16 | static_cast<int>(intensity) << 24;
+  dlight->currentState.constantLight = static_cast<int>(color[0]) | static_cast<int>(color[1]) << 8 |
+                                       static_cast<int>(color[2]) << 16 | static_cast<int>(intensity) << 24;
 
   dlight->dl_backlerp = 0;
-  dlight->dl_time = cg.time;
+  dlight->dl_time     = cg.time;
 
   dlight->dl_clientOnly = true;
 }
@@ -370,15 +352,15 @@ typedef struct {
 } spawn_t;
 
 spawn_t spawns[] = {
-    {0, 0},
-    {"path_corner_2", SP_path_corner_2},
-    {"info_train_spline_main", SP_info_train_spline_main},
-    {"info_train_spline_control", SP_path_corner_2},
+  {0,                           0                        },
+  {"path_corner_2",             SP_path_corner_2         },
+  {"info_train_spline_main",    SP_info_train_spline_main},
+  {"info_train_spline_control", SP_path_corner_2         },
 
-    {"trigger_objective_info", SP_trigger_objective_info},
-    {"misc_gamemodel", SP_misc_gamemodel},
-    {"corona", SP_corona},
-    {"dlight", SP_dlight},
+  {"trigger_objective_info",    SP_trigger_objective_info},
+  {"misc_gamemodel",            SP_misc_gamemodel        },
+  {"corona",                    SP_corona                },
+  {"dlight",                    SP_dlight                },
 };
 
 inline constexpr int NUMSPAWNS = sizeof(spawns) / sizeof(spawn_t);
@@ -447,7 +429,7 @@ qboolean CG_ParseSpawnVars(void) {
   char keyname[MAX_TOKEN_CHARS];
   char com_token[MAX_TOKEN_CHARS];
 
-  cg.numSpawnVars = 0;
+  cg.numSpawnVars     = 0;
   cg.numSpawnVarChars = 0;
 
   // parse the opening brace
@@ -529,9 +511,8 @@ void SP_worldspawn(void) {
   CG_SpawnString("atmosphere", "", &s);
   CG_EffectParse(s);
 
-  cg.fiveMinuteSound_g[0] = cg.fiveMinuteSound_a[0] = cg.twoMinuteSound_g[0] =
-      cg.twoMinuteSound_a[0] = cg.thirtySecondSound_g[0] =
-          cg.thirtySecondSound_a[0] = '\0';
+  cg.fiveMinuteSound_g[0] = cg.fiveMinuteSound_a[0] = cg.twoMinuteSound_g[0] = cg.twoMinuteSound_a[0] =
+    cg.thirtySecondSound_g[0] = cg.thirtySecondSound_a[0] = '\0';
 
   CG_SpawnString("twoMinuteSound_axis", "axis_hq_5minutes", &s);
   Q_strncpyz(cg.fiveMinuteSound_g, s, sizeof(cg.fiveMinuteSound_g));
@@ -552,8 +533,7 @@ void SP_worldspawn(void) {
   if (!*cg.fiveMinuteSound_g) {
     cgs.media.fiveMinuteSound_g = 0;
   } else if (strstr(cg.fiveMinuteSound_g, ".wav")) {
-    cgs.media.fiveMinuteSound_g =
-        trap_S_RegisterSound(cg.fiveMinuteSound_g, qtrue);
+    cgs.media.fiveMinuteSound_g = trap_S_RegisterSound(cg.fiveMinuteSound_g, qtrue);
   } else {
     cgs.media.fiveMinuteSound_g = -1;
   }
@@ -562,8 +542,7 @@ void SP_worldspawn(void) {
   if (!*cg.fiveMinuteSound_a) {
     cgs.media.fiveMinuteSound_a = 0;
   } else if (strstr(cg.fiveMinuteSound_a, ".wav")) {
-    cgs.media.fiveMinuteSound_a =
-        trap_S_RegisterSound(cg.fiveMinuteSound_a, qtrue);
+    cgs.media.fiveMinuteSound_a = trap_S_RegisterSound(cg.fiveMinuteSound_a, qtrue);
   } else {
     cgs.media.fiveMinuteSound_a = -1;
   }
@@ -572,8 +551,7 @@ void SP_worldspawn(void) {
   if (!*cg.twoMinuteSound_g) {
     cgs.media.twoMinuteSound_g = 0;
   } else if (strstr(cg.twoMinuteSound_g, ".wav")) {
-    cgs.media.twoMinuteSound_g =
-        trap_S_RegisterSound(cg.twoMinuteSound_g, qtrue);
+    cgs.media.twoMinuteSound_g = trap_S_RegisterSound(cg.twoMinuteSound_g, qtrue);
   } else {
     cgs.media.twoMinuteSound_g = -1;
   }
@@ -582,8 +560,7 @@ void SP_worldspawn(void) {
   if (!*cg.twoMinuteSound_a) {
     cgs.media.twoMinuteSound_a = 0;
   } else if (strstr(cg.twoMinuteSound_a, ".wav")) {
-    cgs.media.twoMinuteSound_a =
-        trap_S_RegisterSound(cg.twoMinuteSound_a, qtrue);
+    cgs.media.twoMinuteSound_a = trap_S_RegisterSound(cg.twoMinuteSound_a, qtrue);
   } else {
     cgs.media.twoMinuteSound_a = -1;
   }
@@ -592,8 +569,7 @@ void SP_worldspawn(void) {
   if (!*cg.thirtySecondSound_g) {
     cgs.media.thirtySecondSound_g = 0;
   } else if (strstr(cg.thirtySecondSound_g, ".wav")) {
-    cgs.media.thirtySecondSound_g =
-        trap_S_RegisterSound(cg.thirtySecondSound_g, qtrue);
+    cgs.media.thirtySecondSound_g = trap_S_RegisterSound(cg.thirtySecondSound_g, qtrue);
   } else {
     cgs.media.thirtySecondSound_g = -1;
   }
@@ -602,8 +578,7 @@ void SP_worldspawn(void) {
   if (!*cg.thirtySecondSound_a) {
     cgs.media.thirtySecondSound_a = 0;
   } else if (strstr(cg.thirtySecondSound_a, ".wav")) {
-    cgs.media.thirtySecondSound_a =
-        trap_S_RegisterSound(cg.thirtySecondSound_a, qtrue);
+    cgs.media.thirtySecondSound_a = trap_S_RegisterSound(cg.thirtySecondSound_a, qtrue);
   } else {
     cgs.media.thirtySecondSound_a = -1;
   }
@@ -623,11 +598,11 @@ Parses textual entity definitions out of an entstring and spawns gentities.
 */
 void CG_ParseEntitiesFromString(void) {
   // allow calls to CG_Spawn*()
-  cg.spawning = qtrue;
-  cg.numSpawnVars = 0;
+  cg.spawning          = qtrue;
+  cg.numSpawnVars      = 0;
   cg.numMiscGameModels = 0;
-  cg.numCoronas = 0;
-  cg.numDlights = 0;
+  cg.numCoronas        = 0;
+  cg.numDlights        = 0;
 
   // the worldspawn is not an actual entity, but it still
   // has a "spawn" function to perform any global setup

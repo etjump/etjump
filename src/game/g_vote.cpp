@@ -3,19 +3,19 @@
 //
 #include <set>
 
-#include "g_local.h"
-#include "etj_local.h"
-#include "etj_printer.h"
-#include "etj_string_utilities.h"
-#include "etj_map_statistics.h"
-#include "etj_rtv.h"
 #include "etj_custom_map_votes.h"
+#include "etj_local.h"
+#include "etj_map_statistics.h"
+#include "etj_printer.h"
+#include "etj_rtv.h"
+#include "etj_string_utilities.h"
 #include "etj_worldspawn.h"
+#include "g_local.h"
 
-inline constexpr char ACTIVATED[] = "ACTIVATED";
+inline constexpr char ACTIVATED[]   = "ACTIVATED";
 inline constexpr char DEACTIVATED[] = "DEACTIVATED";
-inline constexpr char ENABLED[] = "ENABLED";
-inline constexpr char DISABLED[] = "DISABLED";
+inline constexpr char ENABLED[]     = "ENABLED";
+inline constexpr char DISABLED[]    = "DISABLED";
 
 // note: this is also defined in ui/menudef.h for usage in .menu files
 inline constexpr int CV_SVF_CUSTOMVOTE = 32;
@@ -29,40 +29,32 @@ inline constexpr int CV_SVF_CUSTOMVOTE = 32;
 typedef struct {
   unsigned int dwGameTypes;
   const char *pszVoteName;
-  int (*pVoteCommand)(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                      char *arg2);
+  int (*pVoteCommand)(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2);
   const char *pszVoteMessage;
   const char *pszVoteHelp;
 } vote_reference_t;
 
-static int G_Map_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                           char *arg2) {
+static int G_Map_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2) {
   return G_Map_v(ent, dwVoteIndex, arg, arg2, false);
 }
 
-int G_DevMap_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                       char *arg2) {
+int G_DevMap_v_Wrapper(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2) {
   return G_Map_v(ent, dwVoteIndex, arg, arg2, true);
 }
 
 // VC optimizes for dup strings :)
 static const vote_reference_t aVoteInfo[] = {
-    {0x1ff, "map", G_Map_v_Wrapper, "Change map to",
-     " <mapname>^7\n  Votes for a map to be loaded with cheats disabled"},
-    {0x1ff, "devmap", G_DevMap_v_Wrapper, "Change map to",
-     " <mapname>^7\n  Votes for a map to be loaded with cheats enabled"},
-    {0x1ff, "maprestart", G_MapRestart_v, "Map restart",
-     "^7\n  Restarts the current map in progress"},
-    {0x1ff, "randommap", G_RandomMap_v, "Random map",
-     " ^7\n Votes a new random map to be loaded"},
-    {0x1ff, "rtv", ETJump::G_RockTheVote_v, "Rock The Vote",
-     " ^7\n Initiates Rock The Vote"},
-    {0x1ff, "autoRtv", ETJump::G_AutoRtv_v, "Auto RTV",
-     " ^7\n Votes to set an interval for automatic Rock The Vote"},
-    {0x1ff, "portalPredict", ETJump::G_PortalPredict_v,
-     "Predicted portal teleports",
-     " ^7\n Votes to enable or disable predicted portalgun teleports"},
-    {0, nullptr, nullptr, nullptr}};
+  {0x1ff, "map", G_Map_v_Wrapper, "Change map to", " <mapname>^7\n  Votes for a map to be loaded with cheats disabled"},
+  {0x1ff, "devmap", G_DevMap_v_Wrapper, "Change map to",
+   " <mapname>^7\n  Votes for a map to be loaded with cheats enabled"},
+  {0x1ff, "maprestart", G_MapRestart_v, "Map restart", "^7\n  Restarts the current map in progress"},
+  {0x1ff, "randommap", G_RandomMap_v, "Random map", " ^7\n Votes a new random map to be loaded"},
+  {0x1ff, "rtv", ETJump::G_RockTheVote_v, "Rock The Vote", " ^7\n Initiates Rock The Vote"},
+  {0x1ff, "autoRtv", ETJump::G_AutoRtv_v, "Auto RTV", " ^7\n Votes to set an interval for automatic Rock The Vote"},
+  {0x1ff, "portalPredict", ETJump::G_PortalPredict_v, "Predicted portal teleports",
+   " ^7\n Votes to enable or disable predicted portalgun teleports"},
+  {0, nullptr, nullptr, nullptr}
+};
 
 void G_cpmPrintf(gentity_t *ent, const char *fmt, ...) {
   va_list argptr;
@@ -104,9 +96,8 @@ int G_voteCmdCheck(gentity_t *ent, char *arg, char *arg2) {
 // Voting help summary.
 void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
   int i, rows = 0;
-  int num_cmds =
-      sizeof(aVoteInfo) / sizeof(aVoteInfo[0]) - 1; // Remove terminator;
-  int vi[100]; // Just make it large static.
+  int num_cmds = sizeof(aVoteInfo) / sizeof(aVoteInfo[0]) - 1; // Remove terminator;
+  int vi[100];                                                 // Just make it large static.
   auto clientNum = ClientNum(ent);
 
   if (fShowVote) {
@@ -121,7 +112,7 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
   }
 
   num_cmds = rows;
-  rows = num_cmds / HELP_COLUMNS;
+  rows     = num_cmds / HELP_COLUMNS;
 
   if (num_cmds % HELP_COLUMNS) {
     rows++;
@@ -129,30 +120,23 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
 
   for (i = 0; i < rows; i++) {
     if (i + rows * 3 + 1 <= num_cmds) {
-      Printer::console(clientNum, va("^5%-17s%-17s%-17s%-17s",
-                                     aVoteInfo[vi[i]].pszVoteName,
-                                     aVoteInfo[vi[i + rows]].pszVoteName,
-                                     aVoteInfo[vi[i + rows * 2]].pszVoteName,
-                                     aVoteInfo[vi[i + rows * 3]].pszVoteName));
-    } else if (i + rows * 2 + 1 <= num_cmds) {
       Printer::console(clientNum,
-                       va("^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                          aVoteInfo[vi[i + rows]].pszVoteName,
-                          aVoteInfo[vi[i + rows * 2]].pszVoteName));
+                       va("^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName, aVoteInfo[vi[i + rows]].pszVoteName,
+                          aVoteInfo[vi[i + rows * 2]].pszVoteName, aVoteInfo[vi[i + rows * 3]].pszVoteName));
+    } else if (i + rows * 2 + 1 <= num_cmds) {
+      Printer::console(clientNum, va("^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
+                                     aVoteInfo[vi[i + rows]].pszVoteName, aVoteInfo[vi[i + rows * 2]].pszVoteName));
     } else if (i + rows + 1 <= num_cmds) {
       Printer::console(clientNum,
-                       va("^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
-                          aVoteInfo[vi[i + rows]].pszVoteName));
+                       va("^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName, aVoteInfo[vi[i + rows]].pszVoteName));
     } else {
       Printer::console(clientNum, va("^5%-17s", aVoteInfo[vi[i]].pszVoteName));
     }
   }
 
   if (fShowVote) {
-    Printer::console(
-        clientNum,
-        "\n\nUsage: ^3callvote <command> <params>\n"
-        "^7For current settings/help, use: ^3callvote <command> ?\n");
+    Printer::console(clientNum, "\n\nUsage: ^3callvote <command> <params>\n"
+                                "^7For current settings/help, use: ^3callvote <command> ?\n");
   }
 }
 
@@ -189,8 +173,7 @@ qboolean G_voteDescription(gentity_t *ent, int cmd, bool argCountCheck = true) {
   trap_Argv(2, arg, sizeof(arg));
   if (!Q_stricmp(arg, "?") || (argCountCheck && trap_Argc() == 2)) {
     trap_Argv(1, arg, sizeof(arg));
-    G_cpmPrintf(ent, "\nUsage: ^3\\vote %s%s\n", arg,
-                aVoteInfo[cmd].pszVoteHelp);
+    G_cpmPrintf(ent, "\nUsage: ^3\\vote %s%s\n", arg, aVoteInfo[cmd].pszVoteHelp);
     return (qtrue);
   }
 
@@ -206,35 +189,29 @@ void G_playersMessage(gentity_t *ent) {
   G_cpmPrintf(ent, "Use the ^3players^7 command to find a valid player ID.");
 }
 
-static void G_voteCurrentSetting(gentity_t *ent, const char *cmd,
-                                 const char *setting) {
+static void G_voteCurrentSetting(gentity_t *ent, const char *cmd, const char *setting) {
   G_cpmPrintf(ent, "^2%s^7 is currently ^3%s", cmd, setting);
 }
 
 // Vote toggling
-int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, int curr_setting,
-                       int vote_allow, int vote_type) {
+int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, int curr_setting, int vote_allow, int vote_type) {
   if (!vote_allow && ent) {
     G_voteDisableMessage(ent, aVoteInfo[vote_type].pszVoteName);
-    G_voteCurrentSetting(ent, aVoteInfo[vote_type].pszVoteName,
-                         ((curr_setting) ? ENABLED : DISABLED));
+    G_voteCurrentSetting(ent, aVoteInfo[vote_type].pszVoteName, ((curr_setting) ? ENABLED : DISABLED));
     return (G_INVALID);
   }
   if (G_voteDescription(ent, vote_type)) {
-    G_voteCurrentSetting(ent, aVoteInfo[vote_type].pszVoteName,
-                         ((curr_setting) ? ENABLED : DISABLED));
+    G_voteCurrentSetting(ent, aVoteInfo[vote_type].pszVoteName, ((curr_setting) ? ENABLED : DISABLED));
     return (G_INVALID);
   }
 
   if ((Q_atoi(arg2) && curr_setting) || (!Q_atoi(arg2) && !curr_setting)) {
-    G_cpmPrintf(ent, "^3%s^5 is already %s!", aVoteInfo[vote_type].pszVoteName,
-                ((curr_setting) ? ENABLED : DISABLED));
+    G_cpmPrintf(ent, "^3%s^5 is already %s!", aVoteInfo[vote_type].pszVoteName, ((curr_setting) ? ENABLED : DISABLED));
     return (G_INVALID);
   }
 
   Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2);
-  Com_sprintf(arg2, VOTE_MAXSTRING, "%s",
-              (Q_atoi(arg2)) ? ACTIVATED : DEACTIVATED);
+  Com_sprintf(arg2, VOTE_MAXSTRING, "%s", (Q_atoi(arg2)) ? ACTIVATED : DEACTIVATED);
 
   return (G_OK);
 }
@@ -243,8 +220,7 @@ int G_voteProcessOnOff(gentity_t *ent, char *arg, char *arg2, int curr_setting,
 // Several commands to help with cvar setting
 //
 void G_voteSetOnOff(const char *desc, const char *cvar) {
-  AP(va("cpm \"^3%s is: ^5%s\n\"", desc,
-        (Q_atoi(level.voteInfo.vote_value)) ? ENABLED : DISABLED));
+  AP(va("cpm \"^3%s is: ^5%s\n\"", desc, (Q_atoi(level.voteInfo.vote_value)) ? ENABLED : DISABLED));
   // trap_SendConsoleCommand(EXEC_APPEND, va("%s %s\n", cvar,
   // level.voteInfo.vote_value));
   trap_Cvar_Set(cvar, level.voteInfo.vote_value);
@@ -263,8 +239,7 @@ void G_voteSetVoteString(const char *desc) {
 }
 
 namespace ETJump {
-static bool matchMap(const char *voteArg, std::string &resultedMap,
-                     const bool &cheats) {
+static bool matchMap(const char *voteArg, std::string &resultedMap, const bool &cheats) {
   if (voteArg[0] == '\0') {
     resultedMap = "^3callvote: ^7No map specified.\n";
     return false;
@@ -273,8 +248,7 @@ static bool matchMap(const char *voteArg, std::string &resultedMap,
   auto matchedMaps = G_MatchAllMaps(voteArg);
 
   if (matchedMaps.size() == 0) {
-    resultedMap = StringUtils::format(
-        "^3callvote: ^7no maps found matching ^3%s^7.\n", voteArg);
+    resultedMap = StringUtils::format("^3callvote: ^7no maps found matching ^3%s^7.\n", voteArg);
     return false;
   }
 
@@ -287,16 +261,15 @@ static bool matchMap(const char *voteArg, std::string &resultedMap,
   }
 
   if (matchedMaps.size() > 1 && resultedMap.empty()) {
-    resultedMap = StringUtils::format(
-        "^3callvote: ^7found ^3%i ^7maps matching ^3%s^7.\n",
-        static_cast<int>(matchedMaps.size()), voteArg);
-    auto perRow = 3;
+    resultedMap           = StringUtils::format("^3callvote: ^7found ^3%i ^7maps matching ^3%s^7.\n",
+                                                static_cast<int>(matchedMaps.size()), voteArg);
+    auto perRow           = 3;
     auto mapsOnCurrentRow = 0;
     for (auto &map : matchedMaps) {
       ++mapsOnCurrentRow;
       if (mapsOnCurrentRow > perRow) {
-        mapsOnCurrentRow = 1;
-        resultedMap += StringUtils::format("\n%-22s", map);
+        mapsOnCurrentRow  = 1;
+        resultedMap      += StringUtils::format("\n%-22s", map);
       } else {
         resultedMap += StringUtils::format("%-22s", map);
       }
@@ -307,17 +280,14 @@ static bool matchMap(const char *voteArg, std::string &resultedMap,
     resultedMap = matchedMaps[0];
   }
 
-  if (resultedMap == level.rawmapname &&
-      cheats == static_cast<bool>(g_cheats.integer)) {
-    resultedMap = StringUtils::format(
-        "^3callvote: ^7%s is the current map (cheats %s).\n", level.rawmapname,
-        cheats ? "enabled" : "disabled");
+  if (resultedMap == level.rawmapname && cheats == static_cast<bool>(g_cheats.integer)) {
+    resultedMap = StringUtils::format("^3callvote: ^7%s is the current map (cheats %s).\n", level.rawmapname,
+                                      cheats ? "enabled" : "disabled");
     return false;
   }
 
   if (ETJump::MapStatistics::isBlockedMap(resultedMap)) {
-    resultedMap = StringUtils::format(
-        "^3callvote: ^7Voting for %s is not allowed.\n", resultedMap);
+    resultedMap = StringUtils::format("^3callvote: ^7Voting for %s is not allowed.\n", resultedMap);
     return false;
   }
 
@@ -330,8 +300,7 @@ bool matchRandomMap(const char *arg, std::string &map) {
   if (isCustomMapType) {
     auto customMapType = CustomMapTypeExists(arg);
     if (!customMapType) {
-      map = StringUtils::format("^3randommap: ^7Map type %s does not exist\n.",
-                                arg);
+      map = StringUtils::format("^3randommap: ^7Map type %s does not exist\n.", arg);
       return false;
     }
 
@@ -364,8 +333,7 @@ static void voteChangeMap(const char *cmd) {
   // to correct value, otherwise the client parses a stale configstring value
   // from the previous map, and overrides the cheat state
   constexpr char cheatCmd[] = "devmap";
-  constexpr auto len =
-      static_cast<int32_t>(std::char_traits<char>::length(cheatCmd));
+  constexpr auto len        = static_cast<int32_t>(std::char_traits<char>::length(cheatCmd));
 
   if (!Q_stricmpn(cmd, cheatCmd, len)) {
     trap_Cvar_Set("sv_cheats", "1");
@@ -404,8 +372,7 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
     const char *mapTypeDesc = CustomMapTypeExists(arg2);
     // array size is set in Cmd_CallVote_f
     Q_strncpyz(arg2, mapTypeDesc ? mapTypeDesc : "", MAX_STRING_TOKENS);
-    Q_strncpyz(level.voteInfo.vote_value, map.c_str(),
-               sizeof(level.voteInfo.vote_value));
+    Q_strncpyz(level.voteInfo.vote_value, map.c_str(), sizeof(level.voteInfo.vote_value));
   } else {
     ETJump::voteChangeMap(va("map %s\n", level.voteInfo.vote_value));
   }
@@ -414,9 +381,7 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
 }
 
 // *** Map - simpleton: we don't verify map is allowed/exists ***
-int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
-            const bool &cheats) {
-  const int clientNum = ClientNum(ent);
+int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, const bool &cheats) {
   // Vote request (vote is being initiated)
   if (arg) {
     char serverinfo[MAX_INFO_STRING];
@@ -432,7 +397,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 
     std::string map;
     if (!ETJump::matchMap(arg2, map, cheats)) {
-      Printer::console(clientNum, map);
+      Printer::console(ent, map);
       return G_INVALID;
     }
 
@@ -449,8 +414,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 
     Svcmd_ResetMatch_f(qfalse);
     trap_Cvar_VariableStringBuffer("nextmap", s, sizeof(s));
-    ETJump::voteChangeMap(va("%s %s%s\n", cheats ? "devmap" : "map",
-                             level.voteInfo.vote_value,
+    ETJump::voteChangeMap(va("%s %s%s\n", cheats ? "devmap" : "map", level.voteInfo.vote_value,
                              ((*s) ? va("; set nextmap \"%s\"", s) : "")));
   }
 
@@ -458,8 +422,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 }
 
 // *** Map Restart ***
-int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
-                   char *arg2) {
+int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2) {
   // Vote request (vote is being initiated)
   if (arg) {
     if (vote_allow_matchreset.integer <= 0) {
@@ -480,8 +443,7 @@ int G_MapRestart_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg,
 }
 
 namespace ETJump {
-int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
-                    char *arg2) {
+int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
   if (arg) {
     if (!level.voteInfo.isAutoRtvVote) {
       if (!vote_allow_rtv.integer) {
@@ -496,29 +458,22 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
 
     std::vector<std::string> maps{};
     int numMaps;
-    const int clientNum = !level.voteInfo.isAutoRtvVote
-                              ? ClientNum(ent)
-                              : level.voteInfo.voter_cn;
+    const int clientNum = !level.voteInfo.isAutoRtvVote ? ClientNum(ent) : level.voteInfo.voter_cn;
 
     if (arg2[0]) {
       if (!CustomMapTypeExists(arg2)) {
-        Printer::popup(
-            clientNum,
-            StringUtils::format(
-                "Specified custom vote type ^3'%s' ^7does not exist.", arg2));
+        Printer::popup(clientNum, StringUtils::format("Specified custom vote type ^3'%s' ^7does not exist.", arg2));
         return G_INVALID;
       }
 
-      maps = getMapsOnList(arg2);
+      maps    = getMapsOnList(arg2);
       numMaps = static_cast<int>(maps.size());
 
       // in case someone made an empty map list, or none are available
       if (numMaps == 0) {
-        Printer::popup(
-            clientNum,
-            StringUtils::format("Specified custom vote type ^3'%s' ^7is empty "
-                                "or none of the maps are available.",
-                                arg2));
+        Printer::popup(clientNum, StringUtils::format("Specified custom vote type ^3'%s' ^7is empty "
+                                                      "or none of the maps are available.",
+                                                      arg2));
         return G_INVALID;
       }
 
@@ -543,25 +498,22 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
                     "use this feature.\n",
                     arg);
       } else {
-        Printer::popup(clientNum, StringUtils::format(
-                                      "Sorry, calling ^3%s^7 with less than 3 "
-                                      "valid maps on %s is not possible.",
-                                      arg, arg2[0] ? "a list" : "the server"));
+        Printer::popup(clientNum, StringUtils::format("Sorry, calling ^3%s^7 with less than 3 "
+                                                      "valid maps on %s is not possible.",
+                                                      arg, arg2[0] ? "a list" : "the server"));
       }
       return G_INVALID;
     }
 
-    const size_t maxMaps =
-        std::clamp(g_rtvMapCount.integer, 2, std::min(numMaps, 9));
+    const size_t maxMaps = std::clamp(g_rtvMapCount.integer, 2, std::min(numMaps, 9));
     std::set<std::string> uniqueMaps;
     auto rtvMaps = game.rtv->getRtvMaps();
 
     game.rtv->clearRtvMaps();
 
     // just copy all the maps if we don't have more maps than requested
-    if (numMaps <= maxMaps) {
-      std::copy(maps.begin(), maps.end(),
-                std::inserter(uniqueMaps, uniqueMaps.begin()));
+    if (static_cast<size_t>(numMaps) <= maxMaps) {
+      std::copy(maps.begin(), maps.end(), std::inserter(uniqueMaps, uniqueMaps.begin()));
       uniqueMaps.erase(level.rawmapname);
     } else {
       while (uniqueMaps.size() <= maxMaps) {
@@ -576,9 +528,8 @@ int G_RockTheVote_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     rtvMaps->resize(maxMaps);
 
     for (size_t i = 0; i < maxMaps; ++i, ++it) {
-      (*rtvMaps)[i].mapName = *it;
-      cs += StringUtils::format("%s\\0%s", (*rtvMaps)[i].mapName,
-                                i == maxMaps - 1 ? "" : "\\");
+      (*rtvMaps)[i].mapName  = *it;
+      cs                    += StringUtils::format("%s\\0%s", (*rtvMaps)[i].mapName, i == maxMaps - 1 ? "" : "\\");
     }
 
     if (arg2[0] != '\0') {
@@ -615,21 +566,18 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
     if (time < 0) {
       Q_strncpyz(arg2, "0", MAX_STRING_TOKENS);
     } else if (time > game.rtv->AUTORTV_MAX_TIME) {
-      Q_strncpyz(arg2, std::to_string(game.rtv->AUTORTV_MAX_TIME).c_str(),
-                 MAX_STRING_TOKENS);
+      Q_strncpyz(arg2, std::to_string(game.rtv->AUTORTV_MAX_TIME).c_str(), MAX_STRING_TOKENS);
     }
 
     // if auto rtv is already off, no point turning it off again
     if (Q_atoi(arg2) == 0 && !g_autoRtv.integer) {
-      Printer::popup(ClientNum(ent),
-                     "^7Automatic Rock The Vote is already turned off.");
+      Printer::popup(ClientNum(ent), "^7Automatic Rock The Vote is already turned off.");
       return G_INVALID;
     }
 
     Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, arg2);
   } else {
-    trap_SendConsoleCommand(EXEC_APPEND,
-                            va("g_autoRtv %s", level.voteInfo.vote_value));
+    trap_SendConsoleCommand(EXEC_APPEND, va("g_autoRtv %s", level.voteInfo.vote_value));
 
     if (!Q_stricmp(level.voteInfo.vote_value, "0")) {
       Printer::popupAll("^7Automatic Rock The Vote has been turned off.");
@@ -642,16 +590,14 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
         voteMsg = "^7Automatic Rock The Vote interval was adjusted!";
       }
 
-      const int interval = Q_atoi(level.voteInfo.vote_value);
-      const int nextVoteTime =
-          interval - ((level.time - game.rtv->autoRtvStartTime) / (1000 * 60));
+      const int interval     = Q_atoi(level.voteInfo.vote_value);
+      const int nextVoteTime = interval - ((level.time - game.rtv->autoRtvStartTime) / (1000 * 60));
       const char *minutesStr = nextVoteTime == 1 ? "minute" : "minutes";
 
       Printer::popupAll(voteMsg);
+
       if (nextVoteTime > 0) {
-        Printer::popupAll(
-            StringUtils::format("^7Next vote will be called in ^3%i ^7%s.",
-                                nextVoteTime, minutesStr));
+        Printer::popupAll("^7Next vote will be called in ^3%i ^7%s.", nextVoteTime, minutesStr);
       }
     }
   }
@@ -659,8 +605,7 @@ int G_AutoRtv_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
   return G_OK;
 }
 
-int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
-                      char *arg2) {
+int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
   if (arg) {
     if (!vote_allow_portalPredict.integer) {
       G_voteDisableMessage(ent, arg);
@@ -671,9 +616,8 @@ int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
       return G_INVALID;
     }
 
-    if (game.worldspawn->portalPredict) {
-      Printer::popup(
-          ent, "Portalgun teleport prediction cannot be changed in this map.");
+    if (game.worldspawn->sharedKeys.portalPredict) {
+      Printer::popup(ent, "Portalgun teleport prediction cannot be changed in this map.");
       return G_INVALID;
     }
 
@@ -684,21 +628,18 @@ int G_PortalPredict_v(gentity_t *ent, unsigned dwVoteIndex, char *arg,
     // votes this with a weird number
     if (val == 0) {
       if (!g_portalPredict.integer) {
-        Printer::popup(ent,
-                       "Predicted portalgun teleports are already disabled.");
+        Printer::popup(ent, "Predicted portalgun teleports are already disabled.");
         return G_INVALID;
       }
     } else {
       if (g_portalPredict.integer) {
-        Printer::popup(ent,
-                       "Predicted portalgun teleports are already enabled.");
+        Printer::popup(ent, "Predicted portalgun teleports are already enabled.");
         return G_INVALID;
       }
     }
 
     // ensure the vote value is only ever 1 or 0
-    Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING,
-                val == 0 ? "0" : "1");
+    Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, val == 0 ? "0" : "1");
   } else {
     trap_Cvar_Set("g_portalPredict", level.voteInfo.vote_value);
   }

@@ -22,51 +22,47 @@
  * SOFTWARE.
  */
 
+#include "etj_string_utilities.h"
+
 #include <algorithm>
 #include <cctype>
 #include <iomanip>
-
-#include "etj_string_utilities.h"
 
 namespace StringUtils {
 // https://en.wikipedia.org/wiki/Levenshtein_distance
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C.2B.2B
 unsigned int levenshteinDistance(const std::string &s1, const std::string &s2) {
   const std::size_t len1 = s1.size(), len2 = s2.size();
-  std::vector<std::vector<unsigned int>> d(len1 + 1,
-                                           std::vector<unsigned int>(len2 + 1));
+  std::vector<std::vector<unsigned int>> d(len1 + 1, std::vector<unsigned int>(len2 + 1));
 
   d[0][0] = 0;
-  for (unsigned int i = 1; i <= len1; ++i) d[i][0] = i;
-  for (unsigned int i = 1; i <= len2; ++i) d[0][i] = i;
+  for (unsigned int i = 1; i <= len1; ++i)
+    d[i][0] = i;
+  for (unsigned int i = 1; i <= len2; ++i)
+    d[0][i] = i;
 
   for (unsigned int i = 1; i <= len1; ++i)
     for (unsigned int j = 1; j <= len2; ++j)
-      d[i][j] = std::min({d[i - 1][j] + 1, d[i][j - 1] + 1,
-                          d[i - 1][j - 1] + (s1[i - 1] == s2[j - 1] ? 0 : 1)});
+      d[i][j] = std::min({d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (s1[i - 1] == s2[j - 1] ? 0 : 1)});
   return d[len1][len2];
 }
 
-std::string getBestMatch(const std::vector<std::string> &words,
-                         const std::string &current) {
+std::string getBestMatch(const std::vector<std::string> &words, const std::string &current) {
   std::vector<std::pair<std::string, int>> distances;
 
   for (const auto &word : words) {
-    distances.push_back(
-        std::make_pair(word, levenshteinDistance(word, current)));
+    distances.push_back(std::make_pair(word, levenshteinDistance(word, current)));
   }
 
   auto smallest = std::min_element(begin(distances), end(distances),
-                                   [](const std::pair<std::string, int> &lhs,
-                                      const std::pair<std::string, int> &rhs) {
+                                   [](const std::pair<std::string, int> &lhs, const std::pair<std::string, int> &rhs) {
                                      return lhs.second < rhs.second;
                                    });
 
   return smallest->first;
 }
 
-std::string sanitize(const std::string_view text, const bool toLower,
-                     const bool removeControlChars) {
+std::string sanitize(const std::string_view text, const bool toLower, const bool removeControlChars) {
   std::string out;
 
   for (size_t i = 0; i < text.length(); ++i) {
@@ -89,8 +85,7 @@ std::string getValue(const char *value, const std::string &defaultValue) {
   return strlen(value) > 0 ? value : defaultValue;
 }
 
-std::string getValue(const std::string &value,
-                     const std::string &defaultValue) {
+std::string getValue(const std::string &value, const std::string &defaultValue) {
   return value.length() > 0 ? value : defaultValue;
 }
 
@@ -105,17 +100,20 @@ std::string trimStart(const std::string &input) {
 std::string trimEnd(const std::string &input) {
   std::string str = input;
   str.erase(std::find_if(str.rbegin(), str.rend(),
-                         [](int ch) { return !std::isspace(ch); })
-                .base(),
+                         [](int ch) {
+                           return !std::isspace(ch);
+                         })
+              .base(),
             str.end());
   return str;
 }
 
-std::string trim(const std::string &input) { return trimEnd(trimStart(input)); }
+std::string trim(const std::string &input) {
+  return trimEnd(trimStart(input));
+}
 
 // word-wrapper
-std::vector<std::string> wrapWords(const std::string &input, char separator,
-                                   size_t maxLength) {
+std::vector<std::string> wrapWords(const std::string &input, char separator, size_t maxLength) {
   std::vector<std::string> output;
   size_t lastPos = 0;
 
@@ -189,35 +187,36 @@ std::string getYearsString(const int &years) {
 
 std::string toLowerCase(const std::string &input) {
   std::string str = input;
-  std::transform(str.begin(), str.end(), str.begin(),
-                 [](unsigned char c) { return std::tolower(c); });
+  std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
+    return std::tolower(c);
+  });
   return str;
 }
 
 std::string toUpperCase(const std::string &input) {
   std::string str = input;
-  std::transform(str.begin(), str.end(), str.begin(),
-                 [](unsigned char c) { return std::toupper(c); });
+  std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
+    return std::toupper(c);
+  });
   return str;
 }
 
 std::string eraseLast(const std::string &input, const std::string &substring) {
   std::string str = input;
-  auto pos = str.rfind(substring);
+  auto pos        = str.rfind(substring);
   if (pos != std::string::npos) {
     str.erase(pos, substring.size());
   }
   return str;
 }
 
-std::vector<std::string> split(const std::string &input,
-                               const std::string &delimiter) {
+std::vector<std::string> split(const std::string &input, const std::string &delimiter) {
   size_t posStart = 0, posEnd, delimLen = delimiter.length();
   std::string token;
   std::vector<std::string> splits;
 
   while ((posEnd = input.find(delimiter, posStart)) != std::string::npos) {
-    token = input.substr(posStart, posEnd - posStart);
+    token    = input.substr(posStart, posEnd - posStart);
     posStart = posEnd + delimLen;
     splits.push_back(token);
   }
@@ -227,8 +226,7 @@ std::vector<std::string> split(const std::string &input,
   return splits;
 }
 
-void replaceAll(std::string &input, const std::string &from,
-                const std::string &to) {
+void replaceAll(std::string &input, const std::string &from, const std::string &to) {
   size_t startPost = 0;
   while ((startPost = input.find(from, startPost)) != std::string::npos) {
     input.replace(startPost, from.length(), to);
@@ -236,8 +234,7 @@ void replaceAll(std::string &input, const std::string &from,
   }
 }
 
-void replaceAll(std::wstring &input, const std::wstring &from,
-                const std::wstring &to) {
+void replaceAll(std::wstring &input, const std::wstring &from, const std::wstring &to) {
   size_t startPost = 0;
   while ((startPost = input.find(from, startPost)) != std::wstring::npos) {
     input.replace(startPost, from.length(), to);
@@ -245,8 +242,7 @@ void replaceAll(std::wstring &input, const std::wstring &from,
   }
 }
 
-void stringSubstitute(std::string &input, char character,
-                      const std::string &replacement, size_t numChars) {
+void stringSubstitute(std::string &input, char character, const std::string &replacement, size_t numChars) {
   size_t startPos = 0;
 
   while ((startPos = input.find(character, startPos)) != std::string::npos) {
@@ -267,26 +263,27 @@ bool endsWith(const std::string &str, const std::string &suffix) {
   if (suffix.length() > str.length())
     return false;
 
-  return str.compare(str.length() - suffix.length(), suffix.length(), suffix) ==
-         0;
+  return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
 }
 
-bool iEqual(const std::string_view str1, const std::string_view str2,
-            bool sanitized) {
+bool isWhiteSpace(const std::string_view s) {
+  return std::all_of(s.cbegin(), s.cend(), [](const char c) {
+    return std::isspace(c);
+  });
+}
+
+bool iEqual(const std::string_view str1, const std::string_view str2, bool sanitized) {
   if (sanitized) {
     return sanitize(str1, true) == sanitize(str2, true);
   }
 
-  return std::equal(str1.begin(), str1.end(), str2.begin(), str2.end(),
-                    [](unsigned char a, unsigned char b) {
-                      return std::tolower(a) == std::tolower(b);
-                    });
+  return std::equal(str1.begin(), str1.end(), str2.begin(), str2.end(), [](unsigned char a, unsigned char b) {
+    return std::tolower(a) == std::tolower(b);
+  });
 }
 
-int32_t countExtraPadding(const std::string &input,
-                          const int32_t targetPadding) {
-  return targetPadding +
-         static_cast<int32_t>(input.length() - sanitize(input).length());
+int32_t countExtraPadding(const std::string &input, const int32_t targetPadding) {
+  return targetPadding + static_cast<int32_t>(input.length() - sanitize(input).length());
 }
 
 std::string normalizeNumberString(const std::string &input) {
@@ -356,12 +353,12 @@ std::string truncate(const std::string &str, const size_t len) {
   }
 
   size_t outLen = len;
-  size_t idx = 0;
+  size_t idx    = 0;
 
   for (size_t i = 0; i < outLen && outLen < str.length(); i++) {
     if (isColorString(str, idx)) {
       outLen += 2;
-      idx += 2;
+      idx    += 2;
       i++;
       continue;
     }

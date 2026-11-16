@@ -23,14 +23,14 @@
  */
 
 #include "etj_inline_command_parser.h"
+
 #include "../game/etj_string_utilities.h"
 
 ETJump::InlineCommandParser::InlineCommandParser() {}
 
 ETJump::InlineCommandParser::~InlineCommandParser() {}
 
-std::vector<std::string>
-ETJump::InlineCommandParser::parse(const std::vector<std::string> &args) {
+std::vector<std::string> ETJump::InlineCommandParser::parse(const std::vector<std::string> &args) {
   std::vector<std::string> commands;
 
   std::string currentCommand;
@@ -46,7 +46,7 @@ ETJump::InlineCommandParser::parse(const std::vector<std::string> &args) {
   }
 
   if (currentCommand.length() > 0) {
-    commands.push_back(currentCommand);
+    commands.push_back(std::move(currentCommand));
   }
 
   return commands;

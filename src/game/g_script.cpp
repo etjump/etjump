@@ -105,10 +105,8 @@ qboolean G_ScriptAction_FadeAllSounds(gentity_t *ent, char *params);
 qboolean G_ScriptAction_Construct(gentity_t *ent, char *params);
 qboolean G_ScriptAction_ConstructibleClass(gentity_t *ent, char *params);
 qboolean G_ScriptAction_ConstructibleChargeBarReq(gentity_t *ent, char *params);
-qboolean G_ScriptAction_ConstructibleConstructXPBonus(gentity_t *ent,
-                                                      char *params);
-qboolean G_ScriptAction_ConstructibleDestructXPBonus(gentity_t *ent,
-                                                     char *params);
+qboolean G_ScriptAction_ConstructibleConstructXPBonus(gentity_t *ent, char *params);
+qboolean G_ScriptAction_ConstructibleDestructXPBonus(gentity_t *ent, char *params);
 qboolean G_ScriptAction_ConstructibleHealth(gentity_t *ent, char *params);
 qboolean G_ScriptAction_ConstructibleWeaponclass(gentity_t *ent, char *params);
 qboolean G_ScriptAction_ConstructibleDuration(gentity_t *ent, char *params);
@@ -130,164 +128,165 @@ qboolean useTarget(gentity_t *ent, char *params);
 qboolean wmAnnouncePrivate(gentity_t *ent, char *params);
 qboolean tracker(gentity_t *ent, char *params);
 qboolean changeSkin(gentity_t *ent, char *params);
+qboolean editEntity(gentity_t *ent, char *params);
 } // namespace ETJump::ScriptActions
 
 // these are the actions that each event can call
 g_script_stack_action_t gScriptActions[] = {
-    {"gotomarker", G_ScriptAction_GotoMarker},
-    {"playsound", G_ScriptAction_PlaySound},
-    {"playanim", G_ScriptAction_PlayAnim},
-    {"wait", G_ScriptAction_Wait},
-    {"trigger", G_ScriptAction_Trigger},
-    {"alertentity", G_ScriptAction_AlertEntity},
-    {"togglespeaker", G_ScriptAction_ToggleSpeaker},
-    {"disablespeaker", G_ScriptAction_DisableSpeaker},
-    {"enablespeaker", G_ScriptAction_EnableSpeaker},
-    {"accum", G_ScriptAction_Accum},
-    {"globalaccum", G_ScriptAction_GlobalAccum},
-    {"print", G_ScriptAction_Print},
-    {"faceangles", G_ScriptAction_FaceAngles},
-    {"resetscript", G_ScriptAction_ResetScript},
-    {"attachtotag", G_ScriptAction_TagConnect},
-    {"halt", G_ScriptAction_Halt},
-    {"stopsound", G_ScriptAction_StopSound},
-    {"entityscriptname", G_ScriptAction_EntityScriptName},
-    {"aiscriptname", G_ScriptAction_AIScriptName},
-    {"wm_axis_respawntime", G_ScriptAction_AxisRespawntime},
-    {"wm_allied_respawntime", G_ScriptAction_AlliedRespawntime},
-    {"wm_number_of_objectives", G_ScriptAction_NumberofObjectives},
-    {"wm_setwinner", G_ScriptAction_SetWinner},
-    {"wm_set_defending_team", G_ScriptAction_SetDefendingTeam},
-    {"wm_announce", G_ScriptAction_Announce},
-    {"wm_teamvoiceannounce", G_ScriptAction_TeamVoiceAnnounce},
-    {"wm_addteamvoiceannounce", G_ScriptAction_AddTeamVoiceAnnounce},
-    {"wm_removeteamvoiceannounce", G_ScriptAction_RemoveTeamVoiceAnnounce},
-    {"wm_announce_icon", G_ScriptAction_Announce_Icon},
-    {"wm_endround", G_ScriptAction_EndRound},
-    {"wm_set_round_timelimit", G_ScriptAction_SetRoundTimelimit},
-    {"wm_voiceannounce", G_ScriptAction_VoiceAnnounce},
-    {"wm_objective_status", G_ScriptAction_ObjectiveStatus},
-    {"wm_set_main_objective", G_ScriptAction_SetMainObjective},
-    {"remove", G_ScriptAction_RemoveEntity},
-    {"setstate", G_ScriptAction_SetState},
-    {"followspline", G_ScriptAction_FollowSpline},
-    {"followpath", G_ScriptAction_FollowPath},
-    {"abortmove", G_ScriptAction_AbortMove},
-    {"setspeed", G_ScriptAction_SetSpeed},
-    {"setrotation", G_ScriptAction_SetRotation},
-    {"stoprotation", G_ScriptAction_StopRotation},
-    {"startanimation", G_ScriptAction_StartAnimation},
-    {"attatchtotrain", G_ScriptAction_AttatchToTrain},
-    {"freezeanimation", G_ScriptAction_FreezeAnimation},
-    {"unfreezeanimation", G_ScriptAction_UnFreezeAnimation},
-    {"remapshader", G_ScriptAction_ShaderRemap},
-    {"remapshaderflush", G_ScriptAction_ShaderRemapFlush},
-    {"changemodel", G_ScriptAction_ChangeModel},
-    {"setchargetimefactor", G_ScriptAction_SetChargeTimeFactor},
-    {"setdamagable", G_ScriptAction_SetDamagable},
-    {"startcam", G_ScriptAction_StartCam},
-    {"SetInitialCamera", G_ScriptAction_SetInitialCamera},
-    {"stopcam", G_ScriptAction_StopCam},
-    {"repairmg42", G_ScriptAction_RepairMG42},
-    {"sethqstatus", G_ScriptAction_SetHQStatus},
+  {"gotomarker",                     G_ScriptAction_GotoMarker                   },
+  {"playsound",                      G_ScriptAction_PlaySound                    },
+  {"playanim",                       G_ScriptAction_PlayAnim                     },
+  {"wait",                           G_ScriptAction_Wait                         },
+  {"trigger",                        G_ScriptAction_Trigger                      },
+  {"alertentity",                    G_ScriptAction_AlertEntity                  },
+  {"togglespeaker",                  G_ScriptAction_ToggleSpeaker                },
+  {"disablespeaker",                 G_ScriptAction_DisableSpeaker               },
+  {"enablespeaker",                  G_ScriptAction_EnableSpeaker                },
+  {"accum",                          G_ScriptAction_Accum                        },
+  {"globalaccum",                    G_ScriptAction_GlobalAccum                  },
+  {"print",                          G_ScriptAction_Print                        },
+  {"faceangles",                     G_ScriptAction_FaceAngles                   },
+  {"resetscript",                    G_ScriptAction_ResetScript                  },
+  {"attachtotag",                    G_ScriptAction_TagConnect                   },
+  {"halt",                           G_ScriptAction_Halt                         },
+  {"stopsound",                      G_ScriptAction_StopSound                    },
+  {"entityscriptname",               G_ScriptAction_EntityScriptName             },
+  {"aiscriptname",                   G_ScriptAction_AIScriptName                 },
+  {"wm_axis_respawntime",            G_ScriptAction_AxisRespawntime              },
+  {"wm_allied_respawntime",          G_ScriptAction_AlliedRespawntime            },
+  {"wm_number_of_objectives",        G_ScriptAction_NumberofObjectives           },
+  {"wm_setwinner",                   G_ScriptAction_SetWinner                    },
+  {"wm_set_defending_team",          G_ScriptAction_SetDefendingTeam             },
+  {"wm_announce",                    G_ScriptAction_Announce                     },
+  {"wm_teamvoiceannounce",           G_ScriptAction_TeamVoiceAnnounce            },
+  {"wm_addteamvoiceannounce",        G_ScriptAction_AddTeamVoiceAnnounce         },
+  {"wm_removeteamvoiceannounce",     G_ScriptAction_RemoveTeamVoiceAnnounce      },
+  {"wm_announce_icon",               G_ScriptAction_Announce_Icon                },
+  {"wm_endround",                    G_ScriptAction_EndRound                     },
+  {"wm_set_round_timelimit",         G_ScriptAction_SetRoundTimelimit            },
+  {"wm_voiceannounce",               G_ScriptAction_VoiceAnnounce                },
+  {"wm_objective_status",            G_ScriptAction_ObjectiveStatus              },
+  {"wm_set_main_objective",          G_ScriptAction_SetMainObjective             },
+  {"remove",                         G_ScriptAction_RemoveEntity                 },
+  {"setstate",                       G_ScriptAction_SetState                     },
+  {"followspline",                   G_ScriptAction_FollowSpline                 },
+  {"followpath",                     G_ScriptAction_FollowPath                   },
+  {"abortmove",                      G_ScriptAction_AbortMove                    },
+  {"setspeed",                       G_ScriptAction_SetSpeed                     },
+  {"setrotation",                    G_ScriptAction_SetRotation                  },
+  {"stoprotation",                   G_ScriptAction_StopRotation                 },
+  {"startanimation",                 G_ScriptAction_StartAnimation               },
+  {"attatchtotrain",                 G_ScriptAction_AttatchToTrain               },
+  {"freezeanimation",                G_ScriptAction_FreezeAnimation              },
+  {"unfreezeanimation",              G_ScriptAction_UnFreezeAnimation            },
+  {"remapshader",                    G_ScriptAction_ShaderRemap                  },
+  {"remapshaderflush",               G_ScriptAction_ShaderRemapFlush             },
+  {"changemodel",                    G_ScriptAction_ChangeModel                  },
+  {"setchargetimefactor",            G_ScriptAction_SetChargeTimeFactor          },
+  {"setdamagable",                   G_ScriptAction_SetDamagable                 },
+  {"startcam",                       G_ScriptAction_StartCam                     },
+  {"SetInitialCamera",               G_ScriptAction_SetInitialCamera             },
+  {"stopcam",                        G_ScriptAction_StopCam                      },
+  {"repairmg42",                     G_ScriptAction_RepairMG42                   },
+  {"sethqstatus",                    G_ScriptAction_SetHQStatus                  },
 
-    {"printaccum", G_ScriptAction_PrintAccum},
-    {"printglobalaccum", G_ScriptAction_PrintGlobalAccum},
-    {"cvar", G_ScriptAction_Cvar},
-    {"abortifwarmup", G_ScriptAction_AbortIfWarmup},
-    {"abortifnotsingleplayer", G_ScriptAction_AbortIfNotSinglePlayer},
+  {"printaccum",                     G_ScriptAction_PrintAccum                   },
+  {"printglobalaccum",               G_ScriptAction_PrintGlobalAccum             },
+  {"cvar",                           G_ScriptAction_Cvar                         },
+  {"abortifwarmup",                  G_ScriptAction_AbortIfWarmup                },
+  {"abortifnotsingleplayer",         G_ScriptAction_AbortIfNotSinglePlayer       },
 
-    {"mu_start", G_ScriptAction_MusicStart},
-    {"mu_play", G_ScriptAction_MusicPlay},
-    {"mu_stop", G_ScriptAction_MusicStop},
-    {"mu_queue", G_ScriptAction_MusicQueue},
-    {"mu_fade", G_ScriptAction_MusicFade},
-    {"setdebuglevel", G_ScriptAction_SetDebugLevel},
-    {"setposition", G_ScriptAction_SetPosition},
-    {"setautospawn", G_ScriptAction_SetAutoSpawn},
+  {"mu_start",                       G_ScriptAction_MusicStart                   },
+  {"mu_play",                        G_ScriptAction_MusicPlay                    },
+  {"mu_stop",                        G_ScriptAction_MusicStop                    },
+  {"mu_queue",                       G_ScriptAction_MusicQueue                   },
+  {"mu_fade",                        G_ScriptAction_MusicFade                    },
+  {"setdebuglevel",                  G_ScriptAction_SetDebugLevel                },
+  {"setposition",                    G_ScriptAction_SetPosition                  },
+  {"setautospawn",                   G_ScriptAction_SetAutoSpawn                 },
 
-    // Gordon: going for longest silly script command ever here :) (sets a model
-    // for a brush to one stolen from a func_brushmodel
-    {"setmodelfrombrushmodel", G_ScriptAction_SetModelFromBrushmodel},
+  // Gordon: going for longest silly script command ever here :) (sets a model
+  // for a brush to one stolen from a func_brushmodel
+  {"setmodelfrombrushmodel",         G_ScriptAction_SetModelFromBrushmodel       },
 
-    // fade all sounds up or down
-    {"fadeallsounds", G_ScriptAction_FadeAllSounds},
+  // fade all sounds up or down
+  {"fadeallsounds",                  G_ScriptAction_FadeAllSounds                },
 
-    {"construct", G_ScriptAction_Construct},
-    {"spawnrubble", G_ScriptAction_SpawnRubble},
-    {"setglobalfog", G_ScriptAction_SetGlobalFog},
-    {"allowtankexit", G_ScriptAction_AllowTankExit},
-    {"allowtankenter", G_ScriptAction_AllowTankEnter},
-    {"settankammo", G_ScriptAction_SetTankAmmo},
-    {"addtankammo", G_ScriptAction_AddTankAmmo},
-    {"kill", G_ScriptAction_Kill},
-    {"disablemessage", G_ScriptAction_DisableMessage},
+  {"construct",                      G_ScriptAction_Construct                    },
+  {"spawnrubble",                    G_ScriptAction_SpawnRubble                  },
+  {"setglobalfog",                   G_ScriptAction_SetGlobalFog                 },
+  {"allowtankexit",                  G_ScriptAction_AllowTankExit                },
+  {"allowtankenter",                 G_ScriptAction_AllowTankEnter               },
+  {"settankammo",                    G_ScriptAction_SetTankAmmo                  },
+  {"addtankammo",                    G_ScriptAction_AddTankAmmo                  },
+  {"kill",                           G_ScriptAction_Kill                         },
+  {"disablemessage",                 G_ScriptAction_DisableMessage               },
 
-    // bani
-    {"set", etpro_ScriptAction_SetValues},
+  // bani
+  {"set",                            etpro_ScriptAction_SetValues                },
 
-    {"constructible_class", G_ScriptAction_ConstructibleClass},
-    {"constructible_chargebarreq", G_ScriptAction_ConstructibleChargeBarReq},
-    {"constructible_constructxpbonus",
-     G_ScriptAction_ConstructibleConstructXPBonus},
-    {"constructible_destructxpbonus",
-     G_ScriptAction_ConstructibleDestructXPBonus},
-    {"constructible_health", G_ScriptAction_ConstructibleHealth},
-    {"constructible_weaponclass", G_ScriptAction_ConstructibleWeaponclass},
-    {"constructible_duration", G_ScriptAction_ConstructibleDuration},
+  {"constructible_class",            G_ScriptAction_ConstructibleClass           },
+  {"constructible_chargebarreq",     G_ScriptAction_ConstructibleChargeBarReq    },
+  {"constructible_constructxpbonus", G_ScriptAction_ConstructibleConstructXPBonus},
+  {"constructible_destructxpbonus",  G_ScriptAction_ConstructibleDestructXPBonus },
+  {"constructible_health",           G_ScriptAction_ConstructibleHealth          },
+  {"constructible_weaponclass",      G_ScriptAction_ConstructibleWeaponclass     },
+  {"constructible_duration",         G_ScriptAction_ConstructibleDuration        },
 
-    {"setplayerautospawn", ETJump::ScriptActions::setPlayerAutoSpawn},
-    {"setplayerspawn", ETJump::ScriptActions::setPlayerSpawn},
-    {"damageplayer", ETJump::ScriptActions::damagePlayer},
-    {"killplayer", ETJump::ScriptActions::killPlayer},
+  {"setplayerautospawn",             ETJump::ScriptActions::setPlayerAutoSpawn   },
+  {"setplayerspawn",                 ETJump::ScriptActions::setPlayerSpawn       },
+  {"damageplayer",                   ETJump::ScriptActions::damagePlayer         },
+  {"killplayer",                     ETJump::ScriptActions::killPlayer           },
 
-    {"create", ETJump::ScriptActions::create},
-    {"delete", ETJump::ScriptActions::deleteAction},
+  {"create",                         ETJump::ScriptActions::create               },
+  {"delete",                         ETJump::ScriptActions::deleteAction         },
 
-    {"usetarget", ETJump::ScriptActions::useTarget},
-    {"wm_announce_private", ETJump::ScriptActions::wmAnnouncePrivate},
-    {"tracker", ETJump::ScriptActions::tracker},
-    {"changeskin", ETJump::ScriptActions::changeSkin},
-    {nullptr, nullptr}};
+  {"usetarget",                      ETJump::ScriptActions::useTarget            },
+  {"wm_announce_private",            ETJump::ScriptActions::wmAnnouncePrivate    },
+  {"tracker",                        ETJump::ScriptActions::tracker              },
+  {"changeskin",                     ETJump::ScriptActions::changeSkin           },
+  {"editentity",                     ETJump::ScriptActions::editEntity           },
+  {nullptr,                          nullptr                                     }
+};
 
-qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event,
-                                         const char *eventParm);
-qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event,
-                                        const char *eventParm);
+qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event, const char *eventParm);
+qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event, const char *eventParm);
 
 // the list of events that can start an action sequence
 g_script_event_define_t gScriptEvents[] = {
-    {"spawn", NULL}, // called as each character is spawned into the game
-    {"trigger",
-     G_Script_EventMatch_StringEqual}, // something has triggered us (always
-                                       // followed by an identifier)
-    {"pain", G_Script_EventMatch_IntInRange},      // we've been hurt
-    {"death", NULL},                               // RIP
-    {"activate", G_Script_EventMatch_StringEqual}, // something has triggered us
-                                                   // [activator team]
-    {"stopcam", NULL},
-    {"playerstart", NULL},
-    {"built", G_Script_EventMatch_StringEqual},
-    {"buildstart", G_Script_EventMatch_StringEqual},
-    {"decayed", G_Script_EventMatch_StringEqual},
-    {"destroyed", G_Script_EventMatch_StringEqual},
-    {"rebirth", NULL},
-    {"failed", NULL},
-    {"dynamited", NULL},
-    {"defused", NULL},
-    {"mg42", G_Script_EventMatch_StringEqual},
-    {"message",
-     G_Script_EventMatch_StringEqual}, // contains a sequence of VO in a message
+  {"spawn",       NULL                           }, // called as each character is spawned into the game
+  {"trigger",     G_Script_EventMatch_StringEqual}, // something has triggered us (always
+                                                 // followed by an identifier)
+  {"pain",        G_Script_EventMatch_IntInRange }, // we've been hurt
+  {"death",       NULL                           }, // RIP
+  {"activate",    G_Script_EventMatch_StringEqual}, // something has triggered us
+                                                 // [activator team]
+  {"stopcam",     NULL                           },
+  {"playerstart", NULL                           },
+  {"built",       G_Script_EventMatch_StringEqual},
+  {"buildstart",  G_Script_EventMatch_StringEqual},
+  {"decayed",     G_Script_EventMatch_StringEqual},
+  {"destroyed",   G_Script_EventMatch_StringEqual},
+  {"rebirth",     NULL                           },
+  {"failed",      NULL                           },
+  {"dynamited",   NULL                           },
+  {"defused",     NULL                           },
+  {"mg42",        G_Script_EventMatch_StringEqual},
+  {"message",     G_Script_EventMatch_StringEqual}, // contains a sequence of VO in a message
+  // entity was enabled (turned on)
+  {"enabled",     G_Script_EventMatch_StringEqual},
+  // entity was disabled (turned off)
+  {"disabled",    G_Script_EventMatch_StringEqual},
 
-    {NULL, NULL}};
+  {NULL,          NULL                           }
+};
 
 /*
 ===============
 G_Script_EventMatch_StringEqual
 ===============
 */
-qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event,
-                                         const char *eventParm) {
+qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event, const char *eventParm) {
   if (eventParm && !Q_stricmp(event->params, eventParm)) {
     return qtrue;
   } else {
@@ -300,17 +299,16 @@ qboolean G_Script_EventMatch_StringEqual(g_script_event_t *event,
 G_Script_EventMatch_IntInRange
 ===============
 */
-qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event,
-                                        const char *eventParm) {
+qboolean G_Script_EventMatch_IntInRange(g_script_event_t *event, const char *eventParm) {
   const char *pString, *token;
   int int1, int2, eInt;
 
   // get the cast name
   pString = eventParm;
-  token = COM_ParseExt(&pString, qfalse);
-  int1 = Q_atoi(token);
-  token = COM_ParseExt(&pString, qfalse);
-  int2 = Q_atoi(token);
+  token   = COM_ParseExt(&pString, qfalse);
+  int1    = Q_atoi(token);
+  token   = COM_ParseExt(&pString, qfalse);
+  int2    = Q_atoi(token);
 
   eInt = Q_atoi(event->params);
 
@@ -332,8 +330,7 @@ int G_Script_EventForString(const char *string) {
   hash = BG_StringHashValue_Lwr(string);
 
   for (i = 0; gScriptEvents[i].eventStr; i++) {
-    if (gScriptEvents[i].hash == hash &&
-        !Q_stricmp(string, gScriptEvents[i].eventStr)) {
+    if (gScriptEvents[i].hash == hash && !Q_stricmp(string, gScriptEvents[i].eventStr)) {
       return i;
     }
   }
@@ -352,8 +349,7 @@ g_script_stack_action_t *G_Script_ActionForString(char *string) {
   hash = BG_StringHashValue_Lwr(string);
 
   for (i = 0; gScriptActions[i].actionString; i++) {
-    if (gScriptActions[i].hash == hash &&
-        !Q_stricmp(string, gScriptActions[i].actionString)) {
+    if (gScriptActions[i].hash == hash && !Q_stricmp(string, gScriptActions[i].actionString)) {
       return &gScriptActions[i];
     }
   }
@@ -372,7 +368,7 @@ void G_Script_ScriptLoad(void) {
   char filename[MAX_QPATH];
   vmCvar_t mapname;
   fileHandle_t f = -1;
-  int len = -1;
+  int len        = -1;
   qboolean found = qfalse;
 
   trap_Cvar_Register(&g_scriptDebug, "g_scriptDebug", "0", 0);
@@ -398,12 +394,20 @@ void G_Script_ScriptLoad(void) {
     }
   }
   if (!found) {
-    Q_strncpyz(filename, "maps/", sizeof(filename));
-    Q_strcat(filename, sizeof(filename), mapname.string);
-
-    Q_strcat(filename, sizeof(filename), ".script");
+    // try bundled mapscripts, before falling back to default script
+    Q_strncpyz(filename, va("%s/%s.script", ETJump::BUNDLED_MAPSCRIPT_DIR, mapname.string), sizeof(filename));
     len = trap_FS_FOpenFile(filename, &f, FS_READ);
-    G_Printf("No custom mapscript was found, using default.\n");
+
+    if (len > 0) {
+      G_Printf("Custom mapscript loaded (mod bundled).\n");
+    } else {
+      Q_strncpyz(filename, "maps/", sizeof(filename));
+      Q_strcat(filename, sizeof(filename), mapname.string);
+
+      Q_strcat(filename, sizeof(filename), ".script");
+      len = trap_FS_FOpenFile(filename, &f, FS_READ);
+      G_Printf("No custom mapscript was found, using default.\n");
+    }
   }
 
   // make sure we clear out the temporary scriptname
@@ -440,8 +444,7 @@ G_Script_ParseSpawnbot
   Parses "Spawnbot" command, precaching a custom character if specified
 ==============
 */
-static void G_Script_ParseSpawnbot(const char **ppScript, char params[],
-                                   int paramsize) {
+static void G_Script_ParseSpawnbot(const char **ppScript, char params[], int paramsize) {
   qboolean parsingCharacter = qfalse;
   const char *token;
 
@@ -453,7 +456,6 @@ static void G_Script_ParseSpawnbot(const char **ppScript, char params[],
 
     // did we just see a '/character' parm?
     if (parsingCharacter) {
-
       parsingCharacter = qfalse;
 
       G_CharacterIndex(token);
@@ -461,8 +463,7 @@ static void G_Script_ParseSpawnbot(const char **ppScript, char params[],
       if (!BG_FindCharacter(token)) {
         bg_character_t *character = BG_FindFreeCharacter(token);
 
-        Q_strncpyz(character->characterFile, token,
-                   sizeof(character->characterFile));
+        Q_strncpyz(character->characterFile, token, sizeof(character->characterFile));
 
         if (!G_RegisterCharacter(token, character)) {
           G_Error("ERROR: "
@@ -526,12 +527,12 @@ void G_Script_ScriptParse(gentity_t *ent) {
 
   const bool buildScript = trap_Cvar_VariableIntegerValue("com_buildScript");
 
-  pScript = level.scriptEntity;
+  pScript       = level.scriptEntity;
   bool wantName = true;
   bool inScript = false;
 
   COM_BeginParseSession("G_Script_ScriptParse");
-  int bracketLevel = 0;
+  int bracketLevel  = 0;
   int numEventItems = 0;
 
   memset(events.get(), 0, sizeof(g_script_event_t) * G_MAX_SCRIPT_STACK_ITEMS);
@@ -541,8 +542,7 @@ void G_Script_ScriptParse(gentity_t *ent) {
 
     if (!token[0]) {
       if (!wantName) {
-        G_Error("%s: Error (line %d): '}' expected, end of script found.\n",
-                __func__, COM_GetCurrentParseLine());
+        G_Error("%s: Error (line %d): '}' expected, end of script found.\n", __func__, COM_GetCurrentParseLine());
       }
 
       break;
@@ -555,15 +555,13 @@ void G_Script_ScriptParse(gentity_t *ent) {
       }
 
       if (wantName) {
-        G_Error("%s: Error (line %d): '}' found, but not expected.\n", __func__,
-                COM_GetCurrentParseLine());
+        G_Error("%s: Error (line %d): '}' found, but not expected.\n", __func__, COM_GetCurrentParseLine());
       }
 
       wantName = true;
     } else if (token[0] == '{') {
       if (wantName) {
-        G_Error("%s: Error (line %d): '{' found, NAME expected.\n", __func__,
-                COM_GetCurrentParseLine());
+        G_Error("%s: Error (line %d): '{' found, NAME expected.\n", __func__, COM_GetCurrentParseLine());
       }
     } else if (wantName) {
       if (!Q_stricmp(token, "bot")) {
@@ -581,7 +579,7 @@ void G_Script_ScriptParse(gentity_t *ent) {
       }
 
       if (!Q_stricmp(ent->scriptName, token)) {
-        inScript = true;
+        inScript      = true;
         numEventItems = 0;
       }
 
@@ -592,24 +590,22 @@ void G_Script_ScriptParse(gentity_t *ent) {
       const int eventNum = G_Script_EventForString(token);
 
       if (eventNum < 0) {
-        G_Error("%s: Error (line %d): unknown event: %s.\n", __func__,
-                COM_GetCurrentParseLine(), token);
+        G_Error("%s: Error (line %d): unknown event: %s.\n", __func__, COM_GetCurrentParseLine(), token);
       }
 
       if (numEventItems >= G_MAX_SCRIPT_STACK_ITEMS) {
-        G_Error("%s: Error (line %d): G_MAX_SCRIPT_STACK_ITEMS reached (%d)\n",
-                __func__, COM_GetCurrentParseLine(), G_MAX_SCRIPT_STACK_ITEMS);
+        G_Error("%s: Error (line %d): G_MAX_SCRIPT_STACK_ITEMS reached (%d)\n", __func__, COM_GetCurrentParseLine(),
+                G_MAX_SCRIPT_STACK_ITEMS);
       }
 
       g_script_event_t *curEvent = &events[numEventItems];
-      curEvent->eventNum = eventNum;
+      curEvent->eventNum         = eventNum;
       memset(params, 0, sizeof(params));
 
       // parse any event params before the start of this event's actions
       while ((token = COM_Parse(&pScript)) != nullptr && (token[0] != '{')) {
         if (!token[0]) {
-          G_Error("%s: Error (line %d): '}' expected, end of script found.\n",
-                  __func__, COM_GetCurrentParseLine());
+          G_Error("%s: Error (line %d): '}' expected, end of script found.\n", __func__, COM_GetCurrentParseLine());
         }
 
         // add a space between each param
@@ -622,7 +618,7 @@ void G_Script_ScriptParse(gentity_t *ent) {
 
       // copy the params into the event
       if (strlen(params)) {
-        const auto plen = static_cast<int>(strlen(params) + 1);
+        const auto plen  = static_cast<int>(strlen(params) + 1);
         curEvent->params = static_cast<char *>(G_Alloc(plen));
         Q_strncpyz(curEvent->params, params, plen);
       }
@@ -630,15 +626,13 @@ void G_Script_ScriptParse(gentity_t *ent) {
       // parse the actions for this event
       while ((token = COM_Parse(&pScript)) != nullptr && (token[0] != '}')) {
         if (!token[0]) {
-          G_Error("%s: Error (line %d): '}' expected, end of script found.\n",
-                  __func__, COM_GetCurrentParseLine());
+          G_Error("%s: Error (line %d): '}' expected, end of script found.\n", __func__, COM_GetCurrentParseLine());
         }
 
         g_script_stack_action_t *action = G_Script_ActionForString(token);
 
         if (!action) {
-          G_Error("%s: Error (line %d): unknown action: %s.\n", __func__,
-                  COM_GetCurrentParseLine(), token);
+          G_Error("%s: Error (line %d): unknown action: %s.\n", __func__, COM_GetCurrentParseLine(), token);
         }
 
         curEvent->stack.items[curEvent->stack.numItems].action = action;
@@ -646,8 +640,7 @@ void G_Script_ScriptParse(gentity_t *ent) {
         memset(params, 0, sizeof(params));
 
         // parse for {} if this is a 'set', 'create' or 'delete' command
-        if (!Q_stricmp(action->actionString, "set") ||
-            !Q_stricmp(action->actionString, "create") ||
+        if (!Q_stricmp(action->actionString, "set") || !Q_stricmp(action->actionString, "create") ||
             !Q_stricmp(action->actionString, "delete")) {
           token = COM_Parse(&pScript);
 
@@ -655,8 +648,101 @@ void G_Script_ScriptParse(gentity_t *ent) {
             COM_ParseError("'{' expected, found: %s.\n", token);
           }
 
-          for (token = COM_Parse(&pScript); token && token[0] != '}';
-               token = COM_Parse(&pScript)) {
+          for (token = COM_Parse(&pScript); token && token[0] != '}'; token = COM_Parse(&pScript)) {
+            // add a space between each param
+            if (strlen(params)) {
+              Q_strcat(params, sizeof(params), " ");
+            }
+
+            // need to wrap this param in quotes since it has more than one word
+            if (strrchr(token, ' ')) {
+              Q_strcat(params, sizeof(params), "\"");
+            }
+
+            Q_strcat(params, sizeof(params), token);
+
+            // need to wrap this param in quotes since it has more than one word
+            if (strrchr(token, ' ')) {
+              Q_strcat(params, sizeof(params), "\"");
+            }
+          }
+        } else if (!Q_stricmp(action->actionString, "editentity")) {
+          /*
+           * 'editentity' finds entities matching the k/v pairs in its 'match'
+           * block, and applies the k/v pairs in its 'set' block to each of
+           * them:
+           *
+           * editentity
+           * {
+           *   match
+           *   {
+           *     <selector k/v pairs>
+           *   }
+           *
+           *   set
+           *   {
+           *     <edited k/v pairs>
+           *   }
+           * }
+           *
+           * the whole block is captured into 'params' as two brace-delimited
+           * blocks: '{ <match pairs> } { <set pairs> }'. brace depth must be
+           * tracked to find the end of the outer block without being fooled
+           * by the nested braces. the 'match'/'set' keywords are only skipped
+           * at the top level of the outer block, so a selector value that
+           * happens to equal 'set' or 'match' is preserved.
+           */
+          token = COM_Parse(&pScript);
+
+          if (token[0] != '{') {
+            COM_ParseError("'{' expected, found: %s.\n", token);
+          }
+
+          int32_t depth = 1;
+
+          while (depth > 0) {
+            token = COM_Parse(&pScript);
+
+            if (!token[0]) {
+              G_Error("%s: Error (line %d): '}' expected, end of script "
+                      "found.\n",
+                      __func__, COM_GetCurrentParseLine());
+            }
+
+            if (token[0] == '{') {
+              // nested block opener, preserved as the structural delimiter
+              depth++;
+              if (strlen(params)) {
+                Q_strcat(params, sizeof(params), " ");
+              }
+
+              Q_strcat(params, sizeof(params), "{");
+              continue;
+            }
+
+            if (token[0] == '}') {
+              depth--;
+              // the outer block's closing brace terminates the block,
+              // everything else is a nested block's closing brace
+              if (depth == 0) {
+                break;
+              }
+
+              if (strlen(params)) {
+                Q_strcat(params, sizeof(params), " ");
+              }
+
+              Q_strcat(params, sizeof(params), "}");
+              continue;
+            }
+
+            // skip the 'match'/'set' block keywords at the top level of the
+            // outer block; inside the nested blocks these are preserved as
+            // regular selector/set values
+            if (depth == 1 && (!Q_stricmp(token, "match") || !Q_stricmp(token, "set"))) {
+              continue;
+            }
+
             // add a space between each param
             if (strlen(params)) {
               Q_strcat(params, sizeof(params), " ");
@@ -697,11 +783,10 @@ void G_Script_ScriptParse(gentity_t *ent) {
                   G_ModelIndex(token);
                 } else if (!Q_stricmp(action->actionString, "changeskin")) {
                   G_SkinIndex(token);
-                } else if (buildScript &&
-                           (!Q_stricmp(action->actionString, "mu_start") ||
-                            !Q_stricmp(action->actionString, "mu_play") ||
-                            !Q_stricmp(action->actionString, "mu_queue") ||
-                            !Q_stricmp(action->actionString, "startcam"))) {
+                } else if (buildScript && (!Q_stricmp(action->actionString, "mu_start") ||
+                                           !Q_stricmp(action->actionString, "mu_play") ||
+                                           !Q_stricmp(action->actionString, "mu_queue") ||
+                                           !Q_stricmp(action->actionString, "startcam"))) {
                   // we know there's a [0], but don't know if it's '0'
                   if (strlen(token)) {
                     trap_SendServerCommand(-1, va("addToBuild %s\n", token));
@@ -735,19 +820,16 @@ void G_Script_ScriptParse(gentity_t *ent) {
 
         // copy the params into the event
         if (strlen(params)) {
-          const auto plen = static_cast<int>(strlen(params) + 1);
-          curEvent->stack.items[curEvent->stack.numItems].params =
-              static_cast<char *>(G_Alloc(plen));
-          Q_strncpyz(curEvent->stack.items[curEvent->stack.numItems].params,
-                     params, plen);
+          const auto plen                                        = static_cast<int>(strlen(params) + 1);
+          curEvent->stack.items[curEvent->stack.numItems].params = static_cast<char *>(G_Alloc(plen));
+          Q_strncpyz(curEvent->stack.items[curEvent->stack.numItems].params, params, plen);
         }
 
         curEvent->stack.numItems++;
 
         if (curEvent->stack.numItems >= G_MAX_SCRIPT_STACK_ITEMS) {
-          G_Error(
-              "%s: script exceeded G_MAX_SCRIPT_STACK_ITEMS (%d), line %d\n",
-              __func__, G_MAX_SCRIPT_STACK_ITEMS, COM_GetCurrentParseLine());
+          G_Error("%s: script exceeded G_MAX_SCRIPT_STACK_ITEMS (%d), line %d\n", __func__, G_MAX_SCRIPT_STACK_ITEMS,
+                  COM_GetCurrentParseLine());
         }
       }
 
@@ -756,8 +838,7 @@ void G_Script_ScriptParse(gentity_t *ent) {
       // skip this character completely
       while ((token = COM_Parse(&pScript)) != nullptr) {
         if (!token[0]) {
-          G_Error("%s: Error (line %d): '}' expected, end of script found.\n",
-                  __func__, COM_GetCurrentParseLine());
+          G_Error("%s: Error (line %d): '}' expected, end of script found.\n", __func__, COM_GetCurrentParseLine());
         } else if (token[0] == '{') {
           bracketLevel++;
         } else if (token[0] == '}') {
@@ -771,10 +852,9 @@ void G_Script_ScriptParse(gentity_t *ent) {
 
   // alloc and copy the events into the gentity_t for this cast
   if (numEventItems > 0) {
-    ent->scriptEvents = static_cast<g_script_event_t *>(
-        G_Alloc(static_cast<int>(sizeof(g_script_event_t)) * numEventItems));
-    memcpy(ent->scriptEvents, events.get(),
-           sizeof(g_script_event_t) * numEventItems);
+    ent->scriptEvents =
+      static_cast<g_script_event_t *>(G_Alloc(static_cast<int>(sizeof(g_script_event_t)) * numEventItems));
+    memcpy(ent->scriptEvents, events.get(), sizeof(g_script_event_t) * numEventItems);
     ent->numScriptEvents = numEventItems;
   }
 }
@@ -793,19 +873,18 @@ void G_Script_ScriptChange(gentity_t *ent, int newScriptNum) {
   memcpy(&scriptStatusBackup, &ent->scriptStatus, sizeof(g_script_status_t));
 
   // set the new script to this cast, and reset script status
-  ent->scriptStatus.scriptEventIndex = newScriptNum;
-  ent->scriptStatus.scriptStackHead = 0;
-  ent->scriptStatus.scriptStackChangeTime = level.time;
-  ent->scriptStatus.scriptId = scriptStatusBackup.scriptId + 1;
-  ent->scriptStatus.scriptFlags |= SCFL_FIRST_CALL;
+  ent->scriptStatus.scriptEventIndex       = newScriptNum;
+  ent->scriptStatus.scriptStackHead        = 0;
+  ent->scriptStatus.scriptStackChangeTime  = level.time;
+  ent->scriptStatus.scriptId               = scriptStatusBackup.scriptId + 1;
+  ent->scriptStatus.scriptFlags           |= SCFL_FIRST_CALL;
 
   // try and run the script, if it doesn't finish, then abort the
   // current script (discard backup)
   if (G_Script_ScriptRun(ent) &&
       (ent->scriptStatus.scriptId ==
-       scriptStatusBackup.scriptId +
-           1)) // make sure we didnt change our script via a third party
-  {            // completed successfully
+       scriptStatusBackup.scriptId + 1)) // make sure we didnt change our script via a third party
+  {                                      // completed successfully
     memcpy(&ent->scriptStatus, &scriptStatusBackup, sizeof(g_script_status_t));
     ent->scriptStatus.scriptFlags &= ~SCFL_FIRST_CALL;
   }
@@ -820,8 +899,7 @@ void G_Script_EventStringInit(void) {
   }
 
   for (i = 0; gScriptActions[i].actionString; i++) {
-    gScriptActions[i].hash =
-        BG_StringHashValue_Lwr(gScriptActions[i].actionString);
+    gScriptActions[i].hash = BG_StringHashValue_Lwr(gScriptActions[i].actionString);
   }
 }
 
@@ -833,17 +911,15 @@ G_Script_GetEventIndex
   xkan, 10/28/2002 - extracted from G_Script_ScriptEvent.
 ================
 */
-int G_Script_GetEventIndex(gentity_t *ent, const char *eventStr,
-                           const char *params) {
+int G_Script_GetEventIndex(gentity_t *ent, const char *eventStr, const char *params) {
   int i, eventNum = -1;
 
   int hash = BG_StringHashValue_Lwr(eventStr);
 
   // find out which event this is
   for (i = 0; gScriptEvents[i].eventStr; i++) {
-    if (gScriptEvents[i].hash == hash &&
-        !Q_stricmp(eventStr,
-                   gScriptEvents[i].eventStr)) // match found
+    if (gScriptEvents[i].hash == hash && !Q_stricmp(eventStr,
+                                                    gScriptEvents[i].eventStr)) // match found
     {
       eventNum = i;
       break;
@@ -862,8 +938,7 @@ int G_Script_GetEventIndex(gentity_t *ent, const char *eventStr,
 
   // show debugging info
   if (g_scriptDebug.integer) {
-    G_Printf("%i : (%s) GScript event: %s %s\n", level.time,
-             ent->scriptName ? ent->scriptName : "n/a", eventStr,
+    G_Printf("%i : (%s) GScript event: %s %s\n", level.time, ent->scriptName ? ent->scriptName : "n/a", eventStr,
              params ? params : "");
   }
 
@@ -871,8 +946,7 @@ int G_Script_GetEventIndex(gentity_t *ent, const char *eventStr,
   for (i = 0; i < ent->numScriptEvents; i++) {
     if (ent->scriptEvents[i].eventNum == eventNum) {
       if ((!ent->scriptEvents[i].params) ||
-          (!gScriptEvents[eventNum].eventMatch ||
-           gScriptEvents[eventNum].eventMatch(&ent->scriptEvents[i], params))) {
+          (!gScriptEvents[eventNum].eventMatch || gScriptEvents[eventNum].eventMatch(&ent->scriptEvents[i], params))) {
         return i;
       }
     }
@@ -888,8 +962,7 @@ G_Script_ScriptEvent
   An event has occured, for which a script may exist
 ================
 */
-void G_Script_ScriptEvent(gentity_t *ent, const char *eventStr,
-                          const char *params) {
+void G_Script_ScriptEvent(gentity_t *ent, const char *eventStr, const char *params) {
   int i = G_Script_GetEventIndex(ent, eventStr, params);
 
   if (i >= 0) {
@@ -935,22 +1008,20 @@ qboolean G_Script_ScriptRun(gentity_t *ent) {
   }
   //
   // show debugging info
-  if (g_scriptDebug.integer &&
-      ent->scriptStatus.scriptStackChangeTime == level.time) {
+  if (g_scriptDebug.integer && ent->scriptStatus.scriptStackChangeTime == level.time) {
     if (ent->scriptStatus.scriptStackHead < stack->numItems) {
-      G_Printf(
-          "%i : (%s) GScript command: %s %s\n", level.time, ent->scriptName,
-          stack->items[ent->scriptStatus.scriptStackHead].action->actionString,
-          (stack->items[ent->scriptStatus.scriptStackHead].params
-               ? stack->items[ent->scriptStatus.scriptStackHead].params
-               : ""));
+      G_Printf("%i : (%s) GScript command: %s %s\n", level.time, ent->scriptName,
+               stack->items[ent->scriptStatus.scriptStackHead].action->actionString,
+               (stack->items[ent->scriptStatus.scriptStackHead].params
+                  ? stack->items[ent->scriptStatus.scriptStackHead].params
+                  : ""));
     }
   }
   //
   while (ent->scriptStatus.scriptStackHead < stack->numItems) {
     oldScriptId = ent->scriptStatus.scriptId;
     if (!stack->items[ent->scriptStatus.scriptStackHead].action->actionFunc(
-            ent, stack->items[ent->scriptStatus.scriptStackHead].params)) {
+          ent, stack->items[ent->scriptStatus.scriptStackHead].params)) {
       ent->scriptStatus.scriptFlags &= ~SCFL_FIRST_CALL;
       return qfalse;
     }
@@ -970,12 +1041,10 @@ qboolean G_Script_ScriptRun(gentity_t *ent) {
       if (ent->scriptStatus.scriptStackHead < stack->numItems) {
         G_Printf("%i : (%s) GScript command: %s "
                  "%s\n",
-                 level.time, ent->scriptName,
-                 stack->items[ent->scriptStatus.scriptStackHead]
-                     .action->actionString,
+                 level.time, ent->scriptName, stack->items[ent->scriptStatus.scriptStackHead].action->actionString,
                  (stack->items[ent->scriptStatus.scriptStackHead].params
-                      ? stack->items[ent->scriptStatus.scriptStackHead].params
-                      : ""));
+                    ? stack->items[ent->scriptStatus.scriptStackHead].params
+                    : ""));
       }
     }
   }
@@ -1007,16 +1076,13 @@ void mountedmg42_fire(gentity_t *other) {
   SnapVector(muzzle);
 
   if (self->s.density & 8) {
-    Fire_Lead_Ext(other, other, MG42_SPREAD_MP, MG42_DAMAGE_MP, muzzle, forward,
-                  right, up, MOD_BROWNING);
+    Fire_Lead_Ext(other, other, MG42_SPREAD_MP, MG42_DAMAGE_MP, muzzle, forward, right, up, MOD_BROWNING);
   } else {
-    Fire_Lead_Ext(other, other, MG42_SPREAD_MP, MG42_DAMAGE_MP, muzzle, forward,
-                  right, up, MOD_MG42);
+    Fire_Lead_Ext(other, other, MG42_SPREAD_MP, MG42_DAMAGE_MP, muzzle, forward, right, up, MOD_MG42);
   }
 }
 
 void script_linkentity(gentity_t *ent) {
-
   // this is required since non-solid brushes need to be linked but not
   // solid
   trap_LinkEntity(ent);
@@ -1026,8 +1092,7 @@ void script_linkentity(gentity_t *ent) {
   //	}
 }
 
-void script_mover_die(gentity_t *self, gentity_t *inflictor,
-                      gentity_t *attacker, int damage, int mod) {
+void script_mover_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod) {
   G_Script_ScriptEvent(self, "death", "");
 
   if (!(self->spawnflags & 8)) {
@@ -1092,26 +1157,26 @@ void script_mover_spawn(gentity_t *ent) {
   }
 
   if (ent->spawnflags & 2) {
-    ent->clipmask = CONTENTS_SOLID;
+    ent->clipmask   = CONTENTS_SOLID;
     ent->r.contents = CONTENTS_SOLID;
   } else {
-    ent->s.eFlags |= EF_NONSOLID_BMODEL;
-    ent->clipmask = 0;
-    ent->r.contents = 0;
+    ent->s.eFlags   |= EF_NONSOLID_BMODEL;
+    ent->clipmask    = 0;
+    ent->r.contents  = 0;
   }
 
   script_linkentity(ent);
 
   // now start thinking process which controls AAS interaction
   script_mover_set_blocking(ent);
-  ent->think = script_mover_aas_blocking;
+  ent->think     = script_mover_aas_blocking;
   ent->nextthink = level.time + 200;
 }
 
 void script_mover_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   if (ent->spawnflags & 8) {
     if (ent->count) {
-      ent->health = ent->count;
+      ent->health         = ent->count;
       ent->s.dl_intensity = ent->health;
 
       G_Script_ScriptEvent(ent, "rebirth", "");
@@ -1161,7 +1226,6 @@ with health, if the entity is damagable, it draws a healthbar with this
 description above it.
 */
 void SP_script_mover(gentity_t *ent) {
-
   float scale[3] = {1, 1, 1};
   vec3_t scalevec;
   char tagname[MAX_QPATH];
@@ -1188,7 +1252,7 @@ void SP_script_mover(gentity_t *ent) {
   trap_SetBrushModel(ent, ent->model);
 
   InitMover(ent);
-  ent->reached = NULL;
+  ent->reached        = NULL;
   ent->s.animMovetype = 0;
 
   ent->s.density = 0;
@@ -1226,10 +1290,10 @@ void SP_script_mover(gentity_t *ent) {
   G_SpawnInt("health", "0", &ent->health);
   if (ent->health) {
     ent->takedamage = qtrue;
-    ent->count = ent->health;
+    ent->count      = ent->health;
 
     // client needs to know about it as well
-    ent->s.effect1Time = ent->count;
+    ent->s.effect1Time  = ent->count;
     ent->s.dl_intensity = 255;
 
     if (G_SpawnString("description", "", &s)) {
@@ -1273,8 +1337,8 @@ void SP_script_mover(gentity_t *ent) {
   }
 
   if (ent->spawnflags & 128) {
-    ent->s.density |= 4;
-    ent->waterlevel = 0;
+    ent->s.density  |= 4;
+    ent->waterlevel  = 0;
 
     if (G_SpawnString("gun", "", &modelname)) {
       if (!Q_stricmp(modelname, "browning")) {
@@ -1287,7 +1351,7 @@ void SP_script_mover(gentity_t *ent) {
     ent->s.powerups = -1;
   }
 
-  ent->think = script_mover_spawn;
+  ent->think     = script_mover_spawn;
   ent->nextthink = level.time + FRAMETIME;
 }
 
@@ -1295,13 +1359,13 @@ void SP_script_mover(gentity_t *ent) {
 
 void script_model_med_spawn(gentity_t *ent) {
   if (ent->spawnflags & 2) {
-    ent->clipmask = CONTENTS_SOLID;
+    ent->clipmask   = CONTENTS_SOLID;
     ent->r.contents = CONTENTS_SOLID;
   }
   ent->s.eType = ET_GENERAL;
 
   ent->s.modelindex = G_ModelIndex(ent->model);
-  ent->s.frame = 0;
+  ent->s.frame      = 0;
 
   VectorCopy(ent->s.origin, ent->s.pos.trBase);
   ent->s.pos.trType = TR_STATIONARY;
@@ -1309,8 +1373,7 @@ void script_model_med_spawn(gentity_t *ent) {
   trap_LinkEntity(ent);
 }
 
-void script_model_med_use(gentity_t *ent, gentity_t *other,
-                          gentity_t *activator) {
+void script_model_med_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   script_model_med_spawn(ent);
 }
 
@@ -1329,9 +1392,9 @@ void SP_script_model_med(gentity_t *ent) {
     G_Error("script_model_med must have a \"scriptname\"\n");
   }
 
-  ent->s.eType = ET_GENERAL;
-  ent->s.apos.trType = TR_STATIONARY;
-  ent->s.apos.trTime = 0;
+  ent->s.eType           = ET_GENERAL;
+  ent->s.apos.trType     = TR_STATIONARY;
+  ent->s.apos.trTime     = 0;
   ent->s.apos.trDuration = 0;
   VectorCopy(ent->s.angles, ent->s.apos.trBase);
   VectorClear(ent->s.apos.trDelta);
@@ -1359,9 +1422,9 @@ void SP_script_camera(gentity_t *ent) {
     G_Error("%s must have a \"scriptname\"\n", ent->classname);
   }
 
-  ent->s.eType = ET_CAMERA;
-  ent->s.apos.trType = TR_STATIONARY;
-  ent->s.apos.trTime = 0;
+  ent->s.eType           = ET_CAMERA;
+  ent->s.apos.trType     = TR_STATIONARY;
+  ent->s.apos.trTime     = 0;
   ent->s.apos.trDuration = 0;
   VectorCopy(ent->s.angles, ent->s.apos.trBase);
   VectorClear(ent->s.apos.trDelta);
@@ -1385,44 +1448,40 @@ void SP_script_multiplayer(gentity_t *ent) {
 
   // Gordon: broadcasting this to clients now, should be cheaper in
   // bandwidth for sending landmine info
-  ent->s.eType = ET_GAMEMANAGER;
+  ent->s.eType   = ET_GAMEMANAGER;
   ent->r.svFlags = SVF_BROADCAST;
 
   if (level.gameManager) {
     // Gordon: ok, making this an error now
     G_Error("^1ERROR: multiple script_multiplayers found^7\n");
   }
-  level.gameManager = ent;
-  level.gameManager->s.otherEntityNum =
-      MAX_TEAM_LANDMINES; // axis landmine count
-  level.gameManager->s.otherEntityNum2 =
-      MAX_TEAM_LANDMINES;                    // allies landmine count
-  level.gameManager->s.modelindex = qfalse;  // axis HQ doesn't exist
-  level.gameManager->s.modelindex2 = qfalse; // allied HQ doesn't exist
+  level.gameManager                    = ent;
+  level.gameManager->s.otherEntityNum  = MAX_TEAM_LANDMINES; // axis landmine count
+  level.gameManager->s.otherEntityNum2 = MAX_TEAM_LANDMINES; // allies landmine count
+  level.gameManager->s.modelindex      = qfalse;             // axis HQ doesn't exist
+  level.gameManager->s.modelindex2     = qfalse;             // allied HQ doesn't exist
 
   trap_LinkEntity(ent);
 }
 
 namespace ETJump {
 void spawnGameManager() {
-  gentity_t *ent = G_Spawn();
-  ent->classname = "etjump_game_manager";
+  gentity_t *ent  = G_Spawn();
+  ent->classname  = "etjump_game_manager";
   ent->scriptName = "etjump_manager";
-  ent->s.eType = ET_GAMEMANAGER;
-  ent->r.svFlags = SVF_BROADCAST;
+  ent->s.eType    = ET_GAMEMANAGER;
+  ent->r.svFlags  = SVF_BROADCAST;
 
   // sanity check, should not happen
   if (level.gameManager) {
     G_Error("^1ERROR: multiple etjump_game_managers found\n");
   }
 
-  level.gameManager = ent;
-  level.gameManager->s.otherEntityNum =
-      MAX_TEAM_LANDMINES; // axis landmine count
-  level.gameManager->s.otherEntityNum2 =
-      MAX_TEAM_LANDMINES;                    // allies landmine count
-  level.gameManager->s.modelindex = qfalse;  // axis HQ doesn't exist
-  level.gameManager->s.modelindex2 = qfalse; // allied HQ doesn't exist
+  level.gameManager                    = ent;
+  level.gameManager->s.otherEntityNum  = MAX_TEAM_LANDMINES; // axis landmine count
+  level.gameManager->s.otherEntityNum2 = MAX_TEAM_LANDMINES; // allies landmine count
+  level.gameManager->s.modelindex      = qfalse;             // axis HQ doesn't exist
+  level.gameManager->s.modelindex2     = qfalse;             // allied HQ doesn't exist
 
   trap_LinkEntity(ent);
 

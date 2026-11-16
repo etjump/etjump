@@ -25,13 +25,13 @@ static void CG_ResetEntity(centity_t *cent) {
   // if the event had timed out, it would have been cleared
   // RF, not needed for wolf
   // DHM - Nerve :: Wolf is now using this.
-  cent->previousEvent = 0;
+  cent->previousEvent         = 0;
   cent->previousEventSequence = cent->currentState.eventSequence;
 
   cent->trailTime = cg.snap->serverTime;
 
   // Ridah
-  cent->headJuncIndex = 0;
+  cent->headJuncIndex  = 0;
   cent->headJuncIndex2 = 0;
   // done.
 
@@ -43,19 +43,19 @@ static void CG_ResetEntity(centity_t *cent) {
 
   // rain - reset a bunch of extra stuff
   cent->muzzleFlashTime = 0;
-  cent->overheatTime = 0;
+  cent->overheatTime    = 0;
 
-  cent->miscTime = 0;
+  cent->miscTime  = 0;
   cent->soundTime = 0;
 
   VectorClear(cent->rawOrigin);
   VectorClear(cent->rawAngles);
 
   cent->lastFuseSparkTime = 0;
-  cent->highlightTime = 0;
-  cent->highlighted = qfalse;
+  cent->highlightTime     = 0;
+  cent->highlighted       = qfalse;
 
-  cent->moving = qfalse;
+  cent->moving     = qfalse;
   cent->akimboFire = qfalse;
 }
 
@@ -67,16 +67,13 @@ cent->nextState is moved to cent->currentState and events are fired
 ===============
 */
 static void CG_TransitionEntity(centity_t *cent) {
-
   // Ridah, update the fireDir if it's on fire
   if (CG_EntOnFire(cent)) {
     vec3_t newDir, newPos, oldPos;
     float adjust;
     //
-    BG_EvaluateTrajectory(&cent->nextState.pos, cg.snap->serverTime, newPos,
-                          qfalse, cent->currentState.effect2Time);
-    BG_EvaluateTrajectory(&cent->currentState.pos, cg.snap->serverTime, oldPos,
-                          qfalse, cent->currentState.effect2Time);
+    BG_EvaluateTrajectory(&cent->nextState.pos, cg.snap->serverTime, newPos, qfalse, cent->currentState.effect2Time);
+    BG_EvaluateTrajectory(&cent->currentState.pos, cg.snap->serverTime, oldPos, qfalse, cent->currentState.effect2Time);
     // update the fireRiseDir
     VectorSubtract(oldPos, newPos, newDir);
     // fire should go upwards if travelling slow
@@ -127,8 +124,7 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
 
   cg.snap = snap;
 
-  BG_PlayerStateToEntityState(
-      &snap->ps, &cg_entities[snap->ps.clientNum].currentState, qfalse);
+  BG_PlayerStateToEntityState(&snap->ps, &cg_entities[snap->ps.clientNum].currentState, qfalse);
 
   // sort out solid entities
   CG_BuildSolidList();
@@ -141,11 +137,11 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
 
   for (i = 0; i < cg.snap->numEntities; i++) {
     state = &cg.snap->entities[i];
-    cent = &cg_entities[state->number];
+    cent  = &cg_entities[state->number];
 
     memcpy(&cent->currentState, state, sizeof(entityState_t));
     // cent->currentState = *state;
-    cent->interpolate = qfalse;
+    cent->interpolate  = qfalse;
     cent->currentValid = qtrue;
 
     CG_ResetEntity(cent);
@@ -153,8 +149,6 @@ void CG_SetInitialSnapshot(snapshot_t *snap) {
     // check for events
     CG_CheckEvents(cent);
   }
-
-  cg_fxflags = 0;
 
   trap_Cvar_VariableStringBuffer("r_oldMode", buff, sizeof(buff));
   if (Q_atoi(buff)) {
@@ -234,8 +228,8 @@ static void CG_TransitionSnapshot(void) {
   // clear the currentValid flag for all entities in the existing
   // snapshot
   for (i = 0; i < cg.snap->numEntities; i++) {
-    cent = &cg_entities[cg.snap->entities[i].number];
-    cent->currentValid = qfalse;
+    cent                                  = &cg_entities[cg.snap->entities[i].number];
+    cent->currentValid                    = qfalse;
     oldValid[cg.snap->entities[i].number] = qtrue;
   }
 
@@ -248,7 +242,7 @@ static void CG_TransitionSnapshot(void) {
 
   // move nextSnap to snap and do the transitions
   oldFrame = cg.snap;
-  cg.snap = cg.nextSnap;
+  cg.snap  = cg.nextSnap;
 
   if (cg.snap->ps.clientNum == cg.clientNum) {
     if (cg.xp < cg.snap->ps.stats[STAT_XP]) {
@@ -257,8 +251,7 @@ static void CG_TransitionSnapshot(void) {
     cg.xp = cg.snap->ps.stats[STAT_XP];
   }
 
-  BG_PlayerStateToEntityState(
-      &cg.snap->ps, &cg_entities[cg.snap->ps.clientNum].currentState, qfalse);
+  BG_PlayerStateToEntityState(&cg.snap->ps, &cg_entities[cg.snap->ps.clientNum].currentState, qfalse);
   cg_entities[cg.snap->ps.clientNum].interpolate = qfalse;
 
   for (i = 0; i < cg.snap->numEntities; i++) {
@@ -288,7 +281,7 @@ static void CG_TransitionSnapshot(void) {
     playerState_t *ops, *ps;
 
     ops = &oldFrame->ps;
-    ps = &cg.snap->ps;
+    ps  = &cg.snap->ps;
     // teleporting checks are irrespective of prediction
     if ((ps->eFlags ^ ops->eFlags) & EF_TELEPORT_BIT) {
       cg.thisFrameTeleport = qtrue; // will be cleared by prediction code
@@ -297,8 +290,7 @@ static void CG_TransitionSnapshot(void) {
     // if we are not doing client side movement prediction for
     // any reason, then the client events and view changes will
     // be issued now
-    if (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW) ||
-        cg_nopredict.integer
+    if (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW) || cg_nopredict.integer
 #ifdef ALLOW_GSYNC
         || cgs.synchronousClients
 #endif // ALLOW_GSYNC
@@ -322,19 +314,17 @@ static void CG_SetNextSnap(snapshot_t *snap) {
 
   cg.nextSnap = snap;
 
-  BG_PlayerStateToEntityState(
-      &snap->ps, &cg_entities[snap->ps.clientNum].nextState, qfalse);
+  BG_PlayerStateToEntityState(&snap->ps, &cg_entities[snap->ps.clientNum].nextState, qfalse);
   cg_entities[cg.snap->ps.clientNum].interpolate = qtrue;
 
   // check for extrapolation errors
   for (num = 0; num < snap->numEntities; num++) {
-    es = &snap->entities[num];
+    es   = &snap->entities[num];
     cent = &cg_entities[es->number];
 
     /* If player is hidden, make entity invalid to prevent
        various cgame events from revealing position. */
     if (es->number < MAX_CLIENTS) {
-
       if (ETJump::hideMeCheck(es->number)) {
         cent->nextState.eventSequence = es->eventSequence;
         continue;
@@ -346,8 +336,7 @@ static void CG_SetNextSnap(snapshot_t *snap) {
 
     // if this frame is a teleport, or the entity wasn't in the
     // previous frame, don't interpolate
-    if (!cent->currentValid ||
-        ((cent->currentState.eFlags ^ es->eFlags) & EF_TELEPORT_BIT)) {
+    if (!cent->currentValid || ((cent->currentState.eFlags ^ es->eFlags) & EF_TELEPORT_BIT)) {
       cent->interpolate = qfalse;
     } else {
       cent->interpolate = qtrue;
@@ -418,8 +407,7 @@ static snapshot_t *CG_ReadNextSnapshot(void) {
     if (r) {
       CG_AddLagometerSnapshotInfo(dest);
       // server has been restarted
-      if (cg.snap &&
-          (dest->snapFlags ^ cg.snap->snapFlags) & SNAPFLAG_SERVERCOUNT) {
+      if (cg.snap && (dest->snapFlags ^ cg.snap->snapFlags) & SNAPFLAG_SERVERCOUNT) {
         ETJump::resetTransitionEffects();
       }
 
@@ -445,8 +433,7 @@ static snapshot_t *CG_ReadNextSnapshot(void) {
           }
 
           // adjust itemlist index for removal of duplicate 'weapon_medic_heal'
-          if (ETJump::cgame.demo.compatibility->flags.adjustItemlistIndex &&
-              es->eType == ET_ITEM &&
+          if (ETJump::cgame.demo.compatibility->flags.adjustItemlistIndex && es->eType == ET_ITEM &&
               es->modelindex > ETJump::COMPAT_WEAPON_MEDIC_HEAL_INDEX) {
             es->modelindex--;
           }
@@ -562,7 +549,7 @@ void CG_ProcessSnapshots(void) {
   }
   if (cg.time < cg.snap->serverTime) {
     // this can happen right after a vid_restart
-    cg.time = cg.snap->serverTime;
+    cg.time       = cg.snap->serverTime;
     cgDC.realTime = cg.time;
   }
   if (cg.nextSnap != NULL && cg.nextSnap->serverTime <= cg.time) {

@@ -27,8 +27,7 @@
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
-void ColorParser::parseColorString(const std::string &colorString,
-                                   vec4_t &color) {
+void ColorParser::parseColorString(const std::string &colorString, vec4_t &color) {
   Vector4Set(color, 0.0f, 0.0f, 0.0f, 1.0); // set defaults
 
   std::string token{StringUtils::toLowerCase(StringUtils::trim(colorString))};
@@ -49,8 +48,7 @@ void ColorParser::parseColorString(const std::string &colorString,
   normalizeColorIfRequired(color);
 }
 
-void ColorParser::parseNamedColorString(const std::string &token,
-                                        vec4_t &color) {
+void ColorParser::parseNamedColorString(const std::string &token, vec4_t &color) {
   const auto *validColor = validColorNames[token];
 
   if (validColor) {
@@ -60,8 +58,7 @@ void ColorParser::parseNamedColorString(const std::string &token,
   }
 }
 
-void ColorParser::parseRGBAValuedColorString(const std::string &colorString,
-                                             vec4_t &color) {
+void ColorParser::parseRGBAValuedColorString(const std::string &colorString, vec4_t &color) {
   std::istringstream tokenStream{colorString};
   std::string token;
   int32_t colorChannel = 0;
@@ -71,17 +68,16 @@ void ColorParser::parseRGBAValuedColorString(const std::string &colorString,
       break;
     }
 
-    const auto value = std::min(std::max(std::stof(token), 0.f), 255.0f);
+    const auto value    = std::min(std::max(std::stof(token), 0.f), 255.0f);
     color[colorChannel] = value;
     colorChannel++;
   }
 }
 
-void ColorParser::parseHexValuedColorString(const std::string &token,
-                                            vec4_t &color) {
-  const int64_t colorValue = std::stoll(token, nullptr, 16);
+void ColorParser::parseHexValuedColorString(const std::string &token, vec4_t &color) {
+  const int64_t colorValue  = std::stoll(token, nullptr, 16);
   const size_t channelCount = ((token.size() - 1) >> 1) + 1;
-  const size_t maxShift = 8 * channelCount;
+  const size_t maxShift     = 8 * channelCount;
 
   for (size_t i = 0; i < channelCount; i++) {
     color[i] = (colorValue >> (maxShift - 8 * (i + 1))) & 0xff;

@@ -24,22 +24,17 @@
 
 #pragma once
 
-#include <iomanip>
-#include <string>
-#include <sstream>
 #include <array>
+#include <iomanip>
+#include <sstream>
+#include <string>
 
 #include "etj_string_utilities.h"
+#include "q_shared.h"
 
 #ifdef GAMEDLL
-  #include "etj_printer.h"
+void QDECL G_LogPrintf(const char *fmt, ...);
 #else
-  #ifdef WIN32
-    #define QDECL __cdecl
-  #else
-    #define QDECL
-  #endif
-
 void QDECL Com_Printf(const char *msg, ...);
 #endif
 
@@ -56,7 +51,9 @@ struct Date {
     return year == other.year && mon == other.mon && day == other.day;
   }
 
-  bool operator!=(const Date &other) const { return !(*this == other); }
+  bool operator!=(const Date &other) const {
+    return !(*this == other);
+  }
 
   bool operator<(const Date &other) const {
     if (year < other.year)
@@ -72,11 +69,17 @@ struct Date {
     return day < other.day;
   }
 
-  bool operator>(const Date &other) const { return other < *this; }
+  bool operator>(const Date &other) const {
+    return other < *this;
+  }
 
-  bool operator<=(const Date &other) const { return !(other < *this); }
+  bool operator<=(const Date &other) const {
+    return !(other < *this);
+  }
 
-  bool operator>=(const Date &other) const { return !(*this < other); }
+  bool operator>=(const Date &other) const {
+    return !(*this < other);
+  }
 
   static Date fromString(const std::string &dateString) {
     std::string format = "%Y-%m-%d";
@@ -87,13 +90,11 @@ struct Date {
     ss >> std::get_time(&t, format.c_str());
 
     if (ss.fail()) {
-      throw std::invalid_argument(StringUtils::format(
-          "`%s` does not match to format `%s`", dateString, format));
+      throw std::invalid_argument(StringUtils::format("`%s` does not match to format `%s`", dateString, format));
     }
 
     if (t.tm_year < 70) {
-      throw std::invalid_argument(
-          StringUtils::format("`%s` has to be above year 1970"));
+      throw std::invalid_argument(StringUtils::format("`%s` has to be above year 1970"));
     }
 
     if (t.tm_mday < 1) {
@@ -101,24 +102,22 @@ struct Date {
     }
 
     date.year = t.tm_year + 1900;
-    date.mon = t.tm_mon + 1;
-    date.day = t.tm_mday;
+    date.mon  = t.tm_mon + 1;
+    date.day  = t.tm_mday;
 
     // Parse the date string using std::get_time
     return date;
   }
 
   std::string toDateString() const {
-    return StringUtils::format("%04d-%02d-%02d", this->year, this->mon,
-                               this->day);
+    return StringUtils::format("%04d-%02d-%02d", this->year, this->mon, this->day);
   }
 
   int year{}; // year
   int mon{};  // month
   int day{};  // day of the month
-  std::array<std::string, 12> abbrevMonths = {"Jan", "Feb", "Mar", "Apr",
-                                              "May", "Jun", "Jul", "Aug",
-                                              "Sep", "Oct", "Nov", "Dec"};
+  std::array<std::string, 12> abbrevMonths = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 };
 
 struct Time {
@@ -126,13 +125,14 @@ struct Time {
   Date date{};
 
   bool operator==(const Time &other) const {
-    return (clock.hours == other.clock.hours && clock.min == other.clock.min &&
-            clock.sec == other.clock.sec && clock.ms == other.clock.ms &&
-            date.year == other.date.year && date.mon == other.date.mon &&
+    return (clock.hours == other.clock.hours && clock.min == other.clock.min && clock.sec == other.clock.sec &&
+            clock.ms == other.clock.ms && date.year == other.date.year && date.mon == other.date.mon &&
             date.day == other.date.day);
   }
 
-  bool operator!=(const Time &other) const { return !(*this == other); }
+  bool operator!=(const Time &other) const {
+    return !(*this == other);
+  }
 
   bool operator<(const Time &other) const {
     if (date.year != other.date.year) {
@@ -160,54 +160,53 @@ struct Time {
     return (*this < other) || (*this == other);
   }
 
-  bool operator>(const Time &other) const { return !(*this <= other); }
+  bool operator>(const Time &other) const {
+    return !(*this <= other);
+  }
 
-  bool operator>=(const Time &other) const { return !(*this < other); }
+  bool operator>=(const Time &other) const {
+    return !(*this < other);
+  }
 
   std::string toDateTimeString() const {
-    return StringUtils::format(
-        "%04d-%02d-%02d %02d:%02d:%02d", this->date.year, this->date.mon,
-        this->date.day, this->clock.hours, this->clock.min, this->clock.sec);
+    return StringUtils::format("%04d-%02d-%02d %02d:%02d:%02d", this->date.year, this->date.mon, this->date.day,
+                               this->clock.hours, this->clock.min, this->clock.sec);
   }
 
   // date with abbreviated month, e.g. 01 Jan 1970
   std::string toAbbrevMonthDateString() const {
-    return StringUtils::format("%02d %s %04d", this->date.day,
-                               date.abbrevMonths[this->date.mon - 1],
-                               this->date.year);
+    return StringUtils::format("%02d %s %04d", this->date.day, date.abbrevMonths[this->date.mon - 1], this->date.year);
   }
 
   static Time fromInt(int64_t input) {
     time_t value = input;
-    tm *t = std::gmtime(&value);
+    tm *t        = std::gmtime(&value);
 
     Time time;
     time.date.year = t->tm_year + 1900;
-    time.date.mon = t->tm_mon + 1;
-    time.date.day = t->tm_mday;
+    time.date.mon  = t->tm_mon + 1;
+    time.date.day  = t->tm_mday;
 
     time.clock.hours = t->tm_hour;
-    time.clock.min = t->tm_min;
-    time.clock.sec = t->tm_sec;
+    time.clock.min   = t->tm_min;
+    time.clock.sec   = t->tm_sec;
 
     return time;
   }
 
   // https://en.cppreference.com/w/cpp/io/manip/get_time
   // if parsing fails, returns timestamp from '1900-01-01 00:00:00'
-  static Time fromString(const std::string &input,
-                         const std::string &format = "%Y-%m-%d %H:%M:%S") {
+  static Time fromString(const std::string &input, const std::string &format = "%Y-%m-%d %H:%M:%S") {
     std::istringstream ss(input);
     std::tm t = {};
     ss >> std::get_time(&t, format.c_str());
 
     if (ss.fail()) {
-      const std::string err = StringUtils::format(
-          "%s: Failed to parse timestamp string '%s' in given "
-          "format '%s', using default timestamp.",
-          __func__, input, format);
+      const std::string err = StringUtils::format("%s: Failed to parse timestamp string '%s' in given "
+                                                  "format '%s', using default timestamp.",
+                                                  __func__, input, format);
 #ifdef GAMEDLL
-      Printer::logLn(err);
+      G_LogPrintf("%s\n", err.c_str());
 #else
       Com_Printf("%s\n", err.c_str());
 #endif
@@ -219,12 +218,12 @@ struct Time {
 
     Time time;
     time.date.year = t.tm_year + 1900;
-    time.date.mon = t.tm_mon + 1;
-    time.date.day = t.tm_mday;
+    time.date.mon  = t.tm_mon + 1;
+    time.date.day  = t.tm_mday;
 
     time.clock.hours = t.tm_hour;
-    time.clock.min = t.tm_min;
-    time.clock.sec = t.tm_sec;
+    time.clock.min   = t.tm_min;
+    time.clock.sec   = t.tm_sec;
 
     return time;
   }
@@ -232,8 +231,8 @@ struct Time {
   static Time fromDate(const Date &date) {
     Time time;
     time.date.year = date.year;
-    time.date.mon = date.mon;
-    time.date.day = date.day;
+    time.date.mon  = date.mon;
+    time.date.day  = date.day;
 
     time.clock = {};
 

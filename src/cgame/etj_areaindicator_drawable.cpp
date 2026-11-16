@@ -22,46 +22,28 @@
  * SOFTWARE.
  */
 
-#include <algorithm>
 #include "etj_areaindicator_drawable.h"
+
+#include <algorithm>
+
 #include "etj_utilities.h"
 
 namespace ETJump {
 AreaIndicator::AreaIndicator() {
   indicators.clear();
 
-  indicators.emplace_back(&etj_drawSaveIndicator, &etj_saveIndicatorX,
-                          &etj_saveIndicatorY, CONTENTS_NOSAVE,
-                          BG_LEVEL_NO_SAVE, cgs.media.saveIcon);
-  indicators.emplace_back(&etj_drawProneIndicator, &etj_proneIndicatorX,
-                          &etj_proneIndicatorY, CONTENTS_NOPRONE,
-                          BG_LEVEL_NO_PRONE, cgs.media.proneIcon);
-  indicators.emplace_back(&etj_drawNoclipIndicator, &etj_noclipIndicatorX,
-                          &etj_noclipIndicatorY, CONTENTS_NONOCLIP,
-                          BG_LEVEL_NO_NOCLIP, cgs.media.noclipIcon);
+  indicators.emplace_back(&etj_drawSaveIndicator, &etj_saveIndicatorX, &etj_saveIndicatorY, CONTENTS_NOSAVE,
+                          &cgame.sharedWSKeys.noSave, cgs.media.saveIcon);
+  indicators.emplace_back(&etj_drawProneIndicator, &etj_proneIndicatorX, &etj_proneIndicatorY, CONTENTS_NOPRONE,
+                          &cgame.sharedWSKeys.noProne, cgs.media.proneIcon);
+  indicators.emplace_back(&etj_drawNoclipIndicator, &etj_noclipIndicatorX, &etj_noclipIndicatorY, CONTENTS_NONOCLIP,
+                          &cgame.sharedWSKeys.noNoclip, cgs.media.noclipIcon);
 
-  ci = nullptr;
-  ps = nullptr;
-  forbidShader = &cgs.media.friendShader;
-  pronePressTime = 0;
+  ci                = nullptr;
+  ps                = nullptr;
+  forbidShader      = &cgs.media.friendShader;
+  pronePressTime    = 0;
   printProneMessage = false;
-}
-
-AreaIndicator::Indicator::Indicator(vmCvar_t *controlCvar,
-                                    vmCvar_t *controlCvarX,
-                                    vmCvar_t *controlCvarY, const int contents,
-                                    const int shared,
-                                    const qhandle_t iconShader) {
-  draw = false;
-  drawForbid = false;
-  cvar = controlCvar;
-  cvarX = controlCvarX;
-  cvarY = controlCvarY;
-  x = 0;
-  y = 0;
-  traceContents = contents;
-  sharedValue = shared;
-  shader = iconShader;
 }
 
 void AreaIndicator::checkPronePrint(trace_t &trace) {
@@ -70,22 +52,32 @@ void AreaIndicator::checkPronePrint(trace_t &trace) {
     return;
   }
 
-  if (cgs.shared & BG_LEVEL_NO_PRONE) {
-    if (trace.fraction != 1.0f) {
+  switch (cgame.sharedWSKeys.noProne) {
+    default:
+      if (trace.fraction == 1.0f) {
+        printProneMessage = false;
+        return;
+      }
+
+      break;
+    case AreaOpts::FORBID_OUTSIDE:
+      if (trace.fraction != 1.0f) {
+        printProneMessage = false;
+        return;
+      }
+
+      break;
+    case AreaOpts::ALLOW_EVERYWHERE:
       printProneMessage = false;
       return;
-    }
-  } else {
-    if (trace.fraction == 1.0f) {
-      printProneMessage = false;
-      return;
-    }
+    case AreaOpts::FORBID_EVERYWHERE:
+      break;
   }
 
   if (ps->stats[STAT_USERCMD_BUTTONS] & WBUTTON_PRONE) {
     if (cg.time > pronePressTime) {
       printProneMessage = true;
-      pronePressTime = cg.time + 1000;
+      pronePressTime    = cg.time + 1000;
     }
   } else {
     printProneMessage = false;
@@ -104,58 +96,49 @@ bool AreaIndicator::beforeRender() {
   bool drawAny = false;
 
   for (auto &indicator : indicators) {
-    indicator.draw = false;
+    indicator.draw       = false;
     indicator.drawForbid = false;
-    indicator.x = indicator.cvarX->value;
-    indicator.y = indicator.cvarY->value;
+    indicator.x          = indicator.cvarX->value;
+    indicator.y          = indicator.cvarY->value;
 
     ETJump_AdjustPosition(&indicator.x);
 
     // this is a bit wasteful if none of the indicators are being drawn,
     // but we need to do a trace for prone print always,
     // and I'd rather not complicate the logic based around that
-    CG_TraceCapsule(&trace, ps->origin, ps->mins, cg.pmoveMaxs, ps->origin,
-                    ps->clientNum, indicator.traceContents);
+    CG_TraceCapsule(&trace, ps->origin, ps->mins, cg.pmoveMaxs, ps->origin, ps->clientNum, indicator.traceContents);
 
     if (indicator.traceContents == CONTENTS_NOPRONE) {
       checkPronePrint(trace);
     }
 
+    const bool inside    = trace.fraction != 1.0f;
+    const bool forbidden = !WorldspawnShared::areaAllowsAction(*indicator.areaOpts, trace);
+
     switch (static_cast<DrawMode>(indicator.cvar->integer)) {
       case DrawMode::Always:
-        indicator.draw = true;
-        drawAny = true;
-
-        if (((cgs.shared & indicator.sharedValue) && trace.fraction == 1.0f) ||
-            (!(cgs.shared & indicator.sharedValue) && trace.fraction != 1.0f)) {
-          indicator.drawForbid = true;
-        }
-
+        indicator.draw       = true;
+        drawAny              = true;
+        indicator.drawForbid = forbidden;
         break;
       case DrawMode::Outside:
-        if (trace.fraction == 1.0f) {
-          indicator.draw = true;
-          drawAny = true;
-
-          if (cgs.shared & indicator.sharedValue) {
-            indicator.drawForbid = true;
-          }
+        if (!inside) {
+          indicator.draw       = true;
+          drawAny              = true;
+          indicator.drawForbid = forbidden;
         }
 
         break;
       case DrawMode::Inside:
-        if (trace.fraction != 1.0f) {
-          indicator.draw = true;
-          drawAny = true;
-
-          if (!(cgs.shared & indicator.sharedValue)) {
-            indicator.drawForbid = true;
-          }
+        if (inside) {
+          indicator.draw       = true;
+          drawAny              = true;
+          indicator.drawForbid = forbidden;
         }
 
         break;
       default:
-        indicator.draw = false;
+        indicator.draw       = false;
         indicator.drawForbid = false;
         break;
     }
@@ -178,8 +161,7 @@ void AreaIndicator::render() const {
   }
 
   if (printProneMessage) {
-    CG_CenterPrint("^7You cannot ^3prone ^7inside this area.",
-                   SCREEN_HEIGHT - 99, SMALLCHAR_WIDTH);
+    CG_CenterPrint("^7You cannot ^3prone ^7inside this area.", SCREEN_HEIGHT - 99, SMALLCHAR_WIDTH);
   }
 }
 

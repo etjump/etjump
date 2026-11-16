@@ -25,6 +25,7 @@
 #pragma once
 
 #include "etj_savepos_shared.h"
+#include "g_local.h"
 
 namespace ETJump {
 class SavePosHandler {
@@ -32,11 +33,9 @@ class SavePosHandler {
   static void saveposTeleport(gentity_t *ent, const SavePosData &data);
 
   // restores players timerun state from savepos
-  static void restoreSaveposTimerunState(gentity_t *ent,
-                                         const SavePosData &data);
+  static void restoreSaveposTimerunState(gentity_t *ent, const SavePosData &data);
 
 public:
-  static void execSaveposCommand(gentity_t *ent,
-                                 const std::vector<std::string> &args);
+  static void execSaveposCommand(gentity_t *ent, const std::vector<std::string> &args);
 };
 } // namespace ETJump

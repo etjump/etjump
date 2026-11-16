@@ -1,20 +1,26 @@
+#include <array>
 #include <memory>
 
-#include "g_local.h"
-#include "etj_deathrun_system.h"
 #include "etj_database.h"
-#include "etj_session.h"
-#include "etj_save_system.h"
-#include "etj_printer.h"
-#include "etj_string_utilities.h"
-#include "etj_progression_tracker.h"
-#include "etj_timerun_entities.h"
+#include "etj_deathrun_system.h"
 #include "etj_entity_utilities.h"
+#include "etj_fatal_error_shared.h"
+#include "etj_game_failure.h"
+#include "etj_printer.h"
+#include "etj_progression_tracker.h"
 #include "etj_rtv.h"
+#include "etj_save_system.h"
+#include "etj_session.h"
 #include "etj_shader_config_handler.h"
+#include "etj_string_utilities.h"
 #include "etj_syscall_ext_shared.h"
 #include "etj_target_spawn_relay.h"
+#include "etj_test_fault.h"
 #include "etj_time_utilities.h"
+#include "etj_timerun_entities.h"
+#include "etj_utilities.h"
+#include "etj_worldspawn.h"
+#include "g_local.h"
 
 level_locals_t level;
 
@@ -49,10 +55,10 @@ std::unique_ptr<ShaderConfigHandler> shaderConfigHandler;
 ///////////////////////////////////////////////////////////////////////////////
 
 static void initializeETJump() {
-  ETJump::deathrunSystem = std::make_shared<ETJump::DeathrunSystem>();
-  ETJump::database = std::make_shared<Database>();
-  ETJump::session = std::make_shared<Session>(ETJump::database);
-  ETJump::saveSystem = std::make_shared<ETJump::SaveSystem>(ETJump::session);
+  ETJump::deathrunSystem      = std::make_shared<ETJump::DeathrunSystem>();
+  ETJump::database            = std::make_shared<Database>();
+  ETJump::session             = std::make_shared<Session>(ETJump::database);
+  ETJump::saveSystem          = std::make_shared<ETJump::SaveSystem>(ETJump::session);
   ETJump::progressionTrackers = std::make_shared<ETJump::ProgressionTrackers>();
 
   ETJump::syscallExt = std::make_unique<ETJump::SyscallExt>();
@@ -64,12 +70,12 @@ static void initializeETJump() {
 ///////////////////////////////////////////////////////////////////////////////
 
 static void shutdownETJump() {
-  ETJump::deathrunSystem = nullptr;
-  ETJump::database = nullptr;
-  ETJump::session = nullptr;
-  ETJump::saveSystem = nullptr;
+  ETJump::deathrunSystem      = nullptr;
+  ETJump::database            = nullptr;
+  ETJump::session             = nullptr;
+  ETJump::saveSystem          = nullptr;
   ETJump::progressionTrackers = nullptr;
-  ETJump::syscallExt = nullptr;
+  ETJump::syscallExt          = nullptr;
   ETJump::shaderConfigHandler = nullptr;
 }
 
@@ -262,10 +268,6 @@ vmCvar_t g_tokensMode;
 vmCvar_t g_tokensPath;
 // end of tokens
 
-// ETJump client/server shared data
-// TODO: refactor ghostPlayers into this
-vmCvar_t shared;
-
 // minimum time to wait before vote result will be checked
 vmCvar_t vote_minVoteDuration;
 vmCvar_t g_moverScale;
@@ -299,254 +301,225 @@ vmCvar_t g_oss; //   0  - vanilla/unknown/ET:L auto setup
                 //  256 - Windows x86_64
 
 cvarTable_t gameCvarTable[] = {
-    // don't override the cheat state set by the system
-    {&g_cheats, "sv_cheats", "", CVAR_SYSTEMINFO | CVAR_ROM, 0, qfalse},
+  // don't override the cheat state set by the system
+  {&g_cheats, "sv_cheats", "", CVAR_SYSTEMINFO | CVAR_ROM, 0, qfalse},
 
-    // noset vars
-    {NULL, "gamename", GAME_NAME, CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
-    {NULL, "gamedate", __DATE__, CVAR_ROM, 0, qfalse},
-    {&g_restarted, "g_restarted", "0", CVAR_ROM, 0, qfalse},
-    {NULL, "mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
+  // noset vars
+  {NULL, "gamename", GAME_NAME, CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
+  {NULL, "gamedate", __DATE__, CVAR_ROM, 0, qfalse},
+  {&g_restarted, "g_restarted", "0", CVAR_ROM, 0, qfalse},
+  {NULL, "mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
 
-    // latched vars
-    {&g_gametype, "g_gametype", "2", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse},
+  // latched vars
+  {&g_gametype, "g_gametype", "2", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse},
 
-    // JPW NERVE multiplayer stuffs
-    {&g_redlimbotime, "g_redlimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH,
-     0, qfalse},
-    {&g_bluelimbotime, "g_bluelimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH,
-     0, qfalse},
-    {&g_medicChargeTime, "g_medicChargeTime", "1", CVAR_LATCH, 0, qfalse,
-     qtrue},
-    {&g_engineerChargeTime, "g_engineerChargeTime", "1", CVAR_LATCH, 0, qfalse,
-     qtrue},
-    {&g_LTChargeTime, "g_LTChargeTime", "1", CVAR_LATCH, 0, qfalse, qtrue},
-    {&g_soldierChargeTime, "g_soldierChargeTime", "1", CVAR_LATCH, 0, qfalse,
-     qtrue},
-    // jpw
+  // JPW NERVE multiplayer stuffs
+  {&g_redlimbotime, "g_redlimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse},
+  {&g_bluelimbotime, "g_bluelimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse},
+  {&g_medicChargeTime, "g_medicChargeTime", "1", CVAR_LATCH, 0, qfalse, qtrue},
+  {&g_engineerChargeTime, "g_engineerChargeTime", "1", CVAR_LATCH, 0, qfalse, qtrue},
+  {&g_LTChargeTime, "g_LTChargeTime", "1", CVAR_LATCH, 0, qfalse, qtrue},
+  {&g_soldierChargeTime, "g_soldierChargeTime", "1", CVAR_LATCH, 0, qfalse, qtrue},
+  // jpw
 
-    {&g_covertopsChargeTime, "g_covertopsChargeTime", "1", CVAR_LATCH, 0,
-     qfalse, qtrue},
-    {&g_landminetimeout, "g_landminetimeout", "1", CVAR_ARCHIVE, 0, qfalse,
-     qtrue},
+  {&g_covertopsChargeTime, "g_covertopsChargeTime", "1", CVAR_LATCH, 0, qfalse, qtrue},
+  {&g_landminetimeout, "g_landminetimeout", "1", CVAR_ARCHIVE, 0, qfalse, qtrue},
 
-    {&g_maxclients, "sv_maxclients", "20",
-     CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 0,
-     qfalse}, // NERVE - SMF - made 20 from 8
-    {&g_maxGameClients, "g_maxGameClients", "0",
-     CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-    {&g_minGameClients, "g_minGameClients", "8", CVAR_SERVERINFO, 0,
-     qfalse}, // NERVE - SMF
+  {&g_maxclients, "sv_maxclients", "20", CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 0,
+   qfalse}, // NERVE - SMF - made 20 from 8
+  {&g_maxGameClients, "g_maxGameClients", "0", CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
+  {&g_minGameClients, "g_minGameClients", "8", CVAR_SERVERINFO, 0, qfalse}, // NERVE - SMF
 
-    // change anytime vars
-    {&g_timelimit, "timelimit", "0",
-     CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue},
+  // change anytime vars
+  {&g_timelimit, "timelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue},
 
-    {&g_warmup, "g_warmup", "60", CVAR_ARCHIVE, 0, qtrue},
-    {&g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue},
+  {&g_warmup, "g_warmup", "60", CVAR_ARCHIVE, 0, qtrue},
+  {&g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue},
 
-    {&g_gamestate, "gamestate", "-1", CVAR_WOLFINFO | CVAR_ROM, 0, qfalse},
+  {&g_gamestate, "gamestate", "-1", CVAR_WOLFINFO | CVAR_ROM, 0, qfalse},
 
-    {&g_userTimeLimit, "g_userTimeLimit", "0", 0, 0, qfalse, qtrue},
-    {&g_userAlliedRespawnTime, "g_userAlliedRespawnTime", "0", 0, 0, qfalse,
-     qtrue},
-    {&g_userAxisRespawnTime, "g_userAxisRespawnTime", "0", 0, 0, qfalse, qtrue},
+  {&g_userTimeLimit, "g_userTimeLimit", "0", 0, 0, qfalse, qtrue},
+  {&g_userAlliedRespawnTime, "g_userAlliedRespawnTime", "0", 0, 0, qfalse, qtrue},
+  {&g_userAxisRespawnTime, "g_userAxisRespawnTime", "0", 0, 0, qfalse, qtrue},
 
-    {&g_swapteams, "g_swapteams", "0", CVAR_ROM, 0, qfalse, qtrue},
-    // -NERVE - SMF
+  {&g_swapteams, "g_swapteams", "0", CVAR_ROM, 0, qfalse, qtrue},
+  // -NERVE - SMF
 
-    {&g_logFile, "g_log", "", CVAR_ARCHIVE, 0, qfalse},
-    {&g_logSync, "g_logSync", "0", CVAR_ARCHIVE, 0, qfalse},
+  {&g_logFile, "g_log", "", CVAR_ARCHIVE, 0, qfalse},
+  {&g_logSync, "g_logSync", "0", CVAR_ARCHIVE, 0, qfalse},
 
-    {&g_password, "g_password", "none", CVAR_TEMP, 0, qfalse},
-    {&sv_privatepassword, "sv_privatepassword", "", CVAR_TEMP, 0, qfalse},
-    {&g_banIPs, "g_banIPs", "", CVAR_ARCHIVE, 0, qfalse},
-    // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=500
-    {&g_filterBan, "g_filterBan", "1", CVAR_ARCHIVE, 0, qfalse},
+  {&g_password, "g_password", "none", CVAR_TEMP, 0, qfalse},
+  {&sv_privatepassword, "sv_privatepassword", "", CVAR_TEMP, 0, qfalse},
+  {&g_banIPs, "g_banIPs", "", CVAR_ARCHIVE, 0, qfalse},
+  // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=500
+  {&g_filterBan, "g_filterBan", "1", CVAR_ARCHIVE, 0, qfalse},
 
-    {&g_dedicated, "dedicated", "0", 0, 0, qfalse},
+  {&g_dedicated, "dedicated", "0", 0, 0, qfalse},
 
-    {&g_knockback, "g_knockback", "1000", 0, 0, qtrue, qtrue},
+  {&g_knockback, "g_knockback", "1000", 0, 0, qtrue, qtrue},
 
-    {&g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qtrue},
-    {&g_forcerespawn, "g_forcerespawn", "0", 0, 0, qtrue},
-    {&g_forcerespawn, "g_forcerespawn", "0", 0, 0, qtrue},
-    {&g_inactivity, "g_inactivity", "0", 0, 0, qtrue},
-    {&g_debugMove, "g_debugMove", "0", 0, 0, qfalse},
-    {&g_debugDamage, "g_debugDamage", "0", CVAR_CHEAT, 0, qfalse},
-    {&g_debugAlloc, "g_debugAlloc", "0", 0, 0, qfalse},
-    {&g_debugBullets, "g_debugBullets", "0", CVAR_CHEAT, 0,
-     qfalse}, //----(SA)	added
-    {&g_motd, "g_motd", "", CVAR_ARCHIVE, 0, qfalse},
+  {&g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qtrue},
+  {&g_forcerespawn, "g_forcerespawn", "0", 0, 0, qtrue},
+  {&g_forcerespawn, "g_forcerespawn", "0", 0, 0, qtrue},
+  {&g_inactivity, "g_inactivity", "0", 0, 0, qtrue},
+  {&g_debugMove, "g_debugMove", "0", 0, 0, qfalse},
+  {&g_debugDamage, "g_debugDamage", "0", CVAR_CHEAT, 0, qfalse},
+  {&g_debugAlloc, "g_debugAlloc", "0", 0, 0, qfalse},
+  {&g_debugBullets, "g_debugBullets", "0", CVAR_CHEAT, 0, qfalse}, //----(SA)	added
+  {&g_motd, "g_motd", "", CVAR_ARCHIVE, 0, qfalse},
 
-    {&voteFlags, "voteFlags", "0", CVAR_TEMP | CVAR_ROM | CVAR_SERVERINFO, 0,
-     qfalse},
+  {&voteFlags, "voteFlags", "0", CVAR_TEMP | CVAR_ROM | CVAR_SERVERINFO, 0, qfalse},
 
-    {&g_filtercams, "g_filtercams", "0", CVAR_ARCHIVE, 0, qfalse},
-    {&g_voiceChatsAllowed, "g_voiceChatsAllowed", "4", CVAR_ARCHIVE, 0,
-     qfalse}, // DHM - Nerve
+  {&g_filtercams, "g_filtercams", "0", CVAR_ARCHIVE, 0, qfalse},
+  {&g_voiceChatsAllowed, "g_voiceChatsAllowed", "4", CVAR_ARCHIVE, 0, qfalse}, // DHM - Nerve
 
-    {&g_fastres, "g_fastres", "0", CVAR_ARCHIVE, 0, qtrue,
-     qtrue},                                         // Xian - Fast Medic Resing
-    {&g_knifeonly, "g_knifeonly", "0", 0, 0, qtrue}, // Xian - Fast Medic Resing
+  {&g_fastres, "g_fastres", "0", CVAR_ARCHIVE, 0, qtrue, qtrue}, // Xian - Fast Medic Resing
+  {&g_knifeonly, "g_knifeonly", "0", 0, 0, qtrue}, // Xian - Fast Medic Resing
 
-    {&g_developer, "developer", "0", CVAR_TEMP, 0, qfalse},
-    {&g_userAim, "g_userAim", "1", CVAR_CHEAT, 0, qfalse},
+  {&g_developer, "developer", "0", CVAR_TEMP, 0, qfalse},
+  {&g_userAim, "g_userAim", "1", CVAR_CHEAT, 0, qfalse},
 
-    {&g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
-    {&pmove_msec, "pmove_msec", "8", CVAR_SYSTEMINFO, 0, qfalse},
-    {&sv_fps, "sv_fps", "20", CVAR_SYSTEMINFO, 0, qfalse},
+  {&g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
+  {&pmove_msec, "pmove_msec", "8", CVAR_SYSTEMINFO, 0, qfalse},
+  {&sv_fps, "sv_fps", "20", CVAR_SYSTEMINFO, 0, qfalse},
 
-    {&g_scriptName, "g_scriptName", "", CVAR_CHEAT, 0, qfalse},
+  {&g_scriptName, "g_scriptName", "", CVAR_CHEAT, 0, qfalse},
 
-    {&g_antilag, "g_antilag", "1", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
+  {&g_antilag, "g_antilag", "1", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
 
-    // bani - #184
-    {NULL, "P", "", CVAR_SERVERINFO_NOUPDATE, 0, qfalse, qfalse},
+  // bani - #184
+  {NULL, "P", "", CVAR_SERVERINFO_NOUPDATE, 0, qfalse, qfalse},
 
-    {&refereePassword, "refereePassword", "none", 0, 0, qfalse},
-    {&g_spectatorInactivity, "g_spectatorInactivity", "0", 0, 0, qfalse,
-     qfalse},
-    {&match_latejoin, "match_latejoin", "1", 0, 0, qfalse, qfalse},
-    {&match_minplayers, "match_minplayers", MATCH_MINPLAYERS, 0, 0, qfalse,
-     qfalse},
-    {&match_readypercent, "match_readypercent", "100", 0, 0, qfalse, qtrue},
-    {&match_timeoutcount, "match_timeoutcount", "3", 0, 0, qfalse, qtrue},
-    {&match_timeoutlength, "match_timeoutlength", "180", 0, 0, qfalse, qtrue},
-    {&match_warmupDamage, "match_warmupDamage", "1", 0, 0, qfalse},
-    {&server_motd0, "server_motd0", " ^NEnemy Territory ^7MOTD ", 0, 0, qfalse,
-     qfalse},
-    {&server_motd1, "server_motd1", "", 0, 0, qfalse, qfalse},
-    {&server_motd2, "server_motd2", "", 0, 0, qfalse, qfalse},
-    {&server_motd3, "server_motd3", "", 0, 0, qfalse, qfalse},
-    {&server_motd4, "server_motd4", "", 0, 0, qfalse, qfalse},
-    {&server_motd5, "server_motd5", "", 0, 0, qfalse, qfalse},
-    {&team_maxPanzers, "team_maxPanzers", "-1", 0, 0, qfalse, qfalse},
-    {&team_maxplayers, "team_maxplayers", "0", 0, 0, qfalse, qfalse},
-    {&team_nocontrols, "team_nocontrols", "1", 0, 0, qfalse, qfalse},
-    {&vote_allow_map, "vote_allow_map", "1", 0, 0, qfalse, qfalse},
-    {&vote_allow_matchreset, "vote_allow_matchreset", "1", 0, 0, qfalse,
-     qfalse},
-    {&vote_allow_randommap, "vote_allow_randommap", "1", 0, 0, qfalse, qfalse},
-    {&vote_allow_rtv, "vote_allow_rtv", "1", 0, 0, qfalse, qfalse},
-    {&vote_allow_autoRtv, "vote_allow_autoRtv", "1", 0, 0, qfalse, qfalse},
-    {&vote_allow_portalPredict, "vote_allow_portalPredict", "1", 0, 0, qfalse,
-     qfalse},
-    {&vote_limit, "vote_limit", "5", 0, 0, qfalse, qfalse},
-    {&vote_percent, "vote_percent", "50", 0, 0, qfalse, qfalse},
+  {&refereePassword, "refereePassword", "none", 0, 0, qfalse},
+  {&g_spectatorInactivity, "g_spectatorInactivity", "0", 0, 0, qfalse, qfalse},
+  {&match_latejoin, "match_latejoin", "1", 0, 0, qfalse, qfalse},
+  {&match_minplayers, "match_minplayers", MATCH_MINPLAYERS, 0, 0, qfalse, qfalse},
+  {&match_readypercent, "match_readypercent", "100", 0, 0, qfalse, qtrue},
+  {&match_timeoutcount, "match_timeoutcount", "3", 0, 0, qfalse, qtrue},
+  {&match_timeoutlength, "match_timeoutlength", "180", 0, 0, qfalse, qtrue},
+  {&match_warmupDamage, "match_warmupDamage", "1", 0, 0, qfalse},
+  {&server_motd0, "server_motd0", " ^NEnemy Territory ^7MOTD ", 0, 0, qfalse, qfalse},
+  {&server_motd1, "server_motd1", "", 0, 0, qfalse, qfalse},
+  {&server_motd2, "server_motd2", "", 0, 0, qfalse, qfalse},
+  {&server_motd3, "server_motd3", "", 0, 0, qfalse, qfalse},
+  {&server_motd4, "server_motd4", "", 0, 0, qfalse, qfalse},
+  {&server_motd5, "server_motd5", "", 0, 0, qfalse, qfalse},
+  {&team_maxPanzers, "team_maxPanzers", "-1", 0, 0, qfalse, qfalse},
+  {&team_maxplayers, "team_maxplayers", "0", 0, 0, qfalse, qfalse},
+  {&team_nocontrols, "team_nocontrols", "1", 0, 0, qfalse, qfalse},
+  {&vote_allow_map, "vote_allow_map", "1", 0, 0, qfalse, qfalse},
+  {&vote_allow_matchreset, "vote_allow_matchreset", "1", 0, 0, qfalse, qfalse},
+  {&vote_allow_randommap, "vote_allow_randommap", "1", 0, 0, qfalse, qfalse},
+  {&vote_allow_rtv, "vote_allow_rtv", "1", 0, 0, qfalse, qfalse},
+  {&vote_allow_autoRtv, "vote_allow_autoRtv", "1", 0, 0, qfalse, qfalse},
+  {&vote_allow_portalPredict, "vote_allow_portalPredict", "1", 0, 0, qfalse, qfalse},
+  {&vote_limit, "vote_limit", "5", 0, 0, qfalse, qfalse},
+  {&vote_percent, "vote_percent", "50", 0, 0, qfalse, qfalse},
 
-    {&g_debugConstruct, "g_debugConstruct", "0", CVAR_CHEAT, 0, qfalse},
+  {&g_debugConstruct, "g_debugConstruct", "0", CVAR_CHEAT, 0, qfalse},
 
-    {&g_scriptDebug, "g_scriptDebug", "0", CVAR_CHEAT, 0, qfalse},
+  {&g_scriptDebug, "g_scriptDebug", "0", CVAR_CHEAT, 0, qfalse},
 
-    // What level of detail do we want script printing to go to.
-    {&g_scriptDebugLevel, "g_scriptDebugLevel", "0", CVAR_CHEAT, 0, qfalse},
+  // What level of detail do we want script printing to go to.
+  {&g_scriptDebugLevel, "g_scriptDebugLevel", "0", CVAR_CHEAT, 0, qfalse},
 
-    // points to the URL for mod information, should not be modified by server
-    // admin
-    {&mod_url, "mod_url", GAME_URL, CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
-    // configured by the server admin, points to the web pages for the server
-    {&url, "URL", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
+  // points to the URL for mod information, should not be modified by server
+  // admin
+  {&mod_url, "mod_url", GAME_URL, CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
+  // configured by the server admin, points to the web pages for the server
+  {&url, "URL", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
 
-    {&g_debugSkills, "g_debugSkills", "0", 0},
-    {&g_autoFireteams, "g_autoFireteams", "1", CVAR_ARCHIVE},
+  {&g_debugSkills, "g_debugSkills", "0", 0},
+  {&g_autoFireteams, "g_autoFireteams", "1", CVAR_ARCHIVE},
 
-    {&g_nextmap, "nextmap", "", CVAR_TEMP},
+  {&g_nextmap, "nextmap", "", CVAR_TEMP},
 
-    {&g_dailyLogs, "g_dailyLogs", "1", CVAR_ARCHIVE},
+  {&g_dailyLogs, "g_dailyLogs", "1", CVAR_ARCHIVE},
 
-    // Trickjump cvars
+  // Trickjump cvars
 
-    {&g_save, "g_save", "1", CVAR_ARCHIVE},
+  {&g_save, "g_save", "1", CVAR_ARCHIVE},
 
-    {&g_floodprotection, "g_floodprotection", "1", CVAR_ARCHIVE},
-    {&g_floodlimit, "g_floodlimit", "5", CVAR_ARCHIVE},
-    {&g_floodwait, "g_floodwait", "768", CVAR_ARCHIVE},
+  {&g_floodprotection, "g_floodprotection", "1", CVAR_ARCHIVE},
+  {&g_floodlimit, "g_floodlimit", "5", CVAR_ARCHIVE},
+  {&g_floodwait, "g_floodwait", "768", CVAR_ARCHIVE},
 
-    {&g_ghostPlayers, "g_ghostPlayers", "1", CVAR_SERVERINFO | CVAR_LATCH},
-    {&g_nofatigue, "g_nofatigue", "1", CVAR_ARCHIVE},
-    {&g_blockCheatCvars, "g_blockCheatCvars", "0", CVAR_ARCHIVE},
-    {&g_weapons, "g_weapons", "1", CVAR_ARCHIVE},
-    {&g_noclip, "g_noclip", "0", CVAR_ARCHIVE},
-    {&g_nameChangeLimit, "g_nameChangeLimit", "5", CVAR_ARCHIVE},
-    {&g_nameChangeInterval, "g_nameChangeInterval", "60", CVAR_ARCHIVE},
-    {&g_mapScriptDir, "g_mapScriptDir", "mapscripts", CVAR_ARCHIVE},
-    {&g_blockedMaps, "g_blockedMaps", "", CVAR_ARCHIVE},
-    {&g_allowSpeclock, "g_allowSpeclock", "1", CVAR_ARCHIVE, 0, qtrue},
+  {&g_ghostPlayers, "g_ghostPlayers", "1", CVAR_SERVERINFO | CVAR_LATCH},
+  {&g_nofatigue, "g_nofatigue", "1", CVAR_ARCHIVE},
+  {&g_blockCheatCvars, "g_blockCheatCvars", "0", CVAR_ARCHIVE},
+  {&g_weapons, "g_weapons", "1", CVAR_ARCHIVE},
+  {&g_noclip, "g_noclip", "0", CVAR_ARCHIVE},
+  {&g_nameChangeLimit, "g_nameChangeLimit", "5", CVAR_ARCHIVE},
+  {&g_nameChangeInterval, "g_nameChangeInterval", "60", CVAR_ARCHIVE},
+  {&g_mapScriptDir, "g_mapScriptDir", "mapscripts", CVAR_ARCHIVE},
+  {&g_blockedMaps, "g_blockedMaps", "", CVAR_ARCHIVE},
+  {&g_allowSpeclock, "g_allowSpeclock", "1", CVAR_ARCHIVE, 0, qtrue},
 
-    {&g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE},
-    {&g_userConfig, "g_userConfig", "users.db", CVAR_ARCHIVE},
+  {&g_adminLog, "g_adminLog", "adminsystem.log", CVAR_ARCHIVE},
+  {&g_userConfig, "g_userConfig", "users.db", CVAR_ARCHIVE},
 #ifdef NEW_AUTH
-    {&g_userDatabaseV2, "g_userDatabaseV2", "users.v2.db", CVAR_ARCHIVE},
+  {&g_userDatabaseV2, "g_userDatabaseV2", "users.v2.db", CVAR_ARCHIVE},
 #endif
-    {&g_levelConfig, "g_levelConfig", "levels.cfg", CVAR_ARCHIVE},
-    {&g_allowInvalidHWID, "g_allowInvalidHWID", "0", CVAR_ARCHIVE},
+  {&g_levelConfig, "g_levelConfig", "levels.cfg", CVAR_ARCHIVE},
+  {&g_allowInvalidHWID, "g_allowInvalidHWID", "0", CVAR_ARCHIVE},
 
-    // BannerPrint location
-    {&g_bannerLocation, "g_bannerLocation", "1", CVAR_ARCHIVE},
-    {&g_bannerTime, "g_bannerTime", "60000", CVAR_ARCHIVE},
-    // FIXME: dynamic banner count.
-    {&g_banner1, "g_banner1", "ETJump", CVAR_ARCHIVE},
-    {&g_banner2, "g_banner2",
-     "A Wolfenstein: Enemy Territory Trickjump Modification", CVAR_ARCHIVE},
-    {&g_banner3, "g_banner3", "www.etjump.com", CVAR_ARCHIVE},
-    {&g_banner4, "g_banner4", "Developed by Zero, Feengur and Setup",
-     CVAR_ARCHIVE},
-    {&g_banner5, "g_banner5", "Thanks for choosing ETJump!", CVAR_ARCHIVE},
-    {&g_banners, "g_banners", "1", CVAR_ARCHIVE},
+  // BannerPrint location
+  {&g_bannerLocation, "g_bannerLocation", "1", CVAR_ARCHIVE},
+  {&g_bannerTime, "g_bannerTime", "60000", CVAR_ARCHIVE},
+  // FIXME: dynamic banner count.
+  {&g_banner1, "g_banner1", "ETJump", CVAR_ARCHIVE},
+  {&g_banner2, "g_banner2", "A Wolfenstein: Enemy Territory Trickjump Modification", CVAR_ARCHIVE},
+  {&g_banner3, "g_banner3", "www.etjump.com", CVAR_ARCHIVE},
+  {&g_banner4, "g_banner4", "Developed by Zero, Feengur and Setup", CVAR_ARCHIVE},
+  {&g_banner5, "g_banner5", "Thanks for choosing ETJump!", CVAR_ARCHIVE},
+  {&g_banners, "g_banners", "1", CVAR_ARCHIVE},
 
-    // Feen: PGM
-    // 0 - freestyle, 1 - restricted
-    {&g_portalMode, "g_portalMode", "1", CVAR_ARCHIVE},
-    {&g_portalPredict, "g_portalPredict", "0", CVAR_ARCHIVE | CVAR_SERVERINFO,
-     0, qtrue},
-    {&g_portalTeam, "g_portalTeam", "0", CVAR_ROM | CVAR_SERVERINFO},
+  // Feen: PGM
+  // 0 - freestyle, 1 - restricted
+  {&g_portalMode, "g_portalMode", "1", CVAR_ARCHIVE},
+  {&g_portalPredict, "g_portalPredict", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue},
+  {&g_portalTeam, "g_portalTeam", "0", CVAR_ROM | CVAR_SERVERINFO},
 
-    {&g_maxConnsPerIP, "g_maxConnsPerIP", "2", CVAR_ARCHIVE},
-    {&g_mute, "g_mute", "0", CVAR_ARCHIVE},
-    {&g_goto, "g_goto", "1", CVAR_ARCHIVE},
-    {&g_voteCooldown, "g_voteCooldown", "15", CVAR_ARCHIVE},
-    {&mod_version, "mod_version", GAME_VERSION, CVAR_SERVERINFO},
+  {&g_maxConnsPerIP, "g_maxConnsPerIP", "2", CVAR_ARCHIVE},
+  {&g_mute, "g_mute", "0", CVAR_ARCHIVE},
+  {&g_goto, "g_goto", "1", CVAR_ARCHIVE},
+  {&g_voteCooldown, "g_voteCooldown", "15", CVAR_ARCHIVE},
+  {&mod_version, "mod_version", GAME_VERSION, CVAR_SERVERINFO},
 
-    {&g_mapDatabase, "g_mapDatabase", "maps.dat", CVAR_ARCHIVE},
-    {&g_disableVoteAfterMapChange, "g_disableVoteAfterMapChange", "30000",
-     CVAR_ARCHIVE},
-    {&g_motdFile, "g_motdFile", "motd.json", CVAR_ARCHIVE},
-    {&g_customMapVotesFile, "g_customMapVotesFile", "customvotes.json",
-     CVAR_ARCHIVE},
+  {&g_mapDatabase, "g_mapDatabase", "maps.dat", CVAR_ARCHIVE},
+  {&g_disableVoteAfterMapChange, "g_disableVoteAfterMapChange", "30000", CVAR_ARCHIVE},
+  {&g_motdFile, "g_motdFile", "motd.json", CVAR_ARCHIVE},
+  {&g_customMapVotesFile, "g_customMapVotesFile", "customvotes.json", CVAR_ARCHIVE},
 
-    // Start of timeruns support
-    {&g_timerunsDatabase, "g_timerunsDatabase", "timeruns.db", CVAR_ARCHIVE},
-    {&g_timeruns2Database, "g_timeruns2Database", "timeruns.v2.db",
-     CVAR_ARCHIVE},
-    // End of timeruns support
+  // Start of timeruns support
+  {&g_timerunsDatabase, "g_timerunsDatabase", "timeruns.db", CVAR_ARCHIVE},
+  {&g_timeruns2Database, "g_timeruns2Database", "timeruns.v2.db", CVAR_ARCHIVE},
+  // End of timeruns support
 
-    {&g_chatOptions, "g_chatOptions", "1", CVAR_ARCHIVE},
+  {&g_chatOptions, "g_chatOptions", "1", CVAR_ARCHIVE},
 
-    // tokens
-    {&g_tokensMode, "g_tokensMode", "1", CVAR_ARCHIVE | CVAR_LATCH},
-    {&g_tokensPath, "g_tokensPath", "tokens", CVAR_ARCHIVE | CVAR_LATCH},
-    // end of tokens
+  // tokens
+  {&g_tokensMode, "g_tokensMode", "1", CVAR_ARCHIVE | CVAR_LATCH},
+  {&g_tokensPath, "g_tokensPath", "tokens", CVAR_ARCHIVE | CVAR_LATCH},
+  // end of tokens
 
-    {&shared, "shared", "0", CVAR_SYSTEMINFO | CVAR_ROM},
-    {&vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE},
-    {&g_moverScale, "g_moverScale", "1.0", 0},
-    {&g_debugTrackers, "g_debugTrackers", "0", CVAR_ARCHIVE | CVAR_LATCH},
-    {&g_spectatorVote, "g_spectatorVote", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
-    {&g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE},
-    {&g_oss, "g_oss", "399", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse, qfalse},
+  {&vote_minVoteDuration, "vote_minVoteDuration", "5000", CVAR_ARCHIVE},
+  {&g_moverScale, "g_moverScale", "1.0", 0},
+  {&g_debugTrackers, "g_debugTrackers", "0", CVAR_ARCHIVE | CVAR_LATCH},
+  {&g_spectatorVote, "g_spectatorVote", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
+  {&g_enableVote, "g_enableVote", "1", CVAR_ARCHIVE},
+  {&g_oss, "g_oss", "399", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse, qfalse},
 
-    {&g_autoRtv, "g_autoRtv", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
-    {&vote_minRtvDuration, "vote_minRtvDuration", "15000", CVAR_ARCHIVE},
-    {&g_rtvMapCount, "g_rtvMapCount", "5", CVAR_ARCHIVE},
+  {&g_autoRtv, "g_autoRtv", "0", CVAR_ARCHIVE | CVAR_SERVERINFO},
+  {&vote_minRtvDuration, "vote_minRtvDuration", "15000", CVAR_ARCHIVE},
+  {&g_rtvMapCount, "g_rtvMapCount", "5", CVAR_ARCHIVE},
 
-    {&g_adminChat, "g_adminChat", "1", CVAR_ARCHIVE},
+  {&g_adminChat, "g_adminChat", "1", CVAR_ARCHIVE},
 
-    {&g_chatReplay, "g_chatReplay", "1", CVAR_ARCHIVE},
-    {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "5",
-     CVAR_ARCHIVE | CVAR_LATCH},
+  {&g_chatReplay, "g_chatReplay", "1", CVAR_ARCHIVE},
+  {&g_chatReplayMaxMessageAge, "g_chatReplayMaxMessageAge", "5", CVAR_ARCHIVE | CVAR_LATCH},
 
-    {&g_mapAutoexecDir, "g_mapAutoexecDir", "", CVAR_ARCHIVE},
+  {&g_mapAutoexecDir, "g_mapAutoexecDir", "", CVAR_ARCHIVE},
 };
 
 // bk001129 - made static to avoid aliasing
@@ -569,6 +542,237 @@ qboolean G_SnapshotCallback(int entityNum, int clientNum) {
   return qtrue;
 }
 
+static intptr_t dispatchCommand(const int command, const intptr_t arg0, const intptr_t arg1, const intptr_t arg2) {
+  switch (command) {
+    case GAME_INIT: {
+      ETJ_TEST_FAULT_SCOPE("GAME_INIT");
+      G_InitGame(arg0, arg1, arg2);
+      return 0;
+    }
+    case GAME_SHUTDOWN: {
+      ETJ_TEST_FAULT_SCOPE("GAME_SHUTDOWN");
+      ETJump::FatalErrorBoundary::protectActiveFrames();
+      G_ShutdownGame(arg0);
+      return 0;
+    }
+    case GAME_CLIENT_CONNECT: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_CONNECT");
+      return (intptr_t)ClientConnect(arg0, arg1 ? qtrue : qfalse, arg2 ? qtrue : qfalse);
+    }
+    case GAME_CLIENT_THINK: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_THINK");
+      ClientThink(arg0);
+      return 0;
+    }
+    case GAME_CLIENT_USERINFO_CHANGED: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_USERINFO_CHANGED");
+      ClientUserinfoChanged(arg0);
+      return 0;
+    }
+    case GAME_CLIENT_DISCONNECT: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_DISCONNECT");
+      ClientDisconnect(arg0);
+      return 0;
+    }
+    case GAME_CLIENT_BEGIN: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_BEGIN");
+      ClientBegin(arg0);
+      return 0;
+    }
+    case GAME_CLIENT_COMMAND: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CLIENT_COMMAND");
+      ClientCommand(arg0);
+      return 0;
+    }
+    case GAME_RUN_FRAME: {
+      ETJ_TEST_FAULT_SCOPE("GAME_RUN_FRAME");
+      G_RunFrame(arg0);
+      return 0;
+    }
+    case GAME_CONSOLE_COMMAND: {
+      ETJ_TEST_FAULT_SCOPE("GAME_CONSOLE_COMMAND");
+      return ConsoleCommand();
+    }
+    case BOTAI_START_FRAME:
+      return 0;
+    case BOT_VISIBLEFROMPOS:
+      return qfalse;
+    case BOT_CHECKATTACKATPOS:
+      return qfalse;
+    case GAME_SNAPSHOT_CALLBACK: {
+      ETJ_TEST_FAULT_SCOPE("GAME_SNAPSHOT_CALLBACK");
+      return G_SnapshotCallback(arg0, arg1);
+    }
+    case GAME_MESSAGERECEIVED:
+      return -1;
+  }
+
+  return -1;
+}
+
+namespace ETJump {
+static GameFailure gameFailure;
+
+static bool isDedicatedServer() {
+  // not through 'g_dedicated', the game might have failed before
+  // registering its cvars
+  return trap_Cvar_VariableIntegerValue("dedicated") != 0;
+}
+
+// writes an unexpected error (an unhandled exception) to the game log in the
+// format G_Error uses, G_Error already logged its own errors when they were
+// raised, and G_LogPrintf only echoes to the console on dedicated servers
+static void logUnexpectedError(const char *message, const bool unexpected) {
+  if (!unexpected) {
+    return;
+  }
+
+  G_LogPrintf("==================================================\n");
+  G_LogPrintf("FATAL: %s\n", message);
+  G_LogPrintf("==================================================\n");
+}
+
+static bool failGame(const char *message, const bool unexpected, const bool dropClients) {
+  gameFailure.activate(message, unexpected, dropClients, trap_Milliseconds());
+
+  logUnexpectedError(message, unexpected);
+  G_Printf(S_COLOR_RED "Fatal error, dropping all clients and shutting down: %s\n", message);
+  return true;
+}
+
+// during map load, the engine drops the clients from the previous map
+// itself, as the game denies their reconnect
+static bool failGameOnInit(const char *message, const bool unexpected) {
+  return failGame(message, unexpected, false);
+}
+
+// at runtime, the clients are dropped in the next server frame, as the
+// failed command might be one the engine runs while it handles a client
+// (e.g. building its snapshot, or dropping it), where that isn't expected
+static bool failGameAtRuntime(const char *message, const bool unexpected) {
+  // no game code runs once the game failed, so the only error then is the
+  // one thrown on purpose for the local client of a listen server, which
+  // is raised (see handleFailedGame)
+  if (gameFailure.isActive()) {
+    return false;
+  }
+
+  return failGame(message, unexpected, true);
+}
+
+static bool ignoreShutdownError(const char *message, const bool) {
+  // G_ShutdownGame still ran its remaining steps
+  G_Printf(S_COLOR_RED "Ignoring fatal error during shutdown: %s\n", message);
+  return true;
+}
+
+static FatalErrorBoundary::DeferFunction getDeferFunction(const int command) {
+  switch (command) {
+    case GAME_INIT:
+      return failGameOnInit;
+    case GAME_SHUTDOWN:
+      return ignoreShutdownError;
+    default:
+      return failGameAtRuntime;
+  }
+}
+
+// returned to the engine when a command fails, and for every command while
+// the game is inert after a failure
+static intptr_t getFailureResult(const int command) {
+  switch (command) {
+    case GAME_CLIENT_CONNECT:
+      // denies the connection, and clients that were connected before a
+      // map change get dropped by the engine with this as the reason
+      return reinterpret_cast<intptr_t>(gameFailure.getDenialMessage());
+    case GAME_CONSOLE_COMMAND:
+      // still counts as handled, so the engine doesn't pass it on
+      return qtrue;
+    default:
+      return 0;
+  }
+}
+
+// the engine always sets 'ip' itself, to 'localhost' for the local client
+// of a listen server (not through pers.localClient, the game never sets it,
+// and setting it would exempt the local client from inactivity handling)
+static bool isLocalClient(const int clientNum) {
+  std::array<char, MAX_INFO_STRING> userinfo{};
+  trap_GetUserinfo(clientNum, userinfo.data(), static_cast<int>(userinfo.size()));
+
+  return strcmp(Info_ValueForKey(userinfo.data(), "ip"), "localhost") == 0;
+}
+
+static void dropConnectedClients() {
+  // clients that are still connecting are disconnected by the shutdown
+  for (int i = 0; i < level.maxclients; i++) {
+    if (g_clients[i].pers.connected != CON_CONNECTED) {
+      continue;
+    }
+
+    if (isLocalClient(i)) {
+      gameFailure.setLocalClientDropped();
+    }
+
+    trap_DropClient(i, gameFailure.getDenialMessage(), 0);
+  }
+}
+
+// runs from the command buffer, so unlike trap_Error, the engine doesn't
+// longjmp over this module's frames, and the command only expands a cvar,
+// so a map loaded before the command buffer runs it (e.g. through rcon)
+// cancels the shutdown by clearing the cvar on GAME_INIT
+static void queueShutdown() {
+  trap_Cvar_Set(GAME_FAILURE_SHUTDOWN_CVAR, "killserver");
+  trap_SendConsoleCommand(EXEC_APPEND, va("vstr %s\n", GAME_FAILURE_SHUTDOWN_CVAR));
+}
+
+// handles every command except GAME_INIT and GAME_SHUTDOWN after a failure
+static intptr_t handleFailedGame(const int command) {
+  // server frames are the point where dropping clients is expected, note
+  // that e.g. ETe doesn't run them on a paused listen server, in which
+  // case this waits until the game is unpaused
+  if (command == GAME_RUN_FRAME) {
+    const int time = trap_Milliseconds();
+
+    if (gameFailure.takeClientDrops(time)) {
+      dropConnectedClients();
+    }
+
+    if (gameFailure.takeShutdown(time)) {
+      // the local client of a listen server might need an engine error to
+      // recover (see GameFailure), the boundary raises it once this call
+      // ended, and the engine shuts the server down as well
+      if (gameFailure.shutsDownThroughError(isDedicatedServer())) {
+        FatalErrorBoundary::throwFatal(gameFailure.getMessage());
+      }
+
+      queueShutdown();
+    }
+  }
+
+  if (command == GAME_CONSOLE_COMMAND) {
+    // the engine asks the game before cgame and ui, so on a listen server,
+    // the local client's commands are passed on as if the game didn't know
+    // them, which only leaves the game's own commands without a response
+    if (!isDedicatedServer()) {
+      return qfalse;
+    }
+
+    // it counts as handled (see getFailureResult), so the engine doesn't
+    // print anything for it either, which would leave an admin guessing
+    std::array<char, MAX_TOKEN_CHARS> name{};
+    trap_Argv(0, name.data(), static_cast<int>(name.size()));
+
+    G_Printf("Ignoring '%s', the game is shutting down after a fatal error\n", name.data());
+  }
+
+  // the game might be only partially initialized or in the middle of a
+  // frame, so no game code runs at all
+  return getFailureResult(command);
+}
+} // namespace ETJump
+
 /*
 ================
 vmMain
@@ -578,53 +782,30 @@ This must be the very first function compiled into the .q3vm file
 ================
 */
 
-extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1,
-                                     intptr_t arg2, intptr_t arg3,
-                                     intptr_t arg4, intptr_t arg5,
-                                     intptr_t arg6) {
-  switch (command) {
-    case GAME_INIT:
-      G_InitGame(arg0, arg1, arg2);
-      return 0;
-    case GAME_SHUTDOWN:
-      G_ShutdownGame(arg0);
-      return 0;
-    case GAME_CLIENT_CONNECT:
-      return (intptr_t)ClientConnect(arg0, arg1 ? qtrue : qfalse,
-                                     arg2 ? qtrue : qfalse);
-    case GAME_CLIENT_THINK:
-      ClientThink(arg0);
-      return 0;
-    case GAME_CLIENT_USERINFO_CHANGED:
-      ClientUserinfoChanged(arg0);
-      return 0;
-    case GAME_CLIENT_DISCONNECT:
-      ClientDisconnect(arg0);
-      return 0;
-    case GAME_CLIENT_BEGIN:
-      ClientBegin(arg0);
-      return 0;
-    case GAME_CLIENT_COMMAND:
-      ClientCommand(arg0);
-      return 0;
-    case GAME_RUN_FRAME:
-      G_RunFrame(arg0);
-      return 0;
-    case GAME_CONSOLE_COMMAND:
-      return ConsoleCommand();
-    case BOTAI_START_FRAME:
-      return 0;
-    case BOT_VISIBLEFROMPOS:
-      return qfalse;
-    case BOT_CHECKATTACKATPOS:
-      return qfalse;
-    case GAME_SNAPSHOT_CALLBACK:
-      return G_SnapshotCallback(arg0, arg1);
-    case GAME_MESSAGERECEIVED:
-      return -1;
+extern "C" FN_PUBLIC intptr_t vmMain(int command, intptr_t arg0, intptr_t arg1, intptr_t arg2, intptr_t arg3,
+                                     intptr_t arg4, intptr_t arg5, intptr_t arg6) {
+  if (command == GAME_INIT) {
+    // cancels a shutdown that's still queued from a previous failure
+    trap_Cvar_Set(ETJump::GAME_FAILURE_SHUTDOWN_CVAR, "");
   }
 
-  return -1;
+  if (ETJump::gameFailure.isActive() && (command == GAME_INIT || command == GAME_SHUTDOWN)) {
+    ETJump::gameFailure.reset();
+  }
+
+  // through the boundary even while the game is inert after a failure, so an
+  // error raised then comes from the same stack position as every other call,
+  // which the boundary relies on to tell apart the calls the engine makes
+  // while handling the error from the ones after it
+  return ETJump::FatalErrorBoundary::run(
+    [&] {
+      if (ETJump::gameFailure.isActive()) {
+        return ETJump::handleFailedGame(command);
+      }
+
+      return dispatchCommand(command, arg0, arg1, arg2);
+    },
+    ETJump::getFailureResult(command), ETJump::getDeferFunction(command));
 }
 
 void QDECL G_Printf(const char *fmt, ...) {
@@ -665,7 +846,9 @@ void QDECL G_DPrintf(const char *fmt, ...) {
   G_LogPrintf("FATAL: %s\n", text);
   G_LogPrintf("==================================================\n");
 
-  trap_Error(text);
+  // unwinds the stack up to vmMain, which then shuts the server down
+  // (see GameFailure), instead of calling trap_Error
+  ETJump::FatalErrorBoundary::throwFatal(text);
 }
 
 /*
@@ -675,12 +858,8 @@ for cursor hint purpose (because the ent may have the designed content type
 but nevertheless should not display any cursor hint)
 ==============
 */
-static qboolean G_CursorHintIgnoreEnt(gentity_t *traceEnt,
-                                      gentity_t *clientEnt) {
-  return (traceEnt->s.eType == ET_OID_TRIGGER ||
-          traceEnt->s.eType == ET_TRIGGER_MULTIPLE)
-             ? qtrue
-             : qfalse;
+static qboolean G_CursorHintIgnoreEnt(gentity_t *traceEnt, gentity_t *clientEnt) {
+  return (traceEnt->s.eType == ET_OID_TRIGGER || traceEnt->s.eType == ET_TRIGGER_MULTIPLE) ? qtrue : qfalse;
 }
 
 /*
@@ -699,8 +878,7 @@ explosive,invisible_users,items,etc.)
 */
 
 qboolean G_EmplacedGunIsMountable(gentity_t *ent, gentity_t *other) {
-  if (Q_stricmp(ent->classname, "misc_mg42") &&
-      Q_stricmp(ent->classname, "misc_aagun")) {
+  if (Q_stricmp(ent->classname, "misc_mg42") && Q_stricmp(ent->classname, "misc_aagun")) {
     return qfalse;
   }
 
@@ -748,8 +926,7 @@ qboolean G_EmplacedGunIsMountable(gentity_t *ent, gentity_t *other) {
 }
 
 qboolean G_EmplacedGunIsRepairable(gentity_t *ent, gentity_t *other) {
-  if (Q_stricmp(ent->classname, "misc_mg42") &&
-      Q_stricmp(ent->classname, "misc_aagun")) {
+  if (Q_stricmp(ent->classname, "misc_mg42") && Q_stricmp(ent->classname, "misc_aagun")) {
     return qfalse;
   }
 
@@ -809,8 +986,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
 
   tr = &ps->serverCursorHintTrace;
 
-  trace_contents = (CONTENTS_TRIGGER | CONTENTS_SOLID | CONTENTS_MISSILECLIP |
-                    CONTENTS_BODY | CONTENTS_CORPSE);
+  trace_contents = (CONTENTS_TRIGGER | CONTENTS_SOLID | CONTENTS_MISSILECLIP | CONTENTS_BODY | CONTENTS_CORPSE);
   trap_Trace(tr, offset, NULL, NULL, end, ps->clientNum, trace_contents);
 
   // reset all
@@ -828,22 +1004,18 @@ void G_CheckForCursorHints(gentity_t *ent) {
   // Arnout: building something - add this here because we don't have
   // anything solid to trace to - quite ugly-ish
   if (ent->client->touchingTOI && ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER) {
-    gentity_t *constructible = G_IsConstructible(ent->client->sess.sessionTeam,
-                                                 ent->client->touchingTOI);
+    gentity_t *constructible = G_IsConstructible(ent->client->sess.sessionTeam, ent->client->touchingTOI);
     if (constructible) {
-      ps->serverCursorHint = HINT_CONSTRUCTIBLE;
+      ps->serverCursorHint    = HINT_CONSTRUCTIBLE;
       ps->serverCursorHintVal = (int)constructible->s.angles2[0];
       return;
     }
   }
 
   if (ps->stats[STAT_PLAYER_CLASS] == PC_COVERTOPS) {
-    if (ent->client->landmineSpottedTime &&
-        level.time - ent->client->landmineSpottedTime < 500) {
-      ps->serverCursorHint = HINT_LANDMINE;
-      ps->serverCursorHintVal = ent->client->landmineSpotted
-                                    ? ent->client->landmineSpotted->count2
-                                    : 0;
+    if (ent->client->landmineSpottedTime && level.time - ent->client->landmineSpottedTime < 500) {
+      ps->serverCursorHint    = HINT_LANDMINE;
+      ps->serverCursorHintVal = ent->client->landmineSpotted ? ent->client->landmineSpotted->count2 : 0;
       return;
     }
   }
@@ -877,8 +1049,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
     if ((tr->contents & CONTENTS_WATER) && !(ps->powerups[PW_BREATHER])) {
       hintDist = CH_WATER_DIST;
       hintType = HINT_WATER;
-    } else if ((tr->surfaceFlags & SURF_LADDER) &&
-               !(ps->pm_flags & PMF_LADDER)) // ladder
+    } else if ((tr->surfaceFlags & SURF_LADDER) && !(ps->pm_flags & PMF_LADDER)) // ladder
     {
       hintDist = CH_LADDER_DIST;
       hintType = HINT_LADDER;
@@ -886,10 +1057,8 @@ void G_CheckForCursorHints(gentity_t *ent) {
   } else if (tr->entityNum < MAX_CLIENTS) {
     // Show medics a syringe if they can revive someone
 
-    if (traceEnt->client &&
-        traceEnt->client->sess.sessionTeam == ent->client->sess.sessionTeam) {
-      if (ps->stats[STAT_PLAYER_CLASS] == PC_MEDIC &&
-          traceEnt->client->ps.pm_type == PM_DEAD &&
+    if (traceEnt->client && traceEnt->client->sess.sessionTeam == ent->client->sess.sessionTeam) {
+      if (ps->stats[STAT_PLAYER_CLASS] == PC_MEDIC && traceEnt->client->ps.pm_type == PM_DEAD &&
           !(traceEnt->client->ps.pm_flags & PMF_LIMBO)) {
         hintDist = 48; // JPW NERVE matches
                        // weapon_syringe in g_weapon.c
@@ -908,8 +1077,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
     checkEnt = traceEnt;
 
     // Arnout: invisible entities don't show hints
-    if (traceEnt->entstate == STATE_INVISIBLE ||
-        traceEnt->entstate == STATE_UNDERCONSTRUCTION) {
+    if (traceEnt->entstate == STATE_INVISIBLE || traceEnt->entstate == STATE_UNDERCONSTRUCTION) {
       return;
     }
 
@@ -918,7 +1086,6 @@ void G_CheckForCursorHints(gentity_t *ent) {
     // targeting. so find the target and set checkEnt to that to
     // show the proper hint.
     if (traceEnt->s.eType == ET_GENERAL) {
-
       // ignore trigger_aidoor.  can't just not trace
       // for triggers, since I need invisible_users...
       // damn, I would like to ignore some of these
@@ -947,16 +1114,12 @@ void G_CheckForCursorHints(gentity_t *ent) {
         }
 
         // check for delay so we don't do div by 0
-        if (traceEnt->spawnflags &
-                static_cast<int>(ETJump::FuncInvisSpawnflags::WaitProgress) &&
+        if (traceEnt->spawnflags & static_cast<int>(ETJump::FuncInvisSpawnflags::WaitProgress) &&
             traceEnt->delay != 0) {
-          if (traceEnt->wait > 0 &&
-              level.time < static_cast<int>(traceEnt->wait)) {
+          if (traceEnt->wait > 0 && level.time < static_cast<int>(traceEnt->wait)) {
             hintVal = static_cast<int>(
-                std::clamp(255 * ((static_cast<float>(level.time) -
-                                   traceEnt->wait + traceEnt->delay) /
-                                  traceEnt->delay),
-                           0.0f, 255.0f));
+              std::clamp(255 * ((static_cast<float>(level.time) - traceEnt->wait + traceEnt->delay) / traceEnt->delay),
+                         0.0f, 255.0f));
           }
         } else {
           hintVal = 0;
@@ -965,7 +1128,6 @@ void G_CheckForCursorHints(gentity_t *ent) {
     }
 
     if (checkEnt) {
-
       // TDF This entire function could be the poster
       // boy for converting to OO programming!!! I'm
       // making this into a switch in a vain attempt to
@@ -974,16 +1136,14 @@ void G_CheckForCursorHints(gentity_t *ent) {
 
       switch (checkEnt->s.eType) {
         case ET_CORPSE:
-          if (!ent->client->ps.powerups[PW_BLUEFLAG] &&
-              !ent->client->ps.powerups[PW_REDFLAG] &&
+          if (!ent->client->ps.powerups[PW_BLUEFLAG] && !ent->client->ps.powerups[PW_REDFLAG] &&
               !ent->client->ps.powerups[PW_OPS_DISGUISED]) {
-            if (BODY_TEAM(traceEnt) < 4 &&
-                BODY_TEAM(traceEnt) != ent->client->sess.sessionTeam &&
+            if (BODY_TEAM(traceEnt) < 4 && BODY_TEAM(traceEnt) != ent->client->sess.sessionTeam &&
                 traceEnt->nextthink == traceEnt->timestamp + BODY_TIME) {
               if (ent->client->ps.stats[STAT_PLAYER_CLASS] == PC_COVERTOPS) {
                 hintDist = 48;
                 hintType = HINT_UNIFORM;
-                hintVal = BODY_VALUE(traceEnt);
+                hintVal  = BODY_VALUE(traceEnt);
                 if (hintVal > 255) {
                   hintVal = 255;
                 }
@@ -999,13 +1159,12 @@ void G_CheckForCursorHints(gentity_t *ent) {
           if (G_EmplacedGunIsMountable(traceEnt, ent)) {
             hintDist = CH_ACTIVATE_DIST;
             hintType = HINT_MG42;
-            hintVal = 0;
+            hintVal  = 0;
           } else {
-            if (ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER &&
-                G_EmplacedGunIsRepairable(traceEnt, ent)) {
+            if (ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER && G_EmplacedGunIsRepairable(traceEnt, ent)) {
               hintType = HINT_BUILD;
               hintDist = CH_BREAKABLE_DIST;
-              hintVal = traceEnt->health;
+              hintVal  = traceEnt->health;
               if (hintVal > 255) {
                 hintVal = 255;
               }
@@ -1030,30 +1189,27 @@ void G_CheckForCursorHints(gentity_t *ent) {
               case 0:
                 hintDist = CH_BREAKABLE_DIST;
                 hintType = HINT_BREAKABLE;
-                hintVal = checkEnt->health; // also send health to client for
-                                            // visualization
+                hintVal  = checkEnt->health; // also send health to client for
+                                             // visualization
                 break;
               case 1:
                 hintDist = CH_BREAKABLE_DIST * 2;
                 hintType = HINT_SATCHELCHARGE;
-                hintVal = ps->serverCursorHintVal =
-                    0; // no health for satchel charges
+                hintVal = ps->serverCursorHintVal = 0; // no health for satchel charges
                 break;
               case 2:
                 hintDist = 0;
                 hintType = ps->serverCursorHint = HINT_FORCENONE;
                 hintVal = ps->serverCursorHintVal = 0;
 
-                if (checkEnt->parent &&
-                    checkEnt->parent->s.eType == ET_OID_TRIGGER) {
+                if (checkEnt->parent && checkEnt->parent->s.eType == ET_OID_TRIGGER) {
                   if (((ent->client->sess.sessionTeam == TEAM_AXIS) &&
                        (checkEnt->parent->spawnflags & ALLIED_OBJECTIVE)) ||
                       ((ent->client->sess.sessionTeam == TEAM_ALLIES) &&
                        (checkEnt->parent->spawnflags & AXIS_OBJECTIVE))) {
                     hintDist = CH_BREAKABLE_DIST * 2;
                     hintType = HINT_BREAKABLE_DYNAMITE;
-                    hintVal = ps->serverCursorHintVal =
-                        0; // no health for dynamite
+                    hintVal = ps->serverCursorHintVal = 0; // no health for dynamite
                   }
                 }
                 break;
@@ -1061,8 +1217,8 @@ void G_CheckForCursorHints(gentity_t *ent) {
                 if (checkEnt->health > 0) {
                   hintDist = CH_BREAKABLE_DIST;
                   hintType = HINT_BREAKABLE;
-                  hintVal = checkEnt->health; // also send health to client for
-                                              // visualization
+                  hintVal  = checkEnt->health; // also send health to client for
+                                               // visualization
                 } else {
                   hintDist = 0;
                   hintType = ps->serverCursorHint = HINT_FORCENONE;
@@ -1075,8 +1231,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
           break;
         }
         case ET_CONSTRUCTIBLE:
-          if (G_ConstructionIsPartlyBuilt(checkEnt) &&
-              !(checkEnt->spawnflags & CONSTRUCTIBLE_INVULNERABLE)) {
+          if (G_ConstructionIsPartlyBuilt(checkEnt) && !(checkEnt->spawnflags & CONSTRUCTIBLE_INVULNERABLE)) {
             // only show hint
             // for players who
             // can blow it up
@@ -1085,20 +1240,18 @@ void G_CheckForCursorHints(gentity_t *ent) {
                 case 0:
                   hintDist = CH_BREAKABLE_DIST;
                   hintType = HINT_BREAKABLE;
-                  hintVal = checkEnt->health; // also send health to client for
-                                              // visualization
+                  hintVal  = checkEnt->health; // also send health to client for
+                                               // visualization
                   break;
                 case 1:
                   hintDist = CH_BREAKABLE_DIST * 2;
                   hintType = HINT_SATCHELCHARGE;
-                  hintVal = ps->serverCursorHintVal =
-                      0; // no health for satchel charges
+                  hintVal = ps->serverCursorHintVal = 0; // no health for satchel charges
                   break;
                 case 2:
                   hintDist = CH_BREAKABLE_DIST * 2;
                   hintType = HINT_BREAKABLE_DYNAMITE;
-                  hintVal = ps->serverCursorHintVal =
-                      0; // no health for dynamite
+                  hintVal = ps->serverCursorHintVal = 0; // no health for dynamite
                   break;
                 default:
                   hintDist = 0;
@@ -1149,8 +1302,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
               }
 
               if (!canPickup) {
-                canPickup =
-                    G_CanPickupWeapon(static_cast<weapon_t>(it->giTag), ent);
+                canPickup = G_CanPickupWeapon(static_cast<weapon_t>(it->giTag), ent);
               }
 
               if (canPickup) {
@@ -1171,8 +1323,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
               hintType = HINT_INVENTORY;
               break;
             case IT_TEAM:
-              if (!Q_stricmp(traceEnt->classname, "team_CTF_redflag") &&
-                  ent->client->sess.sessionTeam == TEAM_ALLIES) {
+              if (!Q_stricmp(traceEnt->classname, "team_CTF_redflag") && ent->client->sess.sessionTeam == TEAM_ALLIES) {
                 hintType = HINT_POWERUP;
               } else if (!Q_stricmp(traceEnt->classname, "team_CTF_blueflag") &&
                          ent->client->sess.sessionTeam == TEAM_AXIS) {
@@ -1222,14 +1373,10 @@ void G_CheckForCursorHints(gentity_t *ent) {
 
             // 'active' is true when the button isn't at the starting position
             // in other words, when it's been activated and hasn't returned yet
-            if (checkEnt->spawnflags &
-                    static_cast<int>(
-                        ETJump::FuncButtonSpawnflags::WaitProgress) &&
+            if (checkEnt->spawnflags & static_cast<int>(ETJump::FuncButtonSpawnflags::WaitProgress) &&
                 ETJump::buttonOnCooldown(checkEnt) && checkEnt->active) {
               hintVal = static_cast<int>(std::clamp(
-                  255 * (static_cast<float>(level.time - checkEnt->timestamp) /
-                         checkEnt->wait),
-                  0.0f, 255.0f));
+                255 * (static_cast<float>(level.time - checkEnt->timestamp) / checkEnt->wait), 0.0f, 255.0f));
             } else {
               hintVal = 0;
             }
@@ -1249,9 +1396,7 @@ void G_CheckForCursorHints(gentity_t *ent) {
           if (ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER) {
             hintDist = CH_BREAKABLE_DIST;
             hintType = HINT_DISARM;
-            hintVal =
-                checkEnt
-                    ->health; // also send health to client for visualization
+            hintVal  = checkEnt->health; // also send health to client for visualization
             if (hintVal > 255) {
               hintVal = 255;
             }
@@ -1282,7 +1427,6 @@ void G_CheckForCursorHints(gentity_t *ent) {
         // zooming can eat a lot of potential
         // hints
         switch (hintType) {
-
           // allow while zooming
           case HINT_PLAYER:
           case HINT_TREASURE:
@@ -1303,14 +1447,14 @@ void G_CheckForCursorHints(gentity_t *ent) {
   }
 
   if (dist <= Square(hintDist)) {
-    ps->serverCursorHint = hintType;
+    ps->serverCursorHint    = hintType;
     ps->serverCursorHintVal = hintVal;
   }
 }
 
 void G_SetTargetName(gentity_t *ent, char *targetname) {
   if (targetname && *targetname) {
-    ent->targetname = targetname;
+    ent->targetname     = targetname;
     ent->targetnamehash = BG_StringHashValue(targetname);
   } else {
     ent->targetnamehash = -1;
@@ -1333,7 +1477,7 @@ void G_FindTeams(void) {
   int i, j;
   int c, c2;
 
-  c = 0;
+  c  = 0;
   c2 = 0;
   for (i = 1, e = g_entities + i; i < level.num_entities; i++, e++) {
     if (!e->inuse) {
@@ -1371,8 +1515,8 @@ void G_FindTeams(void) {
       }
       if (!strcmp(e->team, e2->team)) {
         c2++;
-        e2->teamchain = e->teamchain;
-        e->teamchain = e2;
+        e2->teamchain  = e->teamchain;
+        e->teamchain   = e2;
         e2->teammaster = e;
         //				e2->key =
         // e->key;	// (SA) I can't set the
@@ -1428,8 +1572,7 @@ void G_RegisterCvars(void) {
   level.server_settings = 0;
 
   for (i = 0, cv = gameCvarTable; i < gameCvarTableSize; i++, cv++) {
-    trap_Cvar_Register(cv->vmCvar, cv->cvarName, cv->defaultString,
-                       cv->cvarFlags);
+    trap_Cvar_Register(cv->vmCvar, cv->cvarName, cv->defaultString, cv->cvarFlags);
     if (cv->vmCvar) {
       cv->modificationCount = cv->vmCvar->modificationCount;
       // OSP - Update vote info for clients, if necessary
@@ -1470,9 +1613,9 @@ G_UpdateCvars
 void G_UpdateCvars(void) {
   int i;
   cvarTable_t *cv;
-  qboolean fToggles = qfalse;
-  qboolean fVoteFlags = qfalse;
-  qboolean remapped = qfalse;
+  qboolean fToggles          = qfalse;
+  qboolean fVoteFlags        = qfalse;
+  qboolean remapped          = qfalse;
   qboolean chargetimechanged = qfalse;
 
   for (i = 0, cv = gameCvarTable; i < gameCvarTableSize; i++, cv++) {
@@ -1483,9 +1626,7 @@ void G_UpdateCvars(void) {
         cv->modificationCount = cv->vmCvar->modificationCount;
 
         if (cv->trackChange && !(cv->cvarFlags & CVAR_LATCH)) {
-          Printer::popupAll(
-              StringUtils::format("Server: ^3%s ^7changed to ^3%s",
-                                  cv->cvarName, cv->vmCvar->string));
+          Printer::popupAll("Server: ^3%s ^7changed to ^3%s", cv->cvarName, cv->vmCvar->string);
         }
 
         if (cv->teamShader) {
@@ -1497,35 +1638,25 @@ void G_UpdateCvars(void) {
         }
 
         if (cv->vmCvar == &g_soldierChargeTime) {
-          level.soldierChargeTime[0] =
-              g_soldierChargeTime.integer * level.soldierChargeTimeModifier[0];
-          level.soldierChargeTime[1] =
-              g_soldierChargeTime.integer * level.soldierChargeTimeModifier[1];
-          chargetimechanged = qtrue;
+          level.soldierChargeTime[0] = g_soldierChargeTime.integer * level.soldierChargeTimeModifier[0];
+          level.soldierChargeTime[1] = g_soldierChargeTime.integer * level.soldierChargeTimeModifier[1];
+          chargetimechanged          = qtrue;
         } else if (cv->vmCvar == &g_medicChargeTime) {
-          level.medicChargeTime[0] =
-              g_medicChargeTime.integer * level.medicChargeTimeModifier[0];
-          level.medicChargeTime[1] =
-              g_medicChargeTime.integer * level.medicChargeTimeModifier[1];
-          chargetimechanged = qtrue;
+          level.medicChargeTime[0] = g_medicChargeTime.integer * level.medicChargeTimeModifier[0];
+          level.medicChargeTime[1] = g_medicChargeTime.integer * level.medicChargeTimeModifier[1];
+          chargetimechanged        = qtrue;
         } else if (cv->vmCvar == &g_engineerChargeTime) {
-          level.engineerChargeTime[0] = g_engineerChargeTime.integer *
-                                        level.engineerChargeTimeModifier[0];
-          level.engineerChargeTime[1] = g_engineerChargeTime.integer *
-                                        level.engineerChargeTimeModifier[1];
-          chargetimechanged = qtrue;
+          level.engineerChargeTime[0] = g_engineerChargeTime.integer * level.engineerChargeTimeModifier[0];
+          level.engineerChargeTime[1] = g_engineerChargeTime.integer * level.engineerChargeTimeModifier[1];
+          chargetimechanged           = qtrue;
         } else if (cv->vmCvar == &g_LTChargeTime) {
-          level.lieutenantChargeTime[0] =
-              g_LTChargeTime.integer * level.lieutenantChargeTimeModifier[0];
-          level.lieutenantChargeTime[1] =
-              g_LTChargeTime.integer * level.lieutenantChargeTimeModifier[1];
-          chargetimechanged = qtrue;
+          level.lieutenantChargeTime[0] = g_LTChargeTime.integer * level.lieutenantChargeTimeModifier[0];
+          level.lieutenantChargeTime[1] = g_LTChargeTime.integer * level.lieutenantChargeTimeModifier[1];
+          chargetimechanged             = qtrue;
         } else if (cv->vmCvar == &g_covertopsChargeTime) {
-          level.covertopsChargeTime[0] = g_covertopsChargeTime.integer *
-                                         level.covertopsChargeTimeModifier[0];
-          level.covertopsChargeTime[1] = g_covertopsChargeTime.integer *
-                                         level.covertopsChargeTimeModifier[1];
-          chargetimechanged = qtrue;
+          level.covertopsChargeTime[0] = g_covertopsChargeTime.integer * level.covertopsChargeTimeModifier[0];
+          level.covertopsChargeTime[1] = g_covertopsChargeTime.integer * level.covertopsChargeTimeModifier[1];
+          chargetimechanged            = qtrue;
         } else if (cv->vmCvar == &match_readypercent) {
           if (match_readypercent.integer < 1) {
             trap_Cvar_Set(cv->cvarName, "1");
@@ -1534,9 +1665,7 @@ void G_UpdateCvars(void) {
           }
         } else if (cv->vmCvar == &g_warmup) {
           if (g_gamestate.integer != GS_PLAYING) {
-            level.warmupTime =
-                level.time +
-                (((g_warmup.integer < 10) ? 11 : g_warmup.integer + 1) * 1000);
+            level.warmupTime = level.time + (((g_warmup.integer < 10) ? 11 : g_warmup.integer + 1) * 1000);
             trap_SetConfigstring(CS_WARMUP, va("%i", level.warmupTime));
           }
         } else if (cv->vmCvar == &pmove_msec) {
@@ -1553,12 +1682,9 @@ void G_UpdateCvars(void) {
           }
 
           level.frameTime = 1000 / sv_fps.integer;
-        } else if (cv->vmCvar == &vote_allow_map ||
-                   cv->vmCvar == &vote_allow_matchreset ||
-                   cv->vmCvar == &vote_allow_randommap ||
-                   cv->vmCvar == &vote_allow_rtv ||
-                   cv->vmCvar == &vote_allow_autoRtv ||
-                   cv->vmCvar == &vote_allow_portalPredict ||
+        } else if (cv->vmCvar == &vote_allow_map || cv->vmCvar == &vote_allow_matchreset ||
+                   cv->vmCvar == &vote_allow_randommap || cv->vmCvar == &vote_allow_rtv ||
+                   cv->vmCvar == &vote_allow_autoRtv || cv->vmCvar == &vote_allow_portalPredict ||
                    cv->vmCvar == &g_enableVote) {
           fVoteFlags = qtrue;
         } else if (cv->vmCvar == &g_allowSpeclock) {
@@ -1568,24 +1694,23 @@ void G_UpdateCvars(void) {
 
               if (ent->client->sess.specLocked) {
                 ent->client->sess.specLocked = qfalse;
-                Printer::popup(ClientNum(ent),
-                               "You are no longer locked from spectators.");
+                Printer::popup(ClientNum(ent), "You are no longer locked from spectators.");
                 ETJump::UpdateClientConfigString(*ent);
               }
             }
           }
         } else if (cv->vmCvar == &g_mapScriptDir) {
           // prevent admins from setting this to the directory where the game
-          // normally loads mapscripts from, so default mapscripts won't get
-          // loaded as "custom" mapscripts
-          if (!Q_stricmp(g_mapScriptDir.string, "maps")) {
+          // normally loads mapscripts from (or to the bundled mapscript dir),
+          // so default mapscripts won't get loaded as "custom" mapscripts
+          if (!Q_stricmp(g_mapScriptDir.string, "maps") ||
+              !Q_stricmp(g_mapScriptDir.string, ETJump::BUNDLED_MAPSCRIPT_DIR)) {
             G_Printf(S_COLOR_YELLOW "WARNING: ^7illegal ^3'g_mapScriptDir' "
                                     "^7value, resetting to default\n");
             trap_Cvar_Set(cv->cvarName, cv->defaultString);
           }
         } else {
-          fToggles =
-              (G_checkServerToggle(cv->vmCvar) || fToggles) ? qtrue : qfalse;
+          fToggles = (G_checkServerToggle(cv->vmCvar) || fToggles) ? qtrue : qfalse;
         }
       }
     }
@@ -1635,31 +1760,6 @@ void G_wipeCvars(void) {
   G_UpdateCvars();
 }
 
-void G_ExecMapSpecificConfig() {
-  int len = 0;
-  fileHandle_t f = 0;
-  const auto *const path = g_mapAutoexecDir.string[0] != '\0'
-                               ? va("%s/", g_mapAutoexecDir.string)
-                               : "";
-
-  const char *filename = va("%sautoexec_%s.cfg", path, level.rawmapname);
-  len = trap_FS_FOpenFile(filename, &f, FS_READ);
-
-  if (len > 0) {
-    // autoexec_mapname.cfg file found
-    trap_SendConsoleCommand(EXEC_APPEND, va("exec %s\n", filename));
-    return;
-  }
-
-  filename = va("%sautoexec_default.cfg", path);
-  len = trap_FS_FOpenFile(filename, &f, FS_READ);
-
-  if (len > 0) {
-    // autoexec_default.cfg file found
-    trap_SendConsoleCommand(EXEC_APPEND, va("exec %s\n", filename));
-  }
-}
-
 // copies max num chars from beginning of dest into src and returns pointer to
 // new src
 char *strcut(char *dest, char *src, int num) {
@@ -1695,14 +1795,14 @@ void InitGhosting() {
     trap_Cvar_Update(&g_ghostPlayers);
   }
 }
+
 // Fixes MAX_NUM_SPAWNTARGETS EXCEEDED
 void ResetNumSpawnTargets();
 void ETJump_InitGame(int levelTime, int randomSeed, int restart);
 
 static bool G_PatchFixEnabled() {
   char patchFix[MAX_QPATH];
-  trap_Cvar_VariableStringBuffer("cm_optimizePatchPlanes", patchFix,
-                                 sizeof(patchFix));
+  trap_Cvar_VariableStringBuffer("cm_optimizePatchPlanes", patchFix, sizeof(patchFix));
 
   // if the cvar doesn't exist (2.60b/old versions of ETL/ETe),
   // we get a null char
@@ -1725,9 +1825,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   G_Printf(S_COLOR_LTGREY GAME_HEADER);
   G_Printf(S_COLOR_LTGREY "____________________________\n");
-  G_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
-                                    " " S_COLOR_LTGREY GAME_BINARY_NAME
-                                    " init...\n");
+  G_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION " " S_COLOR_LTGREY GAME_BINARY_NAME " init...\n");
 
   G_Printf("\n\n------- Game Initialization -------\n");
   G_Printf("gamename: %s %s\n", GAME_NAME, GAME_VERSION);
@@ -1780,10 +1878,10 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
     level.spawning = oldspawning;
   }
-  level.time = levelTime;
-  level.startTime = levelTime;
+  level.time            = levelTime;
+  level.startTime       = levelTime;
   level.server_settings = i;
-  level.frameTime = 1000 / sv_fps.integer;
+  level.frameTime       = 1000 / sv_fps.integer;
 
   for (i = 0; i < level.numConnectedClients; i++) {
     level.clients[level.sortedClients[i]].sess.spawnObjectiveIndex = 0;
@@ -1791,30 +1889,22 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   // RF, init the anim scripting
   level.animScriptData.soundIndex = G_SoundIndex;
-  level.animScriptData.playSound = G_AnimScriptSound;
+  level.animScriptData.playSound  = G_AnimScriptSound;
 
   level.warmupModificationCount = g_warmup.modificationCount;
 
-  level.soldierChargeTime[0] = level.soldierChargeTime[1] =
-      g_soldierChargeTime.integer;
-  level.medicChargeTime[0] = level.medicChargeTime[1] =
-      g_medicChargeTime.integer;
-  level.engineerChargeTime[0] = level.engineerChargeTime[1] =
-      g_engineerChargeTime.integer;
-  level.lieutenantChargeTime[0] = level.lieutenantChargeTime[1] =
-      g_LTChargeTime.integer;
+  level.soldierChargeTime[0] = level.soldierChargeTime[1] = g_soldierChargeTime.integer;
+  level.medicChargeTime[0] = level.medicChargeTime[1] = g_medicChargeTime.integer;
+  level.engineerChargeTime[0] = level.engineerChargeTime[1] = g_engineerChargeTime.integer;
+  level.lieutenantChargeTime[0] = level.lieutenantChargeTime[1] = g_LTChargeTime.integer;
 
-  level.covertopsChargeTime[0] = level.covertopsChargeTime[1] =
-      g_covertopsChargeTime.integer;
+  level.covertopsChargeTime[0] = level.covertopsChargeTime[1] = g_covertopsChargeTime.integer;
 
   level.soldierChargeTimeModifier[0] = level.soldierChargeTimeModifier[1] = 1.f;
   level.medicChargeTimeModifier[0] = level.medicChargeTimeModifier[1] = 1.f;
-  level.engineerChargeTimeModifier[0] = level.engineerChargeTimeModifier[1] =
-      1.f;
-  level.lieutenantChargeTimeModifier[0] =
-      level.lieutenantChargeTimeModifier[1] = 1.f;
-  level.covertopsChargeTimeModifier[0] = level.covertopsChargeTimeModifier[1] =
-      1.f;
+  level.engineerChargeTimeModifier[0] = level.engineerChargeTimeModifier[1] = 1.f;
+  level.lieutenantChargeTimeModifier[0] = level.lieutenantChargeTimeModifier[1] = 1.f;
+  level.covertopsChargeTimeModifier[0] = level.covertopsChargeTimeModifier[1] = 1.f;
 
   level.hasTimerun = false;
 
@@ -1843,13 +1933,12 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   // with upper/mixed case name (e.g. /map OASIS)
   // callvote already turns the name to all lower case, which means
   // custom mapscripts are required to be lower case on Linux
-  const std::string &mapName =
-      StringUtils::toLowerCase(Info_ValueForKey(cs, "mapname"));
+  const std::string &mapName = StringUtils::toLowerCase(Info_ValueForKey(cs, "mapname"));
   Info_SetValueForKey(cs, "mapname", mapName.c_str());
   trap_Cvar_Set("mapname", mapName.c_str());
   Q_strncpyz(level.rawmapname, mapName.c_str(), sizeof(level.rawmapname));
 
-  G_ExecMapSpecificConfig();
+  Utilities::execMapAutoexec();
 
   trap_SetConfigstring(CS_SCRIPT_MOVER_NAMES, ""); // clear out
 
@@ -1857,7 +1946,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   if (g_dailyLogs.integer) {
     const TimeUtils::Date date = TimeUtils::getCurrentDate(false);
-    const std::string dateStr = date.toDateString();
+    const std::string dateStr  = date.toDateString();
 
     trap_Cvar_Set("g_log", va("logs/%s.log", dateStr.c_str()));
     trap_Cvar_Set("g_adminLog", va("logs/%s-admin.log", dateStr.c_str()));
@@ -1893,8 +1982,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   Info_SetValueForKey(cs, "numspawntargets", "0");
   trap_SetConfigstring(CS_MULTI_INFO, cs);
   ResetNumSpawnTargets();
-  for (i = CS_MULTI_SPAWNTARGETS;
-       i < CS_MULTI_SPAWNTARGETS + MAX_MULTI_SPAWNTARGETS; i++) {
+  for (i = CS_MULTI_SPAWNTARGETS; i < CS_MULTI_SPAWNTARGETS + MAX_MULTI_SPAWNTARGETS; i++) {
     trap_SetConfigstring(i, "");
   }
 
@@ -1920,11 +2008,12 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   level.num_entities = MAX_CLIENTS;
 
   // let the server system know where the entites are
-  trap_LocateGameData(level.gentities, level.num_entities, sizeof(gentity_t),
-                      &level.clients[0].ps, sizeof(level.clients[0]));
+  trap_LocateGameData(level.gentities, level.num_entities, sizeof(gentity_t), &level.clients[0].ps,
+                      sizeof(level.clients[0]));
 
   // Reset the amount of timerun timers
   level.timerunNamesCount = 0;
+  ETJump::TimerunEntity::resetTimerunIndices();
 
   // before mapscript is loaded, so remapshaders from mapscripts work properly
   ETJump::shaderConfigHandler = std::make_unique<ETJump::ShaderConfigHandler>();
@@ -1961,6 +2050,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
 
   ETJump::TimerunEntity::validateTimerunEntities();
   ETJump::TargetSpawnRelay::validateSpawnRelayEntities();
+  game.worldspawn->setKeyOverrideCS();
 
   // TAT 11/13/2002 - entities are spawned, so now we can do setup
   InitialServerEntitySetup();
@@ -1976,8 +2066,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   BG_LoadSpeakerScript(va("sound/maps/%s.sps", level.rawmapname));
 
   level.tracemapLoaded = qfalse;
-  if (!BG_LoadTraceMap(level.rawmapname, level.mapcoordsMins,
-                       level.mapcoordsMaxs)) {
+  if (!BG_LoadTraceMap(level.rawmapname, level.mapcoordsMins, level.mapcoordsMaxs)) {
     G_Printf("^1ERROR No tracemap found for map\n");
   } else {
     level.tracemapLoaded = qtrue;
@@ -2028,12 +2117,39 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
              "1\n\n^7-----------------------------------\n");
   }
 
-  G_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION
-                                    " " S_COLOR_LTGREY GAME_BINARY_NAME
+  G_Printf(S_COLOR_LTGREY GAME_NAME " " S_COLOR_GREEN GAME_VERSION " " S_COLOR_LTGREY GAME_BINARY_NAME
                                     " init... " S_COLOR_GREEN "DONE\n");
 }
 
 void ETJump_ShutdownGame(int restart);
+
+namespace ETJump {
+// the steps that run while the game log is still open
+static void shutdownGameSystems(const int restart) {
+  // every step runs even if an earlier one fails,
+  // the first error is rethrown afterwards
+  ETJump::runEachStep(
+    [] {
+      OnGameShutdown();
+    },
+    [restart] {
+      ETJump_ShutdownGame(restart);
+    },
+    [] {
+      if (g_gametype.integer != ETJUMP_GAMETYPE) {
+        trap_Cvar_Set("g_gametype", va("%i", ETJUMP_GAMETYPE));
+        trap_Cvar_Update(&g_gametype);
+      }
+
+      G_Printf("==== ShutdownGame ====\n");
+
+      G_DebugCloseSkillLog();
+    },
+    [] {
+      shutdownETJump();
+    });
+}
+} // namespace ETJump
 
 /*
 =================
@@ -2041,34 +2157,37 @@ G_ShutdownGame
 =================
 */
 void G_ShutdownGame(int restart) {
-
-  OnGameShutdown();
-  ETJump_ShutdownGame(restart);
-
-  if (g_gametype.integer != ETJUMP_GAMETYPE) {
-    trap_Cvar_Set("g_gametype", va("%i", ETJUMP_GAMETYPE));
-    trap_Cvar_Update(&g_gametype);
-  }
-
-  G_Printf("==== ShutdownGame ====\n");
-
-  G_DebugCloseSkillLog();
-
-  shutdownETJump();
-  if (level.logFile) {
-    G_LogPrintf("ShutdownGame:\n");
-    G_LogPrintf("----------------------------------------------"
-                "--------------\n");
-    trap_FS_FCloseFile(level.logFile);
-    level.logFile = 0;
-  }
-  if (level.adminLogFile) {
-    trap_FS_FCloseFile(level.adminLogFile);
-    level.adminLogFile = 0;
-  }
-
-  // write all the client session data so we can get it back
-  G_WriteSessionData(restart ? qtrue : qfalse);
+  // every step runs even if an earlier one fails,
+  // the first error is rethrown afterwards
+  ETJump::runEachStep(
+    [restart] {
+      // the error only reaches the boundary after the log has been closed
+      // by the next step, so it's logged here while the log is still open
+      try {
+        ETJump::shutdownGameSystems(restart);
+      } catch (...) {
+        const ETJump::FatalErrorBoundary::CaughtError error = ETJump::FatalErrorBoundary::describeCaughtException();
+        ETJump::logUnexpectedError(error.message.data(), error.unexpected);
+        throw;
+      }
+    },
+    [] {
+      if (level.logFile) {
+        G_LogPrintf("ShutdownGame:\n");
+        G_LogPrintf("----------------------------------------------"
+                    "--------------\n");
+        trap_FS_FCloseFile(level.logFile);
+        level.logFile = 0;
+      }
+      if (level.adminLogFile) {
+        trap_FS_FCloseFile(level.adminLogFile);
+        level.adminLogFile = 0;
+      }
+    },
+    [restart] {
+      // write all the client session data so we can get it back
+      G_WriteSessionData(restart ? qtrue : qfalse);
+    });
 }
 
 //===================================================================
@@ -2121,12 +2240,10 @@ int QDECL SortRanks(const void *a, const void *b) {
   cb = &level.clients[*(const int *)b];
 
   // sort special clients last
-  if (/*ca->sess.spectatorState == SPECTATOR_SCOREBOARD ||*/ ca->sess
-          .spectatorClient < 0) {
+  if (/*ca->sess.spectatorState == SPECTATOR_SCOREBOARD ||*/ ca->sess.spectatorClient < 0) {
     return 1;
   }
-  if (/*cb->sess.spectatorState == SPECTATOR_SCOREBOARD ||*/ cb->sess
-          .spectatorClient < 0) {
+  if (/*cb->sess.spectatorState == SPECTATOR_SCOREBOARD ||*/ cb->sess.spectatorClient < 0) {
     return -1;
   }
 
@@ -2139,8 +2256,7 @@ int QDECL SortRanks(const void *a, const void *b) {
   }
 
   // then spectators
-  if (ca->sess.sessionTeam == TEAM_SPECTATOR &&
-      cb->sess.sessionTeam == TEAM_SPECTATOR) {
+  if (ca->sess.sessionTeam == TEAM_SPECTATOR && cb->sess.sessionTeam == TEAM_SPECTATOR) {
     if (ca->sess.spectatorTime < cb->sess.spectatorTime) {
       return -1;
     }
@@ -2186,7 +2302,7 @@ void etpro_PlayerInfo(void) {
   memset(playerinfo, 0, sizeof(playerinfo));
 
   lastclient = -1;
-  e = &g_entities[0];
+  e          = &g_entities[0];
   for (i = 0; i < MAX_CLIENTS; i++, e++) {
     if (e->client == NULL || e->client->pers.connected == CON_DISCONNECTED) {
       playerinfo[i] = '-';
@@ -2230,11 +2346,11 @@ void CalculateRanks(void) {
   char teaminfo[TEAM_NUM_TEAMS][256]; // OSP
   gclient_t *cl;
 
-  level.follow1 = -1;
-  level.follow2 = -1;
-  level.numConnectedClients = 0;
-  level.numNonSpectatorClients = 0;
-  level.numPlayingClients = 0;
+  level.follow1                   = -1;
+  level.follow2                   = -1;
+  level.numConnectedClients       = 0;
+  level.numNonSpectatorClients    = 0;
+  level.numPlayingClients         = 0;
   level.voteInfo.numVotingClients = 0; // don't count bots
 
   level.numFinalDead[0] = 0; // NERVE - SMF
@@ -2267,22 +2383,18 @@ void CalculateRanks(void) {
         level.numNonSpectatorClients++;
 
         // OSP
-        Q_strcat(teaminfo[team], sizeof(teaminfo[team]) - 1,
-                 va("%d ", level.numConnectedClients));
+        Q_strcat(teaminfo[team], sizeof(teaminfo[team]) - 1, va("%d ", level.numConnectedClients));
 
         // decide if this should be
         // auto-followed
         if (level.clients[i].pers.connected == CON_CONNECTED) {
-          int teamIndex =
-              level.clients[i].sess.sessionTeam == TEAM_AXIS ? 0 : 1;
+          int teamIndex = level.clients[i].sess.sessionTeam == TEAM_AXIS ? 0 : 1;
           level.numPlayingClients++;
           if (!(g_entities[i].r.svFlags & SVF_BOT)) {
             level.voteInfo.numVotingClients++;
           }
 
-          if (level.clients[i].sess.sessionTeam == TEAM_AXIS ||
-              level.clients[i].sess.sessionTeam == TEAM_ALLIES) {
-
+          if (level.clients[i].sess.sessionTeam == TEAM_AXIS || level.clients[i].sess.sessionTeam == TEAM_ALLIES) {
             level.numTeamClients[teamIndex]++;
             if (!(g_entities[i].r.svFlags & SVF_BOT)) {
               level.voteInfo.numVotingTeamClients[teamIndex]++;
@@ -2306,8 +2418,7 @@ void CalculateRanks(void) {
     }
   }
 
-  qsort(level.sortedClients, level.numConnectedClients,
-        sizeof(level.sortedClients[0]), SortRanks);
+  qsort(level.sortedClients, level.numConnectedClients, sizeof(level.sortedClients[0]), SortRanks);
 
   // set the rank value for all clients that are connected and not
   // spectators in team games, rank is just the order of the teams,
@@ -2409,14 +2520,13 @@ void MoveClientToIntermission(gentity_t *ent) {
   // sizeof(ent->client->ps.powerups) );
 
   ent->client->ps.eFlags = 0;
-  ent->s.eFlags = 0;
-  ent->s.eType = ET_GENERAL;
-  ent->s.modelindex = 0;
-  ent->s.loopSound = 0;
-  ent->s.event = 0;
-  ent->s.events[0] = ent->s.events[1] = ent->s.events[2] = ent->s.events[3] =
-      0; // DHM - Nerve
-  ent->r.contents = 0;
+  ent->s.eFlags          = 0;
+  ent->s.eType           = ET_GENERAL;
+  ent->s.modelindex      = 0;
+  ent->s.loopSound       = 0;
+  ent->s.event           = 0;
+  ent->s.events[0] = ent->s.events[1] = ent->s.events[2] = ent->s.events[3] = 0; // DHM - Nerve
+  ent->r.contents                                                           = 0;
 }
 
 /*
@@ -2440,8 +2550,7 @@ void FindIntermissionPoint(void) {
     // flags set
     ent = G_Find(NULL, FOFS(classname), "info_player_intermission");
 
-    for (; ent;
-         ent = G_Find(ent, FOFS(classname), "info_player_intermission")) {
+    for (; ent; ent = G_Find(ent, FOFS(classname), "info_player_intermission")) {
       if (!ent->spawnflags) {
         break;
       }
@@ -2449,7 +2558,7 @@ void FindIntermissionPoint(void) {
   }
 
   trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
-  buf = Info_ValueForKey(cs, "winner");
+  buf    = Info_ValueForKey(cs, "winner");
   winner = Q_atoi(buf);
 
   // Change from scripting value for winner (0==AXIS, 1==ALLIES) to
@@ -2473,8 +2582,7 @@ void FindIntermissionPoint(void) {
 
   if (!ent) // the map creator forgot to put in an intermission point...
   {
-    SelectSpawnPoint(vec3_origin, level.intermission_origin,
-                     level.intermission_angle);
+    SelectSpawnPoint(vec3_origin, level.intermission_origin, level.intermission_angle);
   } else {
     VectorCopy(ent->s.origin, level.intermission_origin);
     VectorCopy(ent->s.angles, level.intermission_angle);
@@ -2503,8 +2611,7 @@ void BeginIntermission(void) {
   }
 
   level.intermissiontime = level.time;
-  trap_SetConfigstring(CS_INTERMISSION_START_TIME,
-                       va("%i", level.intermissiontime));
+  trap_SetConfigstring(CS_INTERMISSION_START_TIME, va("%i", level.intermissiontime));
   trap_Cvar_Set("gamestate", va("%i", GS_INTERMISSION));
   trap_Cvar_Update(&g_gamestate);
 
@@ -2537,11 +2644,11 @@ void ExitLevel(void) {
   gclient_t *cl;
 
   trap_SendConsoleCommand(EXEC_APPEND, "vstr nextmap\n");
-  level.changemap = NULL;
+  level.changemap        = NULL;
   level.intermissiontime = 0;
 
   // reset all the scores so we don't enter the intermission again
-  level.teamScores[TEAM_AXIS] = 0;
+  level.teamScores[TEAM_AXIS]   = 0;
   level.teamScores[TEAM_ALLIES] = 0;
 
   for (i = 0; i < g_maxclients.integer; i++) {
@@ -2558,7 +2665,6 @@ void ExitLevel(void) {
   // change all client states to connecting, so the early players into
   // the next level will know the others aren't done reconnecting
   for (i = 0; i < g_maxclients.integer; i++) {
-
     if (level.clients[i].pers.connected == CON_CONNECTED) {
       level.clients[i].pers.connected = CON_CONNECTING;
       trap_UnlinkEntity(&g_entities[i]);
@@ -2583,8 +2689,8 @@ void QDECL G_LogPrintf(const char *fmt, ...) {
   trap_RealTime(&rt);
 
   hour = rt.tm_hour;
-  min = rt.tm_min;
-  sec = rt.tm_sec;
+  min  = rt.tm_min;
+  sec  = rt.tm_sec;
 
   Com_sprintf(string, sizeof(string), "%02i:%02i:%02i ", hour, min, sec);
 
@@ -2604,6 +2710,7 @@ void QDECL G_LogPrintf(const char *fmt, ...) {
 
   trap_FS_Write(string, strlen(string), level.logFile);
 }
+
 // bani
 
 /*
@@ -2631,8 +2738,7 @@ void LogExit(const char *string) {
   // that will get cut off when the queued intermission starts
   trap_SetConfigstring(CS_INTERMISSION, "1");
 
-  G_LogPrintf("red:%i  blue:%i\n", level.teamScores[TEAM_AXIS],
-              level.teamScores[TEAM_ALLIES]);
+  G_LogPrintf("red:%i  blue:%i\n", level.teamScores[TEAM_AXIS], level.teamScores[TEAM_ALLIES]);
 
   // NERVE - SMF - send gameCompleteStatus message to master servers
   trap_SendConsoleCommand(EXEC_APPEND, "gameCompleteStatus\n");
@@ -2654,8 +2760,7 @@ void LogExit(const char *string) {
 
     ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 
-    G_LogPrintf("score: %i  ping: %i  client: %i %s\n",
-                cl->ps.persistant[PERS_SCORE], ping, level.sortedClients[i],
+    G_LogPrintf("score: %i  ping: %i  client: %i %s\n", cl->ps.persistant[PERS_SCORE], ping, level.sortedClients[i],
                 cl->pers.netname);
   }
 
@@ -2674,7 +2779,7 @@ wait 10 seconds before going on.
 */
 void CheckIntermissionExit(void) {
   static int fActions = 0;
-  qboolean exit = qtrue;
+  qboolean exit       = qtrue;
   int i;
   // rain - for #105
   gclient_t *cl;
@@ -2683,13 +2788,11 @@ void CheckIntermissionExit(void) {
   // OSP - end-of-level auto-actions
   //		  maybe make the weapon stats dump available to single
   // player?
-  if (!(fActions & EOM_WEAPONSTATS) &&
-      level.time - level.intermissiontime > 300) {
+  if (!(fActions & EOM_WEAPONSTATS) && level.time - level.intermissiontime > 300) {
     G_matchInfoDump(EOM_WEAPONSTATS);
     fActions |= EOM_WEAPONSTATS;
   }
-  if (!(fActions & EOM_MATCHINFO) &&
-      level.time - level.intermissiontime > 800) {
+  if (!(fActions & EOM_MATCHINFO) && level.time - level.intermissiontime > 800) {
     G_matchInfoDump(EOM_MATCHINFO);
     fActions |= EOM_MATCHINFO;
   }
@@ -2701,11 +2804,9 @@ void CheckIntermissionExit(void) {
 
     cl = level.clients + level.sortedClients[i];
 
-    if (cl->pers.connected != CON_CONNECTED ||
-        cl->sess.sessionTeam == TEAM_SPECTATOR) {
+    if (cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam == TEAM_SPECTATOR) {
       continue;
-    } else if (cl->pers.ready ||
-               (g_entities[level.sortedClients[i]].r.svFlags & SVF_BOT)) {
+    } else if (cl->pers.ready || (g_entities[level.sortedClients[i]].r.svFlags & SVF_BOT)) {
       ready++;
     } else {
       notReady++;
@@ -2716,10 +2817,9 @@ void CheckIntermissionExit(void) {
   // decide whether enough players are ready to exceed
   // match_readypercent
   if (level.ref_allready ||
-      ((ready + notReady > 0) &&
-       100 * ready / (ready + notReady) >= match_readypercent.integer)) {
+      ((ready + notReady > 0) && 100 * ready / (ready + notReady) >= match_readypercent.integer)) {
     level.ref_allready = qfalse;
-    exit = qtrue;
+    exit               = qtrue;
   } else {
     exit = qfalse;
   }
@@ -2746,7 +2846,7 @@ qboolean ScoreIsTied(void) {
   trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
 
   buf = Info_ValueForKey(cs, "winner");
-  a = Q_atoi(buf);
+  a   = Q_atoi(buf);
 
   return a == -1 ? qtrue : qfalse;
 }
@@ -2763,7 +2863,6 @@ can see the last frag.
 =================
 */
 void CheckExitRules(void) {
-
   // if at the intermission, wait for all non-bots to
   // signal ready, then go to next level
   if (g_gamestate.integer == GS_INTERMISSION) {
@@ -2780,7 +2879,6 @@ void CheckExitRules(void) {
   if (g_timelimit.value && !level.warmupTime) {
     // OSP
     if ((level.timeCurrent - level.startTime) >= (g_timelimit.value * 60000)) {
-
       if (level.gameManager) {
         G_Script_ScriptEvent(level.gameManager, "trigger", "timelimit_hit");
       }
@@ -2804,8 +2902,7 @@ void CheckExitRules(void) {
 void CheckWolfMP() {
   // check because we run 6 game frames before calling Connect and/or
   // ClientBegin for clients on a map_restart
-  if (g_gamestate.integer == GS_PLAYING ||
-      g_gamestate.integer == GS_INTERMISSION) {
+  if (g_gamestate.integer == GS_PLAYING || g_gamestate.integer == GS_INTERMISSION) {
     if (level.intermissiontime && g_gamestate.integer != GS_INTERMISSION) {
       trap_Cvar_Set("gamestate", va("%i", GS_INTERMISSION));
     }
@@ -2814,9 +2911,8 @@ void CheckWolfMP() {
 
   // check warmup latch
   if (g_gamestate.integer == GS_WARMUP) {
-    if (!g_doWarmup.integer ||
-        (level.numPlayingClients >= match_minplayers.integer &&
-         level.lastRestartTime + 1000 < level.time && G_readyMatchState())) {
+    if (!g_doWarmup.integer || (level.numPlayingClients >= match_minplayers.integer &&
+                                level.lastRestartTime + 1000 < level.time && G_readyMatchState())) {
       // 1 Sec warmup.
       int delay = 1;
 
@@ -2839,38 +2935,36 @@ void CheckWolfMP() {
   }
 }
 
-int getNumPlayingClients() {
-  auto numPlayingClients = 0;
-  for (auto i = 0, len = level.numConnectedClients; i < len; ++i) {
-    auto clientNum = level.sortedClients[i];
-    if ((g_entities + clientNum)->client->sess.sessionTeam != TEAM_SPECTATOR) {
-      ++numPlayingClients;
-    }
-  }
-  return numPlayingClients;
-}
+static int32_t getNumValidVoters() {
+  int32_t count = 0;
 
-int getNumValidVoters() {
-  auto numValidPlayers = getNumPlayingClients();
-  auto numVotedSpecs = 0;
-  if (g_spectatorVote.integer > 0) {
-    for (auto i = 0, len = level.numConnectedClients; i < len; ++i) {
-      auto clientNum = level.sortedClients[i];
-      auto player = g_entities + clientNum;
-      if (player->client->sess.sessionTeam == TEAM_SPECTATOR &&
-          player->client->ps.eFlags & EF_VOTED) {
-        ++numVotedSpecs;
+  for (int32_t i = 0; i < level.numConnectedClients; i++) {
+    const gentity_t *const ent = g_entities + level.sortedClients[i];
+
+    // prevent connecting clients from affecting vote result, so if someone
+    // crashes while loading a map for example, players don't need to wait
+    // until the player times out for votes to function normally
+    if (ent->client->pers.connected != CON_CONNECTED) {
+      continue;
+    }
+
+    if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+      // don't count spectators that cannot vote, or have not voted yet
+      if (g_spectatorVote.integer == 0 || !(ent->client->ps.eFlags & EF_VOTED)) {
+        continue;
       }
     }
+
+    count++;
   }
 
-  return numValidPlayers + numVotedSpecs;
+  return count;
 }
 
 void resetVote() {
-  level.voteInfo.voteTime = 0;
-  level.voteInfo.forcePass = qfalse;
-  level.voteInfo.voteCanceled = qfalse;
+  level.voteInfo.voteTime      = 0;
+  level.voteInfo.forcePass     = qfalse;
+  level.voteInfo.voteCanceled  = qfalse;
   level.voteInfo.isAutoRtvVote = false;
   game.rtv->setRtvStatus(false);
 
@@ -2902,7 +2996,7 @@ void CheckVote() {
   }
 
   int minVoteDuration;
-  const bool isRtvVote = game.rtv->rtvVoteActive();
+  const bool isRtvVote     = game.rtv->rtvVoteActive();
   const bool isAutoRtvVote = level.voteInfo.isAutoRtvVote;
 
   // vote_minVoteDuration is likely low on most servers, so we use a separate
@@ -2921,36 +3015,31 @@ void CheckVote() {
 
   const int requiredPercentage = std::clamp(vote_percent.integer, 1, 99);
   const int validVotingClients = getNumValidVoters();
-  const int requiredClients = validVotingClients * requiredPercentage / 100;
-  const auto voter =
-      isAutoRtvVote ? nullptr : g_entities + level.voteInfo.voter_cn;
+  const int requiredClients    = validVotingClients * requiredPercentage / 100;
+  const auto voter             = isAutoRtvVote ? nullptr : g_entities + level.voteInfo.voter_cn;
 
-  if (!isAutoRtvVote &&
-      level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
+  if (!isAutoRtvVote && level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
     Printer::popupAll("^7Vote canceled: caller switched team.");
-    G_LogPrintf("Vote canceled: %s (caller %s switched teams)\n",
-                level.voteInfo.voteString, voter->client->pers.netname);
+    G_LogPrintf("Vote canceled: %s (caller %s switched teams)\n", level.voteInfo.voteString,
+                voter->client->pers.netname);
 
-    level.voteInfo.voteYes = 0;
+    level.voteInfo.voteYes           = 0;
     level.voteInfo.voteYesSpectators = 0;
-    level.voteInfo.voteNo = level.numConnectedClients;
-    level.voteInfo.voteNoSpectators = 0;
+    level.voteInfo.voteNo            = level.numConnectedClients;
+    level.voteInfo.voteNoSpectators  = 0;
   } else if (level.voteInfo.voteYes > requiredClients) {
     Printer::popupAll("^5Vote passed!");
     G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
 
-    level.voteInfo.voteTime = 0;
+    level.voteInfo.voteTime     = 0;
     level.voteInfo.voteCanceled = qfalse;
     level.voteInfo.vote_fn(nullptr, 0, nullptr, nullptr);
-  } else if (level.voteInfo.voteNo >=
-                 level.numConnectedClients - requiredClients ||
+  } else if (level.voteInfo.voteNo >= level.numConnectedClients - requiredClients ||
              level.time - level.voteInfo.voteTime >= VOTE_TIME) {
-    std::string voteFailedMsg =
-        StringUtils::format("^3Vote FAILED! ^3(%s)", level.voteInfo.voteString);
-    Printer::popupAll(voteFailedMsg);
+    Printer::popupAll("^3Vote FAILED! ^3(%s)", level.voteInfo.voteString);
     G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
 
-    level.voteInfo.voteTime = 0;
+    level.voteInfo.voteTime     = 0;
     level.voteInfo.voteCanceled = qfalse;
   } else {
     return;
@@ -2987,9 +3076,7 @@ void G_RunThink(gentity_t *ent) {
   float thinktime;
 
   // OSP - If paused, push nextthink
-  if (level.match_pause != PAUSE_NONE &&
-      (ent - g_entities) >= g_maxclients.integer &&
-      ent->nextthink > level.time &&
+  if (level.match_pause != PAUSE_NONE && (ent - g_entities) >= g_maxclients.integer && ent->nextthink > level.time &&
       strstr(ent->classname, "DPRINTF_") == NULL) {
     ent->nextthink += level.time - level.previousTime;
   }
@@ -3021,8 +3108,7 @@ void G_RunEntity(gentity_t *ent, int msec);
 G_PositionEntityOnTag
 ======================
 */
-qboolean G_PositionEntityOnTag(gentity_t *entity, gentity_t *parent,
-                               char *tagName) {
+qboolean G_PositionEntityOnTag(gentity_t *entity, gentity_t *parent, char *tagName) {
   int i;
   orientation_t tag;
   vec3_t axis[3];
@@ -3035,8 +3121,7 @@ qboolean G_PositionEntityOnTag(gentity_t *entity, gentity_t *parent,
   }
 
   for (i = 0; i < 3; i++) {
-    VectorMA(entity->r.currentOrigin, tag.origin[i], axis[i],
-             entity->r.currentOrigin);
+    VectorMA(entity->r.currentOrigin, tag.origin[i], axis[i], entity->r.currentOrigin);
   }
 
   if (entity->client && entity->s.eFlags & EF_MOUNTEDTANK) {
@@ -3082,16 +3167,13 @@ void G_TagLinkEntity(gentity_t *ent, int msec) {
       int pos;
       float frac;
 
-      if ((ent->backspline = BG_GetSplineData(parent->s.effect2Time,
-                                              &ent->back)) == nullptr) {
+      if ((ent->backspline = BG_GetSplineData(parent->s.effect2Time, &ent->back)) == nullptr) {
         return;
       }
 
-      ent->backdelta =
-          parent->s.pos.trDuration
-              ? static_cast<float>(level.time - parent->s.pos.trTime) /
-                    static_cast<float>(parent->s.pos.trDuration)
-              : 0;
+      ent->backdelta = parent->s.pos.trDuration ? static_cast<float>(level.time - parent->s.pos.trTime) /
+                                                    static_cast<float>(parent->s.pos.trDuration)
+                                                : 0;
 
       if (ent->backdelta < 0.f) {
         ent->backdelta = 0.f;
@@ -3105,26 +3187,22 @@ void G_TagLinkEntity(gentity_t *ent, int msec) {
 
       pos = std::floor(ent->backdelta * (MAX_SPLINE_SEGMENTS));
       if (pos >= MAX_SPLINE_SEGMENTS) {
-        pos = MAX_SPLINE_SEGMENTS - 1;
+        pos  = MAX_SPLINE_SEGMENTS - 1;
         frac = ent->backspline->segments[pos].length;
       } else {
-        frac = ((ent->backdelta * (MAX_SPLINE_SEGMENTS)) -
-                static_cast<float>(pos)) *
-               ent->backspline->segments[pos].length;
+        frac =
+          ((ent->backdelta * (MAX_SPLINE_SEGMENTS)) - static_cast<float>(pos)) * ent->backspline->segments[pos].length;
       }
 
-      VectorMA(ent->backspline->segments[pos].start, frac,
-               ent->backspline->segments[pos].v_norm, v);
+      VectorMA(ent->backspline->segments[pos].start, frac, ent->backspline->segments[pos].v_norm, v);
       if (parent->s.apos.trBase[0] != 0) {
-        BG_LinearPathOrigin2(parent->s.apos.trBase[0], &ent->backspline,
-                             &ent->backdelta, v, ent->back);
+        BG_LinearPathOrigin2(parent->s.apos.trBase[0], &ent->backspline, &ent->backdelta, v, ent->back);
       }
 
       VectorCopy(v, origin);
 
       if (ent->s.angles2[0] != 0) {
-        BG_LinearPathOrigin2(ent->s.angles2[0], &ent->backspline,
-                             &ent->backdelta, v, ent->back);
+        BG_LinearPathOrigin2(ent->s.angles2[0], &ent->backspline, &ent->backdelta, v, ent->back);
       }
 
       VectorCopy(v, ent->backorigin);
@@ -3147,15 +3225,14 @@ void G_TagLinkEntity(gentity_t *ent, int msec) {
     if (parent->moving) {
       VectorCopy(parent->backorigin, v);
 
-      ent->back = parent->back;
-      ent->backdelta = parent->backdelta;
+      ent->back       = parent->back;
+      ent->backdelta  = parent->backdelta;
       ent->backspline = parent->backspline;
 
       VectorCopy(v, origin);
 
       if (ent->s.angles2[0] != 0) {
-        BG_LinearPathOrigin2(ent->s.angles2[0], &ent->backspline,
-                             &ent->backdelta, v, ent->back);
+        BG_LinearPathOrigin2(ent->s.angles2[0], &ent->backspline, &ent->backdelta, v, ent->back);
       }
 
       VectorCopy(v, ent->backorigin);
@@ -3213,28 +3290,21 @@ void G_RunEntity(gentity_t *ent, int msec) {
   }
 
   if (ent->tagParent) {
-
     G_RunEntity(ent->tagParent, msec);
 
     if (ent->tagParent) {
       if (G_PositionEntityOnTag(ent, ent->tagParent, ent->tagName)) {
         if (!ent->client) {
           if (!ent->s.density) {
-            BG_EvaluateTrajectory(&ent->s.apos, level.time,
-                                  ent->r.currentAngles, qtrue,
-                                  ent->s.effect2Time);
-            VectorAdd(ent->tagParent->r.currentAngles, ent->r.currentAngles,
-                      ent->r.currentAngles);
+            BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue, ent->s.effect2Time);
+            VectorAdd(ent->tagParent->r.currentAngles, ent->r.currentAngles, ent->r.currentAngles);
           } else {
-            BG_EvaluateTrajectory(&ent->s.apos, level.time,
-                                  ent->r.currentAngles, qtrue,
-                                  ent->s.effect2Time);
+            BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue, ent->s.effect2Time);
           }
         }
       }
     }
   } else if (ent->s.eFlags & EF_PATH_LINK) {
-
     G_TagLinkEntity(ent, msec);
   }
 
@@ -3276,8 +3346,7 @@ void G_RunEntity(gentity_t *ent, int msec) {
   // Arnout: invisible entities don't think
   // NOTE: hack - constructible one does
   if (ent->s.eType != ET_CONSTRUCTIBLE &&
-      (ent->entstate == STATE_INVISIBLE ||
-       ent->entstate == STATE_UNDERCONSTRUCTION)) {
+      (ent->entstate == STATE_INVISIBLE || ent->entstate == STATE_UNDERCONSTRUCTION)) {
     // Gordon: we want them still to run scripts tho :p
     if (ent->s.number >= MAX_CLIENTS) {
       G_Script_ScriptRun(ent);
@@ -3289,11 +3358,9 @@ void G_RunEntity(gentity_t *ent, int msec) {
     return;
   }
 
-  if (ent->s.eType == ET_MISSILE || ent->s.eType == ET_FLAMEBARREL ||
-      ent->s.eType == ET_FP_PARTS || ent->s.eType == ET_FIRE_COLUMN ||
-      ent->s.eType == ET_FIRE_COLUMN_SMOKE || ent->s.eType == ET_EXPLO_PART ||
+  if (ent->s.eType == ET_MISSILE || ent->s.eType == ET_FLAMEBARREL || ent->s.eType == ET_FP_PARTS ||
+      ent->s.eType == ET_FIRE_COLUMN || ent->s.eType == ET_FIRE_COLUMN_SMOKE || ent->s.eType == ET_EXPLO_PART ||
       ent->s.eType == ET_RAMJET) {
-
     // OSP - pausing
     if (level.match_pause == PAUSE_NONE) {
       G_RunMissile(ent);
@@ -3353,10 +3420,9 @@ void G_RunEntity(gentity_t *ent, int msec) {
     return;
   }
 
-  if ((ent->s.eType == ET_HEALER || ent->s.eType == ET_SUPPLIER) &&
-      ent->target_ent) {
+  if ((ent->s.eType == ET_HEALER || ent->s.eType == ET_SUPPLIER) && ent->target_ent) {
     ent->target_ent->s.onFireStart = ent->health;
-    ent->target_ent->s.onFireEnd = ent->count;
+    ent->target_ent->s.onFireEnd   = ent->count;
   }
 
   G_RunThink(ent);
@@ -3391,16 +3457,15 @@ void G_RunFrame(int levelTime) {
     if ((level.time % 500) == 0) {
       // FIXME: set a PAUSE cs and let the client adjust
       //  their local start times instead of this spam
-      trap_SetConfigstring(CS_LEVEL_START_TIME,
-                           va("%i", level.startTime + level.timeDelta));
+      trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime + level.timeDelta));
     }
   }
 
   level.framenum++;
   level.previousTime = level.time;
-  level.time = levelTime;
+  level.time         = levelTime;
 
-  level.axisBombCounter -= level.frameTime;
+  level.axisBombCounter   -= level.frameTime;
   level.alliedBombCounter -= level.frameTime;
 
   if (level.axisBombCounter < 0) {
@@ -3462,10 +3527,8 @@ uebrgpiebrpgibqeripgubeqrpigubqifejbgipegbrtibgurepqgbn%i", level.time)
   G_UpdateTeamMapData();
 
   if (level.gameManager) {
-    level.gameManager->s.otherEntityNum =
-        MAX_TEAM_LANDMINES - G_CountTeamLandmines(TEAM_AXIS);
-    level.gameManager->s.otherEntityNum2 =
-        MAX_TEAM_LANDMINES - G_CountTeamLandmines(TEAM_ALLIES);
+    level.gameManager->s.otherEntityNum  = MAX_TEAM_LANDMINES - G_CountTeamLandmines(TEAM_AXIS);
+    level.gameManager->s.otherEntityNum2 = MAX_TEAM_LANDMINES - G_CountTeamLandmines(TEAM_ALLIES);
   }
 
   RunFrame(levelTime);

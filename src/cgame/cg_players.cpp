@@ -11,7 +11,7 @@
 #include "etj_utilities.h"
 
 inline constexpr int SWING_RIGHT = 1;
-inline constexpr int SWING_LEFT = 2;
+inline constexpr int SWING_LEFT  = 2;
 
 static int dp_realtime;
 static float jumpHeight;
@@ -33,13 +33,10 @@ qboolean CG_EntOnFire(centity_t *cent) {
     //		so make sure onFireStart is not 0
     return (cg.snap->ps.onFireStart && (cg.snap->ps.onFireStart < cg.time) &&
             ((cg.snap->ps.onFireStart + 2000) > cg.time))
-               ? qtrue
-               : qfalse;
+             ? qtrue
+             : qfalse;
   } else {
-    return ((cent->currentState.onFireStart < cg.time) &&
-            (cent->currentState.onFireEnd > cg.time))
-               ? qtrue
-               : qfalse;
+    return ((cent->currentState.onFireStart < cg.time) && (cent->currentState.onFireEnd > cg.time)) ? qtrue : qfalse;
   }
 }
 
@@ -56,8 +53,7 @@ qboolean CG_IsCrouchingAnim(animModelInfo_t *animModelInfo, int animNum) {
   //
   anim = BG_GetAnimationForIndex(animModelInfo, animNum);
   //
-  if (anim->movetype & ((1 << ANIM_MT_IDLECR) | (1 << ANIM_MT_WALKCR) |
-                        (1 << ANIM_MT_WALKCRBK))) {
+  if (anim->movetype & ((1 << ANIM_MT_IDLECR) | (1 << ANIM_MT_WALKCR) | (1 << ANIM_MT_WALKCRBK))) {
     return qtrue;
   }
   //
@@ -99,8 +95,7 @@ static void CG_LoadClientInfo(int clientNum) {
   // reset any existing players and bodies, because they might be in bad
   // frames for this new model
   for (i = 0; i < MAX_GENTITIES; i++) {
-    if (cg_entities[i].currentState.clientNum == clientNum &&
-        cg_entities[i].currentState.eType == ET_PLAYER) {
+    if (cg_entities[i].currentState.clientNum == clientNum && cg_entities[i].currentState.eType == ET_PLAYER) {
       CG_ResetPlayerEntity(&cg_entities[i]);
     }
   }
@@ -137,12 +132,12 @@ void CG_NewClientInfo(int clientNum) {
   // flashing red NOTE: why are we bothering to do all this setting up
   // of a new clientInfo_t anyway? it was all for deffered clients iirc,
   // which we dont have
-  newInfo.location[0] = ci->location[0];
-  newInfo.location[1] = ci->location[1];
-  newInfo.health = ci->health;
+  newInfo.location[0]  = ci->location[0];
+  newInfo.location[1]  = ci->location[1];
+  newInfo.health       = ci->health;
   newInfo.fireteamData = ci->fireteamData;
-  newInfo.clientNum = clientNum;
-  newInfo.selected = ci->selected;
+  newInfo.clientNum    = clientNum;
+  newInfo.selected     = ci->selected;
   newInfo.totalWeapAcc = ci->totalWeapAcc;
 
   // isolate the player's name
@@ -152,22 +147,22 @@ void CG_NewClientInfo(int clientNum) {
   Q_CleanStr(newInfo.cleanname);
 
   // bot skill
-  v = Info_ValueForKey(configstring, "skill");
+  v                = Info_ValueForKey(configstring, "skill");
   newInfo.botSkill = Q_atoi(v);
 
   // team
-  v = Info_ValueForKey(configstring, "t");
+  v            = Info_ValueForKey(configstring, "t");
   newInfo.team = (team_t)Q_atoi(v);
 
   // class
-  v = Info_ValueForKey(configstring, "c");
+  v           = Info_ValueForKey(configstring, "c");
   newInfo.cls = Q_atoi(v);
 
   // rank
-  v = Info_ValueForKey(configstring, "r");
+  v            = Info_ValueForKey(configstring, "r");
   newInfo.rank = Q_atoi(v);
 
-  v = Info_ValueForKey(configstring, "f");
+  v                = Info_ValueForKey(configstring, "f");
   newInfo.fireteam = Q_atoi(v);
 
   v = Info_ValueForKey(configstring, "m");
@@ -176,7 +171,7 @@ void CG_NewClientInfo(int clientNum) {
     char buf[2];
     buf[1] = '\0';
     for (i = 0; i < SK_NUM_SKILLS; i++) {
-      buf[0] = *v;
+      buf[0]            = *v;
       newInfo.medals[i] = Q_atoi(buf);
       v++;
     }
@@ -206,42 +201,42 @@ void CG_NewClientInfo(int clientNum) {
   Q_strncpyz(newInfo.disguiseName, v, sizeof(newInfo.disguiseName));
 
   // disguiseRank
-  v = Info_ValueForKey(configstring, "dr");
+  v                    = Info_ValueForKey(configstring, "dr");
   newInfo.disguiseRank = Q_atoi(v);
 
   // Gordon: weapon and latchedweapon ( FIXME: make these more secure )
-  v = Info_ValueForKey(configstring, "w");
+  v              = Info_ValueForKey(configstring, "w");
   newInfo.weapon = Q_atoi(v);
 
-  v = Info_ValueForKey(configstring, "lw");
+  v                     = Info_ValueForKey(configstring, "lw");
   newInfo.latchedweapon = Q_atoi(v);
 
-  v = Info_ValueForKey(configstring, "sw");
+  v                       = Info_ValueForKey(configstring, "sw");
   newInfo.secondaryweapon = Q_atoi(v);
 
   // pmove_fixed
-  v = Info_ValueForKey(configstring, "pm");
+  v                  = Info_ValueForKey(configstring, "pm");
   newInfo.pmoveFixed = Q_atoi(v);
   // com_maxfps
-  v = Info_ValueForKey(configstring, "fps");
+  v              = Info_ValueForKey(configstring, "fps");
   newInfo.maxFPS = Q_atoi(v);
 
-  v = Info_ValueForKey(configstring, "cgaz");
+  v            = Info_ValueForKey(configstring, "cgaz");
   newInfo.CGaz = Q_atoi(v);
 
-  v = Info_ValueForKey(configstring, "h");
+  v              = Info_ValueForKey(configstring, "h");
   newInfo.hideMe = Q_atoi(v);
 
-  v = Info_ValueForKey(configstring, "sl");
+  v                  = Info_ValueForKey(configstring, "sl");
   newInfo.specLocked = Q_atoi(v) > 0 ? qtrue : qfalse;
 
-  v = Info_ValueForKey(configstring, "tr");
+  v                     = Info_ValueForKey(configstring, "tr");
   newInfo.timerunActive = Q_atoi(v) > 0 ? qtrue : qfalse;
 
-  v = Info_ValueForKey(configstring, "vs");
+  v               = Info_ValueForKey(configstring, "vs");
   newInfo.snaphud = Q_atoi(v);
 
-  v = Info_ValueForKey(configstring, "i");
+  v                        = Info_ValueForKey(configstring, "i");
   newInfo.clientIsInactive = Q_atoi(v);
 
   // Gordon: detect rank/skill changes client side
@@ -258,17 +253,14 @@ void CG_NewClientInfo(int clientNum) {
     }
 
     if (newInfo.rank > cgs.clientinfo[cg.clientNum].rank) {
-
-      CG_SoundPlaySoundScript(cgs.clientinfo[cg.clientNum].team == TEAM_ALLIES
-                                  ? rankSoundNames_Allies[newInfo.rank]
-                                  : rankSoundNames_Axis[newInfo.rank],
+      CG_SoundPlaySoundScript(cgs.clientinfo[cg.clientNum].team == TEAM_ALLIES ? rankSoundNames_Allies[newInfo.rank]
+                                                                               : rankSoundNames_Axis[newInfo.rank],
                               NULL, -1, qtrue);
 
       CG_AddPMItemBig(PM_RANK,
-                      va("Promoted to rank %s!",
-                         cgs.clientinfo[cg.clientNum].team == TEAM_AXIS
-                             ? rankNames_Axis[newInfo.rank]
-                             : rankNames_Allies[newInfo.rank]),
+                      va("Promoted to rank %s!", cgs.clientinfo[cg.clientNum].team == TEAM_AXIS
+                                                   ? rankNames_Axis[newInfo.rank]
+                                                   : rankNames_Allies[newInfo.rank]),
                       rankicons[newInfo.rank][0].shader);
     }
 
@@ -280,13 +272,13 @@ void CG_NewClientInfo(int clientNum) {
 
         if (newInfo.skill[i] == 4 && i == SK_HEAVY_WEAPONS) {
           if (cgs.clientinfo[cg.clientNum].skill[SK_LIGHT_WEAPONS] == 4) {
-            oldclass = cgs.ccSelectedClass;
+            oldclass            = cgs.ccSelectedClass;
             cgs.ccSelectedClass = newInfo.cls;
             CG_LimboPanel_SetSelectedWeaponNumForSlot(1, 2);
             CG_LimboPanel_SendSetupMsg(qfalse);
             cgs.ccSelectedClass = oldclass;
           } else {
-            oldclass = cgs.ccSelectedClass;
+            oldclass            = cgs.ccSelectedClass;
             cgs.ccSelectedClass = newInfo.cls;
             CG_LimboPanel_SetSelectedWeaponNumForSlot(1, 1);
             CG_LimboPanel_SendSetupMsg(qfalse);
@@ -297,14 +289,14 @@ void CG_NewClientInfo(int clientNum) {
         if (newInfo.skill[i] == 4 && i == SK_LIGHT_WEAPONS) {
           if (cgs.clientinfo[cg.clientNum].skill[SK_HEAVY_WEAPONS] == 4) {
             if (cgs.ccSelectedWeapon2 == 2) {
-              oldclass = cgs.ccSelectedClass;
+              oldclass            = cgs.ccSelectedClass;
               cgs.ccSelectedClass = newInfo.cls;
               CG_LimboPanel_SetSelectedWeaponNumForSlot(1, 3);
               CG_LimboPanel_SendSetupMsg(qfalse);
               cgs.ccSelectedClass = oldclass;
             }
           } else {
-            oldclass = cgs.ccSelectedClass;
+            oldclass            = cgs.ccSelectedClass;
             cgs.ccSelectedClass = newInfo.cls;
             CG_LimboPanel_SetSelectedWeaponNumForSlot(1, 1);
             CG_LimboPanel_SendSetupMsg(qfalse);
@@ -318,10 +310,8 @@ void CG_NewClientInfo(int clientNum) {
                            skillNames[i], newInfo.skill[i]),
                         cgs.media.skillPics[i]);
 
-        CG_PriorityCenterPrint(va("You have been rewarded with %s",
-                                  cg_skillRewards[i][newInfo.skill[i] - 1]),
-                               SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20),
-                               SMALLCHAR_WIDTH, 99999);
+        CG_PriorityCenterPrint(va("You have been rewarded with %s", cg_skillRewards[i][newInfo.skill[i] - 1]),
+                               SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.20), SMALLCHAR_WIDTH, 99999);
       }
     }
 
@@ -338,7 +328,7 @@ void CG_NewClientInfo(int clientNum) {
 
   // replace whatever was there with the new one
   newInfo.infoValid = qtrue;
-  *ci = newInfo;
+  *ci               = newInfo;
 
   // make sure we have a character set
   if (!ci->character) {
@@ -358,13 +348,11 @@ PLAYER ANIMATION
 =============================================================================
 */
 
-bg_playerclass_t *CG_PlayerClassForClientinfo(clientInfo_t *ci,
-                                              centity_t *cent) {
+bg_playerclass_t *CG_PlayerClassForClientinfo(clientInfo_t *ci, centity_t *cent) {
   int team, cls;
 
   if (cent && cent->currentState.eType == ET_CORPSE) {
-    return BG_GetPlayerClassInfo(cent->currentState.modelindex,
-                                 cent->currentState.modelindex2);
+    return BG_GetPlayerClassInfo(cent->currentState.modelindex, cent->currentState.modelindex2);
   }
 
   if (cent && cent->currentState.powerups & (1 << PW_OPS_DISGUISED)) {
@@ -387,8 +375,7 @@ CG_SetLerpFrameAnimation
 may include ANIM_TOGGLEBIT
 ===============
 */
-static void CG_SetLerpFrameAnimation(centity_t *cent, clientInfo_t *ci,
-                                     lerpFrame_t *lf, int newAnimation) {
+static void CG_SetLerpFrameAnimation(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf, int newAnimation) {
   animation_t *anim;
 
   bg_character_t *character = CG_CharacterForClientinfo(ci, cent);
@@ -397,23 +384,20 @@ static void CG_SetLerpFrameAnimation(centity_t *cent, clientInfo_t *ci,
     return;
   }
 
-  lf->animationNumber = newAnimation;
-  newAnimation &= ~ANIM_TOGGLEBIT;
+  lf->animationNumber  = newAnimation;
+  newAnimation        &= ~ANIM_TOGGLEBIT;
 
-  if (newAnimation < 0 ||
-      newAnimation >= character->animModelInfo->numAnimations) {
-    CG_Error("CG_SetLerpFrameAnimation: Bad animation number: %i",
-             newAnimation);
+  if (newAnimation < 0 || newAnimation >= character->animModelInfo->numAnimations) {
+    CG_Error("CG_SetLerpFrameAnimation: Bad animation number: %i", newAnimation);
   }
 
   anim = character->animModelInfo->animations[newAnimation];
 
-  lf->animation = anim;
+  lf->animation     = anim;
   lf->animationTime = lf->frameTime + anim->initialLerp;
 
   if (cg_debugAnim.integer == 1) {
-    CG_Printf("Anim: %i, %s\n", newAnimation,
-              character->animModelInfo->animations[newAnimation]->name);
+    CG_Printf("Anim: %i, %s\n", newAnimation, character->animModelInfo->animations[newAnimation]->name);
   }
 }
 
@@ -425,8 +409,7 @@ Sets cg.snap, cg.oldFrame, and cg.backlerp
 cg.time should be between oldFrameTime and frameTime after exit
 ===============
 */
-void CG_RunLerpFrame(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf,
-                     int newAnimation, float speedScale) {
+void CG_RunLerpFrame(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf, int newAnimation, float speedScale) {
   int f;
   animation_t *anim;
 
@@ -444,8 +427,8 @@ void CG_RunLerpFrame(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf,
   // if we have passed the current frame, move it to
   // oldFrame and calculate a new frame
   if (cg.time >= lf->frameTime) {
-    lf->oldFrame = lf->frame;
-    lf->oldFrameTime = lf->frameTime;
+    lf->oldFrame      = lf->frame;
+    lf->oldFrameTime  = lf->frameTime;
     lf->oldFrameModel = lf->frameModel;
 
     // get the next frame based on the animation
@@ -458,7 +441,7 @@ void CG_RunLerpFrame(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf,
     } else {
       lf->frameTime = lf->oldFrameTime + anim->frameLerp;
     }
-    f = (lf->frameTime - lf->animationTime) / anim->frameLerp;
+    f  = (lf->frameTime - lf->animationTime) / anim->frameLerp;
     f *= speedScale; // adjust for haste, etc
     if (f >= anim->numFrames) {
       f -= anim->numFrames;
@@ -473,7 +456,7 @@ void CG_RunLerpFrame(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf,
         lf->frameTime = cg.time;
       }
     }
-    lf->frame = anim->firstFrame + f;
+    lf->frame      = anim->firstFrame + f;
     lf->frameModel = anim->mdxFile;
 
     if (cg.time > lf->frameTime) {
@@ -495,8 +478,7 @@ void CG_RunLerpFrame(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf,
   if (lf->frameTime == lf->oldFrameTime) {
     lf->backlerp = 0;
   } else {
-    lf->backlerp = 1.0 - (float)(cg.time - lf->oldFrameTime) /
-                             (lf->frameTime - lf->oldFrameTime);
+    lf->backlerp = 1.0 - (float)(cg.time - lf->oldFrameTime) / (lf->frameTime - lf->oldFrameTime);
   }
 }
 
@@ -505,8 +487,7 @@ void CG_RunLerpFrame(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf,
 CG_ClearLerpFrame
 ===============
 */
-static void CG_ClearLerpFrame(centity_t *cent, clientInfo_t *ci,
-                              lerpFrame_t *lf, int animationNumber) {
+static void CG_ClearLerpFrame(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf, int animationNumber) {
   lf->frameTime = lf->oldFrameTime = cg.time;
   CG_SetLerpFrameAnimation(cent, ci, lf, animationNumber);
   if (lf->animation) {
@@ -522,10 +503,9 @@ CG_SetLerpFrameAnimationRate
 may include ANIM_TOGGLEBIT
 ===============
 */
-void CG_SetLerpFrameAnimationRate(centity_t *cent, clientInfo_t *ci,
-                                  lerpFrame_t *lf, int newAnimation) {
+void CG_SetLerpFrameAnimationRate(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf, int newAnimation) {
   animation_t *anim, *oldanim;
-  int transitionMin = -1, oldAnimNum;
+  int transitionMin  = -1, oldAnimNum;
   qboolean firstAnim = qfalse;
 
   bg_character_t *character = CG_CharacterForClientinfo(ci, cent);
@@ -534,18 +514,17 @@ void CG_SetLerpFrameAnimationRate(centity_t *cent, clientInfo_t *ci,
     return;
   }
 
-  oldanim = lf->animation;
+  oldanim    = lf->animation;
   oldAnimNum = lf->animationNumber;
 
   if (!lf->animation) {
     firstAnim = qtrue;
   }
 
-  lf->animationNumber = newAnimation;
-  newAnimation &= ~ANIM_TOGGLEBIT;
+  lf->animationNumber  = newAnimation;
+  newAnimation        &= ~ANIM_TOGGLEBIT;
 
-  if (newAnimation < 0 ||
-      newAnimation >= character->animModelInfo->numAnimations) {
+  if (newAnimation < 0 || newAnimation >= character->animModelInfo->numAnimations) {
     CG_Error("CG_SetLerpFrameAnimationRate: Bad animation "
              "number: %i",
              newAnimation);
@@ -553,18 +532,15 @@ void CG_SetLerpFrameAnimationRate(centity_t *cent, clientInfo_t *ci,
 
   anim = character->animModelInfo->animations[newAnimation];
 
-  lf->animation = anim;
+  lf->animation     = anim;
   lf->animationTime = lf->frameTime + anim->initialLerp;
 
   if (!(anim->flags & ANIMFL_FIRINGANIM) || (lf != &cent->pe.torso)) {
-    if ((lf == &cent->pe.legs) &&
-        (CG_IsCrouchingAnim(character->animModelInfo, newAnimation) !=
-         CG_IsCrouchingAnim(character->animModelInfo, oldAnimNum))) {
-      if (anim->moveSpeed ||
-          (anim->movetype & ((1 << ANIM_MT_TURNLEFT) |
-                             (1 << ANIM_MT_TURNRIGHT)))) // if unknown
-                                                         // movetype, go
-                                                         // there faster
+    if ((lf == &cent->pe.legs) && (CG_IsCrouchingAnim(character->animModelInfo, newAnimation) !=
+                                   CG_IsCrouchingAnim(character->animModelInfo, oldAnimNum))) {
+      if (anim->moveSpeed || (anim->movetype & ((1 << ANIM_MT_TURNLEFT) | (1 << ANIM_MT_TURNRIGHT)))) // if unknown
+                                                                                                      // movetype, go
+                                                                                                      // there faster
       {
         transitionMin = lf->frameTime + 200; // slowly raise/drop
       } else {
@@ -579,7 +555,7 @@ void CG_SetLerpFrameAnimationRate(centity_t *cent, clientInfo_t *ci,
     if (oldanim && oldanim->animBlend) // transitionMin < lf->frameTime +
                                        // oldanim->animBlend) {
     {
-      transitionMin = lf->frameTime + oldanim->animBlend;
+      transitionMin     = lf->frameTime + oldanim->animBlend;
       lf->animationTime = transitionMin;
     } else {
       // slow down transitions according to speed
@@ -595,16 +571,15 @@ void CG_SetLerpFrameAnimationRate(centity_t *cent, clientInfo_t *ci,
 
   // if first anim, go immediately
   if (firstAnim) {
-    lf->frameTime = cg.time - 1;
+    lf->frameTime     = cg.time - 1;
     lf->animationTime = cg.time - 1;
-    lf->frame = anim->firstFrame;
-    lf->frameModel = anim->mdxFile;
+    lf->frame         = anim->firstFrame;
+    lf->frameModel    = anim->mdxFile;
   }
 
   if (cg_debugAnim.integer == 1) // DHM - Nerve :: extra debug info
   {
-    CG_Printf("Anim: %i, %s\n", newAnimation,
-              character->animModelInfo->animations[newAnimation]->name);
+    CG_Printf("Anim: %i, %s\n", newAnimation, character->animModelInfo->animations[newAnimation]->name);
   }
 }
 
@@ -616,17 +591,16 @@ Sets cg.snap, cg.oldFrame, and cg.backlerp
 cg.time should be between oldFrameTime and frameTime after exit
 ===============
 */
-void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
-                         centity_t *cent, int recursion) {
+void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation, centity_t *cent, int recursion) {
   int f;
   animation_t *anim, *oldAnim;
   animation_t *otherAnim = NULL;
   qboolean isLadderAnim;
 
-  static constexpr float ANIM_SCALEMAX_LOW = 1.1;
+  static constexpr float ANIM_SCALEMAX_LOW  = 1.1;
   static constexpr float ANIM_SCALEMAX_HIGH = 1.6;
 
-  static constexpr int ANIM_SPEEDMAX_LOW = 100;
+  static constexpr int ANIM_SPEEDMAX_LOW  = 100;
   static constexpr int ANIM_SPEEDMAX_HIGH = 20;
 
   // debugging tool to get no animations
@@ -635,9 +609,7 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
     return;
   }
 
-  isLadderAnim = lf->animation && (lf->animation->flags & ANIMFL_LADDERANIM)
-                     ? qtrue
-                     : qfalse;
+  isLadderAnim = lf->animation && (lf->animation->flags & ANIMFL_LADDERANIM) ? qtrue : qfalse;
 
   oldAnim = lf->animation;
 
@@ -655,11 +627,10 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
   anim = lf->animation;
 
   // check for forcing last frame
-  if (cent->currentState.eFlags & EF_FORCE_END_FRAME ||
-      cent->currentState.eType == ET_CORPSE) {
+  if (cent->currentState.eFlags & EF_FORCE_END_FRAME || cent->currentState.eType == ET_CORPSE) {
     lf->oldFrame = lf->frame = anim->firstFrame + anim->numFrames - 1;
     lf->oldFrameModel = lf->frameModel = anim->mdxFile;
-    lf->backlerp = 0;
+    lf->backlerp                       = 0;
     return;
   }
 
@@ -678,8 +649,7 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
         {
           lf->oldFramePos[2] = cent->lerpOrigin[2];
         }
-        moveSpeed = Distance(cent->lerpOrigin, lf->oldFramePos) /
-                    ((float)(cg.time - lf->oldFrameTime) / 1000.0);
+        moveSpeed = Distance(cent->lerpOrigin, lf->oldFramePos) / ((float)(cg.time - lf->oldFrameTime) / 1000.0);
       } else {
         if (isLadderAnim) // only use Z axis for
                           // speed
@@ -687,18 +657,17 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
           lf->oldFramePos[0] = cent->currentState.pos.trBase[0];
           lf->oldFramePos[1] = cent->currentState.pos.trBase[1];
         }
-        moveSpeed = Distance(cent->lerpOrigin, lf->oldFramePos) /
-                    ((float)(cg.time - lf->oldFrameTime) / 1000.0);
+        moveSpeed = Distance(cent->lerpOrigin, lf->oldFramePos) / ((float)(cg.time - lf->oldFrameTime) / 1000.0);
       }
       //
       // convert it to a factor of this animation's
       // movespeed
-      lf->animSpeedScale = moveSpeed / (float)anim->moveSpeed;
+      lf->animSpeedScale       = moveSpeed / (float)anim->moveSpeed;
       lf->oldFrameSnapshotTime = cg.latestSnapshotTime;
     }
   } else {
     // move at normal speed
-    lf->animSpeedScale = 1.0;
+    lf->animSpeedScale       = 1.0;
     lf->oldFrameSnapshotTime = cg.latestSnapshotTime;
   }
   // adjust with manual setting (pain anims)
@@ -707,8 +676,8 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
   // if we have passed the current frame, move it to
   // oldFrame and calculate a new frame
   if (cg.time >= lf->frameTime) {
-    lf->oldFrame = lf->frame;
-    lf->oldFrameTime = lf->frameTime;
+    lf->oldFrame      = lf->frame;
+    lf->oldFrameTime  = lf->frameTime;
     lf->oldFrameModel = lf->frameModel;
     VectorCopy(cent->lerpOrigin, lf->oldFramePos);
 
@@ -724,7 +693,6 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
         lf->animSpeedScale = 0.25;
       }
     } else if (lf->animSpeedScale > ANIM_SCALEMAX_LOW) {
-
       if (!(anim->flags & ANIMFL_LADDERANIM)) {
         // allow slower anims to speed up more
         // than faster anims
@@ -735,11 +703,9 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
             lf->animSpeedScale = ANIM_SCALEMAX_HIGH;
           }
         } else {
-          lf->animSpeedScale =
-              ANIM_SCALEMAX_HIGH -
-              (ANIM_SCALEMAX_HIGH - ANIM_SCALEMAX_LOW) *
-                  (float)(anim->moveSpeed - ANIM_SPEEDMAX_HIGH) /
-                  (float)(ANIM_SPEEDMAX_LOW - ANIM_SPEEDMAX_HIGH);
+          lf->animSpeedScale = ANIM_SCALEMAX_HIGH - (ANIM_SCALEMAX_HIGH - ANIM_SCALEMAX_LOW) *
+                                                      (float)(anim->moveSpeed - ANIM_SPEEDMAX_HIGH) /
+                                                      (float)(ANIM_SPEEDMAX_LOW - ANIM_SPEEDMAX_HIGH);
         }
       } else if (lf->animSpeedScale > 4.0) {
         lf->animSpeedScale = 4.0;
@@ -756,20 +722,19 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
     if (!lf->animSpeedScale) {
       // stopped on the ladder, so stay on the same
       // frame
-      f = lf->frame - anim->firstFrame;
+      f              = lf->frame - anim->firstFrame;
       lf->frameTime += anim->frameLerp; // don't wait too long before
                                         // starting to move again
     } else if (lf->oldAnimationNumber != lf->animationNumber &&
                (!anim->moveSpeed || lf->oldFrame < anim->firstFrame ||
-                lf->oldFrame >=
-                    anim->firstFrame + anim->numFrames)) // Ridah, added this
-                                                         // so walking frames
-                                                         // don't always get
-                                                         // reset to 0, which
-                                                         // can happen in the
-                                                         // middle of a walking
-                                                         // anim, which looks
-                                                         // wierd
+                lf->oldFrame >= anim->firstFrame + anim->numFrames)) // Ridah, added this
+                                                                     // so walking frames
+                                                                     // don't always get
+                                                                     // reset to 0, which
+                                                                     // can happen in the
+                                                                     // middle of a walking
+                                                                     // anim, which looks
+                                                                     // wierd
     {
       lf->frameTime = lf->animationTime; // initial lerp
       if (oldAnim && anim->moveSpeed)    // keep locomotions going
@@ -782,10 +747,8 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
       } else {
         f = 0;
       }
-    } else if ((lf == &cent->pe.legs) && otherAnim &&
-               !(anim->flags & ANIMFL_FIRINGANIM) &&
-               ((lf->animationNumber & ~ANIM_TOGGLEBIT) ==
-                (cent->pe.torso.animationNumber & ~ANIM_TOGGLEBIT)) &&
+    } else if ((lf == &cent->pe.legs) && otherAnim && !(anim->flags & ANIMFL_FIRINGANIM) &&
+               ((lf->animationNumber & ~ANIM_TOGGLEBIT) == (cent->pe.torso.animationNumber & ~ANIM_TOGGLEBIT)) &&
                (!anim->moveSpeed)) {
       // legs should synch with torso
       f = cent->pe.torso.frame - otherAnim->firstFrame;
@@ -795,10 +758,8 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
                // still in an old anim)
       }
       lf->frameTime = cent->pe.torso.frameTime;
-    } else if ((lf == &cent->pe.torso) && otherAnim &&
-               !(anim->flags & ANIMFL_FIRINGANIM) &&
-               ((lf->animationNumber & ~ANIM_TOGGLEBIT) ==
-                (cent->pe.legs.animationNumber & ~ANIM_TOGGLEBIT)) &&
+    } else if ((lf == &cent->pe.torso) && otherAnim && !(anim->flags & ANIMFL_FIRINGANIM) &&
+               ((lf->animationNumber & ~ANIM_TOGGLEBIT) == (cent->pe.legs.animationNumber & ~ANIM_TOGGLEBIT)) &&
                (otherAnim->moveSpeed)) {
       // torso needs to sync with legs
       f = cent->pe.legs.frame - otherAnim->firstFrame;
@@ -809,8 +770,7 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
       }
       lf->frameTime = cent->pe.legs.frameTime;
     } else {
-      lf->frameTime = lf->oldFrameTime + (int)((float)anim->frameLerp *
-                                               (1.0 / lf->animSpeedScale));
+      lf->frameTime = lf->oldFrameTime + (int)((float)anim->frameLerp * (1.0 / lf->animSpeedScale));
       if (lf->frameTime < cg.time) {
         lf->frameTime = cg.time;
       }
@@ -820,15 +780,13 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
       if (anim->flags & ANIMFL_REVERSED) {
         if (cg.time > lf->frameTime && !anim->moveSpeed) {
           f = (anim->numFrames - 1) -
-              ((lf->frame - anim->firstFrame) -
-               (1 + (cg.time - lf->frameTime) / anim->frameLerp));
+              ((lf->frame - anim->firstFrame) - (1 + (cg.time - lf->frameTime) / anim->frameLerp));
         } else {
           f = (anim->numFrames - 1) - ((lf->frame - anim->firstFrame) - 1);
         }
       } else {
         if (cg.time > lf->frameTime && !anim->moveSpeed) {
-          f = (lf->frame - anim->firstFrame) + 1 +
-              (cg.time - lf->frameTime) / anim->frameLerp;
+          f = (lf->frame - anim->firstFrame) + 1 + (cg.time - lf->frameTime) / anim->frameLerp;
         } else {
           f = (lf->frame - anim->firstFrame) + 1;
         }
@@ -854,15 +812,14 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
       }
     }
     if (anim->flags & ANIMFL_REVERSED) {
-      lf->frame = anim->firstFrame + anim->numFrames - 1 - f;
+      lf->frame      = anim->firstFrame + anim->numFrames - 1 - f;
       lf->frameModel = anim->mdxFile;
     } else {
-      lf->frame = anim->firstFrame + f;
+      lf->frame      = anim->firstFrame + f;
       lf->frameModel = anim->mdxFile;
     }
 
     if (cg.time > lf->frameTime) {
-
       // Ridah, run the frame again until we move ahead
       // of the current time, fixes walking speeds for
       // zombie
@@ -892,8 +849,7 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
   if (lf->frameTime == lf->oldFrameTime) {
     lf->backlerp = 0;
   } else {
-    lf->backlerp = 1.0 - (float)(cg.time - lf->oldFrameTime) /
-                             (lf->frameTime - lf->oldFrameTime);
+    lf->backlerp = 1.0 - (float)(cg.time - lf->oldFrameTime) / (lf->frameTime - lf->oldFrameTime);
   }
 }
 
@@ -902,8 +858,7 @@ void CG_RunLerpFrameRate(clientInfo_t *ci, lerpFrame_t *lf, int newAnimation,
 CG_ClearLerpFrameRate
 ===============
 */
-void CG_ClearLerpFrameRate(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf,
-                           int animationNumber) {
+void CG_ClearLerpFrameRate(centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf, int animationNumber) {
   lf->frameTime = lf->oldFrameTime = cg.time;
   CG_SetLerpFrameAnimationRate(cent, ci, lf, animationNumber);
   if (lf->animation) {
@@ -925,7 +880,7 @@ static void CG_PlayerAnimation(centity_t *cent, refEntity_t *body) {
 
   clientNum = cent->currentState.clientNum;
 
-  ci = &cgs.clientinfo[clientNum];
+  ci        = &cgs.clientinfo[clientNum];
   character = CG_CharacterForClientinfo(ci, cent);
 
   if (!character) {
@@ -934,9 +889,8 @@ static void CG_PlayerAnimation(centity_t *cent, refEntity_t *body) {
 
   if (cg_noPlayerAnims.integer) {
     body->frame = body->oldframe = body->torsoFrame = body->oldTorsoFrame = 0;
-    body->frameModel = body->oldframeModel = body->torsoFrameModel =
-        body->oldTorsoFrameModel =
-            character->animModelInfo->animations[0]->mdxFile;
+    body->frameModel = body->oldframeModel = body->torsoFrameModel = body->oldTorsoFrameModel =
+      character->animModelInfo->animations[0]->mdxFile;
     return;
   }
 
@@ -946,10 +900,8 @@ static void CG_PlayerAnimation(centity_t *cent, refEntity_t *body) {
   // do the shuffle turn frames locally
   if (!(cent->currentState.eFlags & EF_DEAD) && cent->pe.legs.yawing) {
     // CG_Printf("turn: %i\n", cg.time );
-    tempIndex = BG_GetAnimScriptAnimation(
-        clientNum, character->animModelInfo, cent->currentState.aiState,
-        (cent->pe.legs.yawing == SWING_RIGHT ? ANIM_MT_TURNRIGHT
-                                             : ANIM_MT_TURNLEFT));
+    tempIndex = BG_GetAnimScriptAnimation(clientNum, character->animModelInfo, cent->currentState.aiState,
+                                          (cent->pe.legs.yawing == SWING_RIGHT ? ANIM_MT_TURNRIGHT : ANIM_MT_TURNLEFT));
     if (tempIndex > -1) {
       animIndex = tempIndex;
     }
@@ -957,19 +909,18 @@ static void CG_PlayerAnimation(centity_t *cent, refEntity_t *body) {
   // run the animation
   CG_RunLerpFrameRate(ci, &cent->pe.legs, animIndex, cent, 0);
 
-  body->oldframe = cent->pe.legs.oldFrame;
-  body->frame = cent->pe.legs.frame;
-  body->backlerp = cent->pe.legs.backlerp;
-  body->frameModel = cent->pe.legs.frameModel;
+  body->oldframe      = cent->pe.legs.oldFrame;
+  body->frame         = cent->pe.legs.frame;
+  body->backlerp      = cent->pe.legs.backlerp;
+  body->frameModel    = cent->pe.legs.frameModel;
   body->oldframeModel = cent->pe.legs.oldFrameModel;
 
-  CG_RunLerpFrameRate(ci, &cent->pe.torso, cent->currentState.torsoAnim, cent,
-                      0);
+  CG_RunLerpFrameRate(ci, &cent->pe.torso, cent->currentState.torsoAnim, cent, 0);
 
-  body->oldTorsoFrame = cent->pe.torso.oldFrame;
-  body->torsoFrame = cent->pe.torso.frame;
-  body->torsoBacklerp = cent->pe.torso.backlerp;
-  body->torsoFrameModel = cent->pe.torso.frameModel;
+  body->oldTorsoFrame      = cent->pe.torso.oldFrame;
+  body->torsoFrame         = cent->pe.torso.frame;
+  body->torsoBacklerp      = cent->pe.torso.backlerp;
+  body->torsoFrameModel    = cent->pe.torso.frameModel;
   body->oldTorsoFrameModel = cent->pe.torso.oldFrameModel;
 }
 
@@ -986,8 +937,7 @@ PLAYER ANGLES
 CG_SwingAngles
 ==================
 */
-static void CG_SwingAngles(float destination, float swingTolerance,
-                           float clampTolerance, float speed, float *angle,
+static void CG_SwingAngles(float destination, float swingTolerance, float clampTolerance, float speed, float *angle,
                            int *swinging) {
   float swing;
   float move;
@@ -1007,8 +957,8 @@ static void CG_SwingAngles(float destination, float swingTolerance,
 
   // modify the speed depending on the delta
   // so it doesn't seem so linear
-  swing = AngleSubtract(destination, *angle);
-  scale = fabs(swing);
+  swing  = AngleSubtract(destination, *angle);
+  scale  = fabs(swing);
   scale *= 0.05;
   if (scale < 0.5) {
     scale = 0.5;
@@ -1018,7 +968,7 @@ static void CG_SwingAngles(float destination, float swingTolerance,
   if (swing >= 0) {
     move = cg.frametime * scale * speed;
     if (move >= swing) {
-      move = swing;
+      move      = swing;
       *swinging = qfalse;
     } else {
       *swinging = SWING_LEFT; // left
@@ -1027,7 +977,7 @@ static void CG_SwingAngles(float destination, float swingTolerance,
   } else if (swing < 0) {
     move = cg.frametime * scale * -speed;
     if (move <= swing) {
-      move = swing;
+      move      = swing;
       *swinging = qfalse;
     } else {
       *swinging = SWING_RIGHT; // right
@@ -1057,15 +1007,15 @@ static void CG_AddPainTwitch(centity_t *cent, vec3_t torsoAngles) {
 
   if (!cent->pe.animSpeed) {
     // we need to inititialize this stuff
-    cent->pe.painAnimLegs = -1;
+    cent->pe.painAnimLegs  = -1;
     cent->pe.painAnimTorso = -1;
-    cent->pe.animSpeed = 1.0;
+    cent->pe.animSpeed     = 1.0;
   }
 
   if (cent->currentState.eFlags & EF_DEAD) {
-    cent->pe.painAnimLegs = -1;
+    cent->pe.painAnimLegs  = -1;
     cent->pe.painAnimTorso = -1;
-    cent->pe.animSpeed = 1.0;
+    cent->pe.animSpeed     = 1.0;
     return;
   }
 
@@ -1110,8 +1060,7 @@ Handles seperate torso motion
   if < 45 degrees, also show in torso
 ===============
 */
-static void CG_PlayerAngles(centity_t *cent, vec3_t legs[3], vec3_t torso[3],
-                            vec3_t head[3]) {
+static void CG_PlayerAngles(centity_t *cent, vec3_t legs[3], vec3_t torso[3], vec3_t head[3]) {
   vec3_t legsAngles, torsoAngles, headAngles;
   float dest;
   vec3_t velocity;
@@ -1143,32 +1092,28 @@ static void CG_PlayerAngles(centity_t *cent, vec3_t legs[3], vec3_t torso[3],
 	      BG_GetConditionBitFlag(cent->currentState.clientNum, ANIM_COND_MOVETYPE, ANIM_MT_IDLECR))/*
 	    ||	 (BG_GetConditionValue( cent->currentState.clientNum, ANIM_COND_MOVETYPE, qfalse ) & ((1<<ANIM_MT_STRAFELEFT) | (1<<ANIM_MT_STRAFERIGHT)) )*/)
 	{
-
     // always point all in the same direction
-    cent->pe.torso.yawing = qtrue;   // always center
+    cent->pe.torso.yawing   = qtrue; // always center
     cent->pe.torso.pitching = qtrue; // always center
-    cent->pe.legs.yawing = qtrue;    // always center
+    cent->pe.legs.yawing    = qtrue; // always center
 
     // if firing, make sure torso and head are always aligned
-  } else if (BG_GetConditionValue(cent->currentState.clientNum,
-                                  ANIM_COND_FIRING, qtrue)) {
-    cent->pe.torso.yawing = qtrue;   // always center
+  } else if (BG_GetConditionValue(cent->currentState.clientNum, ANIM_COND_FIRING, qtrue)) {
+    cent->pe.torso.yawing   = qtrue; // always center
     cent->pe.torso.pitching = qtrue; // always center
   }
 
   // adjust legs for movement dir
-  if (cent->currentState.eFlags & EF_DEAD ||
-      cent->currentState.eFlags & EF_MOUNTEDTANK) {
+  if (cent->currentState.eFlags & EF_DEAD || cent->currentState.eFlags & EF_MOUNTEDTANK) {
     // don't let dead bodies twitch
-    legsAngles[YAW] = headAngles[YAW];
+    legsAngles[YAW]  = headAngles[YAW];
     torsoAngles[YAW] = headAngles[YAW];
   } else {
     legsAngles[YAW] = headAngles[YAW] + cent->currentState.angles2[YAW];
 
     if (!(cent->currentState.eFlags & EF_FIRING)) {
-      torsoAngles[YAW] =
-          headAngles[YAW] + 0.35 * cent->currentState.angles2[YAW];
-      clampTolerance = 90;
+      torsoAngles[YAW] = headAngles[YAW] + 0.35 * cent->currentState.angles2[YAW];
+      clampTolerance   = 90;
     } else // must be firing
     {
       torsoAngles[YAW] = headAngles[YAW]; // always face firing
@@ -1179,8 +1124,8 @@ static void CG_PlayerAngles(centity_t *cent, vec3_t legs[3], vec3_t torso[3],
     }
 
     // torso
-    CG_SwingAngles(torsoAngles[YAW], 25, clampTolerance, cg_swingSpeed.value,
-                   &cent->pe.torso.yawAngle, &cent->pe.torso.yawing);
+    CG_SwingAngles(torsoAngles[YAW], 25, clampTolerance, cg_swingSpeed.value, &cent->pe.torso.yawAngle,
+                   &cent->pe.torso.yawing);
 
     // if the legs are yawing (facing heading direction), allow
     // them to rotate a bit, so we don't keep calling the
@@ -1190,33 +1135,30 @@ static void CG_PlayerAngles(centity_t *cent, vec3_t legs[3], vec3_t torso[3],
 
     clampTolerance = 150;
 
-    if (BG_GetConditionBitFlag(ci->clientNum, ANIM_COND_MOVETYPE,
-                               ANIM_MT_IDLE)) {
+    if (BG_GetConditionBitFlag(ci->clientNum, ANIM_COND_MOVETYPE, ANIM_MT_IDLE)) {
       cent->pe.legs.yawing = qfalse; // set it if they really need to swing
-      CG_SwingAngles(legsAngles[YAW], 20, clampTolerance,
-                     0.5 * cg_swingSpeed.value, &cent->pe.legs.yawAngle,
+      CG_SwingAngles(legsAngles[YAW], 20, clampTolerance, 0.5 * cg_swingSpeed.value, &cent->pe.legs.yawAngle,
                      &cent->pe.legs.yawing);
-    } else if (strstr(BG_GetAnimString(character->animModelInfo, legsSet),
-                      "strafe")) {
+    } else if (strstr(BG_GetAnimString(character->animModelInfo, legsSet), "strafe")) {
       // FIXME: what is this strstr hack??
       // if	( BG_GetConditionValue( ci->clientNum,
       // ANIM_COND_MOVETYPE, qfalse ) &
       // ((1<<ANIM_MT_STRAFERIGHT)|(1<<ANIM_MT_STRAFELEFT))
       // )
       cent->pe.legs.yawing = qfalse; // set it if they really need to swing
-      legsAngles[YAW] = headAngles[YAW];
-      CG_SwingAngles(legsAngles[YAW], 0, clampTolerance, cg_swingSpeed.value,
-                     &cent->pe.legs.yawAngle, &cent->pe.legs.yawing);
+      legsAngles[YAW]      = headAngles[YAW];
+      CG_SwingAngles(legsAngles[YAW], 0, clampTolerance, cg_swingSpeed.value, &cent->pe.legs.yawAngle,
+                     &cent->pe.legs.yawing);
     } else if (cent->pe.legs.yawing) {
-      CG_SwingAngles(legsAngles[YAW], 0, clampTolerance, cg_swingSpeed.value,
-                     &cent->pe.legs.yawAngle, &cent->pe.legs.yawing);
+      CG_SwingAngles(legsAngles[YAW], 0, clampTolerance, cg_swingSpeed.value, &cent->pe.legs.yawAngle,
+                     &cent->pe.legs.yawing);
     } else {
-      CG_SwingAngles(legsAngles[YAW], 40, clampTolerance, cg_swingSpeed.value,
-                     &cent->pe.legs.yawAngle, &cent->pe.legs.yawing);
+      CG_SwingAngles(legsAngles[YAW], 40, clampTolerance, cg_swingSpeed.value, &cent->pe.legs.yawAngle,
+                     &cent->pe.legs.yawing);
     }
 
     torsoAngles[YAW] = cent->pe.torso.yawAngle;
-    legsAngles[YAW] = cent->pe.legs.yawAngle;
+    legsAngles[YAW]  = cent->pe.legs.yawAngle;
   }
 
   // --------- pitch -------------
@@ -1234,8 +1176,7 @@ static void CG_PlayerAngles(centity_t *cent, vec3_t legs[3], vec3_t torso[3],
   if (cent->currentState.eFlags & EF_PRONE) {
     torsoAngles[PITCH] = legsAngles[PITCH] - 3;
   } else {
-    CG_SwingAngles(dest, 15, 30, 0.1, &cent->pe.torso.pitchAngle,
-                   &cent->pe.torso.pitching);
+    CG_SwingAngles(dest, 15, 30, 0.1, &cent->pe.torso.pitchAngle, &cent->pe.torso.pitching);
     torsoAngles[PITCH] = cent->pe.torso.pitchAngle;
   }
 
@@ -1251,10 +1192,10 @@ static void CG_PlayerAngles(centity_t *cent, vec3_t legs[3], vec3_t torso[3],
     speed *= 0.05;
 
     AnglesToAxis(legsAngles, axis);
-    side = speed * DotProduct(velocity, axis[1]);
+    side              = speed * DotProduct(velocity, axis[1]);
     legsAngles[ROLL] -= side;
 
-    side = speed * DotProduct(velocity, axis[0]);
+    side               = speed * DotProduct(velocity, axis[0]);
     legsAngles[PITCH] += side;
   }
 
@@ -1284,8 +1225,7 @@ static void CG_BreathPuffs(centity_t *cent, refEntity_t *head) {
     return;
   }
 
-  if (cent->currentState.number == cg.snap->ps.clientNum &&
-      !cg.renderingThirdPerson) {
+  if (cent->currentState.number == cg.snap->ps.clientNum && !cg.renderingThirdPerson) {
     return;
   }
 
@@ -1320,8 +1260,7 @@ static void CG_BreathPuffs(centity_t *cent, refEntity_t *head) {
   forward[1] = up[1] * 8 + forward[1] * 5;
   forward[2] = up[2] * 8 + forward[2] * 5;
 
-  CG_SmokePuff(morg, forward, 4, 1, 1, 1, 0.5f, 2000, cg.time, cg.time + 400, 0,
-               cgs.media.shotgunSmokePuffShader);
+  CG_SmokePuff(morg, forward, 4, 1, 1, 1, 0.5f, 2000, cg.time, cg.time + 400, 0, cgs.media.shotgunSmokePuffShader);
 
   ci->breathPuffTime = cg.time + 3000 + random() * 1000;
 }
@@ -1373,13 +1312,11 @@ Float a sprite over the player's head
 DHM - Nerve :: added height parameter
 ===============
 */
-static void CG_PlayerFloatSprite(centity_t *cent, qhandle_t shader,
-                                 int height) {
+static void CG_PlayerFloatSprite(centity_t *cent, qhandle_t shader, int height) {
   int rf;
   refEntity_t ent{};
 
-  if (cent->currentState.number == cg.snap->ps.clientNum &&
-      !cg.renderingThirdPerson) {
+  if (cent->currentState.number == cg.snap->ps.clientNum && !cg.renderingThirdPerson) {
     rf = RF_THIRD_PERSON; // only show in mirrors
   } else {
     rf = 0;
@@ -1399,10 +1336,10 @@ static void CG_PlayerFloatSprite(centity_t *cent, qhandle_t shader,
     }
   }
 
-  ent.reType = RT_SPRITE;
-  ent.customShader = shader;
-  ent.radius = 6.66;
-  ent.renderfx = rf;
+  ent.reType        = RT_SPRITE;
+  ent.customShader  = shader;
+  ent.radius        = 6.66;
+  ent.renderfx      = rf;
   ent.shaderRGBA[0] = 255;
   ent.shaderRGBA[1] = 255;
   ent.shaderRGBA[2] = 255;
@@ -1423,8 +1360,7 @@ Float sprites over the player's head
 static void CG_PlayerSprites(centity_t *cent) {
   int team;
 
-  if (cent->currentState.powerups & (1 << PW_REDFLAG) ||
-      cent->currentState.powerups & (1 << PW_BLUEFLAG)) {
+  if (cent->currentState.powerups & (1 << PW_REDFLAG) || cent->currentState.powerups & (1 << PW_BLUEFLAG)) {
     CG_PlayerFloatSprite(cent, cgs.media.objectiveShader, 56);
     return;
   }
@@ -1444,26 +1380,21 @@ static void CG_PlayerSprites(centity_t *cent) {
   // DHM - Nerve :: If this client is a medic, draw a 'revive' icon over
   //					dead players that are not in limbo
   // yet.
-  if ((cent->currentState.eFlags & EF_DEAD) &&
-      cent->currentState.number == cent->currentState.clientNum &&
-      cg.snap->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC &&
-      cg.snap->ps.stats[STAT_HEALTH] > 0 &&
+  if ((cent->currentState.eFlags & EF_DEAD) && cent->currentState.number == cent->currentState.clientNum &&
+      cg.snap->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC && cg.snap->ps.stats[STAT_HEALTH] > 0 &&
       cg.snap->ps.persistant[PERS_TEAM] == team) {
-
     CG_PlayerFloatSprite(cent, cgs.media.medicReviveShader, 8);
     return;
   }
 
   // DHM - Nerve :: show voice chat signal so players know who's talking
-  if (cent->voiceChatSpriteTime > cg.time &&
-      cg.snap->ps.persistant[PERS_TEAM] == team) {
+  if (cent->voiceChatSpriteTime > cg.time && cg.snap->ps.persistant[PERS_TEAM] == team) {
     CG_PlayerFloatSprite(cent, cent->voiceChatSprite, 56);
     return;
   }
 
   // DHM - Nerve :: only show talk icon to team-mates
-  if (cent->currentState.eFlags & EF_TALK &&
-      cg.snap->ps.persistant[PERS_TEAM] == team) {
+  if (cent->currentState.eFlags & EF_TALK && cg.snap->ps.persistant[PERS_TEAM] == team) {
     CG_PlayerFloatSprite(cent, cgs.media.balloonShader, 48);
     return;
   }
@@ -1472,8 +1403,7 @@ static void CG_PlayerSprites(centity_t *cent) {
     fireteamData_t *ft;
     ft = CG_IsOnFireteam(cent->currentState.number);
     if (ft) {
-      if (ft == CG_IsOnFireteam(cg.clientNum) &&
-          cgs.clientinfo[cent->currentState.number].selected) {
+      if (ft == CG_IsOnFireteam(cg.clientNum) && cgs.clientinfo[cent->currentState.number].selected) {
         CG_PlayerFloatSprite(cent, cgs.media.fireteamicons[ft->ident], 56);
       }
     }
@@ -1501,18 +1431,19 @@ typedef struct {
   qhandle_t shader;
 } shadowPart_t;
 
-static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
-                                float opacity) {
+static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane, float opacity) {
   vec3_t end;
   trace_t trace;
   float dist, distFade;
   int tagIndex, subIndex;
   vec3_t origin, angles, axis[3];
-  vec4_t projection = {0, 0, -1, 64};
-  shadowPart_t shadowParts[] = {{"tag_footleft", 10.f, 4.f, 1.0f, 0},
-                                {"tag_footright", 10.f, 4.f, 1.0f, 0},
-                                {"tag_torso", 18.f, 96.f, 0.8f, 0},
-                                {nullptr, 0}};
+  vec4_t projection          = {0, 0, -1, 64};
+  shadowPart_t shadowParts[] = {
+    {"tag_footleft", 10.f, 4.f, 1.0f, 0},
+    {"tag_footright", 10.f, 4.f, 1.0f, 0},
+    {"tag_torso", 18.f, 96.f, 0.8f, 0},
+    {nullptr, 0}
+  };
 
   // DAJ pulled out of initialisation
   shadowParts[0].shader = cgs.media.shadowFootShader;
@@ -1529,8 +1460,7 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
   VectorCopy(cent->lerpOrigin, end);
   end[2] -= SHADOW_DISTANCE;
 
-  trap_CM_BoxTrace(&trace, cent->lerpOrigin, end, nullptr, nullptr, 0,
-                   MASK_PLAYERSOLID);
+  trap_CM_BoxTrace(&trace, cent->lerpOrigin, end, nullptr, nullptr, 0, MASK_PLAYERSOLID);
 
   *shadowPlane = trace.endpos[2] + 1;
 
@@ -1546,7 +1476,7 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
 
   // add the mark as a temporary, so it goes directly to the renderer
   // without taking a spot in the cg_marks array
-  dist = VectorDistance(cent->lerpOrigin, cg.refdef_current->vieworg);
+  dist     = VectorDistance(cent->lerpOrigin, cg.refdef_current->vieworg);
   distFade = 1.0f - (1.0f - opacity);
   if (!(cent->currentState.eFlags & EF_ZOOMING) && (dist > SHADOW_MIN_DIST)) {
     if (dist > SHADOW_MAX_DIST) {
@@ -1576,9 +1506,8 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
     // into sloped geometry as much
     origin[2] += 18.0f;
 
-    CG_ImpactMark(cgs.media.shadowTorsoShader, origin, projection, 18.0f,
-                  cent->lerpAngles[YAW], distFade, distFade, distFade, distFade,
-                  -1);
+    CG_ImpactMark(cgs.media.shadowTorsoShader, origin, projection, 18.0f, cent->lerpAngles[YAW], distFade, distFade,
+                  distFade, distFade, -1);
 
     return qtrue;
   }
@@ -1588,10 +1517,8 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
     // now add shadows for the various body parts
     for (tagIndex = 0; shadowParts[tagIndex].tagname; tagIndex++) {
       // grab each tag with this name
-      for (subIndex = 0;
-           (subIndex = CG_GetOriginForTag(cent, &cent->pe.bodyRefEnt,
-                                          shadowParts[tagIndex].tagname,
-                                          subIndex, origin, axis)) >= 0;
+      for (subIndex = 0; (subIndex = CG_GetOriginForTag(cent, &cent->pe.bodyRefEnt, shadowParts[tagIndex].tagname,
+                                                        subIndex, origin, axis)) >= 0;
            subIndex++) {
         // project it onto the shadow plane
         if (origin[2] < *shadowPlane) {
@@ -1604,9 +1531,8 @@ static qboolean CG_PlayerShadow(centity_t *cent, float *shadowPlane,
 
         AxisToAngles(axis, angles);
 
-        CG_ImpactMark(shadowParts[tagIndex].shader, origin, projection,
-                      shadowParts[tagIndex].size, angles[YAW], distFade,
-                      distFade, distFade, distFade, -1);
+        CG_ImpactMark(shadowParts[tagIndex].shader, origin, projection, shadowParts[tagIndex].size, angles[YAW],
+                      distFade, distFade, distFade, distFade, -1);
       }
     }
   }
@@ -1647,14 +1573,12 @@ static void CG_PlayerSplash(centity_t *cent) {
 
   // if the head isn't out of liquid, don't make a mark
   contents = CG_PointContents(start, 0);
-  if (contents &
-      (CONTENTS_SOLID | CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA)) {
+  if (contents & (CONTENTS_SOLID | CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA)) {
     return;
   }
 
   // trace down to find the surface
-  trap_CM_BoxTrace(&trace, start, end, NULL, NULL, 0,
-                   (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA));
+  trap_CM_BoxTrace(&trace, start, end, NULL, NULL, 0, (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA));
 
   if (trace.fraction == 1.0) {
     return;
@@ -1662,44 +1586,44 @@ static void CG_PlayerSplash(centity_t *cent) {
 
   // create a mark polygon
   VectorCopy(trace.endpos, verts[0].xyz);
-  verts[0].xyz[0] -= 32;
-  verts[0].xyz[1] -= 32;
-  verts[0].st[0] = 0;
-  verts[0].st[1] = 0;
-  verts[0].modulate[0] = 255;
-  verts[0].modulate[1] = 255;
-  verts[0].modulate[2] = 255;
-  verts[0].modulate[3] = 255;
+  verts[0].xyz[0]      -= 32;
+  verts[0].xyz[1]      -= 32;
+  verts[0].st[0]        = 0;
+  verts[0].st[1]        = 0;
+  verts[0].modulate[0]  = 255;
+  verts[0].modulate[1]  = 255;
+  verts[0].modulate[2]  = 255;
+  verts[0].modulate[3]  = 255;
 
   VectorCopy(trace.endpos, verts[1].xyz);
-  verts[1].xyz[0] -= 32;
-  verts[1].xyz[1] += 32;
-  verts[1].st[0] = 0;
-  verts[1].st[1] = 1;
-  verts[1].modulate[0] = 255;
-  verts[1].modulate[1] = 255;
-  verts[1].modulate[2] = 255;
-  verts[1].modulate[3] = 255;
+  verts[1].xyz[0]      -= 32;
+  verts[1].xyz[1]      += 32;
+  verts[1].st[0]        = 0;
+  verts[1].st[1]        = 1;
+  verts[1].modulate[0]  = 255;
+  verts[1].modulate[1]  = 255;
+  verts[1].modulate[2]  = 255;
+  verts[1].modulate[3]  = 255;
 
   VectorCopy(trace.endpos, verts[2].xyz);
-  verts[2].xyz[0] += 32;
-  verts[2].xyz[1] += 32;
-  verts[2].st[0] = 1;
-  verts[2].st[1] = 1;
-  verts[2].modulate[0] = 255;
-  verts[2].modulate[1] = 255;
-  verts[2].modulate[2] = 255;
-  verts[2].modulate[3] = 255;
+  verts[2].xyz[0]      += 32;
+  verts[2].xyz[1]      += 32;
+  verts[2].st[0]        = 1;
+  verts[2].st[1]        = 1;
+  verts[2].modulate[0]  = 255;
+  verts[2].modulate[1]  = 255;
+  verts[2].modulate[2]  = 255;
+  verts[2].modulate[3]  = 255;
 
   VectorCopy(trace.endpos, verts[3].xyz);
-  verts[3].xyz[0] += 32;
-  verts[3].xyz[1] -= 32;
-  verts[3].st[0] = 1;
-  verts[3].st[1] = 0;
-  verts[3].modulate[0] = 255;
-  verts[3].modulate[1] = 255;
-  verts[3].modulate[2] = 255;
-  verts[3].modulate[3] = 255;
+  verts[3].xyz[0]      += 32;
+  verts[3].xyz[1]      -= 32;
+  verts[3].st[0]        = 1;
+  verts[3].st[1]        = 0;
+  verts[3].modulate[0]  = 255;
+  verts[3].modulate[1]  = 255;
+  verts[3].modulate[2]  = 255;
+  verts[3].modulate[3]  = 255;
 
   trap_R_AddPolyToScene(cgs.media.wakeMarkShader, 4, verts);
 }
@@ -1714,12 +1638,12 @@ Adds a piece with modifications or duplications for powerups
 Also called by CG_Missile for quad rockets, but nobody can tell...
 ===============
 */
-void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team,
-                                 entityState_t *es, const vec3_t fireRiseDir) {
+void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team, entityState_t *es,
+                                 const vec3_t fireRiseDir) {
   centity_t *cent;
   refEntity_t backupRefEnt; //, parentEnt;
   qboolean onFire = qfalse;
-  float alpha = 0.0;
+  float alpha     = 0.0;
   float fireStart, fireEnd;
 
   cent = &cg_entities[es->number];
@@ -1743,10 +1667,10 @@ void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team,
     // set the alpha
     if (ent->entityNum == cg.snap->ps.clientNum) {
       fireStart = cg.snap->ps.onFireStart;
-      fireEnd = cg.snap->ps.onFireStart + 1500;
+      fireEnd   = cg.snap->ps.onFireStart + 1500;
     } else {
       fireStart = es->onFireStart;
-      fireEnd = es->onFireEnd;
+      fireEnd   = es->onFireEnd;
     }
 
     alpha = (cg.time - fireStart) / 1500.0;
@@ -1774,9 +1698,7 @@ void CG_AddRefEntityWithPowerups(refEntity_t *ent, int powerups, int team,
     trap_R_AddRefEntityToScene(ent);
 
     if (ent->hModel == cent->pe.bodyRefEnt.hModel) {
-      trap_S_AddLoopingSound(ent->origin, vec3_origin,
-                             cgs.media.flameCrackSound, (int)(255.0 * alpha),
-                             0);
+      trap_S_AddLoopingSound(ent->origin, vec3_origin, cgs.media.flameCrackSound, (int)(255.0 * alpha), 0);
     }
   }
 
@@ -1798,8 +1720,7 @@ void CG_AnimPlayerConditions(bg_character_t *character, centity_t *cent) {
   if (!character) {
     return;
   }
-  if (cg.snap && cg.snap->ps.clientNum == cent->currentState.number &&
-      !cg.renderingThirdPerson) {
+  if (cg.snap && cg.snap->ps.clientNum == cent->currentState.number && !cg.renderingThirdPerson) {
     return;
   }
 
@@ -1807,27 +1728,22 @@ void CG_AnimPlayerConditions(bg_character_t *character, centity_t *cent) {
 
   // WEAPON
   if (es->eFlags & EF_ZOOMING) {
-    BG_UpdateConditionValue(es->clientNum, ANIM_COND_WEAPON, WP_BINOCULARS,
-                            qtrue);
+    BG_UpdateConditionValue(es->clientNum, ANIM_COND_WEAPON, WP_BINOCULARS, qtrue);
   } else {
     BG_UpdateConditionValue(es->clientNum, ANIM_COND_WEAPON, es->weapon, qtrue);
   }
 
   // MOUNTED
   if ((es->eFlags & EF_MG42_ACTIVE) || (es->eFlags & EF_MOUNTEDTANK)) {
-    BG_UpdateConditionValue(es->clientNum, ANIM_COND_MOUNTED, MOUNTED_MG42,
-                            qtrue);
+    BG_UpdateConditionValue(es->clientNum, ANIM_COND_MOUNTED, MOUNTED_MG42, qtrue);
   } else if (es->eFlags & EF_AAGUN_ACTIVE) {
-    BG_UpdateConditionValue(es->clientNum, ANIM_COND_MOUNTED, MOUNTED_AAGUN,
-                            qtrue);
+    BG_UpdateConditionValue(es->clientNum, ANIM_COND_MOUNTED, MOUNTED_AAGUN, qtrue);
   } else {
-    BG_UpdateConditionValue(es->clientNum, ANIM_COND_MOUNTED, MOUNTED_UNUSED,
-                            qtrue);
+    BG_UpdateConditionValue(es->clientNum, ANIM_COND_MOUNTED, MOUNTED_UNUSED, qtrue);
   }
 
   // UNDERHAND
-  BG_UpdateConditionValue(es->clientNum, ANIM_COND_UNDERHAND,
-                          cent->lerpAngles[0] > 0, qtrue);
+  BG_UpdateConditionValue(es->clientNum, ANIM_COND_UNDERHAND, cent->lerpAngles[0] > 0, qtrue);
 
   if (es->eFlags & EF_CROUCHING) {
     BG_UpdateConditionValue(es->clientNum, ANIM_COND_CROUCHING, qtrue, qtrue);
@@ -1844,9 +1760,8 @@ void CG_AnimPlayerConditions(bg_character_t *character, centity_t *cent) {
   // reverse engineer the legs anim -> movetype (if possible)
   legsAnim = es->legsAnim & ~ANIM_TOGGLEBIT;
   if (character->animModelInfo->animations[legsAnim]->movetype) {
-    BG_UpdateConditionValue(
-        es->clientNum, ANIM_COND_MOVETYPE,
-        character->animModelInfo->animations[legsAnim]->movetype, qfalse);
+    BG_UpdateConditionValue(es->clientNum, ANIM_COND_MOVETYPE, character->animModelInfo->animations[legsAnim]->movetype,
+                            qfalse);
   }
 }
 
@@ -1882,8 +1797,8 @@ void CG_Player(centity_t *cent) {
 
   cgsnap = &cg_entities[cg.snap->ps.clientNum];
 
-  shadow = qfalse;   // gjd added to make sure it was initialized
-  shadowPlane = 0.0; // ditto
+  shadow      = qfalse; // gjd added to make sure it was initialized
+  shadowPlane = 0.0;    // ditto
 
   // if set to invisible, skip
   if (cent->currentState.eFlags & EF_NODRAW) {
@@ -1908,24 +1823,19 @@ void CG_Player(centity_t *cent) {
   // Only hide if player is nonsolid
   if (!ETJump::playerIsSolid(cg.snap->ps.clientNum, clientNum)) {
     vec_t playerDist = Distance(cgsnap->lerpOrigin, cent->lerpOrigin);
-    int transZone = etj_hideDistance.integer + etj_hideFadeRange.integer;
+    int transZone    = etj_hideDistance.integer + etj_hideFadeRange.integer;
 
     // Hide players at close range
-    if (etj_hide.integer && ci->clientNum != cg.snap->ps.clientNum &&
-        playerDist < etj_hideDistance.integer) {
+    if (etj_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < etj_hideDistance.integer) {
       return;
     }
 
-    if (etj_hide.integer && ci->clientNum != cg.snap->ps.clientNum &&
-        playerDist < transZone) {
-
-      float diff = (transZone - playerDist) / etj_hideFadeRange.integer;
-      cg.currentTransparencyValue =
-          etj_playerOpacity.value - (etj_playerOpacity.value * diff);
+    if (etj_hide.integer && ci->clientNum != cg.snap->ps.clientNum && playerDist < transZone) {
+      float diff                  = (transZone - playerDist) / etj_hideFadeRange.integer;
+      cg.currentTransparencyValue = etj_playerOpacity.value - (etj_playerOpacity.value * diff);
     }
 
-    if (etj_hide.integer && ci->clientNum != cg.snap->ps.clientNum &&
-        cg.currentTransparencyValue <= 0) {
+    if (etj_hide.integer && ci->clientNum != cg.snap->ps.clientNum && cg.currentTransparencyValue <= 0) {
       return;
     }
 
@@ -1937,13 +1847,10 @@ void CG_Player(centity_t *cent) {
   character = CG_CharacterForClientinfo(ci, cent);
 
   if (cent->currentState.eFlags & EF_MOUNTEDTANK) {
-    VectorCopy(cg_entities[cg_entities[cent->currentState.clientNum].tagParent]
-                   .mountedMG42Player.origin,
-               playerOrigin);
+    VectorCopy(cg_entities[cg_entities[cent->currentState.clientNum].tagParent].mountedMG42Player.origin, playerOrigin);
   } else if (cent->currentState.eFlags & EF_MG42_ACTIVE ||
-             cent->currentState.eFlags &
-                 EF_AAGUN_ACTIVE) // Arnout: see if we're attached to a
-                                  // gun
+             cent->currentState.eFlags & EF_AAGUN_ACTIVE) // Arnout: see if we're attached to a
+                                                          // gun
   {
     centity_t *mg42;
     int num;
@@ -2009,8 +1916,7 @@ void CG_Player(centity_t *cent) {
 
   // get the player model information
   renderfx = 0;
-  if (cent->currentState.number == cg.snap->ps.clientNum &&
-      !cg.renderingThirdPerson) {
+  if (cent->currentState.number == cg.snap->ps.clientNum && !cg.renderingThirdPerson) {
     renderfx = RF_THIRD_PERSON; // only draw in mirrors
   }
 
@@ -2054,23 +1960,23 @@ void CG_Player(centity_t *cent) {
 
   body.hilightIntensity = hilightIntensity;
   head.hilightIntensity = hilightIntensity;
-  acc.hilightIntensity = hilightIntensity;
+  acc.hilightIntensity  = hilightIntensity;
 
   //
   // add the body
   //
   if (cent->currentState.eType == ET_CORPSE && cent->currentState.time2 == 1) {
-    body.hModel = character->undressedCorpseModel;
+    body.hModel     = character->undressedCorpseModel;
     body.customSkin = character->undressedCorpseSkin;
   } else {
     body.customSkin = character->skin;
-    body.hModel = character->mesh;
+    body.hModel     = character->mesh;
   }
 
   VectorCopy(playerOrigin, body.origin);
   VectorCopy(lightorigin, body.lightingOrigin);
   body.shadowPlane = shadowPlane;
-  body.renderfx = renderfx;
+  body.renderfx    = renderfx;
   VectorCopy(body.origin,
              body.oldorigin); // don't positionally lerp at all
 
@@ -2087,8 +1993,7 @@ void CG_Player(centity_t *cent) {
 
   ETJump_SetEntityAutoTransparency(&body);
 
-  CG_AddRefEntityWithPowerups(&body, cent->currentState.powerups, ci->team,
-                              &cent->currentState, cent->fireRiseDir);
+  CG_AddRefEntityWithPowerups(&body, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 
 // ydnar debug
 #if 0
@@ -2217,11 +2122,11 @@ void CG_Player(centity_t *cent) {
   CG_PositionRotatedEntityOnTag(&head, &body, "tag_head");
 
   head.shadowPlane = shadowPlane;
-  head.renderfx = renderfx;
+  head.renderfx    = renderfx;
 
   if (cent->currentState.eFlags & EF_FIRING) {
-    cent->pe.lastFiredWeaponTime = 0;
-    cent->pe.weaponFireTime += cg.frametime;
+    cent->pe.lastFiredWeaponTime  = 0;
+    cent->pe.weaponFireTime      += cg.frametime;
   } else {
     if (cent->pe.weaponFireTime > 500 && cent->pe.weaponFireTime) {
       cent->pe.lastFiredWeaponTime = cg.time;
@@ -2230,8 +2135,7 @@ void CG_Player(centity_t *cent) {
     cent->pe.weaponFireTime = 0;
   }
 
-  if (cent->currentState.eType != ET_CORPSE &&
-      !(cent->currentState.eFlags & EF_DEAD)) {
+  if (cent->currentState.eType != ET_CORPSE && !(cent->currentState.eFlags & EF_DEAD)) {
     hudHeadAnimNumber_t anim;
 
     if (cent->pe.weaponFireTime > 500) {
@@ -2242,18 +2146,16 @@ void CG_Player(centity_t *cent) {
       anim = HD_IDLE1;
     }
 
-    CG_HudHeadAnimation(character, &cent->pe.head, &head.oldframe, &head.frame,
-                        &head.backlerp, anim);
+    CG_HudHeadAnimation(character, &cent->pe.head, &head.oldframe, &head.frame, &head.backlerp, anim);
   } else {
-    head.frame = 0;
+    head.frame    = 0;
     head.oldframe = 0;
     head.backlerp = 0.f;
   }
   ETJump_SetEntityAutoTransparency(&head);
 
   // set blinking flag
-  CG_AddRefEntityWithPowerups(&head, cent->currentState.powerups, ci->team,
-                              &cent->currentState, cent->fireRiseDir);
+  CG_AddRefEntityWithPowerups(&head, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
 
   cent->pe.headRefEnt = head;
 
@@ -2288,8 +2190,7 @@ void CG_Player(centity_t *cent) {
 
     ETJump_SetEntityAutoTransparency(&acc);
 
-    CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team,
-                                &cent->currentState, cent->fireRiseDir);
+    CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
   }
 
   //
@@ -2299,13 +2200,12 @@ void CG_Player(centity_t *cent) {
     if (!(character->accModels[i])) {
       continue;
     }
-    acc.hModel = character->accModels[i];
+    acc.hModel     = character->accModels[i];
     acc.customSkin = character->accSkins[i];
 
     // Gordon: looted corpses dont have any accsserories, evil
     // looters :E
-    if (!(cent->currentState.eType == ET_CORPSE &&
-          cent->currentState.time2 == 1)) {
+    if (!(cent->currentState.eType == ET_CORPSE && cent->currentState.time2 == 1)) {
       switch (i) {
         case ACC_BELT_LEFT:
           CG_PositionEntityOnTag(&acc, &body, "tag_bright", 0, NULL);
@@ -2359,8 +2259,7 @@ void CG_Player(centity_t *cent) {
       // transparency and color
       ETJump_SetEntityAutoTransparency(&acc);
 
-      CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team,
-                                  &cent->currentState, cent->fireRiseDir);
+      CG_AddRefEntityWithPowerups(&acc, cent->currentState.powerups, ci->team, &cent->currentState, cent->fireRiseDir);
     }
   }
 
@@ -2371,8 +2270,7 @@ void CG_Player(centity_t *cent) {
 
 //=====================================================================
 
-extern void CG_ClearWeapLerpFrame(clientInfo_t *ci, lerpFrame_t *lf,
-                                  int animationNumber);
+extern void CG_ClearWeapLerpFrame(clientInfo_t *ci, lerpFrame_t *lf, int animationNumber);
 
 /*
 ===============
@@ -2388,44 +2286,40 @@ void CG_ResetPlayerEntity(centity_t *cent) {
   // added 	cent->extrapolated = qfalse;
 
   if (!(cent->currentState.eFlags & EF_DEAD)) {
-    CG_ClearLerpFrameRate(cent, &cgs.clientinfo[cent->currentState.clientNum],
-                          &cent->pe.legs, cent->currentState.legsAnim);
-    CG_ClearLerpFrame(cent, &cgs.clientinfo[cent->currentState.clientNum],
-                      &cent->pe.torso, cent->currentState.torsoAnim);
+    CG_ClearLerpFrameRate(cent, &cgs.clientinfo[cent->currentState.clientNum], &cent->pe.legs,
+                          cent->currentState.legsAnim);
+    CG_ClearLerpFrame(cent, &cgs.clientinfo[cent->currentState.clientNum], &cent->pe.torso,
+                      cent->currentState.torsoAnim);
 
     memset(&cent->pe.legs, 0, sizeof(cent->pe.legs));
-    cent->pe.legs.yawAngle = cent->rawAngles[YAW];
-    cent->pe.legs.yawing = qfalse;
+    cent->pe.legs.yawAngle   = cent->rawAngles[YAW];
+    cent->pe.legs.yawing     = qfalse;
     cent->pe.legs.pitchAngle = 0;
-    cent->pe.legs.pitching = qfalse;
+    cent->pe.legs.pitching   = qfalse;
 
     memset(&cent->pe.torso, 0, sizeof(cent->pe.legs));
-    cent->pe.torso.yawAngle = cent->rawAngles[YAW];
-    cent->pe.torso.yawing = qfalse;
+    cent->pe.torso.yawAngle   = cent->rawAngles[YAW];
+    cent->pe.torso.yawing     = qfalse;
     cent->pe.torso.pitchAngle = cent->rawAngles[PITCH];
-    cent->pe.torso.pitching = qfalse;
+    cent->pe.torso.pitching   = qfalse;
   }
 
-  BG_EvaluateTrajectory(&cent->currentState.pos, cg.time, cent->lerpOrigin,
-                        qfalse, cent->currentState.effect2Time);
-  BG_EvaluateTrajectory(&cent->currentState.apos, cg.time, cent->lerpAngles,
-                        qtrue, cent->currentState.effect2Time);
+  BG_EvaluateTrajectory(&cent->currentState.pos, cg.time, cent->lerpOrigin, qfalse, cent->currentState.effect2Time);
+  BG_EvaluateTrajectory(&cent->currentState.apos, cg.time, cent->lerpAngles, qtrue, cent->currentState.effect2Time);
 
   VectorCopy(cent->lerpOrigin, cent->rawOrigin);
   VectorCopy(cent->lerpAngles, cent->rawAngles);
 
   if (cg_debugPosition.integer) {
-    CG_Printf("%i ResetPlayerEntity yaw=%.6f\n", cent->currentState.number,
-              cent->pe.torso.yawAngle);
+    CG_Printf("%i ResetPlayerEntity yaw=%.6f\n", cent->currentState.number, cent->pe.torso.yawAngle);
   }
 
-  cent->pe.painAnimLegs = -1;
+  cent->pe.painAnimLegs  = -1;
   cent->pe.painAnimTorso = -1;
-  cent->pe.animSpeed = 1.0;
+  cent->pe.animSpeed     = 1.0;
 }
 
-void CG_GetBleedOrigin(vec3_t head_origin, vec3_t body_origin,
-                       int fleshEntityNum) {
+void CG_GetBleedOrigin(vec3_t head_origin, vec3_t body_origin, int fleshEntityNum) {
   clientInfo_t *ci;
   refEntity_t body{};
   refEntity_t head{};
@@ -2440,7 +2334,7 @@ void CG_GetBleedOrigin(vec3_t head_origin, vec3_t body_origin,
 
   character = CG_CharacterForClientinfo(ci, NULL);
 
-  cent = &cg_entities[fleshEntityNum];
+  cent       = &cg_entities[fleshEntityNum];
   backupCent = *cent;
 
   CG_PlayerAngles(cent, body.axis, body.torsoAxis, head.axis);
@@ -2488,8 +2382,7 @@ qboolean CG_GetTag(int clientNum, char *tagname, orientation_t *orientation) {
 
   ci = &cgs.clientinfo[clientNum];
 
-  if (cg.snap && clientNum == cg.snap->ps.clientNum &&
-      cg.renderingThirdPerson) {
+  if (cg.snap && clientNum == cg.snap->ps.clientNum && cg.renderingThirdPerson) {
     cent = &cg.predictedPlayerEntity;
   } else {
     cent = &cg_entities[ci->clientNum];
@@ -2524,8 +2417,7 @@ qboolean CG_GetTag(int clientNum, char *tagname, orientation_t *orientation) {
 CG_GetWeaponTag
 ===============
 */
-qboolean CG_GetWeaponTag(int clientNum, const char *tagname,
-                         orientation_t *orientation) {
+qboolean CG_GetWeaponTag(int clientNum, const char *tagname, orientation_t *orientation) {
   clientInfo_t *ci;
   centity_t *cent;
   refEntity_t *refent;
@@ -2535,8 +2427,7 @@ qboolean CG_GetWeaponTag(int clientNum, const char *tagname,
 
   ci = &cgs.clientinfo[clientNum];
 
-  if (cg.snap && clientNum == cg.snap->ps.clientNum &&
-      cg.renderingThirdPerson) {
+  if (cg.snap && clientNum == cg.snap->ps.clientNum && cg.renderingThirdPerson) {
     cent = &cg.predictedPlayerEntity;
   } else {
     cent = &cg_entities[ci->clientNum];
@@ -2579,8 +2470,7 @@ qboolean CG_GetWeaponTag(int clientNum, const char *tagname,
 CG_SwingAngles_Limbo
 ==================
 */
-static void CG_SwingAngles_Limbo(float destination, float swingTolerance,
-                                 float clampTolerance, float speed,
+static void CG_SwingAngles_Limbo(float destination, float swingTolerance, float clampTolerance, float speed,
                                  float *angle, int *swinging) {
   float swing;
   float move;
@@ -2614,14 +2504,14 @@ static void CG_SwingAngles_Limbo(float destination, float swingTolerance,
   if (swing >= 0) {
     move = cg.frametime * scale * speed;
     if (move >= swing) {
-      move = swing;
+      move      = swing;
       *swinging = qfalse;
     }
     *angle = AngleMod(*angle + move);
   } else if (swing < 0) {
     move = cg.frametime * scale * -speed;
     if (move <= swing) {
-      move = swing;
+      move      = swing;
       *swinging = qfalse;
     }
     *angle = AngleMod(*angle + move);
@@ -2641,8 +2531,7 @@ static void CG_SwingAngles_Limbo(float destination, float swingTolerance,
 CG_PlayerAngles_Limbo
 ===============
 */
-void CG_PlayerAngles_Limbo(playerInfo_t *pi, vec3_t legs[3], vec3_t torso[3],
-                           vec3_t head[3]) {
+void CG_PlayerAngles_Limbo(playerInfo_t *pi, vec3_t legs[3], vec3_t torso[3], vec3_t head[3]) {
   vec3_t legsAngles, torsoAngles, headAngles;
   float dest;
 
@@ -2652,8 +2541,8 @@ void CG_PlayerAngles_Limbo(playerInfo_t *pi, vec3_t legs[3], vec3_t torso[3],
   VectorClear(torsoAngles);
 
   torsoAngles[YAW] = 180;
-  legsAngles[YAW] = 180;
-  headAngles[YAW] = 180;
+  legsAngles[YAW]  = 180;
+  headAngles[YAW]  = 180;
 
   // --------- pitch -------------
 
@@ -2663,8 +2552,7 @@ void CG_PlayerAngles_Limbo(playerInfo_t *pi, vec3_t legs[3], vec3_t torso[3],
   } else {
     dest = headAngles[PITCH] * 0.75;
   }
-  CG_SwingAngles_Limbo(dest, 15, 30, 0.1, &pi->torso.pitchAngle,
-                       &pi->torso.pitching);
+  CG_SwingAngles_Limbo(dest, 15, 30, 0.1, &pi->torso.pitchAngle, &pi->torso.pitching);
   torsoAngles[PITCH] = pi->torso.pitchAngle;
 
   // pull the angles back out of the hierarchial chain
@@ -2692,15 +2580,16 @@ animation_t *CG_GetLimboAnimation(playerInfo_t *pi, const char *name) {
     }
   }
 
-  return character->animModelInfo
-      ->animations[0]; // safe fallback so we never end up without an
-                       // animation (which will crash the game)
+  return character->animModelInfo->animations[0]; // safe fallback so we never end up without an
+                                                  // animation (which will crash the game)
 }
 
-int CG_GetSelectedWeapon(void) { return 0; }
+int CG_GetSelectedWeapon(void) {
+  return 0;
+}
 
-void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
-                         int time, clientInfo_t *ci, qboolean animatedHead) {
+void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi, int time, clientInfo_t *ci,
+                         qboolean animatedHead) {
   refdef_t refdef;
   refEntity_t body{};
   refEntity_t head{};
@@ -2712,7 +2601,7 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
   vec3_t maxs = {16, 16, 32};
   float len;
   //	float			xx;
-  vec4_t hcolor = {1, 0, 0, 0.5};
+  vec4_t hcolor             = {1, 0, 0, 0.5};
   bg_character_t *character = BG_GetCharacter(pi->teamNum, pi->classNum);
   int i;
 
@@ -2725,9 +2614,9 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
 
   AxisClear(refdef.viewaxis);
 
-  refdef.x = x;
-  refdef.y = y;
-  refdef.width = w;
+  refdef.x      = x;
+  refdef.y      = y;
+  refdef.width  = w;
   refdef.height = h;
 
   /*	refdef.fov_x = (int)((float)refdef.width / 640.0f * 90.0f);
@@ -2746,7 +2635,7 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
   // HACKS FOR SPECIFIC THINGS THAT CAN BE DONE CLEANLY
   if (animatedHead == qfalse) {
     // END Mad Doc - TDF
-    len = 0.9 * (maxs[2] - mins[2]); // NERVE - SMF - changed from 0.7
+    len       = 0.9 * (maxs[2] - mins[2]); // NERVE - SMF - changed from 0.7
     origin[0] = pi->y - 70 + (len / tan(DEG2RAD(refdef.fov_x) * 0.5));
     origin[1] = 0.5 * (mins[1] + maxs[1]);
     origin[2] = pi->z - 23 + (-0.5 * (mins[2] + maxs[2]));
@@ -2774,7 +2663,7 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
   // add the body
   //
 
-  body.hModel = character->mesh;
+  body.hModel     = character->mesh;
   body.customSkin = character->skin;
 
   body.renderfx = renderfx;
@@ -2784,18 +2673,15 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
   VectorCopy(body.origin, body.oldorigin);
 
   if (cg.time >= pi->torso.frameTime) {
-    pi->torso.oldFrameTime = pi->torso.frameTime;
-    pi->torso.oldFrame = pi->torso.frame;
-    pi->torso.oldFrameModel = pi->torso.frameModel =
-        pi->torso.animation->mdxFile;
+    pi->torso.oldFrameTime  = pi->torso.frameTime;
+    pi->torso.oldFrame      = pi->torso.frame;
+    pi->torso.oldFrameModel = pi->torso.frameModel = pi->torso.animation->mdxFile;
 
     while (cg.time >= pi->torso.frameTime) {
-      pi->torso.frameTime += (pi->torso.animation->duration /
-                              (float)(pi->torso.animation->numFrames));
+      pi->torso.frameTime += (pi->torso.animation->duration / (float)(pi->torso.animation->numFrames));
       pi->torso.frame++;
 
-      if (pi->torso.frame >=
-          pi->torso.animation->firstFrame + pi->torso.animation->numFrames) {
+      if (pi->torso.frame >= pi->torso.animation->firstFrame + pi->torso.animation->numFrames) {
         pi->torso.frame = pi->torso.animation->firstFrame;
       }
     }
@@ -2805,22 +2691,19 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
     pi->torso.backlerp = 0;
   } else {
     pi->torso.backlerp =
-        1.0 - (float)(cg.time - pi->torso.oldFrameTime) /
-                  (pi->torso.frameTime - pi->torso.oldFrameTime);
+      1.0 - (float)(cg.time - pi->torso.oldFrameTime) / (pi->torso.frameTime - pi->torso.oldFrameTime);
   }
 
   if (cg.time >= pi->legs.frameTime) {
-    pi->legs.oldFrameTime = pi->legs.frameTime;
-    pi->legs.oldFrame = pi->legs.frame;
+    pi->legs.oldFrameTime  = pi->legs.frameTime;
+    pi->legs.oldFrame      = pi->legs.frame;
     pi->legs.oldFrameModel = pi->legs.frameModel = pi->legs.animation->mdxFile;
 
     while (cg.time >= pi->legs.frameTime) {
-      pi->legs.frameTime += (pi->legs.animation->duration /
-                             (float)(pi->legs.animation->numFrames));
+      pi->legs.frameTime += (pi->legs.animation->duration / (float)(pi->legs.animation->numFrames));
       pi->legs.frame++;
 
-      if (pi->legs.frame >=
-          pi->legs.animation->firstFrame + pi->legs.animation->numFrames) {
+      if (pi->legs.frame >= pi->legs.animation->firstFrame + pi->legs.animation->numFrames) {
         pi->legs.frame = pi->legs.animation->firstFrame;
       }
     }
@@ -2829,20 +2712,19 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
   if (pi->legs.frameTime == pi->legs.oldFrameTime) {
     pi->legs.backlerp = 0;
   } else {
-    pi->legs.backlerp = 1.0 - (float)(cg.time - pi->legs.oldFrameTime) /
-                                  (pi->legs.frameTime - pi->legs.oldFrameTime);
+    pi->legs.backlerp = 1.0 - (float)(cg.time - pi->legs.oldFrameTime) / (pi->legs.frameTime - pi->legs.oldFrameTime);
   }
 
-  body.oldTorsoFrame = pi->torso.oldFrame;
-  body.torsoFrame = pi->torso.frame;
-  body.torsoBacklerp = pi->torso.backlerp;
-  body.torsoFrameModel = pi->torso.frameModel;
+  body.oldTorsoFrame      = pi->torso.oldFrame;
+  body.torsoFrame         = pi->torso.frame;
+  body.torsoBacklerp      = pi->torso.backlerp;
+  body.torsoFrameModel    = pi->torso.frameModel;
   body.oldTorsoFrameModel = pi->torso.oldFrameModel;
 
-  body.oldframe = pi->legs.oldFrame;
-  body.frame = pi->legs.frame;
-  body.backlerp = pi->legs.backlerp;
-  body.frameModel = pi->legs.frameModel;
+  body.oldframe      = pi->legs.oldFrame;
+  body.frame         = pi->legs.frame;
+  body.backlerp      = pi->legs.backlerp;
+  body.frameModel    = pi->legs.frameModel;
   body.oldframeModel = pi->legs.oldFrameModel;
 
   trap_R_AddRefEntityToScene(&body);
@@ -2863,7 +2745,7 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
 
   head.renderfx = renderfx;
 
-  head.frame = 0;
+  head.frame    = 0;
   head.oldframe = 0;
   head.backlerp = 0.f;
 
@@ -2876,7 +2758,7 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
     if (!(character->accModels[i])) {
       continue;
     }
-    acc.hModel = character->accModels[i];
+    acc.hModel     = character->accModels[i];
     acc.customSkin = character->accSkins[i];
 
     switch (i) {
@@ -2956,92 +2838,71 @@ void CG_DrawPlayer_Limbo(float x, float y, float w, float h, playerInfo_t *pi,
 }
 
 weaponType_t weaponTypes[] = {
-    {WP_MP40, "MP 40"},
-    {WP_THOMPSON, "THOMPSON"},
-    {
-        WP_STEN,
-        "STEN",
-    },
-    {
-        WP_PANZERFAUST,
-        "PANZERFAUST",
-    },
-    {
-        WP_FLAMETHROWER,
-        "FLAMETHROWER",
-    },
-    {
-        WP_KAR98,
-        "K43",
-    },
-    {
-        WP_CARBINE,
-        "M1 GARAND",
-    },
-    {
-        WP_FG42,
-        "FG42",
-    },
-    {
-        WP_GARAND,
-        "M1 GARAND",
-    },
-    {
-        WP_MOBILE_MG42,
-        "MOBILE MG42",
-    },
-    {
-        WP_K43,
-        "K43",
-    },
-    {
-        WP_MORTAR,
-        "MORTAR",
-    },
-    {
-        WP_COLT,
-        "COLT",
-    },
-    {
-        WP_LUGER,
-        "LUGER",
-    },
-    {
-        WP_AKIMBO_COLT,
-        "AKIMBO COLTS",
-    },
-    {
-        WP_AKIMBO_LUGER,
-        "AKIMBO LUGERS",
-    },
-    {
-        WP_SILENCED_COLT,
-        "COLT",
-    },
-    {
-        WP_SILENCER,
-        "LUGER",
-    },
-    {
-        WP_AKIMBO_SILENCEDCOLT,
-        "AKIMBO COLTS",
-    },
-    {
-        WP_AKIMBO_SILENCEDLUGER,
-        "AKIMBO LUGERS",
-    },
-    {
-        WP_PORTAL_GUN,
-        "PORTAL GUN",
-    }, // Feen: PGM
-    {
-        WP_NONE,
-        NULL,
-    },
-    {
-        (weapon_t)-1,
-        NULL,
-    },
+  {WP_MP40, "MP 40"},
+  {WP_THOMPSON, "THOMPSON"},
+  {
+   WP_STEN, "STEN",
+   },
+  {
+   WP_PANZERFAUST, "PANZERFAUST",
+   },
+  {
+   WP_FLAMETHROWER, "FLAMETHROWER",
+   },
+  {
+   WP_KAR98, "K43",
+   },
+  {
+   WP_CARBINE, "M1 GARAND",
+   },
+  {
+   WP_FG42, "FG42",
+   },
+  {
+   WP_GARAND, "M1 GARAND",
+   },
+  {
+   WP_MOBILE_MG42, "MOBILE MG42",
+   },
+  {
+   WP_K43, "K43",
+   },
+  {
+   WP_MORTAR, "MORTAR",
+   },
+  {
+   WP_COLT, "COLT",
+   },
+  {
+   WP_LUGER, "LUGER",
+   },
+  {
+   WP_AKIMBO_COLT, "AKIMBO COLTS",
+   },
+  {
+   WP_AKIMBO_LUGER, "AKIMBO LUGERS",
+   },
+  {
+   WP_SILENCED_COLT, "COLT",
+   },
+  {
+   WP_SILENCER, "LUGER",
+   },
+  {
+   WP_AKIMBO_SILENCEDCOLT, "AKIMBO COLTS",
+   },
+  {
+   WP_AKIMBO_SILENCEDLUGER, "AKIMBO LUGERS",
+   },
+  {
+   WP_PORTAL_GUN, "PORTAL GUN",
+   }, // Feen: PGM
+  {
+   WP_NONE, NULL,
+   },
+  {
+   (weapon_t)-1,
+   NULL, },
 };
 
 weaponType_t *WM_FindWeaponTypeForWeapon(weapon_t weapon) {
@@ -3070,8 +2931,7 @@ void WM_RegisterWeaponTypeShaders() {
   }
 }
 
-void CG_MenuSetAnimation(playerInfo_t *pi, const char *legsAnim,
-                         const char *torsoAnim, qboolean force,
+void CG_MenuSetAnimation(playerInfo_t *pi, const char *legsAnim, const char *torsoAnim, qboolean force,
                          qboolean clearpending) {
   lastLegsAnim = pi->legs.animation = CG_GetLimboAnimation(pi, legsAnim);
   lastTorsoAnim = pi->torso.animation = CG_GetLimboAnimation(pi, torsoAnim);
@@ -3080,23 +2940,22 @@ void CG_MenuSetAnimation(playerInfo_t *pi, const char *legsAnim,
     pi->legs.oldFrame = pi->legs.frame = pi->legs.animation->firstFrame;
     pi->torso.oldFrame = pi->torso.frame = pi->torso.animation->firstFrame;
 
-    pi->legs.frameTime = cg.time;
+    pi->legs.frameTime  = cg.time;
     pi->torso.frameTime = cg.time;
 
     pi->legs.oldFrameModel = pi->legs.frameModel = pi->legs.animation->mdxFile;
-    pi->torso.oldFrameModel = pi->torso.frameModel =
-        pi->torso.animation->mdxFile;
+    pi->torso.oldFrameModel = pi->torso.frameModel = pi->torso.animation->mdxFile;
 
     pi->numPendingAnimations = 0;
   } else {
-    pi->legs.oldFrame = pi->legs.frame;
-    pi->legs.oldFrameModel = pi->legs.frameModel;
-    pi->legs.frame = pi->legs.animation->firstFrame;
-    pi->torso.oldFrame = pi->torso.frame;
+    pi->legs.oldFrame       = pi->legs.frame;
+    pi->legs.oldFrameModel  = pi->legs.frameModel;
+    pi->legs.frame          = pi->legs.animation->firstFrame;
+    pi->torso.oldFrame      = pi->torso.frame;
     pi->torso.oldFrameModel = pi->torso.frameModel;
-    pi->torso.frame = pi->torso.animation->firstFrame;
+    pi->torso.frame         = pi->torso.animation->firstFrame;
 
-    pi->legs.frameTime += 200; // Give them some time to lerp between animations
+    pi->legs.frameTime  += 200; // Give them some time to lerp between animations
     pi->torso.frameTime += 200;
   }
 
@@ -3105,25 +2964,21 @@ void CG_MenuSetAnimation(playerInfo_t *pi, const char *legsAnim,
   }
 }
 
-void CG_MenuPendingAnimation(playerInfo_t *pi, const char *legsAnim,
-                             const char *torsoAnim, int delay) {
+void CG_MenuPendingAnimation(playerInfo_t *pi, const char *legsAnim, const char *torsoAnim, int delay) {
   if (pi->numPendingAnimations >= 4) {
     return;
   }
 
   if (!pi->numPendingAnimations) {
-    pi->pendingAnimations[pi->numPendingAnimations].pendingAnimationTime =
-        cg.time + delay;
+    pi->pendingAnimations[pi->numPendingAnimations].pendingAnimationTime = cg.time + delay;
   } else {
     pi->pendingAnimations[pi->numPendingAnimations].pendingAnimationTime =
-        pi->pendingAnimations[pi->numPendingAnimations - 1]
-            .pendingAnimationTime +
-        delay;
+      pi->pendingAnimations[pi->numPendingAnimations - 1].pendingAnimationTime + delay;
   }
-  pi->pendingAnimations[pi->numPendingAnimations].pendingLegsAnim = legsAnim;
+  pi->pendingAnimations[pi->numPendingAnimations].pendingLegsAnim  = legsAnim;
   pi->pendingAnimations[pi->numPendingAnimations].pendingTorsoAnim = torsoAnim;
 
-  lastLegsAnim = CG_GetLimboAnimation(pi, legsAnim);
+  lastLegsAnim  = CG_GetLimboAnimation(pi, legsAnim);
   lastTorsoAnim = CG_GetLimboAnimation(pi, torsoAnim);
   pi->numPendingAnimations++;
 }
@@ -3135,27 +2990,23 @@ void CG_MenuCheckPendingAnimation(playerInfo_t *pi) {
     return;
   }
 
-  if (pi->pendingAnimations[0].pendingAnimationTime &&
-      pi->pendingAnimations[0].pendingAnimationTime < cg.time) {
-    CG_MenuSetAnimation(pi, pi->pendingAnimations[0].pendingLegsAnim,
-                        pi->pendingAnimations[0].pendingTorsoAnim, qfalse,
+  if (pi->pendingAnimations[0].pendingAnimationTime && pi->pendingAnimations[0].pendingAnimationTime < cg.time) {
+    CG_MenuSetAnimation(pi, pi->pendingAnimations[0].pendingLegsAnim, pi->pendingAnimations[0].pendingTorsoAnim, qfalse,
                         qfalse);
 
     for (i = 0; i < 3; i++) {
-      memcpy(&pi->pendingAnimations[i], &pi->pendingAnimations[i + 1],
-             sizeof(pendingAnimation_t));
+      memcpy(&pi->pendingAnimations[i], &pi->pendingAnimations[i + 1], sizeof(pendingAnimation_t));
     }
 
     pi->numPendingAnimations--;
   }
 }
 
-void CG_SetHudHeadLerpFrameAnimation(bg_character_t *ch, lerpFrame_t *lf,
-                                     int newAnimation) {
+void CG_SetHudHeadLerpFrameAnimation(bg_character_t *ch, lerpFrame_t *lf, int newAnimation) {
   animation_t *anim;
 
-  lf->animationNumber = newAnimation;
-  newAnimation &= ~ANIM_TOGGLEBIT;
+  lf->animationNumber  = newAnimation;
+  newAnimation        &= ~ANIM_TOGGLEBIT;
 
   if (newAnimation < 0 || newAnimation >= MAX_HD_ANIMATIONS) {
     CG_Error("Bad animation number "
@@ -3165,20 +3016,18 @@ void CG_SetHudHeadLerpFrameAnimation(bg_character_t *ch, lerpFrame_t *lf,
 
   anim = &ch->hudheadanimations[newAnimation];
 
-  lf->animation = anim;
+  lf->animation     = anim;
   lf->animationTime = lf->frameTime + anim->initialLerp;
 }
 
-void CG_ClearHudHeadLerpFrame(bg_character_t *ch, lerpFrame_t *lf,
-                              int animationNumber) {
+void CG_ClearHudHeadLerpFrame(bg_character_t *ch, lerpFrame_t *lf, int animationNumber) {
   lf->frameTime = lf->oldFrameTime = cg.time;
   CG_SetHudHeadLerpFrameAnimation(ch, lf, animationNumber);
   lf->oldFrame = lf->frame = lf->animation->firstFrame;
   lf->oldFrameModel = lf->frameModel = lf->animation->mdxFile;
 }
 
-void CG_RunHudHeadLerpFrame(bg_character_t *ch, lerpFrame_t *lf,
-                            int newAnimation, float speedScale) {
+void CG_RunHudHeadLerpFrame(bg_character_t *ch, lerpFrame_t *lf, int newAnimation, float speedScale) {
   int f;
   animation_t *anim;
 
@@ -3192,8 +3041,8 @@ void CG_RunHudHeadLerpFrame(bg_character_t *ch, lerpFrame_t *lf,
   // if we have passed the current frame, move it to
   // oldFrame and calculate a new frame
   if (cg.time >= lf->frameTime) {
-    lf->oldFrame = lf->frame;
-    lf->oldFrameTime = lf->frameTime;
+    lf->oldFrame      = lf->frame;
+    lf->oldFrameTime  = lf->frameTime;
     lf->oldFrameModel = lf->frameModel;
 
     // get the next frame based on the animation
@@ -3206,7 +3055,7 @@ void CG_RunHudHeadLerpFrame(bg_character_t *ch, lerpFrame_t *lf,
     } else {
       lf->frameTime = lf->oldFrameTime + anim->frameLerp;
     }
-    f = (lf->frameTime - lf->animationTime) / anim->frameLerp;
+    f  = (lf->frameTime - lf->animationTime) / anim->frameLerp;
     f *= speedScale; // adjust for haste, etc
     if (f >= anim->numFrames) {
       f -= anim->numFrames;
@@ -3221,7 +3070,7 @@ void CG_RunHudHeadLerpFrame(bg_character_t *ch, lerpFrame_t *lf,
         lf->frameTime = cg.time;
       }
     }
-    lf->frame = anim->firstFrame + f;
+    lf->frame      = anim->firstFrame + f;
     lf->frameModel = anim->mdxFile;
     if (cg.time > lf->frameTime) {
       lf->frameTime = cg.time;
@@ -3239,27 +3088,24 @@ void CG_RunHudHeadLerpFrame(bg_character_t *ch, lerpFrame_t *lf,
   if (lf->frameTime == lf->oldFrameTime) {
     lf->backlerp = 0;
   } else {
-    lf->backlerp = 1.0 - (float)(cg.time - lf->oldFrameTime) /
-                             (lf->frameTime - lf->oldFrameTime);
+    lf->backlerp = 1.0 - (float)(cg.time - lf->oldFrameTime) / (lf->frameTime - lf->oldFrameTime);
   }
 }
 
-void CG_HudHeadAnimation(bg_character_t *ch, lerpFrame_t *lf, int *oldframe,
-                         int *frame, float *backlerp,
+void CG_HudHeadAnimation(bg_character_t *ch, lerpFrame_t *lf, int *oldframe, int *frame, float *backlerp,
                          hudHeadAnimNumber_t animation) {
   //	centity_t *cent = &cg.predictedPlayerEntity;
 
   CG_RunHudHeadLerpFrame(ch, lf, (int)animation, 1.f);
 
   *oldframe = lf->oldFrame;
-  *frame = lf->frame;
+  *frame    = lf->frame;
   *backlerp = lf->backlerp;
 }
 
 // sets normalized rgba values for entity (alphaGen/rgbGen should be set to
 // entity)
-void ETJump_SetEntityRGBA(refEntity_t *ent, float red, float green, float blue,
-                          float alpha) {
+void ETJump_SetEntityRGBA(refEntity_t *ent, float red, float green, float blue, float alpha) {
   ent->shaderRGBA[0] = 255.0 * red;
   ent->shaderRGBA[1] = 255.0 * green;
   ent->shaderRGBA[2] = 255.0 * blue;
@@ -3272,10 +3118,9 @@ void ETJump_SetEntityAutoTransparency(refEntity_t *ent) {
 
   // don't allow colors to affect default skins/shaders
   if (etj_drawSimplePlayers.integer > 0) {
-    ETJump::cgame.utils.colorParser->parseColorString(
-        etj_simplePlayersColor.string, simplePlayersColor);
+    ETJump::cgame.utils.colorParser->parseColorString(etj_simplePlayersColor.string, simplePlayersColor);
     ent->customShader = cgs.media.simplePlayersShader;
   }
-  ETJump_SetEntityRGBA(ent, simplePlayersColor[0], simplePlayersColor[1],
-                       simplePlayersColor[2], cg.currentTransparencyValue);
+  ETJump_SetEntityRGBA(ent, simplePlayersColor[0], simplePlayersColor[1], simplePlayersColor[2],
+                       cg.currentTransparencyValue);
 }

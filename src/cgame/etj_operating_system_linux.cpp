@@ -24,13 +24,15 @@
 
 #ifdef __linux__
 
-  #include "etj_operating_system.h"
-  #include <sys/ioctl.h>
+  #include <cstring>
+  #include <fstream>
   #include <net/if.h>
   #include <netinet/in.h>
-  #include <cstring>
+  #include <sys/ioctl.h>
   #include <unistd.h>
-  #include <fstream>
+
+  #include "etj_operating_system.h"
+
   #include "../game/etj_string_utilities.h"
   #include "../game/etj_crypto.h"
 
@@ -331,8 +333,7 @@ std::string ETJump::OperatingSystem::getHwid() {
 
   const ifreq *it = ifc.ifc_req;
 
-  for (const ifreq *const end = it + ifc.ifc_len / sizeof(struct ifreq);
-       it != end; ++it) {
+  for (const ifreq *const end = it + ifc.ifc_len / sizeof(struct ifreq); it != end; ++it) {
     strcpy(ifr.ifr_name, it->ifr_name);
 
     if (ioctl(sock, SIOCGIFFLAGS, &ifr) == 0) {
@@ -357,9 +358,8 @@ std::string ETJump::OperatingSystem::getHwid() {
 
   unsigned char mac_address[6];
   memcpy(mac_address, ifr.ifr_hwaddr.sa_data, sizeof(mac_address));
-  hwid += StringUtils::format("%02X:%02X:%02X:%02X:%02X:%02X", mac_address[0],
-                              mac_address[1], mac_address[2], mac_address[3],
-                              mac_address[4], mac_address[5]);
+  hwid += StringUtils::format("%02X:%02X:%02X:%02X:%02X:%02X", mac_address[0], mac_address[1], mac_address[2],
+                              mac_address[3], mac_address[4], mac_address[5]);
 
   return Crypto::sha1(hwid);
 }

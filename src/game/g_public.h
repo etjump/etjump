@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "q_shared.h"
+
 // entity->svFlags
 // the server does not know how to interpret most of the values
 // in entityStates (level eType), so the game must explicitly flag
@@ -15,13 +17,13 @@ inline constexpr int SVF_NOCLIENT = 0x00000001;
 // this ent is a "visibility dummy" and needs it's master to be
 // sent to clients that can see it even if they can't see the master ent
 inline constexpr int SVF_VISDUMMY = 0x00000004;
-inline constexpr int SVF_BOT = 0x00000008;
-inline constexpr int SVF_POW = 0x00000010;
+inline constexpr int SVF_BOT      = 0x00000008;
+inline constexpr int SVF_POW      = 0x00000010;
 // send to all connected clients
 inline constexpr int SVF_BROADCAST = 0x00000020;
 // merge a second pvs at origin2 into snapshots
-inline constexpr int SVF_PORTAL = 0x00000040;
-inline constexpr int SVF_BLANK = 0x00000080;
+inline constexpr int SVF_PORTAL      = 0x00000040;
+inline constexpr int SVF_BLANK       = 0x00000080;
 inline constexpr int SVF_NOFOOTSTEPS = 0x00000100;
 // use capsule for collision detection
 inline constexpr int SVF_CAPSULE = 0x00000200;
@@ -115,10 +117,10 @@ typedef enum {
                   // because it is not journaled
 
   // console variable interaction
-  G_CVAR_REGISTER, // ( vmCvar_t *vmCvar, const char *varName, const
-                   // char *defaultValue, int flags );
-  G_CVAR_UPDATE,   // ( vmCvar_t *vmCvar );
-  G_CVAR_SET,      // ( const char *var_name, const char *value );
+  G_CVAR_REGISTER,               // ( vmCvar_t *vmCvar, const char *varName, const
+                                 // char *defaultValue, int flags );
+  G_CVAR_UPDATE,                 // ( vmCvar_t *vmCvar );
+  G_CVAR_SET,                    // ( const char *var_name, const char *value );
   G_CVAR_VARIABLE_INTEGER_VALUE, // ( const char *var_name );
 
   G_CVAR_VARIABLE_STRING_BUFFER, // ( const char *var_name, char

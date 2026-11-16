@@ -22,26 +22,23 @@
  * SOFTWARE.
  */
 
-#include "ui_local.h"
 #include "etj_demo_queue.h"
+
+#include "ui_local.h"
 
 #include "../game/etj_filesystem.h"
 
 namespace ETJump {
-inline constexpr char startHelp[] =
-    "Starts playback from the directory specified by ^3'etj_demoQueueDir'^7.";
-inline constexpr char stopHelp[] =
-    "Stops demo queue playback.\n\nDue to communication limitations with the "
-    "engine, it's necessary to issue this command to prevent the next demo "
-    "from playing when hitting ESC while the queue playback is active";
-inline constexpr char nextHelp[] = "Skip to next demo in queue.";
-inline constexpr char prevHelp[] = "Go back to previous demo in queue.";
+inline constexpr char startHelp[]   = "Starts playback from the directory specified by ^3'etj_demoQueueDir'^7.";
+inline constexpr char stopHelp[]    = "Stops demo queue playback.\n\nDue to communication limitations with the "
+                                      "engine, it's necessary to issue this command to prevent the next demo "
+                                      "from playing when hitting ESC while the queue playback is active";
+inline constexpr char nextHelp[]    = "Skip to next demo in queue.";
+inline constexpr char prevHelp[]    = "Go back to previous demo in queue.";
 inline constexpr char restartHelp[] = "Restarts the queue from beginning.";
-inline constexpr char gotoHelp[] =
-    "Skips to a specified demo number in the queue.";
-inline constexpr char statusHelp[] = "Prints the current status of demo queue.";
-inline constexpr char helpHelp[] =
-    "Prints general usage information or details about specific command.";
+inline constexpr char gotoHelp[]    = "Skips to a specified demo number in the queue.";
+inline constexpr char statusHelp[]  = "Prints the current status of demo queue.";
+inline constexpr char helpHelp[]    = "Prints general usage information or details about specific command.";
 
 DemoQueue::DemoQueue() {
   initCommands();
@@ -50,34 +47,52 @@ DemoQueue::DemoQueue() {
 
 void DemoQueue::initCommands() {
   commands = {
-      DemoQueueCommand{"start", startHelp, [this] { start(); }},
-      DemoQueueCommand{"stop", stopHelp, [] { stop(); }},
-      DemoQueueCommand{"next", nextHelp, [this] { gotoDemo({"next"}); }},
-      DemoQueueCommand{"previous", prevHelp,
-                       [this] { gotoDemo({"previous"}); }},
-      DemoQueueCommand{"restart", restartHelp, [this] { restart(); }},
-      DemoQueueCommand{"goto", gotoHelp,
-                       [this] {
-                         // this is a bit silly but allows for less duplication
-                         // and better error messages
-                         if (trap_Argc() > 2) {
-                           char buf[MAX_TOKEN_CHARS]{};
-                           trap_Argv(2, buf, sizeof(buf));
-                           gotoDemo({"goto", buf});
-                         } else {
-                           gotoDemo({"goto"});
-                         }
-                       }},
-      DemoQueueCommand{"status", statusHelp, [this] { printStatus(); }},
-      DemoQueueCommand{"help", helpHelp, [this] {
-                         if (trap_Argc() < 3) {
-                           printHelp("");
-                         } else {
-                           char buf[MAX_TOKEN_CHARS]{};
-                           trap_Argv(2, buf, sizeof(buf));
-                           printHelp(isValidCommand(buf) ? buf : "");
-                         }
-                       }}};
+    DemoQueueCommand{"start",    startHelp,
+                     [this] {
+                       start();
+                     }                                          },
+    DemoQueueCommand{"stop",     stopHelp,
+                     [] {
+                       stop();
+                     }                                          },
+    DemoQueueCommand{"next",     nextHelp,
+                     [this] {
+                       gotoDemo({"next"});
+                     }                                          },
+    DemoQueueCommand{"previous", prevHelp,
+                     [this] {
+                       gotoDemo({"previous"});
+                     }                                          },
+    DemoQueueCommand{"restart",  restartHelp,
+                     [this] {
+                       restart();
+                     }                                          },
+    DemoQueueCommand{"goto",     gotoHelp,
+                     [this] {
+                       // this is a bit silly but allows for less duplication
+                       // and better error messages
+                       if (trap_Argc() > 2) {
+                         char buf[MAX_TOKEN_CHARS]{};
+                         trap_Argv(2, buf, sizeof(buf));
+                         gotoDemo({"goto", buf});
+                       } else {
+                         gotoDemo({"goto"});
+                       }
+                     }                                          },
+    DemoQueueCommand{"status",   statusHelp,
+                     [this] {
+                       printStatus();
+                     }                                          },
+    DemoQueueCommand{"help",     helpHelp,    [this] {
+                       if (trap_Argc() < 3) {
+                         printHelp("");
+                       } else {
+                         char buf[MAX_TOKEN_CHARS]{};
+                         trap_Argv(2, buf, sizeof(buf));
+                         printHelp(isValidCommand(buf) ? buf : "");
+                       }
+                     }}
+  };
 }
 
 void DemoQueue::initProtocol() {
@@ -95,8 +110,7 @@ void DemoQueue::initProtocol() {
 
 void DemoQueue::initQueue() {
   queue.clear();
-  queue = FileSystem::getFileList(
-      "demos/" + std::string(etj_demoQueueDir.string), demoExt, true);
+  queue = FileSystem::getFileList("demos/" + std::string(etj_demoQueueDir.string), demoExt, true);
 }
 
 void DemoQueue::playDemo() {
@@ -104,9 +118,7 @@ void DemoQueue::playDemo() {
   trap_Cvar_Update(&etj_demoQueueCurrent);
   trap_Cvar_Update(&etj_demoQueueDir);
 
-  trap_Cmd_ExecuteText(EXEC_APPEND,
-                       va("demo \"%s/%s\"\n", etj_demoQueueDir.string,
-                          etj_demoQueueCurrent.string));
+  trap_Cmd_ExecuteText(EXEC_APPEND, va("demo \"%s/%s\"\n", etj_demoQueueDir.string, etj_demoQueueCurrent.string));
 }
 
 void DemoQueue::commandHandler() {
@@ -265,21 +277,17 @@ void DemoQueue::printStatus() {
     return;
   }
 
-  const std::string demoDir = etj_demoQueueDir.string[0] == '\0'
-                                  ? ""
-                                  : "/" + std::string(etj_demoQueueDir.string);
+  const std::string demoDir = etj_demoQueueDir.string[0] == '\0' ? "" : "/" + std::string(etj_demoQueueDir.string);
   uiInfo.uiDC.Print("Playing back demo ^3%i ^7of ^3%i ^7from "
                     "^3'demos%s'\n^7Currently queued demos:\n\n",
-                    getCurrentDemoIndex() + 1, static_cast<int>(queue.size()),
-                    demoDir.c_str());
+                    getCurrentDemoIndex() + 1, static_cast<int>(queue.size()), demoDir.c_str());
 
   const std::string current = etj_demoQueueCurrent.string;
   std::string msg;
 
   for (int i = 0; i < static_cast<int>(queue.size()); i++) {
-    msg += StringUtils::format("%-4i%s %s\n", i + 1,
-                               current == queue[i] ? "^z>^7" : " ",
-                               StringUtils::sanitize(queue[i]));
+    msg +=
+      StringUtils::format("%-4i%s %s\n", i + 1, current == queue[i] ? "^z>^7" : " ", StringUtils::sanitize(queue[i]));
   }
 
   // this can be quite lengthy with lots of demos in queue, so do splits
@@ -297,16 +305,15 @@ void DemoQueue::printHelp(const std::string &cmd) const {
       validCmds += "  " + command.cmdString + "\n";
     }
 
-    uiInfo.uiDC.Print(
-        "demoQueue\n\nUsage:\ndemoQueue "
-        "[command]\n\nDescription:\nAutomatically play back all demos from a "
-        "subdirectory specified by ^3'etj_demoQueueDir'^7.\nLeave the cvar "
-        "empty to play directly from ^3'demos' ^7directory.\n\nNote that "
-        "performing a ^3'vid_restart' ^7while the playback is active\nwill "
-        "break the queue playback due to communication limitations with the "
-        "engine.\n\nAvailable commands:\n\n%s\n\nUse ^3'help [command]'^7 to "
-        "get more information about a specific command.\n",
-        validCmds.c_str());
+    uiInfo.uiDC.Print("demoQueue\n\nUsage:\ndemoQueue "
+                      "[command]\n\nDescription:\nAutomatically play back all demos from a "
+                      "subdirectory specified by ^3'etj_demoQueueDir'^7.\nLeave the cvar "
+                      "empty to play directly from ^3'demos' ^7directory.\n\nNote that "
+                      "performing a ^3'vid_restart' ^7while the playback is active\nwill "
+                      "break the queue playback due to communication limitations with the "
+                      "engine.\n\nAvailable commands:\n\n%s\n\nUse ^3'help [command]'^7 to "
+                      "get more information about a specific command.\n",
+                      validCmds.c_str());
   } else {
     for (const auto &command : commands) {
       if (command.cmdString == cmd) {
@@ -327,8 +334,7 @@ int DemoQueue::getCurrentDemoIndex() {
     return 0;
   }
 
-  const auto it =
-      std::find(queue.cbegin(), queue.cend(), etj_demoQueueCurrent.string);
+  const auto it = std::find(queue.cbegin(), queue.cend(), etj_demoQueueCurrent.string);
 
   if (it == queue.cend()) {
     return 0;
@@ -338,18 +344,14 @@ int DemoQueue::getCurrentDemoIndex() {
 }
 
 bool DemoQueue::isValidCommand(const std::string &cmd) const {
-  return std::any_of(commands.cbegin(), commands.cend(),
-                     [&](const DemoQueueCommand &command) {
-                       return cmd == command.cmdString;
-                     });
+  return std::any_of(commands.cbegin(), commands.cend(), [&](const DemoQueueCommand &command) {
+    return cmd == command.cmdString;
+  });
 }
 
 bool DemoQueue::canStartPlayback() const {
   if (queue.empty()) {
-    const std::string demoDir =
-        etj_demoQueueDir.string[0] == '\0'
-            ? ""
-            : "/" + std::string(etj_demoQueueDir.string);
+    const std::string demoDir = etj_demoQueueDir.string[0] == '\0' ? "" : "/" + std::string(etj_demoQueueDir.string);
     uiInfo.uiDC.Print("No demos found. Make ^3'etj_demoQueueDir' ^7points to "
                       "the correct directory.\n",
                       demoDir.c_str());

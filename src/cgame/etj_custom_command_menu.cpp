@@ -23,10 +23,11 @@
  */
 
 #include "etj_custom_command_menu.h"
+
 #include "cg_local.h"
+#include "etj_client_commands_handler.h"
 #include "etj_consolecommands.h"
 #include "etj_cvar_update_handler.h"
-#include "etj_client_commands_handler.h"
 
 #include "../game/etj_filesystem.h"
 #include "../game/etj_toml_utilities.h"
@@ -34,11 +35,9 @@
 namespace ETJump {
 inline constexpr char DEFAULT_CUSTOM_COMMAND_FILE[] = "custom_commands.dat";
 
-CustomCommandMenu::CustomCommandMenu(
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
-    : cvarUpdate(cvarUpdate), consoleCommands(consoleCommands) {
-
+CustomCommandMenu::CustomCommandMenu(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+                                     const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+  : cvarUpdate(cvarUpdate), consoleCommands(consoleCommands) {
   startListeners();
   setFilename(&etj_ccMenu_filename);
 
@@ -58,42 +57,42 @@ CustomCommandMenu::~CustomCommandMenu() {
 }
 
 void CustomCommandMenu::startListeners() {
-  cvarUpdate->subscribe(&etj_ccMenu_filename,
-                        [this](const vmCvar_t *cvar) { setFilename(cvar); });
+  cvarUpdate->subscribe(&etj_ccMenu_filename, [this](const vmCvar_t *cvar) {
+    setFilename(cvar);
+  });
 
-  consoleCommands->subscribe(
-      "addCustomCommand",
-      [this](const std::vector<std::string> &args) { addCommand(args); });
+  consoleCommands->subscribe("addCustomCommand", [this](const std::vector<std::string> &args) {
+    addCommand(args);
+  });
 
-  consoleCommands->subscribe(
-      "deleteCustomCommand",
-      [this](const std::vector<std::string> &args) { deleteCommand(args); });
+  consoleCommands->subscribe("deleteCustomCommand", [this](const std::vector<std::string> &args) {
+    deleteCommand(args);
+  });
 
-  consoleCommands->subscribe(
-      "editCustomCommand",
-      [this](const std::vector<std::string> &args) { editCommand(args); });
+  consoleCommands->subscribe("editCustomCommand", [this](const std::vector<std::string> &args) {
+    editCommand(args);
+  });
 
-  consoleCommands->subscribe(
-      "moveCustomCommand",
-      [this](const std::vector<std::string> &args) { moveCommand(args); });
+  consoleCommands->subscribe("moveCustomCommand", [this](const std::vector<std::string> &args) {
+    moveCommand(args);
+  });
 
-  consoleCommands->subscribe(
-      "listCustomCommands",
-      [this](const std::vector<std::string> &args) { listCommands(args); });
+  consoleCommands->subscribe("listCustomCommands", [this](const std::vector<std::string> &args) {
+    listCommands(args);
+  });
 
-  consoleCommands->subscribe(
-      "readCustomCommands",
-      [this](const std::vector<std::string> &) { parseCommands(); });
+  consoleCommands->subscribe("readCustomCommands", [this](const std::vector<std::string> &) {
+    parseCommands();
+  });
 
-  consoleCommands->subscribe("generateCustomCommandsFile",
-                             [this](const std::vector<std::string> &args) {
-                               generateExampleFile(args);
-                             });
+  consoleCommands->subscribe("generateCustomCommandsFile", [this](const std::vector<std::string> &args) {
+    generateExampleFile(args);
+  });
 }
 
 void CustomCommandMenu::setFilename(const vmCvar_t *cvar) {
   if (cvar->string[0] != '\0') {
-    customCommandMenuFile = cvar->string;
+    customCommandMenuFile  = cvar->string;
     customCommandMenuFile += ".dat";
   } else {
     customCommandMenuFile = DEFAULT_CUSTOM_COMMAND_FILE;
@@ -129,25 +128,22 @@ void CustomCommandMenu::parseCommands() {
         std::optional<std::string> name;
         std::optional<std::string> cmd;
 
-        name = toml::find<std::optional<std::string>>(
-            page, "name-" + std::to_string(j));
-        cmd = toml::find<std::optional<std::string>>(
-            page, "command-" + std::to_string(j));
+        name = toml::find<std::optional<std::string>>(page, "name-" + std::to_string(j));
+        cmd  = toml::find<std::optional<std::string>>(page, "command-" + std::to_string(j));
 
         if (!name.has_value() || !cmd.has_value()) {
           continue;
         }
 
         CustomCommand command{};
-        command.name = name.value();
+        command.name    = name.value();
         command.command = cmd.value();
 
         // we are looping 1-indexed to match the field names
-        commands[i][j - 1] = command;
+        commands[i][j - 1] = std::move(command);
       }
     } catch (const toml::type_error &e) {
-      CG_Printf("Skipping custom command parsing for page ^3%i^7: %s\n", i,
-                TOMLUtils::getError(e.what()).c_str());
+      CG_Printf("Skipping custom command parsing for page ^3%i^7: %s\n", i, TOMLUtils::getError(e.what()).c_str());
       continue;
     }
   }
@@ -155,8 +151,7 @@ void CustomCommandMenu::parseCommands() {
 
 void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
   if (commandsFull()) {
-    CG_Printf("You may not add more than ^3%i ^7custom commands.\n",
-              MAX_CUSTOM_COMMANDS);
+    CG_Printf("You may not add more than ^3%i ^7custom commands.\n", MAX_CUSTOM_COMMANDS);
     return;
   }
 
@@ -169,29 +164,27 @@ void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
     /addCustomCommand <name> <command> <page>
     /addCustomCommand <name> <command> <page> <slot>)";
 
-  const auto optCommand = ConsoleCommands::getOptCommand(
-      "addCustomCommand",
-      CommandParser::CommandDefinition::create("addCustomCommand", desc)
-          .addOption(
-              "name", "n",
-              "Name of the command, displayed in the custom command menu. If "
-              "not provided, the command will be displayed as the name.",
-              CommandParser::OptionDefinition::Type::MultiToken, false)
-          .addOption(
-              "command", "c",
-              "The command to execute. If chaining multiple commands with "
-              "semicolon, ensure the entire command is inside quotes.",
-              CommandParser::OptionDefinition::Type::MultiToken, false)
-          .addOption("page", "p",
-                     "The page to add the command to. Default is the first "
-                     "page with a free slot.",
-                     CommandParser::OptionDefinition::Type::Integer, false)
-          .addOption("slot", "s",
-                     "The slot on the page to add the command to. Default is "
-                     "the first free slot on a page. You must also specify "
-                     "'page' option for this to work.",
-                     CommandParser::OptionDefinition::Type::Integer, false),
-      args);
+  const auto optCommand =
+    ConsoleCommands::getOptCommand("addCustomCommand",
+                                   CommandParser::CommandDefinition::create("addCustomCommand", desc)
+                                     .addOption("name", "n",
+                                                "Name of the command, displayed in the custom command menu. If "
+                                                "not provided, the command will be displayed as the name.",
+                                                CommandParser::OptionDefinition::Type::MultiToken, false)
+                                     .addOption("command", "c",
+                                                "The command to execute. If chaining multiple commands with "
+                                                "semicolon, ensure the entire command is inside quotes.",
+                                                CommandParser::OptionDefinition::Type::MultiToken, false)
+                                     .addOption("page", "p",
+                                                "The page to add the command to. Default is the first "
+                                                "page with a free slot.",
+                                                CommandParser::OptionDefinition::Type::Integer, false)
+                                     .addOption("slot", "s",
+                                                "The slot on the page to add the command to. Default is "
+                                                "the first free slot on a page. You must also specify "
+                                                "'page' option for this to work.",
+                                                CommandParser::OptionDefinition::Type::Integer, false),
+                                   args);
 
   if (!optCommand.has_value()) {
     return;
@@ -213,29 +206,27 @@ void CustomCommandMenu::addCommand(const std::vector<std::string> &args) {
     return;
   }
 
-  const std::string pageStr = "page-" + std::to_string(page.value());
+  const std::string pageStr  = "page-" + std::to_string(page.value());
   const std::string slotName = "name-" + std::to_string(slot.value());
-  const std::string slotCmd = "command-" + std::to_string(slot.value());
+  const std::string slotCmd  = "command-" + std::to_string(slot.value());
 
-  table[pageStr][slotName] = name;
-  table[pageStr][slotCmd] = cmd;
+  table[pageStr][slotName] = std::move(name);
+  table[pageStr][slotCmd]  = std::move(cmd);
 
   // we might not be inserting to last slot, so sort the table again
   sortTable(table, pageStr);
 
   if (writeFile(table)) {
-    CG_Printf("Added new custom command to page ^3%i^7, slot ^3%i^7.\n",
-              page.value(), slot.value());
+    CG_Printf("Added new custom command to page ^3%i^7, slot ^3%i^7.\n", page.value(), slot.value());
     parseCommands();
   }
 }
 
-bool CustomCommandMenu::validateAddCommand(
-    const CommandParser::Command &optCommand, std::string &name,
-    std::string &cmd, std::optional<uint8_t> &page,
-    std::optional<uint8_t> &slot) const {
+bool CustomCommandMenu::validateAddCommand(const CommandParser::Command &optCommand, std::string &name,
+                                           std::string &cmd, std::optional<uint8_t> &page,
+                                           std::optional<uint8_t> &slot) const {
   const auto optName = optCommand.getOptional("name");
-  const auto optCmd = optCommand.getOptional("command");
+  const auto optCmd  = optCommand.getOptional("command");
   const auto optPage = optCommand.getOptional("page");
   const auto optSlot = optCommand.getOptional("slot");
 
@@ -252,16 +243,16 @@ bool CustomCommandMenu::validateAddCommand(
         break;
       case 2:
         name = optCommand.extraArgs[0];
-        cmd = optCommand.extraArgs[1];
+        cmd  = optCommand.extraArgs[1];
         break;
       case 3:
         name = optCommand.extraArgs[0];
-        cmd = optCommand.extraArgs[1];
+        cmd  = optCommand.extraArgs[1];
         page = static_cast<uint8_t>(Q_atoi(optCommand.extraArgs[2]));
         break;
       default: // >= 4
         name = optCommand.extraArgs[0];
-        cmd = optCommand.extraArgs[1];
+        cmd  = optCommand.extraArgs[1];
         page = static_cast<uint8_t>(Q_atoi(optCommand.extraArgs[2]));
         slot = static_cast<uint8_t>(Q_atoi(optCommand.extraArgs[3]));
         break;
@@ -285,8 +276,7 @@ bool CustomCommandMenu::validateAddCommand(
   // if the user gave slot but no page, the command is invalid
   if (optSlot.has_value() && !optPage.has_value()) {
     opFailedChatMsg();
-    CG_Printf(
-        "Parameter `slot` requires parameter `page` to be explicitly set.\n");
+    CG_Printf("Parameter `slot` requires parameter `page` to be explicitly set.\n");
     return false;
   }
 
@@ -306,8 +296,7 @@ bool CustomCommandMenu::validateAddCommand(
     }
   }
 
-  if (commands.find(page.value()) != commands.cend() &&
-      pageIsFull(page.value())) {
+  if (commands.find(page.value()) != commands.cend() && pageIsFull(page.value())) {
     opFailedChatMsg();
     CG_Printf("Requested page ^3%i ^7is full.\n", page.value());
     return false;
@@ -327,11 +316,9 @@ bool CustomCommandMenu::validateAddCommand(
     return false;
   }
 
-  if (commands.find(page.value()) != commands.cend() &&
-      !commands.at(page.value())[slot.value() - 1].command.empty()) {
+  if (commands.find(page.value()) != commands.cend() && !commands.at(page.value())[slot.value() - 1].command.empty()) {
     opFailedChatMsg();
-    CG_Printf("Slot ^3%i ^7on page ^3%i ^7already contains a command.\n",
-              slot.value(), page.value());
+    CG_Printf("Slot ^3%i ^7on page ^3%i ^7already contains a command.\n", slot.value(), page.value());
     return false;
   }
 
@@ -346,16 +333,16 @@ void CustomCommandMenu::deleteCommand(const std::vector<std::string> &args) {
     /deleteCustomCommand <page>
     /deleteCustomCommand <page> <slot>)";
 
-  const auto optCommand = ConsoleCommands::getOptCommand(
-      "deleteCustomCommand",
-      CommandParser::CommandDefinition::create("deleteCustomCommand", desc)
-          .addOption("page", "p", "Page to delete the command from.",
-                     CommandParser::OptionDefinition::Type::Integer, true, 0)
-          .addOption("slot", "s",
-                     "Slot to delete the command from. Defaults to last, "
-                     "non-empty slot.",
-                     CommandParser::OptionDefinition::Type::Integer, false, 1),
-      args);
+  const auto optCommand =
+    ConsoleCommands::getOptCommand("deleteCustomCommand",
+                                   CommandParser::CommandDefinition::create("deleteCustomCommand", desc)
+                                     .addOption("page", "p", "Page to delete the command from.",
+                                                CommandParser::OptionDefinition::Type::Integer, true, 0)
+                                     .addOption("slot", "s",
+                                                "Slot to delete the command from. Defaults to last, "
+                                                "non-empty slot.",
+                                                CommandParser::OptionDefinition::Type::Integer, false, 1),
+                                   args);
 
   if (!optCommand.has_value()) {
     return;
@@ -382,7 +369,7 @@ void CustomCommandMenu::deleteCommand(const std::vector<std::string> &args) {
   try {
     const std::string pageStr = "page-" + std::to_string(page.value());
     const std::string nameStr = "name-" + std::to_string(slot.value());
-    const std::string cmdStr = "command-" + std::to_string(slot.value());
+    const std::string cmdStr  = "command-" + std::to_string(slot.value());
 
     table.at(pageStr).as_table().erase(nameStr);
     table.at(pageStr).as_table().erase(cmdStr);
@@ -392,23 +379,19 @@ void CustomCommandMenu::deleteCommand(const std::vector<std::string> &args) {
       table.as_table().erase(pageStr);
     }
   } catch (const toml::type_error &e) {
-    CG_Printf("Failed to delete command: %s",
-              TOMLUtils::getError(e.what()).c_str());
+    CG_Printf("Failed to delete command: %s", TOMLUtils::getError(e.what()).c_str());
   } catch (const std::out_of_range &e) {
-    CG_Printf("Failed to delete command: %s",
-              TOMLUtils::getError(e.what()).c_str());
+    CG_Printf("Failed to delete command: %s", TOMLUtils::getError(e.what()).c_str());
   }
 
   if (writeFile(table)) {
-    CG_Printf("Deleted custom command from page ^3%i^7, slot ^3%i^7.\n",
-              page.value(), slot.value());
+    CG_Printf("Deleted custom command from page ^3%i^7, slot ^3%i^7.\n", page.value(), slot.value());
     parseCommands();
   }
 }
 
-bool CustomCommandMenu::validateDeleteCommand(
-    const CommandParser::Command &optCommand, std::optional<uint8_t> &page,
-    std::optional<uint8_t> &slot) const {
+bool CustomCommandMenu::validateDeleteCommand(const CommandParser::Command &optCommand, std::optional<uint8_t> &page,
+                                              std::optional<uint8_t> &slot) const {
   const auto optPage = optCommand.getOptional("page");
   const auto optSlot = optCommand.getOptional("slot");
 
@@ -418,8 +401,7 @@ bool CustomCommandMenu::validateDeleteCommand(
                      TEAM_SPECTATOR);
   };
 
-  if (optPage.value().integer == 0 ||
-      optPage.value().integer > CUSTOM_COMMAND_MENU_MAX_PAGES) {
+  if (optPage.value().integer == 0 || optPage.value().integer > CUSTOM_COMMAND_MENU_MAX_PAGES) {
     opFailedChatMsg();
     CG_Printf("Parameter `page` is out of range (1-5).\n");
     return false;
@@ -444,19 +426,16 @@ bool CustomCommandMenu::validateDeleteCommand(
 
     // make sure we actually have a command at this slot
     // we want to do this here, because the deletion fails silently otherwise
-    if (commands.find(page.value()) != commands.cend() &&
-        commands.at(page.value())[slot.value() - 1].command.empty()) {
+    if (commands.find(page.value()) != commands.cend() && commands.at(page.value())[slot.value() - 1].command.empty()) {
       opFailedChatMsg();
-      CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n",
-                page.value(), slot.value());
+      CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n", page.value(), slot.value());
       return false;
     }
 
     return true;
   };
 
-  slot = optSlot.has_value() ? static_cast<uint8_t>(optSlot.value().integer)
-                             : findSlotForDeletion(page.value());
+  slot = optSlot.has_value() ? static_cast<uint8_t>(optSlot.value().integer) : findSlotForDeletion(page.value());
 
   if (!isValidSlot()) {
     return false;
@@ -478,34 +457,29 @@ void CustomCommandMenu::editCommand(const std::vector<std::string> &args) {
     /editCustomCommand <page> <slot>)";
 
   const auto optCommand = ConsoleCommands::getOptCommand(
-      "editCustomCommand",
-      CommandParser::CommandDefinition::create("editCustomCommand", desc)
-          .addOption("page", "p", "Page to edit a command from.",
-                     CommandParser::OptionDefinition::Type::Integer, true, 0)
-          .addOption("slot", "s", "Slot to edit a command from.",
-                     CommandParser::OptionDefinition::Type::Integer, true, 1)
-          .addOption("name", "n",
-                     "Name to set for the command in the targeted slot.",
-                     CommandParser::OptionDefinition::Type::MultiToken, false)
-          .addOption("command", "c", "Command to set to the targeted slot.",
-                     CommandParser::OptionDefinition::Type::MultiToken, false),
-      args);
+    "editCustomCommand",
+    CommandParser::CommandDefinition::create("editCustomCommand", desc)
+      .addOption("page", "p", "Page to edit a command from.", CommandParser::OptionDefinition::Type::Integer, true, 0)
+      .addOption("slot", "s", "Slot to edit a command from.", CommandParser::OptionDefinition::Type::Integer, true, 1)
+      .addOption("name", "n", "Name to set for the command in the targeted slot.",
+                 CommandParser::OptionDefinition::Type::MultiToken, false)
+      .addOption("command", "c", "Command to set to the targeted slot.",
+                 CommandParser::OptionDefinition::Type::MultiToken, false),
+    args);
 
   if (!optCommand.has_value()) {
     return;
   }
 
-  const uint8_t page = static_cast<uint8_t>(
-      optCommand.value().getOptional("page").value().integer);
-  const uint8_t slot = static_cast<uint8_t>(
-      optCommand.value().getOptional("slot").value().integer);
+  const uint8_t page = static_cast<uint8_t>(optCommand.value().getOptional("page").value().integer);
+  const uint8_t slot = static_cast<uint8_t>(optCommand.value().getOptional("slot").value().integer);
 
   if (!validateEditCommand(optCommand.value(), page, slot)) {
     return;
   }
 
   const auto optName = optCommand.value().getOptional("name");
-  const auto optCmd = optCommand.value().getOptional("command");
+  const auto optCmd  = optCommand.value().getOptional("command");
 
   toml::ordered_value table;
 
@@ -515,7 +489,7 @@ void CustomCommandMenu::editCommand(const std::vector<std::string> &args) {
 
   const std::string pageStr = "page-" + std::to_string(page);
   const std::string nameStr = "name-" + std::to_string(slot);
-  const std::string cmdStr = "command-" + std::to_string(slot);
+  const std::string cmdStr  = "command-" + std::to_string(slot);
 
   try {
     if (optName.has_value()) {
@@ -526,23 +500,19 @@ void CustomCommandMenu::editCommand(const std::vector<std::string> &args) {
       table.at(pageStr).at(cmdStr) = optCmd.value().text;
     }
   } catch (const toml::type_error &e) {
-    CG_Printf("Failed to edit command: %s",
-              TOMLUtils::getError(e.what()).c_str());
+    CG_Printf("Failed to edit command: %s", TOMLUtils::getError(e.what()).c_str());
   } catch (const std::out_of_range &e) {
-    CG_Printf("Failed to edit command: %s",
-              TOMLUtils::getError(e.what()).c_str());
+    CG_Printf("Failed to edit command: %s", TOMLUtils::getError(e.what()).c_str());
   }
 
   if (writeFile(table)) {
-    CG_Printf("Edited custom command on page ^3%i^7, slot ^3%i^7.\n", page,
-              slot);
+    CG_Printf("Edited custom command on page ^3%i^7, slot ^3%i^7.\n", page, slot);
     parseCommands();
   }
 }
 
-bool CustomCommandMenu::validateEditCommand(
-    const CommandParser::Command &optCommand, const uint8_t page,
-    const uint8_t slot) const {
+bool CustomCommandMenu::validateEditCommand(const CommandParser::Command &optCommand, const uint8_t page,
+                                            const uint8_t slot) const {
   const auto opFailedChatMsg = []() {
     CG_AddToTeamChat("^3editCustomCommand: ^7operation failed. Check console "
                      "for more information.",
@@ -573,8 +543,7 @@ bool CustomCommandMenu::validateEditCommand(
     return false;
   }
 
-  if (!optCommand.getOptional("name").has_value() &&
-      !optCommand.getOptional("command").has_value()) {
+  if (!optCommand.getOptional("name").has_value() && !optCommand.getOptional("command").has_value()) {
     opFailedChatMsg();
     CG_Printf("Neither of parameters `name` or `command` were provided.\n");
     return false;
@@ -599,35 +568,29 @@ void CustomCommandMenu::moveCommand(const std::vector<std::string> &args) {
     /moveCustomCommand <from-page> <from-slot> <to-page>
     /moveCustomCommand <from-page> <from-slot> <to-page> <to-slot>)";
 
-  const auto optCommand = ConsoleCommands::getOptCommand(
-      "editCustomCommand",
-      CommandParser::CommandDefinition::create("editCustomCommand", desc)
-          .addOption("from-page", "fp", "Page to move a command from.",
-                     CommandParser::OptionDefinition::Type::Integer, true, 0)
-          .addOption("from-slot", "fs",
-                     "Slot at 'from-page' to move a command from.",
-                     CommandParser::OptionDefinition::Type::Integer, true, 1)
-          .addOption("to-page", "tp", "Page to move the targeted command to.",
-                     CommandParser::OptionDefinition::Type::Integer, true, 2)
-          .addOption("to-slot", "ts",
-                     "Slot at 'to-page' to move the targeted command to.",
-                     CommandParser::OptionDefinition::Type::Integer, false, 3),
-      args);
+  const auto optCommand =
+    ConsoleCommands::getOptCommand("editCustomCommand",
+                                   CommandParser::CommandDefinition::create("editCustomCommand", desc)
+                                     .addOption("from-page", "fp", "Page to move a command from.",
+                                                CommandParser::OptionDefinition::Type::Integer, true, 0)
+                                     .addOption("from-slot", "fs", "Slot at 'from-page' to move a command from.",
+                                                CommandParser::OptionDefinition::Type::Integer, true, 1)
+                                     .addOption("to-page", "tp", "Page to move the targeted command to.",
+                                                CommandParser::OptionDefinition::Type::Integer, true, 2)
+                                     .addOption("to-slot", "ts", "Slot at 'to-page' to move the targeted command to.",
+                                                CommandParser::OptionDefinition::Type::Integer, false, 3),
+                                   args);
 
   if (!optCommand.has_value()) {
     return;
   }
 
-  const auto fromPage = static_cast<uint8_t>(
-      optCommand.value().getOptional("from-page").value().integer);
-  const auto fromSlot = static_cast<uint8_t>(
-      optCommand.value().getOptional("from-slot").value().integer);
-  const auto toPage = static_cast<uint8_t>(
-      optCommand.value().getOptional("to-page").value().integer);
+  const auto fromPage = static_cast<uint8_t>(optCommand.value().getOptional("from-page").value().integer);
+  const auto fromSlot = static_cast<uint8_t>(optCommand.value().getOptional("from-slot").value().integer);
+  const auto toPage   = static_cast<uint8_t>(optCommand.value().getOptional("to-page").value().integer);
   std::optional<uint8_t> toSlot;
 
-  if (!validateMoveCommand(optCommand.value(), fromPage, fromSlot, toPage,
-                           toSlot)) {
+  if (!validateMoveCommand(optCommand.value(), fromPage, fromSlot, toPage, toSlot)) {
     return;
   }
 
@@ -638,33 +601,32 @@ void CustomCommandMenu::moveCommand(const std::vector<std::string> &args) {
   }
 
   const bool targetPageEmpty = commands.find(toPage) == commands.cend();
-  const bool swap = !targetPageEmpty &&
-                    !commands.at(toPage)[toSlot.value() - 1].command.empty();
+  const bool swap            = !targetPageEmpty && !commands.at(toPage)[toSlot.value() - 1].command.empty();
 
   try {
     const std::string fromPageStr = "page-" + std::to_string(fromPage);
     const std::string fromNameStr = "name-" + std::to_string(fromSlot);
-    const std::string fromCmdStr = "command-" + std::to_string(fromSlot);
+    const std::string fromCmdStr  = "command-" + std::to_string(fromSlot);
 
     const std::string toPageStr = "page-" + std::to_string(toPage);
     const std::string toNameStr = "name-" + std::to_string(toSlot.value());
-    const std::string toCmdStr = "command-" + std::to_string(toSlot.value());
+    const std::string toCmdStr  = "command-" + std::to_string(toSlot.value());
 
     if (swap) {
       const std::string oldName = table.at(toPageStr).at(toNameStr).as_string();
-      const std::string oldCmd = table.at(toPageStr).at(toCmdStr).as_string();
+      const std::string oldCmd  = table.at(toPageStr).at(toCmdStr).as_string();
 
       table[toPageStr][toNameStr] = commands.at(fromPage)[fromSlot - 1].name;
-      table[toPageStr][toCmdStr] = commands.at(fromPage)[fromSlot - 1].command;
+      table[toPageStr][toCmdStr]  = commands.at(fromPage)[fromSlot - 1].command;
 
       table[fromPageStr][fromNameStr] = oldName;
-      table[fromPageStr][fromCmdStr] = oldCmd;
+      table[fromPageStr][fromCmdStr]  = oldCmd;
 
       sortTable(table, toPageStr);
       sortTable(table, fromPageStr);
     } else { // move
       table[toPageStr][toNameStr] = commands.at(fromPage)[fromSlot - 1].name;
-      table[toPageStr][toCmdStr] = commands.at(fromPage)[fromSlot - 1].command;
+      table[toPageStr][toCmdStr]  = commands.at(fromPage)[fromSlot - 1].command;
 
       table.at(fromPageStr).as_table().erase(fromNameStr);
       table.at(fromPageStr).as_table().erase(fromCmdStr);
@@ -680,11 +642,9 @@ void CustomCommandMenu::moveCommand(const std::vector<std::string> &args) {
       }
     }
   } catch (const toml::type_error &e) {
-    CG_Printf("Failed to move command: %s",
-              TOMLUtils::getError(e.what()).c_str());
+    CG_Printf("Failed to move command: %s", TOMLUtils::getError(e.what()).c_str());
   } catch (const std::out_of_range &e) {
-    CG_Printf("Failed to move command: %s",
-              TOMLUtils::getError(e.what()).c_str());
+    CG_Printf("Failed to move command: %s", TOMLUtils::getError(e.what()).c_str());
   }
 
   if (writeFile(table)) {
@@ -701,10 +661,9 @@ void CustomCommandMenu::moveCommand(const std::vector<std::string> &args) {
   }
 }
 
-bool CustomCommandMenu::validateMoveCommand(
-    const CommandParser::Command &optCommand, const uint8_t fromPage,
-    const uint8_t fromSlot, const uint8_t toPage,
-    std::optional<uint8_t> &toSlot) const {
+bool CustomCommandMenu::validateMoveCommand(const CommandParser::Command &optCommand, const uint8_t fromPage,
+                                            const uint8_t fromSlot, const uint8_t toPage,
+                                            std::optional<uint8_t> &toSlot) const {
   const auto opFailedChatMsg = []() {
     CG_AddToTeamChat("^3moveCustomCommand: ^7operation failed. Check console "
                      "for more information.",
@@ -731,8 +690,7 @@ bool CustomCommandMenu::validateMoveCommand(
 
   if (commands.at(fromPage)[fromSlot - 1].command.empty()) {
     opFailedChatMsg();
-    CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n", fromPage,
-              fromSlot);
+    CG_Printf("No command found on page ^3%i ^7in slot ^3%i^7.\n", fromPage, fromSlot);
     return false;
   }
 
@@ -765,8 +723,7 @@ bool CustomCommandMenu::validateMoveCommand(
   return true;
 }
 
-void CustomCommandMenu::listCommands(
-    const std::vector<std::string> &args) const {
+void CustomCommandMenu::listCommands(const std::vector<std::string> &args) const {
   if (commands.empty()) {
     CG_Printf("No commands saved.\n");
     return;
@@ -779,24 +736,21 @@ void CustomCommandMenu::listCommands(
     /listcustomCommands <page>)";
 
   const auto optCommand = ConsoleCommands::getOptCommand(
-      "listCustomCommands",
-      CommandParser::CommandDefinition::create("listCustomCommands", desc)
-          .addOption(
-              "page", "p",
-              "Page to list commands from. If not specified, lists all pages.",
-              CommandParser::OptionDefinition::Type::Integer, false, 0),
-      args);
+    "listCustomCommands",
+    CommandParser::CommandDefinition::create("listCustomCommands", desc)
+      .addOption("page", "p", "Page to list commands from. If not specified, lists all pages.",
+                 CommandParser::OptionDefinition::Type::Integer, false, 0),
+    args);
 
   if (!optCommand.has_value()) {
     return;
   }
 
   const auto optPage = optCommand.value().getOptional("page");
-  uint8_t page = 0;
+  uint8_t page       = 0;
 
   if (optPage.has_value()) {
-    if (optPage.value().integer == 0 ||
-        optPage.value().integer > CUSTOM_COMMAND_MENU_MAX_PAGES) {
+    if (optPage.value().integer == 0 || optPage.value().integer > CUSTOM_COMMAND_MENU_MAX_PAGES) {
       CG_AddToTeamChat("^3listCustomCommands: ^7operation failed. Check "
                        "console for more information.",
                        TEAM_SPECTATOR);
@@ -807,25 +761,23 @@ void CustomCommandMenu::listCommands(
     page = static_cast<uint8_t>(optPage.value().integer);
   }
 
-  const auto printCommands =
-      [](const uint8_t page,
-         const std::array<CustomCommand, CUSTOM_COMMAND_MENU_PAGE_SIZE> &cmds) {
-        CG_Printf("^7[ Page %i ]\n", page);
+  const auto printCommands = [](const uint8_t page,
+                                const std::array<CustomCommand, CUSTOM_COMMAND_MENU_PAGE_SIZE> &cmds) {
+    CG_Printf("^7[ Page %i ]\n", page);
 
-        for (size_t i = 0; i < cmds.size(); i++) {
-          const auto &cmd = cmds[i];
+    for (size_t i = 0; i < cmds.size(); i++) {
+      const auto &cmd = cmds[i];
 
-          if (cmd.command.empty()) {
-            continue;
-          }
+      if (cmd.command.empty()) {
+        continue;
+      }
 
-          CG_Printf("^7%i. %s\n   ^7%s\n", static_cast<int32_t>(i + 1),
-                    !cmd.name.empty() ? cmd.name.c_str() : "(empty name)",
-                    cmd.command.c_str());
-        }
+      CG_Printf("^7%i. %s\n   ^7%s\n", static_cast<int32_t>(i + 1),
+                !cmd.name.empty() ? cmd.name.c_str() : "(empty name)", cmd.command.c_str());
+    }
 
-        CG_Printf("\n");
-      };
+    CG_Printf("\n");
+  };
 
   if (page == 0) {
     CG_Printf("Saved custom commands:\n\n");
@@ -846,9 +798,9 @@ void CustomCommandMenu::listCommands(
 
 inline bool CustomCommandMenu::commandsFull() const {
   return commands.size() >= CUSTOM_COMMAND_MENU_MAX_PAGES &&
-         std::all_of(
-             commands.cbegin(), commands.cend(),
-             [this](const auto &page) { return pageIsFull(page.first); });
+         std::all_of(commands.cbegin(), commands.cend(), [this](const auto &page) {
+           return pageIsFull(page.first);
+         });
 }
 
 inline bool CustomCommandMenu::pageIsFull(const uint8_t page) const {
@@ -912,14 +864,13 @@ uint8_t CustomCommandMenu::findSlotForDeletion(const uint8_t page) const {
   return 0;
 }
 
-void CustomCommandMenu::sortTable(toml::ordered_value &table,
-                                  const std::string &key) {
+void CustomCommandMenu::sortTable(toml::ordered_value &table, const std::string &key) {
   const auto &targetPage = table.at(key).as_table();
   toml::ordered_value::table_type sortedPage;
 
   for (uint8_t i = 1; i <= CUSTOM_COMMAND_MENU_PAGE_SIZE; i++) {
     const std::string nameKey = "name-" + std::to_string(i);
-    const std::string cmdKey = "command-" + std::to_string(i);
+    const std::string cmdKey  = "command-" + std::to_string(i);
 
     if (targetPage.contains(nameKey)) {
       sortedPage[nameKey] = targetPage.at(nameKey);
@@ -930,26 +881,22 @@ void CustomCommandMenu::sortTable(toml::ordered_value &table,
     }
   }
 
-  table[key] = toml::ordered_value(sortedPage);
+  table[key] = toml::ordered_value(std::move(sortedPage));
 }
 
-const std::map<uint8_t, std::array<CustomCommandMenu::CustomCommand,
-                                   CUSTOM_COMMAND_MENU_PAGE_SIZE>> &
+const std::map<uint8_t, std::array<CustomCommandMenu::CustomCommand, CUSTOM_COMMAND_MENU_PAGE_SIZE>> &
 CustomCommandMenu::getCustomCommands() const {
   return commands;
 }
 
-void CustomCommandMenu::generateExampleFile(
-    const std::vector<std::string> &args) {
-  if (args.empty() || (!StringUtils::iEqual(args[0], "-f") &&
-                       !StringUtils::iEqual(args[0], "--force"))) {
+void CustomCommandMenu::generateExampleFile(const std::vector<std::string> &args) {
+  if (args.empty() || (!StringUtils::iEqual(args[0], "-f") && !StringUtils::iEqual(args[0], "--force"))) {
     // we don't really care for a potential custom file here, just make sure
     // we don't overwrite the default one, that most players likely use.
     if (FileSystem::exists(DEFAULT_CUSTOM_COMMAND_FILE)) {
-      CG_Printf(
-          "Existing custom command file ^3'%s' ^7was found.\nRun this command "
-          "again with ^3'-f' ^7or ^3'--force' ^7argument to overwrite it.\n",
-          DEFAULT_CUSTOM_COMMAND_FILE);
+      CG_Printf("Existing custom command file ^3'%s' ^7was found.\nRun this command "
+                "again with ^3'-f' ^7or ^3'--force' ^7argument to overwrite it.\n",
+                DEFAULT_CUSTOM_COMMAND_FILE);
       return;
     }
   }
@@ -1006,8 +953,7 @@ void CustomCommandMenu::generateExampleFile(
     return;
   }
 
-  CG_Printf("Wrote example custom command file ^3'%s'\n",
-            DEFAULT_CUSTOM_COMMAND_FILE);
+  CG_Printf("Wrote example custom command file ^3'%s'\n", DEFAULT_CUSTOM_COMMAND_FILE);
 
   // the file will not exist immediately after we call 'write', so calling
   // 'parseCommands' here directly will fail to parse the generated file

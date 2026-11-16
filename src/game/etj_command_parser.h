@@ -24,9 +24,9 @@
 
 #pragma once
 
+#include <map>
 #include <optional>
 #include <string>
-#include <map>
 #include <utility>
 #include <vector>
 
@@ -71,17 +71,15 @@ public:
     bool required{true};
     std::optional<int> position;
 
-    static OptionDefinition create(const std::string &name,
-                                   const std::string &shortName,
-                                   const std::string &description, Type type,
-                                   bool required) {
+    static OptionDefinition create(const std::string &name, const std::string &shortName,
+                                   const std::string &description, Type type, bool required) {
       auto def = OptionDefinition{};
 
-      def.name = name;
-      def.shortName = shortName;
+      def.name        = name;
+      def.shortName   = shortName;
       def.description = description;
-      def.type = type;
-      def.required = required;
+      def.type        = type;
+      def.required    = required;
 
       return def;
     }
@@ -94,74 +92,64 @@ public:
 
     std::string help() const {
       auto optionsToStrings = Container::map(options, [](const auto &pair) {
-        return CommandParser::formatCommandHelpString(
-            pair.second.name, pair.second.shortName, pair.second.type,
-            pair.second.description, pair.second.required,
-            pair.second.position);
+        return CommandParser::formatCommandHelpString(pair.second.name, pair.second.shortName, pair.second.type,
+                                                      pair.second.description, pair.second.required,
+                                                      pair.second.position);
       });
 
-      return StringUtils::format("Usage: %s\n\n    %s\n\nOptions:\n%s\n", name,
-                                 description,
+      return StringUtils::format("Usage: %s\n\n    %s\n\nOptions:\n%s\n", name, description,
                                  StringUtils::join(optionsToStrings, "\n"));
     }
 
-    static CommandDefinition create(const std::string &name,
-                                    const std::string &description) {
+    static CommandDefinition create(const std::string &name, const std::string &description) {
       CommandDefinition def;
 
-      def.name = name;
+      def.name        = name;
       def.description = description;
-      def.options = {};
+      def.options     = {};
 
       return def;
     }
 
-    CommandDefinition &addOption(const std::string &name,
-                                 const std::string &shortName,
-                                 const std::string &description,
+    CommandDefinition &addOption(const std::string &name, const std::string &shortName, const std::string &description,
                                  OptionDefinition::Type type, bool required) {
       auto opt = OptionDefinition{};
 
-      opt.name = name;
-      opt.shortName = shortName;
+      opt.name        = name;
+      opt.shortName   = shortName;
       opt.description = description;
-      opt.type = type;
-      opt.required = required;
+      opt.type        = type;
+      opt.required    = required;
 
       this->options[name] = std::move(opt);
 
       return *this;
     }
 
-    CommandDefinition &addOption(const std::string &name,
-                                 const std::string &shortName,
-                                 const std::string &description,
-                                 OptionDefinition::Type type, bool required,
-                                 int position) {
+    CommandDefinition &addOption(const std::string &name, const std::string &shortName, const std::string &description,
+                                 OptionDefinition::Type type, bool required, int position) {
       for (const auto &o : this->options) {
-        if (o.second.position.has_value() &&
-            o.second.position.value() == position) {
-          throw std::runtime_error(StringUtils::format(
-              "`%s` already has argument `%s` configured to position `%d`. Use "
-              "a different position for `%s`.",
-              this->name, o.second.name, position, name));
+        if (o.second.position.has_value() && o.second.position.value() == position) {
+          throw std::runtime_error(
+            StringUtils::format("`%s` already has argument `%s` configured to position `%d`. Use "
+                                "a different position for `%s`.",
+                                this->name, o.second.name, position, name));
         }
       }
 
-      if (type == OptionDefinition::Type::Boolean ||
-          type == OptionDefinition::Type::MultiToken) {
+      if (type == OptionDefinition::Type::Boolean || type == OptionDefinition::Type::MultiToken) {
         throw std::runtime_error("Positional arguments are not supported for "
                                  "boolean or multitoken types.");
       }
 
       auto opt = OptionDefinition{};
 
-      opt.name = name;
-      opt.shortName = shortName;
+      opt.name        = name;
+      opt.shortName   = shortName;
       opt.description = description;
-      opt.type = type;
-      opt.required = required;
-      opt.position = position;
+      opt.type        = type;
+      opt.required    = required;
+      opt.position    = position;
 
       this->options[name] = std::move(opt);
 
@@ -188,8 +176,7 @@ public:
     std::vector<std::string> extraArgs;
     bool helpRequested{};
 
-    [[nodiscard]] std::optional<Option>
-    getOptional(const std::string &name) const {
+    [[nodiscard]] std::optional<Option> getOptional(const std::string &name) const {
       if (options.count(name) == 0) {
         return std::nullopt;
       }
@@ -203,8 +190,7 @@ public:
   };
 
   CommandParser(CommandDefinition definition, std::vector<std::string> args)
-      : _args(args), _current(begin(args)), _def(std::move(definition)),
-        _cmd(Command()) {}
+    : _args(args), _current(begin(args)), _def(std::move(definition)), _cmd(Command()) {}
 
   Command parse();
 
@@ -217,29 +203,22 @@ private:
   const OptionDefinition *getOptionOrNull();
   void expectBoolean(const OptionDefinition *optionDefinition);
   void expectToken(const OptionDefinition *optionDefinition);
-  static Option createTokenOption(const OptionDefinition *optionDefinition,
-                                  const std::string &text);
+  static Option createTokenOption(const OptionDefinition *optionDefinition, const std::string &text);
   void expectMultipleTokens(const OptionDefinition *optionDefinition);
   void expectInteger(const OptionDefinition *optionDefinition);
-  Option createIntegerOption(const OptionDefinition *optionDefinition,
-                             const std::string &text);
+  Option createIntegerOption(const OptionDefinition *optionDefinition, const std::string &text);
   void expectDecimal(const OptionDefinition *optionDefinition);
-  Option createDecimalOption(const OptionDefinition *optionDefinition,
-                             const std::string &text);
+  Option createDecimalOption(const OptionDefinition *optionDefinition, const std::string &text);
   void expectDate(const OptionDefinition *optionDefinition);
-  Option createDateOption(const OptionDefinition *optionDefinition,
-                          const std::string &text);
+  Option createDateOption(const OptionDefinition *optionDefinition, const std::string &text);
   void expectOption();
   void expectExtraArg();
   void expectOptionOrExtraArgs();
   void processPositionalArguments();
   void validateCommand();
 
-  static std::string formatCommandHelpString(const std::string &name,
-                                             const std::string &shortname,
-                                             OptionDefinition::Type optionType,
-                                             const std::string &description,
-                                             bool required,
-                                             std::optional<int> position);
+  static std::string formatCommandHelpString(const std::string &name, const std::string &shortname,
+                                             OptionDefinition::Type optionType, const std::string &description,
+                                             bool required, std::optional<int> position);
 };
 } // namespace ETJump

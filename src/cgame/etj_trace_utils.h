@@ -31,18 +31,20 @@
 namespace ETJump {
 class TraceUtils {
 public:
-  TraceUtils() = default;
+  TraceUtils()  = default;
   ~TraceUtils() = default;
 
-  void filteredTrace(int32_t clientNum, trace_t *result, const vec3_t start,
-                     const vec3_t mins, const vec3_t maxs, const vec3_t end,
-                     int32_t skipNumber, int32_t mask);
+  void filteredTrace(int32_t clientNum, trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+                     const vec3_t end, int32_t skipNumber, int32_t mask);
+
+  // does not filter solid/nonsolid players (all players considered solid)
+  void filteredTraceIgnorePlayers(int32_t clientNum, trace_t *result, const vec3_t start, const vec3_t mins,
+                                  const vec3_t maxs, const vec3_t end, int32_t skipNumber, int32_t mask);
 
   // flamechunks might be owned by players or 'props_flamethrower' entity,
   // which means we don't need to always do conditional filtering
-  void flamechunkTrace(int32_t clientNum, trace_t *result, const vec3_t start,
-                       const vec3_t mins, const vec3_t maxs, const vec3_t end,
-                       int32_t skipNumber, int32_t mask);
+  void flamechunkTrace(int32_t clientNum, trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+                       const vec3_t end, int32_t skipNumber, int32_t mask);
 
   // prediction code gets pretty awkward & inefficient if we set/reset
   // entities for every single trace, so expose these so they can be
@@ -53,6 +55,9 @@ public:
   bool entityIsIgnored(int32_t entityNum);
 
 private:
+  // only ignores non-player entities - all players considered solid
+  void setupIgnoredEntitiesIgnorePlayers(int32_t clientNum);
+
   std::vector<int32_t> tempTraceIgnoredEnts;
 };
 } // namespace ETJump

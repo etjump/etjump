@@ -23,6 +23,7 @@
  */
 
 #include "etj_upper_right_drawable.h"
+
 #include "etj_utilities.h"
 
 #include "../game/etj_time_utilities.h"
@@ -48,11 +49,11 @@ bool UpperRight::beforeRender() {
   // and run up to FPSFrames+1 instead
   if (FPSInit != 1) {
     FPSFrameTimes[FPSIndex] = currentTime - FPSLastTime;
-    FPSIndex = (FPSIndex + 1) % FPSFrames;
+    FPSIndex                = (FPSIndex + 1) % FPSFrames;
 
     if (currentTime - FPSLastUpdate >= etj_FPSMeterUpdateInterval.integer) {
       FPSLastUpdate = currentTime;
-      fps = 0;
+      fps           = 0;
       for (std::size_t i = 0; i < FPSInit - 1; ++i) {
         fps += FPSFrameTimes[i];
       }
@@ -71,10 +72,8 @@ void UpperRight::render() const {
     CG_DrawFireTeamOverlay(&rect);
   }
 
-  if (!(cg.snap->ps.pm_flags & PMF_LIMBO) &&
-      (cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR) &&
-      (cgs.autoMapExpanded ||
-       (!cgs.autoMapExpanded && (cg.time - cgs.autoMapExpandTime < 250.f)))) {
+  if (!(cg.snap->ps.pm_flags & PMF_LIMBO) && (cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR) &&
+      (cgs.autoMapExpanded || (!cgs.autoMapExpanded && (cg.time - cgs.autoMapExpandTime < 250.f)))) {
     return;
   }
 
@@ -102,18 +101,15 @@ void UpperRight::render() const {
 
 void UpperRight::drawRoundTimer(float &y) const {
   const int msec = cg.time - cgs.levelStartTime;
-  auto time = TimeUtils::toClock(msec, true);
+  auto time      = TimeUtils::toClock(msec, true);
 
-  const char *s = time.hours > 0
-                      ? va("%02d:%02d:%02d", time.hours, time.min, time.sec)
-                      : va("%02d:%02d", time.min, time.sec);
+  const char *s =
+    time.hours > 0 ? va("%02d:%02d:%02d", time.hours, time.min, time.sec) : va("%02d:%02d", time.min, time.sec);
   const int w = CG_Text_Width_Ext(s, textScale, 0, &cgs.media.limboFont1);
 
   CG_FillRect(upperRight_x - w - 2, y, w + 5, 12 + 2, backgroundColor);
-  CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1,
-                          borderColor);
-  CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor,
-                    s, 0, 0, 0, &cgs.media.limboFont1);
+  CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1, borderColor);
+  CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor, s, 0, 0, 0, &cgs.media.limboFont1);
 
   y += 16;
 }
@@ -126,41 +122,33 @@ void UpperRight::drawClock(float &y) const {
   displayTime[0] = '\0';
 
   if (etj_drawClock.integer == 1) {
-    Q_strcat(displayTime, sizeof(displayTime),
-             va("%d:%02d", tm.tm_hour, tm.tm_min));
+    Q_strcat(displayTime, sizeof(displayTime), va("%d:%02d", tm.tm_hour, tm.tm_min));
     Q_strcat(displayTime, sizeof(displayTime), va(":%02d", tm.tm_sec));
   } else {
     Q_strcat(displayTime, sizeof(displayTime),
-             va("%d:%02d",
-                ((tm.tm_hour == 0 || tm.tm_hour == 12) ? 12 : tm.tm_hour % 12),
-                tm.tm_min));
+             va("%d:%02d", ((tm.tm_hour == 0 || tm.tm_hour == 12) ? 12 : tm.tm_hour % 12), tm.tm_min));
     Q_strcat(displayTime, sizeof(displayTime), va(":%02d", tm.tm_sec));
-    Q_strcat(displayTime, sizeof(displayTime),
-             (tm.tm_hour < 12) ? " am" : " pm");
+    Q_strcat(displayTime, sizeof(displayTime), (tm.tm_hour < 12) ? " am" : " pm");
   }
 
-  const int w =
-      CG_Text_Width_Ext(displayTime, textScale, 0, &cgs.media.limboFont1);
+  const int w = CG_Text_Width_Ext(displayTime, textScale, 0, &cgs.media.limboFont1);
 
   CG_FillRect(upperRight_x - w - 2, y, w + 5, 12 + 2, backgroundColor);
-  CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1,
-                          borderColor);
-  CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor,
-                    displayTime, 0, 0, 0, &cgs.media.limboFont1);
+  CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1, borderColor);
+  CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor, displayTime, 0, 0, 0,
+                    &cgs.media.limboFont1);
 
   y += 16;
 }
 
 void UpperRight::drawFPS(float &y) const {
   const std::string s = std::to_string(fps) + " FPS";
-  const int w =
-      CG_Text_Width_Ext(s.c_str(), textScale, 0, &cgs.media.limboFont1);
+  const int w         = CG_Text_Width_Ext(s.c_str(), textScale, 0, &cgs.media.limboFont1);
 
   CG_FillRect(upperRight_x - w - 2, y, w + 5, 12 + 2, backgroundColor);
-  CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1,
-                          borderColor);
-  CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor,
-                    s.c_str(), 0, 0, 0, &cgs.media.limboFont1);
+  CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1, borderColor);
+  CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor, s.c_str(), 0, 0, 0,
+                    &cgs.media.limboFont1);
 
   y += 16;
 }
@@ -173,19 +161,16 @@ void UpperRight::drawSpeed(float &y) const {
   static int lasttime;
 
   if (cg.resetmaxspeed) {
-    highestSpeed = 0;
+    highestSpeed     = 0;
     cg.resetmaxspeed = qfalse;
   }
 
   const int thistime = trap_Milliseconds();
 
   if (thistime > (lasttime + etj_speedinterval.integer)) {
-
     if (etj_speedXYonly.integer) {
-      speed = sqrt(cg.predictedPlayerState.velocity[0] *
-                       cg.predictedPlayerState.velocity[0] +
-                   cg.predictedPlayerState.velocity[1] *
-                       cg.predictedPlayerState.velocity[1]);
+      speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] +
+                   cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
     } else {
       speed = VectorLength(cg.predictedPlayerState.velocity);
     }
@@ -229,13 +214,11 @@ void UpperRight::drawSpeed(float &y) const {
           break;
         case 1:
           // Miles per hour
-          s = va("%.1f MPH (%.1f MAX)", (speed / SPEED_US_TO_MPH),
-                 (highestSpeed / SPEED_US_TO_MPH));
+          s = va("%.1f MPH (%.1f MAX)", (speed / SPEED_US_TO_MPH), (highestSpeed / SPEED_US_TO_MPH));
           break;
         case 2:
           // Kilometers per hour
-          s = va("%.1f KPH (%.1f MAX)", (speed / SPEED_US_TO_KPH),
-                 (highestSpeed / SPEED_US_TO_KPH));
+          s = va("%.1f KPH (%.1f MAX)", (speed / SPEED_US_TO_KPH), (highestSpeed / SPEED_US_TO_KPH));
           break;
       }
       break;
@@ -244,18 +227,15 @@ void UpperRight::drawSpeed(float &y) const {
   const int w = CG_Text_Width_Ext(s, textScale, 0, &cgs.media.limboFont1);
 
   CG_FillRect(upperRight_x - w - 2, y, w + 5, 12 + 2, backgroundColor);
-  CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1,
-                          borderColor);
-  CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor,
-                    s, 0, 0, 0, &cgs.media.limboFont1);
+  CG_DrawRect_FixedBorder(upperRight_x - w - 2, y, w + 5, 12 + 2, 1, borderColor);
+  CG_Text_Paint_Ext(upperRight_x - w, y + 11, textScale, textScale, textColor, s, 0, 0, 0, &cgs.media.limboFont1);
 
   y += 16;
 }
 
 void UpperRight::drawSnapshot(float &y) const {
-  const char *s = va("time:%i snap:%i cmd:%i", cg.snap->serverTime,
-                     cg.latestSnapshotNum, cgs.serverCommandSequence);
-  const int w = CG_DrawStrlen(s) * BIGCHAR_WIDTH;
+  const char *s = va("time:%i snap:%i cmd:%i", cg.snap->serverTime, cg.latestSnapshotNum, cgs.serverCommandSequence);
+  const int w   = CG_DrawStrlen(s) * BIGCHAR_WIDTH;
 
   CG_DrawBigString(upperRight_x - w, y + 2, s, 1.0F);
 

@@ -23,22 +23,19 @@
  */
 
 #include "etj_player_bbox.h"
+
 #include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_utilities.h"
 
 namespace ETJump {
 PlayerBBox::PlayerBBox(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : shader(trap_R_RegisterShader(etj_playerBBoxShader.string)),
-      cvarUpdate(cvarUpdate) {
+  : shader(trap_R_RegisterShader(etj_playerBBoxShader.string)), cvarUpdate(cvarUpdate) {
   setupListeners();
 
-  cgame.utils.colorParser->parseColorString(etj_playerBBoxColorSelf.string,
-                                            colorSelf);
-  cgame.utils.colorParser->parseColorString(etj_playerBBoxColorOther.string,
-                                            colorOther);
-  cgame.utils.colorParser->parseColorString(etj_playerBBoxColorFireteam.string,
-                                            colorFireteam);
+  cgame.utils.colorParser->parseColorString(etj_playerBBoxColorSelf.string, colorSelf);
+  cgame.utils.colorParser->parseColorString(etj_playerBBoxColorOther.string, colorOther);
+  cgame.utils.colorParser->parseColorString(etj_playerBBoxColorFireteam.string, colorFireteam);
 }
 
 PlayerBBox::~PlayerBBox() {
@@ -52,15 +49,13 @@ void PlayerBBox::setupListeners() {
     cgame.utils.colorParser->parseColorString(cvar->string, colorSelf);
   });
 
-  cvarUpdate->subscribe(
-      &etj_playerBBoxColorOther, [this](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(cvar->string, colorOther);
-      });
+  cvarUpdate->subscribe(&etj_playerBBoxColorOther, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, colorOther);
+  });
 
-  cvarUpdate->subscribe(
-      &etj_playerBBoxColorFireteam, [this](const vmCvar_t *cvar) {
-        cgame.utils.colorParser->parseColorString(cvar->string, colorFireteam);
-      });
+  cvarUpdate->subscribe(&etj_playerBBoxColorFireteam, [this](const vmCvar_t *cvar) {
+    cgame.utils.colorParser->parseColorString(cvar->string, colorFireteam);
+  });
 }
 
 void PlayerBBox::drawBBox(const clientInfo_t *ci, const centity_t *cent) const {
@@ -71,9 +66,8 @@ void PlayerBBox::drawBBox(const clientInfo_t *ci, const centity_t *cent) const {
   BBox box;
   int pType;
 
-  const int drawFlags = etj_drawPlayerBBox.integer;
-  const bool inFireteam =
-      CG_IsOnSameFireteam(cg.clientNum, cent->currentState.clientNum);
+  const int drawFlags   = etj_drawPlayerBBox.integer;
+  const bool inFireteam = CG_IsOnSameFireteam(cg.clientNum, cent->currentState.clientNum);
 
   if (cent->currentState.clientNum == cg.snap->ps.clientNum) {
     if (!(drawFlags & static_cast<int>(DrawFlags::Self))) {
@@ -107,8 +101,7 @@ void PlayerBBox::drawBBox(const clientInfo_t *ci, const centity_t *cent) const {
     // adjust alpha to match etj_hideDistance + etj_hideFadeRange
     // we don't need to worry about hideme or dist < hideDistance here, the code
     // in CG_Player exits before we ever call this function in those scenarios
-    if (etj_hide.integer &&
-        !playerIsSolid(cg.snap->ps.clientNum, ci->clientNum)) {
+    if (etj_hide.integer && !playerIsSolid(cg.snap->ps.clientNum, ci->clientNum)) {
       setBBoxAlpha(cent, box);
     }
   }
@@ -222,36 +215,32 @@ void PlayerBBox::setupBBoxExtents(const centity_t *cent, BBox &box) {
 bool PlayerBBox::bottomOnly(const int &pType) {
   switch (static_cast<PlayerType>(pType)) {
     case PlayerType::Self:
-      return etj_playerBBoxBottomOnly.integer &
-             static_cast<int>(DrawFlags::Self);
+      return etj_playerBBoxBottomOnly.integer & static_cast<int>(DrawFlags::Self);
     case PlayerType::Other:
-      return etj_playerBBoxBottomOnly.integer &
-             static_cast<int>(DrawFlags::Others);
+      return etj_playerBBoxBottomOnly.integer & static_cast<int>(DrawFlags::Others);
     case PlayerType::Fireteam:
-      return etj_playerBBoxBottomOnly.integer &
-             static_cast<int>(DrawFlags::Fireteam);
+      return etj_playerBBoxBottomOnly.integer & static_cast<int>(DrawFlags::Fireteam);
     default: // shouldn't happen
       return false;
   }
 }
 
 void PlayerBBox::setBBoxAlpha(const centity_t *cent, BBox &box) {
-  const centity_t *self = &cg_entities[cg.snap->ps.clientNum];
+  const centity_t *self  = &cg_entities[cg.snap->ps.clientNum];
   const vec_t playerDist = Distance(self->lerpOrigin, cent->lerpOrigin);
-  const float fadeRange = etj_hideFadeRange.value;
-  const float transZone = etj_hideDistance.value + fadeRange;
+  const float fadeRange  = etj_hideFadeRange.value;
+  const float transZone  = etj_hideDistance.value + fadeRange;
 
   if (playerDist > transZone) {
     return;
   }
 
-  const float diff = (transZone - playerDist) / fadeRange;
-  const float alpha = 1.0f - (1.0f * diff);
-  box.color[3] *= alpha;
+  const float diff   = (transZone - playerDist) / fadeRange;
+  const float alpha  = 1.0f - (1.0f * diff);
+  box.color[3]      *= alpha;
 }
 
-bool PlayerBBox::canSkipDraw(const centity_t *cent,
-                             const clientInfo_t *ci) const {
+bool PlayerBBox::canSkipDraw(const centity_t *cent, const clientInfo_t *ci) const {
   if (!ci) {
     return true;
   }

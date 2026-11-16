@@ -22,16 +22,16 @@
  * SOFTWARE.
  */
 
+#include "etj_cvar_master_drawer.h"
+
 #include <algorithm>
 
-#include "etj_cvar_master_drawer.h"
 #include "cg_local.h"
 #include "etj_cvar_update_handler.h"
 
 namespace ETJump {
-CvarBasedMasterDrawer::CvarBasedMasterDrawer(
-    const vmCvar_t *cvar, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : selector(cvar), cvarUpdate(cvarUpdate) {
+CvarBasedMasterDrawer::CvarBasedMasterDrawer(const vmCvar_t *cvar, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+  : selector(cvar), cvarUpdate(cvarUpdate) {
   this->cvarUpdate->subscribe(selector, [this](const vmCvar_t *cvar) {
     updateCurrentIndex(cvar->integer);
   });

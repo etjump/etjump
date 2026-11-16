@@ -27,7 +27,9 @@
 
 class Drawable {
 public:
-  Drawable() { addDrawable(this); }
+  Drawable() {
+    addDrawable(this);
+  }
 
   virtual ~Drawable() {};
 

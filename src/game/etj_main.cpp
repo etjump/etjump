@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-#include "etj_local.h"
-
 #include <functional>
 #include <memory>
+
 #include "etj_banner_system.h"
 #include "etj_database_v2.h"
+#include "etj_local.h"
 #include "etj_printer.h"
 
 namespace {
@@ -40,8 +40,7 @@ std::vector<std::function<void(int levelTime)>> runFrameCallbacks;
 void InitBannerSystem() {
   ETJump::BannerSystem::Options options;
   options.interval = g_bannerTime.integer;
-  options.location =
-      static_cast<ETJump::BannerSystem::Location>(g_bannerLocation.integer);
+  options.location = static_cast<ETJump::BannerSystem::Location>(g_bannerLocation.integer);
   if (strlen(g_banner1.string) > 0)
     options.messages.push_back(g_banner1.string);
   if (strlen(g_banner2.string) > 0)

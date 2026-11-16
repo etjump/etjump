@@ -24,16 +24,15 @@
 
 #include "etj_colorpicker.h"
 #include "etj_demo_queue.h"
+#include "etj_keep_alive.h"
 #include "etj_local.h"
 #include "etj_quick_connect.h"
 #include "ui_local.h"
 
+#include "../../assets/ui/changelog/version_headers.h"
 #include "../cgame/etj_color_parser.h"
-
 #include "../game/etj_file.h"
 #include "../game/etj_syscall_ext_shared.h"
-
-#include "../../assets/ui/changelog/version_headers.h"
 
 namespace ETJump {
 static void initExtensionSystem() {
@@ -92,8 +91,7 @@ static void initExtensionSystem() {
 
 static void detectClientEngine(int legacyClient, int clientVersion) {
   char etVersionStr[MAX_CVAR_VALUE_STRING]; // ET: Legacy exclusive
-  trap_Cvar_VariableStringBuffer("etVersion", etVersionStr,
-                                 sizeof(etVersionStr));
+  trap_Cvar_VariableStringBuffer("etVersion", etVersionStr, sizeof(etVersionStr));
 
   if (etVersionStr[0] == '\0') {
     char versionStr[MAX_CVAR_VALUE_STRING];
@@ -102,8 +100,7 @@ static void detectClientEngine(int legacyClient, int clientVersion) {
     // we can use this length for every detection
     const auto len = static_cast<int>(strlen("ET 2.60b"));
 
-    if (!Q_stricmpn(versionStr, "ET 2.60b", len) ||
-        !Q_stricmpn(versionStr, "ET 2.60d", len)) {
+    if (!Q_stricmpn(versionStr, "ET 2.60b", len) || !Q_stricmpn(versionStr, "ET 2.60d", len)) {
       uiInfo.vetClient = true;
     } else if (!Q_stricmpn(versionStr, "ET 2.60e", len)) {
       uiInfo.eteClient = true;
@@ -120,20 +117,18 @@ static void initColorPicker() {
     p->updateSliderState(item);
   };
 
-  uiInfo.uiDC.cvarToColorPickerState =
-      [p = ui.colorPicker.get()](const std::string &cvar) {
-        p->cvarToColorPickerState(cvar);
-      };
+  uiInfo.uiDC.cvarToColorPickerState = [p = ui.colorPicker.get()](const std::string &cvar) {
+    p->cvarToColorPickerState(cvar);
+  };
 
   uiInfo.uiDC.resetColorPickerState = [p = ui.colorPicker.get()] {
     p->resetColorPickerState();
   };
 
-  uiInfo.uiDC.colorPickerDragFunc =
-      [p = ui.colorPicker.get()](itemDef_t *item, const float cursorX,
-                                 const float cursorY, const int key) {
-        p->colorPickerDragFunc(item, cursorX, cursorY, key);
-      };
+  uiInfo.uiDC.colorPickerDragFunc = [p = ui.colorPicker.get()](itemDef_t *item, const float cursorX,
+                                                               const float cursorY, const int key) {
+    p->colorPickerDragFunc(item, cursorX, cursorY, key);
+  };
 
   uiInfo.uiDC.toggleRGBSliderValues = [p = ui.colorPicker.get()] {
     p->toggleRGBSliderValues();
@@ -144,9 +139,9 @@ static void initColorPicker() {
   };
 
   uiInfo.uiDC.getColorSliderString = &ColorPicker::getColorSliderString;
-  uiInfo.uiDC.setColorSliderType = &ColorPicker::setColorSliderType;
-  uiInfo.uiDC.getColorSliderValue = &ColorPicker::getColorSliderValue;
-  uiInfo.uiDC.setColorSliderValue = &ColorPicker::setColorSliderValue;
+  uiInfo.uiDC.setColorSliderType   = &ColorPicker::setColorSliderType;
+  uiInfo.uiDC.getColorSliderValue  = &ColorPicker::getColorSliderValue;
+  uiInfo.uiDC.setColorSliderValue  = &ColorPicker::setColorSliderValue;
 }
 
 static void initDemoQueueHandler() {
@@ -155,9 +150,8 @@ static void initDemoQueueHandler() {
 
 static void parseChangelogs() {
   // the "cvar" names are the filenames, excluding .txt extension
-  const std::vector<std::string> files =
-      StringUtils::split(CHANGELOG_CVARS, "|");
-  const std::string path = "ui/changelog/";
+  const std::vector<std::string> files = StringUtils::split(CHANGELOG_CVARS, "|");
+  const std::string path               = "ui/changelog/";
 
   for (const auto &file : files) {
     try {
@@ -174,16 +168,14 @@ static void parseChangelogs() {
 
         while ((pos = line.find("__", pos)) != std::string::npos) {
           line.replace(pos, 2, color ? "^o" : "^*");
-          pos += 2;
-          color = !color;
+          pos   += 2;
+          color  = !color;
         }
       }
 
       uiInfo.changelogs[file] = StringUtils::join(lines, "\n");
-    } catch (...) {
-      Com_Printf(S_COLOR_RED
-                 "%s: failed to open changelog '%s.txt' for reading.\n",
-                 __func__, file.c_str());
+    } catch (const std::exception &) {
+      Com_Printf(S_COLOR_RED "%s: failed to open changelog '%s.txt' for reading.\n", __func__, file.c_str());
     }
   }
 }
@@ -208,13 +200,13 @@ void init(const int32_t legacyClient, const int32_t clientVersion) {
 
   initColorPicker();
   initDemoQueueHandler();
+  initKeepAlive();
 
   parseChangelogs();
 }
 
 void shutdown() {
-  if (etj_demoQueueCurrent.string[0] != '\0' && uiInfo.demoPlayback &&
-      !ui.demoQueue->manualSkip) {
+  if (etj_demoQueueCurrent.string[0] != '\0' && uiInfo.demoPlayback && !ui.demoQueue->manualSkip) {
     trap_Cmd_ExecuteText(EXEC_APPEND, "demoQueue next\n");
   }
 

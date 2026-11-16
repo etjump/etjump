@@ -5,20 +5,15 @@
 
 static mapEntityData_t mapEntities[MAX_GENTITIES];
 static int mapEntityCount = 0;
-static int mapEntityTime = 0;
-static qboolean expanded = qfalse;
+static qboolean expanded  = qfalse;
 
 extern playerInfo_t pi;
 
 qboolean ccInitial = qtrue;
 
 void CG_TransformToCommandMapCoord(float *coord_x, float *coord_y) {
-  *coord_x =
-      CC_2D_X +
-      ((*coord_x - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * CC_2D_W;
-  *coord_y =
-      CC_2D_Y +
-      ((*coord_y - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * CC_2D_H;
+  *coord_x = CC_2D_X + ((*coord_x - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * CC_2D_W;
+  *coord_y = CC_2D_Y + ((*coord_y - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * CC_2D_H;
 }
 
 // START	xkan, 9/19/2002
@@ -28,7 +23,8 @@ static float automapZoom = 5.159;
 int CG_CurLayerForZ(int z) {
   int curlayer = 0;
 
-  while (z > cgs.ccLayerCeils[curlayer] && curlayer < cgs.ccLayers) curlayer++;
+  while (z > cgs.ccLayerCeils[curlayer] && curlayer < cgs.ccLayers)
+    curlayer++;
 
   if (curlayer == cgs.ccLayers) {
     CG_Printf("^3Warning: no valid command map layer for z\n");
@@ -38,23 +34,18 @@ int CG_CurLayerForZ(int z) {
   return curlayer;
 }
 
-static qboolean CG_ScissorEntIsCulled(mapEntityData_t *mEnt,
-                                      mapScissor_t *scissor) {
+static qboolean CG_ScissorEntIsCulled(mapEntityData_t *mEnt, mapScissor_t *scissor) {
   if (!scissor->circular) {
-    if (mEnt->automapTransformed[0] < scissor->tl[0] ||
-        mEnt->automapTransformed[0] > scissor->br[0] ||
-        mEnt->automapTransformed[1] < scissor->tl[1] ||
-        mEnt->automapTransformed[1] > scissor->br[1]) {
+    if (mEnt->automapTransformed[0] < scissor->tl[0] || mEnt->automapTransformed[0] > scissor->br[0] ||
+        mEnt->automapTransformed[1] < scissor->tl[1] || mEnt->automapTransformed[1] > scissor->br[1]) {
       return qtrue;
     }
   } else {
     float distSquared;
     vec2_t distVec;
 
-    distVec[0] = mEnt->automapTransformed[0] -
-                 (scissor->tl[0] + (0.5f * (scissor->br[0] - scissor->tl[0])));
-    distVec[1] = mEnt->automapTransformed[1] -
-                 (scissor->tl[1] + (0.5f * (scissor->br[1] - scissor->tl[1])));
+    distVec[0]  = mEnt->automapTransformed[0] - (scissor->tl[0] + (0.5f * (scissor->br[0] - scissor->tl[0])));
+    distVec[1]  = mEnt->automapTransformed[1] - (scissor->tl[1] + (0.5f * (scissor->br[1] - scissor->tl[1])));
     distSquared = distVec[0] * distVec[0] + distVec[1] * distVec[1];
 
     if (distSquared > Square(0.5f * (scissor->br[0] - scissor->tl[0]))) {
@@ -67,18 +58,15 @@ static qboolean CG_ScissorEntIsCulled(mapEntityData_t *mEnt,
 
 static qboolean CG_ScissorPointIsCulled(vec2_t vec, mapScissor_t *scissor) {
   if (!scissor->circular) {
-    if (vec[0] < scissor->tl[0] || vec[0] > scissor->br[0] ||
-        vec[1] < scissor->tl[1] || vec[1] > scissor->br[1]) {
+    if (vec[0] < scissor->tl[0] || vec[0] > scissor->br[0] || vec[1] < scissor->tl[1] || vec[1] > scissor->br[1]) {
       return qtrue;
     }
   } else {
     float distSquared;
     vec2_t distVec;
 
-    distVec[0] =
-        vec[0] - (scissor->tl[0] + (0.5f * (scissor->br[0] - scissor->tl[0])));
-    distVec[1] =
-        vec[1] - (scissor->tl[1] + (0.5f * (scissor->br[1] - scissor->tl[1])));
+    distVec[0]  = vec[0] - (scissor->tl[0] + (0.5f * (scissor->br[0] - scissor->tl[0])));
+    distVec[1]  = vec[1] - (scissor->tl[1] + (0.5f * (scissor->br[1] - scissor->tl[1])));
     distSquared = distVec[0] * distVec[0] + distVec[1] * distVec[1];
 
     if (distSquared > Square(0.5f * (scissor->br[0] - scissor->tl[0]))) {
@@ -103,10 +91,8 @@ void CG_TransformAutomapEntity(void) {
 
     // calculate the screen coordinate of this entity for the
     // automap, consider the zoom value
-    mEnt->automapTransformed[0] = (mEnt->x - cg.mapcoordsMins[0]) *
-                                  cg.mapcoordsScale[0] * 100 * automapZoom;
-    mEnt->automapTransformed[1] = (mEnt->y - cg.mapcoordsMins[1]) *
-                                  cg.mapcoordsScale[1] * 100 * automapZoom;
+    mEnt->automapTransformed[0] = (mEnt->x - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0] * 100 * automapZoom;
+    mEnt->automapTransformed[1] = (mEnt->y - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1] * 100 * automapZoom;
   }
 }
 
@@ -128,6 +114,7 @@ void CG_AdjustAutomapZoom(int zoomIn) {
   // recalculate the screen coordinates since the zoom changed
   CG_TransformAutomapEntity();
 }
+
 // END		xkan, 9/19/2002
 
 void CG_ParseMapEntity(int *mapEntityCount, int *offset, team_t team) {
@@ -179,10 +166,8 @@ void CG_ParseMapEntity(int *mapEntityCount, int *offset, team_t team) {
   trap_Argv((*offset)++, buffer, 16);
   mEnt->data = Q_atoi(buffer);
 
-  mEnt->transformed[0] =
-      (mEnt->x - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0] * CC_2D_W;
-  mEnt->transformed[1] =
-      (mEnt->y - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1] * CC_2D_H;
+  mEnt->transformed[0] = (mEnt->x - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0] * CC_2D_W;
+  mEnt->transformed[1] = (mEnt->y - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1] * CC_2D_H;
 
   mEnt->team = team;
 
@@ -198,7 +183,6 @@ void CG_ParseMapEntityInfo(int axis_number, int allied_number) {
   int i, offset;
 
   mapEntityCount = 0;
-  mapEntityTime = cg.time;
 
   offset = 3;
 
@@ -225,37 +209,30 @@ void CG_InitLocations(void) {
   gridStep[1] = 1200.f;
 
   // ensure minimal grid density
-  while (gridStep[0] > 50.f &&
-         (cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0] < 7)
+  while (gridStep[0] > 50.f && (cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0] < 7)
     gridStep[0] -= 50.f;
-  while (gridStep[1] > 50.f &&
-         (cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1] < 7)
+  while (gridStep[1] > 50.f && (cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1] < 7)
     gridStep[1] -= 50.f;
 
-  gridStartCoord[0] =
-      .5f *
-      ((((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]) -
-        ((int)((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]))) *
-       gridStep[0]);
-  gridStartCoord[1] =
-      .5f *
-      ((((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1]) -
-        ((int)((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1]))) *
-       gridStep[1]);
+  gridStartCoord[0] = .5f * ((((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]) -
+                              ((int)((cg.mapcoordsMaxs[0] - cg.mapcoordsMins[0]) / gridStep[0]))) *
+                             gridStep[0]);
+  gridStartCoord[1] = .5f * ((((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1]) -
+                              ((int)((cg.mapcoordsMins[1] - cg.mapcoordsMaxs[1]) / gridStep[1]))) *
+                             gridStep[1]);
 }
 
 inline constexpr int COMMANDMAP_PLAYER_ICON_SIZE = 6;
-inline constexpr int AUTOMAP_PLAYER_ICON_SIZE = 5;
+inline constexpr int AUTOMAP_PLAYER_ICON_SIZE    = 5;
 
-inline constexpr float CONST_ICON_NORMAL_SIZE = 32.0f;
+inline constexpr float CONST_ICON_NORMAL_SIZE   = 32.0f;
 inline constexpr float CONST_ICON_EXPANDED_SIZE = 48.0f;
 
 // xkan: extracted from CG_DrawCommandMap.
 // drawingCommandMap - qfalse: command map; qtrue: auto map (upper left in main
 // game view)
 
-void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
-                      int mEntFilter, mapScissor_t *scissor,
+void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h, int mEntFilter, mapScissor_t *scissor,
                       qboolean interactive, snapshot_t *snap, int icon_size) {
   int j = 1;
   qhandle_t pic;
@@ -265,7 +242,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
   const char *name;
   vec4_t c_clr = {1.f, 1.f, 1.f, 1.f};
   vec2_t icon_extends, icon_pos, string_pos = {0, 0};
-  int customimage = 0;
+  int customimage    = 0;
   oidInfo_t *oidInfo = NULL;
   float origX, origY, yaw;
 
@@ -299,44 +276,32 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 
       // for these, if availaible, ignore the coordinate
       // data and grab the most up to date pvs data
-      origX = (cent - cg_entities == cg.clientNum
-                   ? cg.predictedPlayerEntity.lerpOrigin[0]
-                   : cent->lerpOrigin[0]);
-      origY = (cent - cg_entities == cg.clientNum
-                   ? cg.predictedPlayerEntity.lerpOrigin[1]
-                   : cent->lerpOrigin[1]);
-      yaw = (cent - cg_entities == cg.clientNum
-                 ? cg.predictedPlayerState.viewangles[YAW]
-                 : cent->lerpAngles[YAW]);
+      origX = (cent - cg_entities == cg.clientNum ? cg.predictedPlayerEntity.lerpOrigin[0] : cent->lerpOrigin[0]);
+      origY = (cent - cg_entities == cg.clientNum ? cg.predictedPlayerEntity.lerpOrigin[1] : cent->lerpOrigin[1]);
+      yaw   = (cent - cg_entities == cg.clientNum ? cg.predictedPlayerState.viewangles[YAW] : cent->lerpAngles[YAW]);
 
       // note that cg.mapcoordsMaxs[1] <
       // cg.mapcoordsMins[1]
-      if (origX < cg.mapcoordsMins[0] || origX > cg.mapcoordsMaxs[0] ||
-          origY > cg.mapcoordsMins[1] || origY < cg.mapcoordsMaxs[1]) {
+      if (origX < cg.mapcoordsMins[0] || origX > cg.mapcoordsMaxs[0] || origY > cg.mapcoordsMins[1] ||
+          origY < cg.mapcoordsMaxs[1]) {
         return;
       }
 
-      if (mEnt->type == ME_PLAYER_DISGUISED &&
-          !(cent->currentState.powerups & (1 << PW_OPS_DISGUISED))) {
+      if (mEnt->type == ME_PLAYER_DISGUISED && !(cent->currentState.powerups & (1 << PW_OPS_DISGUISED))) {
         return;
       }
 
       classInfo = CG_PlayerClassForClientinfo(ci, cent);
 
-      if (cent - cg_entities == cg.clientNum ||
-          (ci->team == snap->ps.persistant[PERS_TEAM] && cent->currentValid)) {
+      if (cent - cg_entities == cg.clientNum || (ci->team == snap->ps.persistant[PERS_TEAM] && cent->currentValid)) {
         if (!scissor) {
-          mEnt->transformed[0] =
-              ((origX - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w;
-          mEnt->transformed[1] =
-              ((origY - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h;
+          mEnt->transformed[0] = ((origX - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w;
+          mEnt->transformed[1] = ((origY - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h;
         } else {
           mEnt->automapTransformed[0] =
-              ((origX - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w *
-              scissor->zoomFactor;
+            ((origX - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w * scissor->zoomFactor;
           mEnt->automapTransformed[1] =
-              ((origY - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h *
-              scissor->zoomFactor;
+            ((origY - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h * scissor->zoomFactor;
         }
 
         mEnt->yaw = yaw;
@@ -361,13 +326,11 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
       }
 
       if (scissor) {
-        icon_pos[0] =
-            mEnt->automapTransformed[0] - scissor->tl[0] + x - icon_size;
-        icon_pos[1] =
-            mEnt->automapTransformed[1] - scissor->tl[1] + y - icon_size;
+        icon_pos[0] = mEnt->automapTransformed[0] - scissor->tl[0] + x - icon_size;
+        icon_pos[1] = mEnt->automapTransformed[1] - scissor->tl[1] + y - icon_size;
       } else {
-        icon_pos[0] = x + mEnt->transformed[0] - icon_size;
-        icon_pos[1] = y + mEnt->transformed[1] - icon_size;
+        icon_pos[0]   = x + mEnt->transformed[0] - icon_size;
+        icon_pos[1]   = y + mEnt->transformed[1] - icon_size;
         string_pos[0] = x + mEnt->transformed[0];
         string_pos[1] = y + mEnt->transformed[1] + icon_size;
       }
@@ -381,14 +344,12 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
 
       if (mEnt->type == ME_PLAYER_REVIVE) {
         constexpr int interval = 2000;
-        const int msec = cg.time % interval;
-        vec4_t reviveClr = {1.f, 1.f, 1.f, 1.f};
-        reviveClr[3] =
-            static_cast<float>((std::sin(msec * M_PI / interval) + 1) / 2);
+        const int msec         = cg.time % interval;
+        vec4_t reviveClr       = {1.f, 1.f, 1.f, 1.f};
+        reviveClr[3]           = static_cast<float>((std::sin(msec * M_PI / interval) + 1) / 2);
 
         trap_R_SetColor(reviveClr);
-        CG_DrawPic(icon_pos[0] + 3, icon_pos[1] + 3, icon_extends[0] - 3,
-                   icon_extends[1] - 3, cgs.media.medicIcon);
+        CG_DrawPic(icon_pos[0] + 3, icon_pos[1] + 3, icon_extends[0] - 3, icon_extends[1] - 3, cgs.media.medicIcon);
         trap_R_SetColor(NULL);
       } else {
         if (cg.clientNum == mEnt->data) {
@@ -398,19 +359,16 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
             trap_R_SetColor(colorYellow);
           }
 
-          CG_DrawPic(icon_pos[0], icon_pos[1], icon_extends[0], icon_extends[1],
-                     cgs.media.ccPlayerHighlight);
+          CG_DrawPic(icon_pos[0], icon_pos[1], icon_extends[0], icon_extends[1], cgs.media.ccPlayerHighlight);
           trap_R_SetColor(NULL);
 
           if (cg.predictedPlayerEntity.voiceChatSpriteTime > cg.time) {
-            CG_DrawPic(icon_pos[0] + 12, icon_pos[1], icon_extends[0] * 0.5f,
-                       icon_extends[1] * 0.5f,
+            CG_DrawPic(icon_pos[0] + 12, icon_pos[1], icon_extends[0] * 0.5f, icon_extends[1] * 0.5f,
                        cg.predictedPlayerEntity.voiceChatSprite);
           }
         } else if (mEnt->type == ME_PLAYER_DISGUISED) {
           trap_R_SetColor(colorOrange);
-          CG_DrawPic(icon_pos[0], icon_pos[1], icon_extends[0], icon_extends[1],
-                     cgs.media.ccPlayerHighlight);
+          CG_DrawPic(icon_pos[0], icon_pos[1], icon_extends[0], icon_extends[1], cgs.media.ccPlayerHighlight);
           trap_R_SetColor(NULL);
         } else if (/*!(cgs.ccFilter &
                       CC_FILTER_BUDDIES) &&*/
@@ -419,13 +377,11 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
             trap_R_SetColor(colorRed);
           }
 
-          CG_DrawPic(icon_pos[0], icon_pos[1], icon_extends[0], icon_extends[1],
-                     cgs.media.ccPlayerHighlight);
+          CG_DrawPic(icon_pos[0], icon_pos[1], icon_extends[0], icon_extends[1], cgs.media.ccPlayerHighlight);
           trap_R_SetColor(NULL);
 
           if (!scissor) {
-            CG_Text_Paint_Ext(string_pos[0], string_pos[1], 0.2f, 0.2f,
-                              colorWhite, ci->name, 0, 0,
+            CG_Text_Paint_Ext(string_pos[0], string_pos[1], 0.2f, 0.2f, colorWhite, ci->name, 0, 0,
                               ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
             //					CG_DrawStringExt_Shadow(
             // string_pos[0],
@@ -437,31 +393,28 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
           }
 
           if (cent->voiceChatSpriteTime > cg.time) {
-            CG_DrawPic(icon_pos[0] + 12, icon_pos[1], icon_extends[0] * 0.5f,
-                       icon_extends[1] * 0.5f, cent->voiceChatSprite);
+            CG_DrawPic(icon_pos[0] + 12, icon_pos[1], icon_extends[0] * 0.5f, icon_extends[1] * 0.5f,
+                       cent->voiceChatSprite);
           }
         } else if (ci->team == snap->ps.persistant[PERS_TEAM]) {
           if (ci->ccSelected) {
             trap_R_SetColor(colorRed);
-            CG_DrawPic(icon_pos[0], icon_pos[1], icon_extends[0],
-                       icon_extends[1], cgs.media.ccPlayerHighlight);
+            CG_DrawPic(icon_pos[0], icon_pos[1], icon_extends[0], icon_extends[1], cgs.media.ccPlayerHighlight);
             trap_R_SetColor(NULL);
           }
 
           if (cent->voiceChatSpriteTime > cg.time) {
-            CG_DrawPic(icon_pos[0] + 12, icon_pos[1], icon_extends[0] * 0.5f,
-                       icon_extends[1] * 0.5f, cent->voiceChatSprite);
+            CG_DrawPic(icon_pos[0] + 12, icon_pos[1], icon_extends[0] * 0.5f, icon_extends[1] * 0.5f,
+                       cent->voiceChatSprite);
           }
         }
 
         c_clr[3] = 1.0f;
 
         trap_R_SetColor(c_clr);
-        CG_DrawPic(icon_pos[0], icon_pos[1], icon_extends[0], icon_extends[1],
-                   classInfo->icon);
+        CG_DrawPic(icon_pos[0], icon_pos[1], icon_extends[0], icon_extends[1], classInfo->icon);
 
-        CG_DrawRotatedPic(icon_pos[0] - 1, icon_pos[1] - 1, icon_extends[0] + 2,
-                          icon_extends[1] + 2, classInfo->arrow,
+        CG_DrawRotatedPic(icon_pos[0] - 1, icon_pos[1] - 1, icon_extends[0] + 2, icon_extends[1] + 2, classInfo->arrow,
                           (0.5 - (mEnt->yaw - 180.f) / 360.f));
         trap_R_SetColor(NULL);
       }
@@ -477,73 +430,45 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
         oidInfo = &cgs.oidInfo[mEnt->data];
 
         for (j = 0; j < cg.snap->numEntities; j++) {
-          if (cg.snap->entities[j].eType == ET_OID_TRIGGER &&
-              cg.snap->entities[j].teamNum == mEnt->data) {
+          if (cg.snap->entities[j].eType == ET_OID_TRIGGER && cg.snap->entities[j].teamNum == mEnt->data) {
             cent = &cg_entities[cg.snap->entities[j].number];
             if (!scissor) {
-              mEnt->transformed[0] =
-                  ((cent->lerpOrigin[0] - cg.mapcoordsMins[0]) *
-                   cg.mapcoordsScale[0]) *
-                  w;
-              mEnt->transformed[1] =
-                  ((cent->lerpOrigin[1] - cg.mapcoordsMins[1]) *
-                   cg.mapcoordsScale[1]) *
-                  h;
+              mEnt->transformed[0] = ((cent->lerpOrigin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w;
+              mEnt->transformed[1] = ((cent->lerpOrigin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h;
             } else {
               mEnt->automapTransformed[0] =
-                  ((cent->lerpOrigin[0] - cg.mapcoordsMins[0]) *
-                   cg.mapcoordsScale[0]) *
-                  w * scissor->zoomFactor;
+                ((cent->lerpOrigin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w * scissor->zoomFactor;
               mEnt->automapTransformed[1] =
-                  ((cent->lerpOrigin[1] - cg.mapcoordsMins[1]) *
-                   cg.mapcoordsScale[1]) *
-                  h * scissor->zoomFactor;
+                ((cent->lerpOrigin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h * scissor->zoomFactor;
             }
             break;
           }
         }
-      } else if (mEnt->type == ME_CONSTRUCT || mEnt->type == ME_DESTRUCT ||
-                 mEnt->type == ME_DESTRUCT_2) {
+      } else if (mEnt->type == ME_CONSTRUCT || mEnt->type == ME_DESTRUCT || mEnt->type == ME_DESTRUCT_2) {
         cent = &cg_entities[mEnt->data];
 
         oidInfo = &cgs.oidInfo[cent->currentState.modelindex2];
 
         if (!scissor) {
-          mEnt->transformed[0] = ((cent->lerpOrigin[0] - cg.mapcoordsMins[0]) *
-                                  cg.mapcoordsScale[0]) *
-                                 w;
-          mEnt->transformed[1] = ((cent->lerpOrigin[1] - cg.mapcoordsMins[1]) *
-                                  cg.mapcoordsScale[1]) *
-                                 h;
+          mEnt->transformed[0] = ((cent->lerpOrigin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w;
+          mEnt->transformed[1] = ((cent->lerpOrigin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h;
         } else {
           mEnt->automapTransformed[0] =
-              ((cent->lerpOrigin[0] - cg.mapcoordsMins[0]) *
-               cg.mapcoordsScale[0]) *
-              w * scissor->zoomFactor;
+            ((cent->lerpOrigin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w * scissor->zoomFactor;
           mEnt->automapTransformed[1] =
-              ((cent->lerpOrigin[1] - cg.mapcoordsMins[1]) *
-               cg.mapcoordsScale[1]) *
-              h * scissor->zoomFactor;
+            ((cent->lerpOrigin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h * scissor->zoomFactor;
         }
       } else if (mEnt->type == ME_COMMANDMAP_MARKER) {
         oidInfo = &cgs.oidInfo[mEnt->data];
 
         if (!scissor) {
-          mEnt->transformed[0] = ((oidInfo->origin[0] - cg.mapcoordsMins[0]) *
-                                  cg.mapcoordsScale[0]) *
-                                 w;
-          mEnt->transformed[1] = ((oidInfo->origin[1] - cg.mapcoordsMins[1]) *
-                                  cg.mapcoordsScale[1]) *
-                                 h;
+          mEnt->transformed[0] = ((oidInfo->origin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w;
+          mEnt->transformed[1] = ((oidInfo->origin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h;
         } else {
           mEnt->automapTransformed[0] =
-              ((oidInfo->origin[0] - cg.mapcoordsMins[0]) *
-               cg.mapcoordsScale[0]) *
-              w * scissor->zoomFactor;
+            ((oidInfo->origin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w * scissor->zoomFactor;
           mEnt->automapTransformed[1] =
-              ((oidInfo->origin[1] - cg.mapcoordsMins[1]) *
-               cg.mapcoordsScale[1]) *
-              h * scissor->zoomFactor;
+            ((oidInfo->origin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h * scissor->zoomFactor;
         }
       }
 
@@ -560,8 +485,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
       }
 
       if (oidInfo) {
-        customimage = mEnt->team == TEAM_AXIS ? oidInfo->customimageaxis
-                                              : oidInfo->customimageallies;
+        customimage = mEnt->team == TEAM_AXIS ? oidInfo->customimageaxis : oidInfo->customimageallies;
       }
 
       /*		if((mEnt->yaw & 0xFF) & (1 <<
@@ -575,8 +499,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
         if (mEntFilter & CC_FILTER_CONSTRUCTIONS) {
           return;
         }
-        pic = mEnt->team == TEAM_AXIS ? cgs.media.ccConstructIcon[0]
-                                      : cgs.media.ccConstructIcon[1];
+        pic = mEnt->team == TEAM_AXIS ? cgs.media.ccConstructIcon[0] : cgs.media.ccConstructIcon[1];
       } else if (mEnt->type == ME_TANK) {
         if (mEntFilter & CC_FILTER_OBJECTIVES) {
           return;
@@ -596,9 +519,8 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
         if (mEntFilter & CC_FILTER_DESTRUCTIONS) {
           return;
         }
-        pic = mEnt->team == TEAM_AXIS
-                  ? cgs.media.ccDestructIcon[cent->currentState.effect1Time][0]
-                  : cgs.media.ccDestructIcon[cent->currentState.effect1Time][1];
+        pic = mEnt->team == TEAM_AXIS ? cgs.media.ccDestructIcon[cent->currentState.effect1Time][0]
+                                      : cgs.media.ccDestructIcon[cent->currentState.effect1Time][1];
       }
 
       {
@@ -620,8 +542,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
         }
         if (info & (1 << 6)) {
           if (mEnt->type == ME_DESTRUCT_2) {
-            pic = mEnt->team == TEAM_AXIS ? cgs.media.ccCmdPost[0]
-                                          : cgs.media.ccCmdPost[1];
+            pic = mEnt->team == TEAM_AXIS ? cgs.media.ccCmdPost[0] : cgs.media.ccCmdPost[1];
           }
           if (mEntFilter & CC_FILTER_CMDPOST) {
             return;
@@ -642,11 +563,9 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
       }
 
       if (interactive && !expanded &&
-          BG_RectContainsPoint(
-              x + mEnt->transformed[0] - (CONST_ICON_NORMAL_SIZE * 0.5f),
-              y + mEnt->transformed[1] - (CONST_ICON_NORMAL_SIZE * 0.5f),
-              CONST_ICON_NORMAL_SIZE, CONST_ICON_NORMAL_SIZE, cgDC.cursor.virtX,
-              cgDC.cursor.virtY)) {
+          BG_RectContainsPoint(x + mEnt->transformed[0] - (CONST_ICON_NORMAL_SIZE * 0.5f),
+                               y + mEnt->transformed[1] - (CONST_ICON_NORMAL_SIZE * 0.5f), CONST_ICON_NORMAL_SIZE,
+                               CONST_ICON_NORMAL_SIZE, cgDC.cursor.virtX, cgDC.cursor.virtY)) {
         float w;
 
         icon_extends[0] = CONST_ICON_EXPANDED_SIZE;
@@ -662,8 +581,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
           icon_extends[1] *= cgs.ccZoomFactor;
         }
 
-        CG_DrawPic(icon_pos[0] - (icon_extends[0] * 0.5f),
-                   icon_pos[1] - (icon_extends[1] * 0.5f), icon_extends[0],
+        CG_DrawPic(icon_pos[0] - (icon_extends[0] * 0.5f), icon_pos[1] - (icon_extends[1] * 0.5f), icon_extends[0],
                    icon_extends[1], pic);
 
         if (oidInfo) {
@@ -673,10 +591,8 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
         }
 
         w = CG_Text_Width_Ext(name, 0.2f, 0, &cgs.media.limboFont2);
-        CG_CommandMap_SetHighlightText(name, icon_pos[0] - (w * 0.5f),
-                                       icon_pos[1] - 8);
-      } else if (interactive &&
-                 (mEnt->yaw & 0xFF) & (1 << cgs.ccSelectedObjective)) {
+        CG_CommandMap_SetHighlightText(name, icon_pos[0] - (w * 0.5f), icon_pos[1] - 8);
+      } else if (interactive && (mEnt->yaw & 0xFF) & (1 << cgs.ccSelectedObjective)) {
         float scalesize;
         int time = cg.time % 1400;
 
@@ -699,8 +615,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
           icon_extends[1] *= 0.5f;
         }
 
-        CG_DrawPic(icon_pos[0] - (icon_extends[0] * 0.5f),
-                   icon_pos[1] - (icon_extends[1] * 0.5f), icon_extends[0],
+        CG_DrawPic(icon_pos[0] - (icon_extends[0] * 0.5f), icon_pos[1] - (icon_extends[1] * 0.5f), icon_extends[0],
                    icon_extends[1], pic);
       } else {
         icon_extends[0] = CONST_ICON_NORMAL_SIZE;
@@ -716,8 +631,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
           icon_extends[1] *= cgs.ccZoomFactor;
         }
 
-        CG_DrawPic(icon_pos[0] - (icon_extends[0] * 0.5f),
-                   icon_pos[1] - (icon_extends[1] * 0.5f), icon_extends[0],
+        CG_DrawPic(icon_pos[0] - (icon_extends[0] * 0.5f), icon_pos[1] - (icon_extends[1] * 0.5f), icon_extends[0],
                    icon_extends[1], pic);
       }
       trap_R_SetColor(NULL);
@@ -767,8 +681,7 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
       }
 
       trap_R_SetColor(c_clr);
-      CG_DrawPic(icon_pos[0] - icon_extends[0] * 0.5f,
-                 icon_pos[1] - icon_extends[1] * 0.5f, icon_extends[0],
+      CG_DrawPic(icon_pos[0] - icon_extends[0] * 0.5f, icon_pos[1] - icon_extends[1] * 0.5f, icon_extends[0],
                  icon_extends[1], pic);
       trap_R_SetColor(NULL);
 
@@ -779,9 +692,8 @@ void CG_DrawMapEntity(mapEntityData_t *mEnt, float x, float y, float w, float h,
   }
 }
 
-void CG_DrawMap(float x, float y, float w, float h, int mEntFilter,
-                mapScissor_t *scissor, qboolean interactive, float alpha,
-                qboolean borderblend) {
+void CG_DrawMap(float x, float y, float w, float h, int mEntFilter, mapScissor_t *scissor, qboolean interactive,
+                float alpha, qboolean borderblend) {
   int i /*, j = 1*/;
   snapshot_t *snap;
   //	vec4_t c_clr = {1.f, 1.f, 1.f, 1.f};
@@ -810,8 +722,7 @@ void CG_DrawMap(float x, float y, float w, float h, int mEntFilter,
       sc_w = w;
       sc_h = h;
 
-      CG_DrawPic(sc_x, sc_y, sc_w, sc_h,
-                 cgs.media.commandCentreAutomapMaskShader);
+      CG_DrawPic(sc_x, sc_y, sc_w, sc_h, cgs.media.commandCentreAutomapMaskShader);
 
       s0 = (scissor->tl[0]) / (w * scissor->zoomFactor);
       s1 = (scissor->br[0]) / (w * scissor->zoomFactor);
@@ -820,12 +731,10 @@ void CG_DrawMap(float x, float y, float w, float h, int mEntFilter,
 
       CG_AdjustFrom640(&sc_x, &sc_y, &sc_w, &sc_h);
       if (cgs.ccLayers) {
-        trap_R_DrawStretchPic(
-            sc_x, sc_y, sc_w, sc_h, s0, t0, s1, t1,
-            cgs.media.commandCentreAutomapShader[cgs.ccSelectedLayer]);
-      } else {
         trap_R_DrawStretchPic(sc_x, sc_y, sc_w, sc_h, s0, t0, s1, t1,
-                              cgs.media.commandCentreAutomapShader[0]);
+                              cgs.media.commandCentreAutomapShader[cgs.ccSelectedLayer]);
+      } else {
+        trap_R_DrawStretchPic(sc_x, sc_y, sc_w, sc_h, s0, t0, s1, t1, cgs.media.commandCentreAutomapShader[0]);
       }
       trap_R_DrawStretchPic(0, 0, 0, 0, 0, 0, 0, 0,
                             cgs.media.whiteShader); // HACK : the code above
@@ -843,8 +752,7 @@ void CG_DrawMap(float x, float y, float w, float h, int mEntFilter,
       Vector4Set(color, 1.f, 1.f, 1.f, alpha);
       trap_R_SetColor(color);
       if (cgs.ccLayers) {
-        CG_DrawPic(x, y, w, h,
-                   cgs.media.commandCentreMapShaderTrans[cgs.ccSelectedLayer]);
+        CG_DrawPic(x, y, w, h, cgs.media.commandCentreMapShaderTrans[cgs.ccSelectedLayer]);
       } else {
         CG_DrawPic(x, y, w, h, cgs.media.commandCentreMapShaderTrans[0]);
       }
@@ -866,13 +774,11 @@ void CG_DrawMap(float x, float y, float w, float h, int mEntFilter,
       continue;
     }
 
-    if (mEnt->type == ME_PLAYER || mEnt->type == ME_PLAYER_DISGUISED ||
-        mEnt->type == ME_PLAYER_REVIVE) {
+    if (mEnt->type == ME_PLAYER || mEnt->type == ME_PLAYER_DISGUISED || mEnt->type == ME_PLAYER_REVIVE) {
       continue;
     }
 
-    CG_DrawMapEntity(mEnt, x, y, w, h, mEntFilter, scissor, interactive, snap,
-                     icon_size);
+    CG_DrawMapEntity(mEnt, x, y, w, h, mEntFilter, scissor, interactive, snap, icon_size);
   }
 
   CG_DrawSpawnPointInfo(x, y, w, h, qtrue, scissor, exspawn);
@@ -884,13 +790,11 @@ void CG_DrawMap(float x, float y, float w, float h, int mEntFilter,
       continue;
     }
 
-    if (mEnt->type != ME_PLAYER && mEnt->type != ME_PLAYER_DISGUISED &&
-        mEnt->type != ME_PLAYER_REVIVE) {
+    if (mEnt->type != ME_PLAYER && mEnt->type != ME_PLAYER_DISGUISED && mEnt->type != ME_PLAYER_REVIVE) {
       continue;
     }
 
-    CG_DrawMapEntity(mEnt, x, y, w, h, mEntFilter, scissor, interactive, snap,
-                     icon_size);
+    CG_DrawMapEntity(mEnt, x, y, w, h, mEntFilter, scissor, interactive, snap, icon_size);
   }
 }
 
@@ -914,115 +818,105 @@ void CG_DrawExpandedAutoMap(void) {
     }
   } else {
     if (cg.time - cgs.autoMapExpandTime < 250.f) {
-      x = (SCREEN_WIDTH - w - 20.f) +
-          ((cg.time - cgs.autoMapExpandTime) / 250.f) * (w + 30.f);
+      x = (SCREEN_WIDTH - w - 20.f) + ((cg.time - cgs.autoMapExpandTime) / 250.f) * (w + 30.f);
     } else {
       return;
     }
   }
 
-  CG_DrawMap(x, y, w, h, cgs.ccFilter, NULL, qfalse,
-             std::clamp(etj_expandedMapAlpha.value, 0.0f, 1.0f), qfalse);
+  CG_DrawMap(x, y, w, h, cgs.ccFilter, NULL, qfalse, std::clamp(etj_expandedMapAlpha.value, 0.0f, 1.0f), qfalse);
 
   // Draw the border
 
   // top left
-  s1 = 0;
-  t1 = 0;
-  s2 = 1;
-  t2 = 1;
+  s1  = 0;
+  t1  = 0;
+  s2  = 1;
+  t2  = 1;
   b_x = x - 8;
   b_y = y - 8;
   b_w = 8;
   b_h = 8;
   CG_AdjustFrom640(&b_x, &b_y, &b_w, &b_h);
-  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2,
-                        cgs.media.commandCentreAutomapCornerShader);
+  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2, cgs.media.commandCentreAutomapCornerShader);
 
   // top
-  s2 = w / 256.f;
+  s2  = w / 256.f;
   b_x = x;
   b_y = y - 8;
   b_w = w;
   b_h = 8;
   CG_AdjustFrom640(&b_x, &b_y, &b_w, &b_h);
-  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2,
-                        cgs.media.commandCentreAutomapBorderShader);
+  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2, cgs.media.commandCentreAutomapBorderShader);
 
   // top right
-  s1 = 1;
-  t1 = 0;
-  s2 = 0;
-  t2 = 1;
+  s1  = 1;
+  t1  = 0;
+  s2  = 0;
+  t2  = 1;
   b_x = x + w;
   b_y = y - 8;
   b_w = 8;
   b_h = 8;
   CG_AdjustFrom640(&b_x, &b_y, &b_w, &b_h);
-  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2,
-                        cgs.media.commandCentreAutomapCornerShader);
+  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2, cgs.media.commandCentreAutomapCornerShader);
 
   // right
-  s1 = 1;
-  t1 = h / 256.f;
-  s2 = 0;
-  t2 = 0;
+  s1  = 1;
+  t1  = h / 256.f;
+  s2  = 0;
+  t2  = 0;
   b_x = x + w;
   b_y = y;
   b_w = 8;
   b_h = h;
   CG_AdjustFrom640(&b_x, &b_y, &b_w, &b_h);
-  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2,
-                        cgs.media.commandCentreAutomapBorder2Shader);
+  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2, cgs.media.commandCentreAutomapBorder2Shader);
 
   // bottom right
-  s1 = 1;
-  t1 = 1;
-  s2 = 0;
-  t2 = 0;
+  s1  = 1;
+  t1  = 1;
+  s2  = 0;
+  t2  = 0;
   b_x = x + w;
   b_y = y + h;
   b_w = 8;
   b_h = 8;
   CG_AdjustFrom640(&b_x, &b_y, &b_w, &b_h);
-  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2,
-                        cgs.media.commandCentreAutomapCornerShader);
+  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2, cgs.media.commandCentreAutomapCornerShader);
 
   // bottom
-  s1 = w / 256.f;
+  s1  = w / 256.f;
   b_x = x;
   b_y = y + h;
   b_w = w;
   b_h = 8;
   CG_AdjustFrom640(&b_x, &b_y, &b_w, &b_h);
-  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2,
-                        cgs.media.commandCentreAutomapBorderShader);
+  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2, cgs.media.commandCentreAutomapBorderShader);
 
   // bottom left
-  s1 = 0;
-  t1 = 1;
-  s2 = 1;
-  t2 = 0;
+  s1  = 0;
+  t1  = 1;
+  s2  = 1;
+  t2  = 0;
   b_x = x - 8;
   b_y = y + h;
   b_w = 8;
   b_h = 8;
   CG_AdjustFrom640(&b_x, &b_y, &b_w, &b_h);
-  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2,
-                        cgs.media.commandCentreAutomapCornerShader);
+  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2, cgs.media.commandCentreAutomapCornerShader);
 
   // left
-  s1 = 0;
-  t1 = 0;
-  s2 = 1;
-  t2 = h / 256.f;
+  s1  = 0;
+  t1  = 0;
+  s2  = 1;
+  t2  = h / 256.f;
   b_x = x - 8;
   b_y = y;
   b_w = 8;
   b_h = h;
   CG_AdjustFrom640(&b_x, &b_y, &b_w, &b_h);
-  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2,
-                        cgs.media.commandCentreAutomapBorder2Shader);
+  trap_R_DrawStretchPic(b_x, b_y, b_w, b_h, s1, t1, s2, t2, cgs.media.commandCentreAutomapBorder2Shader);
 }
 
 void CG_DrawAutoMap(void) {
@@ -1033,8 +927,7 @@ void CG_DrawAutoMap(void) {
   memset(&mapScissor, 0, sizeof(mapScissor));
 
   if (cgs.ccLayers) {
-    cgs.ccSelectedLayer =
-        CG_CurLayerForZ((int)cg.predictedPlayerEntity.lerpOrigin[2]);
+    cgs.ccSelectedLayer = CG_CurLayerForZ((int)cg.predictedPlayerEntity.lerpOrigin[2]);
   }
 
   x = SCREEN_WIDTH - 120;
@@ -1056,10 +949,8 @@ void CG_DrawAutoMap(void) {
       // y -= 128.f;
       CG_DrawExpandedAutoMap();
       return;
-    } else if ((cg.time - cgs.autoMapExpandTime > 150.f) &&
-               (cg.time - cgs.autoMapExpandTime < 250.f)) {
-      y = (y - 128.f) +
-          ((cg.time - cgs.autoMapExpandTime - 150.f) / 100.f) * 128.f;
+    } else if ((cg.time - cgs.autoMapExpandTime > 150.f) && (cg.time - cgs.autoMapExpandTime < 250.f)) {
+      y = (y - 128.f) + ((cg.time - cgs.autoMapExpandTime - 150.f) / 100.f) * 128.f;
       CG_DrawExpandedAutoMap();
     }
   }
@@ -1080,13 +971,9 @@ void CG_DrawAutoMap(void) {
   mapScissor.br[0] = mapScissor.br[1] = -1;
 
   automapTransformed[0] =
-      ((cg.predictedPlayerEntity.lerpOrigin[0] - cg.mapcoordsMins[0]) *
-       cg.mapcoordsScale[0]) *
-      w * mapScissor.zoomFactor;
+    ((cg.predictedPlayerEntity.lerpOrigin[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * w * mapScissor.zoomFactor;
   automapTransformed[1] =
-      ((cg.predictedPlayerEntity.lerpOrigin[1] - cg.mapcoordsMins[1]) *
-       cg.mapcoordsScale[1]) *
-      h * mapScissor.zoomFactor;
+    ((cg.predictedPlayerEntity.lerpOrigin[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * h * mapScissor.zoomFactor;
 
   // update clip region (for next drawing). clip region has a size
   // kAutomap_width x kAutomap_height and it is after zooming is
@@ -1118,13 +1005,12 @@ void CG_DrawAutoMap(void) {
 }
 
 inline constexpr float FLAGSIZE_EXPANDED = 48.f;
-inline constexpr float FLAGSIZE_NORMAL = 32.f;
-inline constexpr float FLAG_LEFTFRAC = 25 / 128.f;
-inline constexpr float FLAG_TOPFRAC = 95 / 128.f;
-inline constexpr float SPAWN_SIZEUPTIME = 1000.f;
+inline constexpr float FLAGSIZE_NORMAL   = 32.f;
+inline constexpr float FLAG_LEFTFRAC     = 25 / 128.f;
+inline constexpr float FLAG_TOPFRAC      = 95 / 128.f;
+inline constexpr float SPAWN_SIZEUPTIME  = 1000.f;
 
-int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
-                          mapScissor_t *scissor, int expand) {
+int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw, mapScissor_t *scissor, int expand) {
   int i;
   char buffer[64];
   vec2_t point;
@@ -1147,10 +1033,8 @@ int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
     }
 
     // rain - added parens around ambiguity
-    if (((cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) &&
-         (cg.spawnTeams[i] != team)) ||
+    if (((cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) && (cg.spawnTeams[i] != team)) ||
         ((cg.spawnTeams[i] & SPAWN_DISABLED) && !changetime)) {
-
       continue;
     }
 
@@ -1161,21 +1045,13 @@ int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
     }
 
     if (scissor) {
-      point[0] = ((cg.spawnCoordsUntransformed[i][0] - cg.mapcoordsMins[0]) *
-                  cg.mapcoordsScale[0]) *
-                 pw * scissor->zoomFactor;
-      point[1] = ((cg.spawnCoordsUntransformed[i][1] - cg.mapcoordsMins[1]) *
-                  cg.mapcoordsScale[1]) *
-                 ph * scissor->zoomFactor;
-    } else {
       point[0] =
-          px + (((cg.spawnCoordsUntransformed[i][0] - cg.mapcoordsMins[0]) *
-                 cg.mapcoordsScale[0]) *
-                pw);
+        ((cg.spawnCoordsUntransformed[i][0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * pw * scissor->zoomFactor;
       point[1] =
-          py + (((cg.spawnCoordsUntransformed[i][1] - cg.mapcoordsMins[1]) *
-                 cg.mapcoordsScale[1]) *
-                ph);
+        ((cg.spawnCoordsUntransformed[i][1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * ph * scissor->zoomFactor;
+    } else {
+      point[0] = px + (((cg.spawnCoordsUntransformed[i][0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * pw);
+      point[1] = py + (((cg.spawnCoordsUntransformed[i][1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * ph);
     }
 
     if (scissor && CG_ScissorPointIsCulled(point, scissor)) {
@@ -1216,19 +1092,13 @@ int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
           size *= cgs.ccZoomFactor;
         }
 
-        CG_DrawPic(
-            point[0] - FLAG_LEFTFRAC * size, point[1] - FLAG_TOPFRAC * size,
-            size, size,
-            cgs.media
-                .commandCentreSpawnShader[cg.spawnTeams[i] == TEAM_AXIS ? 0
-                                                                        : 1]);
+        CG_DrawPic(point[0] - FLAG_LEFTFRAC * size, point[1] - FLAG_TOPFRAC * size, size, size,
+                   cgs.media.commandCentreSpawnShader[cg.spawnTeams[i] == TEAM_AXIS ? 0 : 1]);
       }
     } else if ((draw && i == expand) ||
                (!expanded &&
-                BG_RectContainsPoint(point[0] - FLAGSIZE_NORMAL * 0.5f,
-                                     point[1] - FLAGSIZE_NORMAL * 0.5f,
-                                     FLAGSIZE_NORMAL, FLAGSIZE_NORMAL,
-                                     cgDC.cursor.virtX, cgDC.cursor.virtY))) {
+                BG_RectContainsPoint(point[0] - FLAGSIZE_NORMAL * 0.5f, point[1] - FLAGSIZE_NORMAL * 0.5f,
+                                     FLAGSIZE_NORMAL, FLAGSIZE_NORMAL, cgDC.cursor.virtX, cgDC.cursor.virtY))) {
       if (draw) {
         float size = FLAGSIZE_EXPANDED;
         if (scissor) {
@@ -1237,21 +1107,15 @@ int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
           size *= cgs.ccZoomFactor;
         }
 
-        CG_DrawPic(
-            point[0] - FLAG_LEFTFRAC * size, point[1] - FLAG_TOPFRAC * size,
-            size, size,
-            cgs.media
-                .commandCentreSpawnShader[cg.spawnTeams[i] == TEAM_AXIS ? 0
-                                                                        : 1]);
+        CG_DrawPic(point[0] - FLAG_LEFTFRAC * size, point[1] - FLAG_TOPFRAC * size, size, size,
+                   cgs.media.commandCentreSpawnShader[cg.spawnTeams[i] == TEAM_AXIS ? 0 : 1]);
       } else {
         if (!scissor) {
           float w;
 
-          Com_sprintf(buffer, sizeof(buffer), "%s (Troops: %i)",
-                      cg.spawnPoints[i], cg.spawnPlayerCounts[i]);
+          Com_sprintf(buffer, sizeof(buffer), "%s (Troops: %i)", cg.spawnPoints[i], cg.spawnPlayerCounts[i]);
           w = CG_Text_Width_Ext(buffer, 0.2f, 0, &cgs.media.limboFont2);
-          CG_CommandMap_SetHighlightText(buffer, point[0] - (w * 0.5f),
-                                         point[1] - 8);
+          CG_CommandMap_SetHighlightText(buffer, point[0] - (w * 0.5f), point[1] - 8);
         }
 
         e = i;
@@ -1265,18 +1129,12 @@ int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
           size *= cgs.ccZoomFactor;
         }
 
-        CG_DrawPic(
-            point[0] - FLAG_LEFTFRAC * size, point[1] - FLAG_TOPFRAC * size,
-            size, size,
-            cgs.media
-                .commandCentreSpawnShader[cg.spawnTeams[i] == TEAM_AXIS ? 0
-                                                                        : 1]);
+        CG_DrawPic(point[0] - FLAG_LEFTFRAC * size, point[1] - FLAG_TOPFRAC * size, size, size,
+                   cgs.media.commandCentreSpawnShader[cg.spawnTeams[i] == TEAM_AXIS ? 0 : 1]);
 
         if (!scissor) {
-          Com_sprintf(buffer, sizeof(buffer), "(Troops: %i)",
-                      cg.spawnPlayerCounts[i]);
-          CG_Text_Paint_Ext(point[0] + FLAGSIZE_NORMAL * 0.25f, point[1], 0.2f,
-                            0.2f, colorWhite, buffer, 0, 0,
+          Com_sprintf(buffer, sizeof(buffer), "(Troops: %i)", cg.spawnPlayerCounts[i]);
+          CG_Text_Paint_Ext(point[0] + FLAGSIZE_NORMAL * 0.25f, point[1], 0.2f, 0.2f, colorWhite, buffer, 0, 0,
                             ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
         }
       }
@@ -1286,13 +1144,11 @@ int CG_DrawSpawnPointInfo(int px, int py, int pw, int ph, qboolean draw,
   return e;
 }
 
-void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw,
-                         mapScissor_t *scissor, int expand) {
+void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw, mapScissor_t *scissor, int expand) {
   if (cg.lastFiredWeapon == WP_MORTAR_SET && cg.mortarImpactTime >= 0) {
     if (cg.snap->ps.weapon != WP_MORTAR_SET) {
       cg.mortarImpactTime = 0;
     } else {
-
       // vec4_t colour = { .77f, .1f, .1f, 1.f };
       vec4_t colour = {1.f, 1.f, 1.f, 1.f};
       vec3_t point;
@@ -1302,19 +1158,11 @@ void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw,
       // 5000);
 
       if (scissor) {
-        point[0] = ((cg.mortarImpactPos[0] - cg.mapcoordsMins[0]) *
-                    cg.mapcoordsScale[0]) *
-                   pw * scissor->zoomFactor;
-        point[1] = ((cg.mortarImpactPos[1] - cg.mapcoordsMins[1]) *
-                    cg.mapcoordsScale[1]) *
-                   ph * scissor->zoomFactor;
+        point[0] = ((cg.mortarImpactPos[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * pw * scissor->zoomFactor;
+        point[1] = ((cg.mortarImpactPos[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * ph * scissor->zoomFactor;
       } else {
-        point[0] = px + (((cg.mortarImpactPos[0] - cg.mapcoordsMins[0]) *
-                          cg.mapcoordsScale[0]) *
-                         pw);
-        point[1] = py + (((cg.mortarImpactPos[1] - cg.mapcoordsMins[1]) *
-                          cg.mapcoordsScale[1]) *
-                         ph);
+        point[0] = px + (((cg.mortarImpactPos[0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * pw);
+        point[1] = py + (((cg.mortarImpactPos[1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * ph);
       }
 
       // rain - don't return if the marker is culled,
@@ -1346,11 +1194,10 @@ void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw,
         }
 
         trap_R_SetColor(colour);
-        CG_DrawRotatedPic(point[0] - 8.f, point[1] - 8.f, 16, 16,
-                          cgs.media.ccMortarHit,
+        CG_DrawRotatedPic(point[0] - 8.f, point[1] - 8.f, 16, 16, cgs.media.ccMortarHit,
                           .5f - (cg.mortarFireAngles[YAW] /*- 180.f */
                                  + 45.f) /
-                                    360.f);
+                                  360.f);
         trap_R_SetColor(NULL);
       }
     }
@@ -1371,21 +1218,13 @@ void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw,
         }
 
         if (scissor) {
-          point[0] = ((cg.artilleryRequestPos[i][0] - cg.mapcoordsMins[0]) *
-                      cg.mapcoordsScale[0]) *
-                     pw * scissor->zoomFactor;
-          point[1] = ((cg.artilleryRequestPos[i][1] - cg.mapcoordsMins[1]) *
-                      cg.mapcoordsScale[1]) *
-                     ph * scissor->zoomFactor;
-        } else {
           point[0] =
-              px + (((cg.artilleryRequestPos[i][0] - cg.mapcoordsMins[0]) *
-                     cg.mapcoordsScale[0]) *
-                    pw);
+            ((cg.artilleryRequestPos[i][0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * pw * scissor->zoomFactor;
           point[1] =
-              py + (((cg.artilleryRequestPos[i][1] - cg.mapcoordsMins[1]) *
-                     cg.mapcoordsScale[1]) *
-                    ph);
+            ((cg.artilleryRequestPos[i][1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * ph * scissor->zoomFactor;
+        } else {
+          point[0] = px + (((cg.artilleryRequestPos[i][0] - cg.mapcoordsMins[0]) * cg.mapcoordsScale[0]) * pw);
+          point[1] = py + (((cg.artilleryRequestPos[i][1] - cg.mapcoordsMins[1]) * cg.mapcoordsScale[1]) * ph);
         }
 
         // rain - don't return if the marker is
@@ -1401,8 +1240,7 @@ void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw,
         }
 
         trap_R_SetColor(colour);
-        CG_DrawPic(point[0] - 8.f, point[1] - 8.f, 16, 16,
-                   cgs.media.ccMortarTarget);
+        CG_DrawPic(point[0] - 8.f, point[1] - 8.f, 16, 16, cgs.media.ccMortarTarget);
         trap_R_SetColor(NULL);
 
         // CG_FillRect( point[0] - 8.f, point[1]
@@ -1443,8 +1281,8 @@ void CG_DrawMortarMarker(int px, int py, int pw, int ph, qboolean draw,
 }*/
 
 mapEntityData_t *CG_ScanForCommandCentreEntity(void) {
-  vec_t rangeSquared = Square(1000);
-  int ent = 0;
+  vec_t rangeSquared    = Square(1000);
+  int ent               = 0;
   mapEntityData_t *mEnt = &mapEntities[0];
   int i;
 
@@ -1466,7 +1304,7 @@ mapEntityData_t *CG_ScanForCommandCentreEntity(void) {
 
     if (i == 0 || rngSquared < rangeSquared) {
       rangeSquared = rngSquared;
-      ent = i;
+      ent          = i;
     }
   }
 
@@ -1518,8 +1356,7 @@ qboolean CG_CommandCentreLayersClick(void) {
   y = CC_2D_Y + CC_2D_H - 32;
 
   for (i = 0; i < cgs.ccLayers; i++) {
-    if (BG_RectContainsPoint(x, y, 32, 32, cgDC.cursor.virtX,
-                             cgDC.cursor.virtY)) {
+    if (BG_RectContainsPoint(x, y, 32, 32, cgDC.cursor.virtX, cgDC.cursor.virtY)) {
       cgs.ccSelectedLayer = i;
       return qtrue;
     }
@@ -1538,8 +1375,8 @@ qboolean CG_CommandCentreSpawnPointClick(void) {
   }
 
   for (i = 1; i < cg.spawnCount; i++) {
-    if ((cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) &&
-        cg.spawnTeams[i] && cg.spawnTeams[i] != CG_LimboPanel_GetRealTeam()) {
+    if ((cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) && cg.spawnTeams[i] &&
+        cg.spawnTeams[i] != CG_LimboPanel_GetRealTeam()) {
       continue;
     }
 
@@ -1556,12 +1393,10 @@ qboolean CG_CommandCentreSpawnPointClick(void) {
     point[0] = cg.spawnCoords[i][0] + SCREEN_OFFSET_X;
     point[1] = cg.spawnCoords[i][1];
 
-    if (BG_RectContainsPoint(point[0] - FLAGSIZE_NORMAL * 0.5f,
-                             point[1] - FLAGSIZE_NORMAL * 0.5f, FLAGSIZE_NORMAL,
-                             FLAGSIZE_NORMAL, cgDC.cursor.virtX,
-                             cgDC.cursor.virtY)) {
+    if (BG_RectContainsPoint(point[0] - FLAGSIZE_NORMAL * 0.5f, point[1] - FLAGSIZE_NORMAL * 0.5f, FLAGSIZE_NORMAL,
+                             FLAGSIZE_NORMAL, cgDC.cursor.virtX, cgDC.cursor.virtY)) {
       trap_SendConsoleCommand(va("setspawnpt %i\n", i));
-      cg.selectedSpawnPoint = i;
+      cg.selectedSpawnPoint    = i;
       cgs.ccRequestedObjective = -1;
       return qtrue;
     }
@@ -1582,16 +1417,16 @@ void CG_CommandCentreClick(int key) {
 
 char cg_highlightText[256];
 rectDef_t cg_highlightTextRect;
+
 void CG_CommandMap_SetHighlightText(const char *text, float x, float y) {
   Q_strncpyz(cg_highlightText, text, sizeof(cg_highlightText));
   cg_highlightTextRect.x = x;
   cg_highlightTextRect.y = y;
-  expanded = qtrue;
+  expanded               = qtrue;
 }
 
 void CG_CommandMap_DrawHighlightText(void) {
-  CG_Text_Paint_Ext(cg_highlightTextRect.x, cg_highlightTextRect.y, 0.25f,
-                    0.25f, colorWhite, cg_highlightText, 0, 0,
+  CG_Text_Paint_Ext(cg_highlightTextRect.x, cg_highlightTextRect.y, 0.25f, 0.25f, colorWhite, cg_highlightText, 0, 0,
                     ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
   *cg_highlightText = '\0';
 }

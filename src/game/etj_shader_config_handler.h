@@ -24,12 +24,13 @@
 
 #pragma once
 
-#include "q_shared.h"
 #include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include "q_shared.h"
 
 namespace ETJump {
 // 128 in VET for 32 shaders, completely arbitrary

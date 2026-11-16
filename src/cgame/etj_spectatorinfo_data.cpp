@@ -22,16 +22,17 @@
  * SOFTWARE.
  */
 
+#include "etj_spectatorinfo_data.h"
+
 #include <algorithm>
 
-#include "etj_spectatorinfo_data.h"
 #include "cg_local.h"
 
 namespace ETJump {
 void SpectatorInfoData::update(std::optional<int32_t> clientNum) {
   if (clientNum.has_value()) {
     const int32_t cnum = clientNum.value();
-    const char *cs = CG_ConfigString(CS_PLAYERS + cnum);
+    const char *cs     = CG_ConfigString(CS_PLAYERS + cnum);
 
     // the client we got an update from disconnected,
     // remove them from the lists if present
@@ -59,15 +60,15 @@ void SpectatorInfoData::update(std::optional<int32_t> clientNum) {
     if (ci->clientIsInactive) {
       removeClientFromList(activeSpectators, cg.scores[i].client);
 
-      if (std::find(inactiveSpectators.cbegin(), inactiveSpectators.cend(),
-                    cg.scores[i].client) == inactiveSpectators.cend()) {
+      if (std::find(inactiveSpectators.cbegin(), inactiveSpectators.cend(), cg.scores[i].client) ==
+          inactiveSpectators.cend()) {
         inactiveSpectators.emplace_back(cg.scores[i].client);
       }
     } else {
       removeClientFromList(inactiveSpectators, cg.scores[i].client);
 
-      if (std::find(activeSpectators.cbegin(), activeSpectators.cend(),
-                    cg.scores[i].client) == activeSpectators.cend()) {
+      if (std::find(activeSpectators.cbegin(), activeSpectators.cend(), cg.scores[i].client) ==
+          activeSpectators.cend()) {
         activeSpectators.emplace_back(cg.scores[i].client);
       }
     }
@@ -87,8 +88,7 @@ const std::vector<int32_t> &SpectatorInfoData::getInactiveSpectators() const {
   return inactiveSpectators;
 }
 
-void SpectatorInfoData::removeClientFromList(std::vector<int32_t> &v,
-                                             const int32_t clientNum) {
+void SpectatorInfoData::removeClientFromList(std::vector<int32_t> &v, const int32_t clientNum) {
   v.erase(std::remove(v.begin(), v.end(), clientNum), v.end());
 }
 

@@ -34,8 +34,7 @@ using Arguments = std::vector<std::string>;
 
 void registerCommands();
 bool forwardedConsoleCommand(std::string_view cmd, const Arguments &args);
-std::optional<CommandParser::Command>
-getOptCommand(const std::string &commandPrefix,
-              const CommandParser::CommandDefinition &def,
-              const std::vector<std::string> &args);
+std::optional<CommandParser::Command> getOptCommand(const std::string &commandPrefix,
+                                                    const CommandParser::CommandDefinition &def,
+                                                    const std::vector<std::string> &args);
 } // namespace ETJump::ConsoleCommands

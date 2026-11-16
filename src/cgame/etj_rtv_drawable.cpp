@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
+#include "etj_rtv_drawable.h"
+
 #include <array>
 
-#include "etj_rtv_drawable.h"
 #include "cg_local.h"
 #include "etj_client_rtv_handler.h"
 #include "etj_utilities.h"
@@ -33,81 +34,80 @@
 
 namespace ETJump {
 std::vector<panel_button_t> rtvButtonsLayout;
-std::array<const char *, 10> rtvMenuStrings = {
-    "", "", "", "", "", "", "", "", "", "Keep current map"};
+std::array<const char *, 10> rtvMenuStrings = {"", "", "", "", "", "", "", "", "", "Keep current map"};
 
-RtvDrawable::RtvDrawable() { setupPanelButtons(); }
+RtvDrawable::RtvDrawable() {
+  setupPanelButtons();
+}
 
 void RtvDrawable::setupPanelButtons() {
   static panel_button_text_t rtvTitleFont = {
-      0.19f, 0.19f, {0.6f, 0.6f, 0.6f, 1.f}, 0, 0, &cgs.media.limboFont1_lo,
+    0.19f, 0.19f, {0.6f, 0.6f, 0.6f, 1.f},
+      0, 0, &cgs.media.limboFont1_lo,
   };
 
   static panel_button_text_t rtvFont = {
-      0.2f,
-      0.2f,
-      {0.6f, 0.6f, 0.6f, 1.f},
-      ITEM_TEXTSTYLE_SHADOWED,
-      0,
-      &cgs.media.limboFont2,
+    0.2f, 0.2f, {0.6f, 0.6f, 0.6f, 1.f},
+      ITEM_TEXTSTYLE_SHADOWED, 0, &cgs.media.limboFont2,
   };
 
   static panel_button_t rtvTopBorder = {
-      nullptr,
-      "",
-      {10, 129, 204, 136},
-      {1, static_cast<int>(255 * .5f), static_cast<int>(255 * .5f),
-       static_cast<int>(255 * .5f), static_cast<int>(255 * .5f), 1, 0, 0},
-      nullptr, // font
-      nullptr, // keyDown
-      nullptr, // keyUp
-      BG_PanelButtonsRender_Img,
-      nullptr,
+    nullptr,
+    "",
+    {10, 129, 204, 136},
+    {1, static_cast<int>(255 * .5f), static_cast<int>(255 * .5f), static_cast<int>(255 * .5f),
+      static_cast<int>(255 * .5f), 1, 0, 0},
+    nullptr, // font
+    nullptr, // keyDown
+    nullptr, // keyUp
+    BG_PanelButtonsRender_Img,
+    nullptr,
   };
 
   static panel_button_t rtvTopBorderBack = {
-      "white",
-      "",
-      {11, 130, 202, 134},
-      {1, 0, 0, 0, static_cast<int>(255 * 0.75f), 0, 0, 0},
-      nullptr, // font
-      nullptr, // keyDown
-      nullptr, // keyUp
-      BG_PanelButtonsRender_Img,
-      nullptr,
+    "white",
+    "",
+    {11, 130, 202, 134},
+    {1, 0, 0, 0, static_cast<int>(255 * 0.75f), 0, 0, 0},
+    nullptr, // font
+    nullptr, // keyDown
+    nullptr, // keyUp
+    BG_PanelButtonsRender_Img,
+    nullptr,
   };
 
   static panel_button_t rtvTopBorderInner = {
-      "white",
-      "",
-      {12, 131, 200, 12},
-      {1, 41, 51, 43, 204, 0, 0, 0},
-      nullptr, // font
-      nullptr, // keyDown
-      nullptr, // keyUp
-      BG_PanelButtonsRender_Img,
-      nullptr,
+    "white",
+    "",
+    {12, 131, 200, 12},
+    {1, 41, 51, 43, 204, 0, 0, 0},
+    nullptr, // font
+    nullptr, // keyDown
+    nullptr, // keyUp
+    BG_PanelButtonsRender_Img,
+    nullptr,
   };
 
   static panel_button_t rtvTopBorderInnerText = {
-      nullptr,           "",      {15, 141, 200, 12}, {0, 0, 0, 0, 0, 0, 0, 0},
-      &rtvTitleFont, // font
-      nullptr,       // keyDown
-      nullptr,       // keyUp
-      drawMenuTitleText, nullptr,
+    nullptr,           "",      {15, 141, 200, 12},
+                     {0, 0, 0, 0, 0, 0, 0, 0},
+    &rtvTitleFont, // font
+    nullptr, // keyDown
+    nullptr, // keyUp
+    drawMenuTitleText, nullptr,
   };
 
   static panel_button_t rtvMenuItemText = {
-      nullptr,      "",      {16, 153, 128, 12}, {0, 0, 0, 0, 0, 0, 0, 0},
-      &rtvFont, // font
-      nullptr,  // keyDown
-      nullptr,  // keyUp
-      drawMenuText, nullptr,
+    nullptr,      "",      {16, 153, 128, 12},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+    &rtvFont, // font
+    nullptr, // keyDown
+    nullptr, // keyUp
+    drawMenuText, nullptr,
   };
 
-  static panel_button_t *rtvButtons[] = {
-      &rtvTopBorderBack,      &rtvTopBorder,    &rtvTopBorderInner,
-      &rtvTopBorderInnerText, &rtvMenuItemText, nullptr};
+  static panel_button_t *rtvButtons[] = {&rtvTopBorderBack,      &rtvTopBorder,    &rtvTopBorderInner,
+                                         &rtvTopBorderInnerText, &rtvMenuItemText, nullptr};
 
   rtvButtonsLayout.clear();
 
@@ -128,15 +128,13 @@ void RtvDrawable::drawMenuTitleText(panel_button_t *button) {
 
   std::string str = StringUtils::format("VOTE FOR A MAP (%i)", sec);
 
-  CG_Text_Paint_Ext(
-      button->rect.x, button->rect.y + static_cast<float>(button->data[0]),
-      button->font->scalex, button->font->scaley, button->font->colour, str, 0,
-      0, button->font->style, button->font->font);
+  CG_Text_Paint_Ext(button->rect.x, button->rect.y + static_cast<float>(button->data[0]), button->font->scalex,
+                    button->font->scaley, button->font->colour, str, 0, 0, button->font->style, button->font->font);
 }
 
 void RtvDrawable::drawMenuText(panel_button_t *button) {
-  float y = button->rect.y;
-  const auto arrSize = static_cast<int>(rtvMenuStrings.size());
+  float y                   = button->rect.y;
+  const auto arrSize        = static_cast<int>(rtvMenuStrings.size());
   const auto *const rtvMaps = cgame.systems.rtv->getRtvMaps();
 
   for (int i = 0; i < arrSize; i++) {
@@ -146,20 +144,17 @@ void RtvDrawable::drawMenuText(panel_button_t *button) {
       continue;
     }
 
-    std::string str =
-        StringUtils::format("%i. %s", (i + 1) % 10, rtvMenuStrings[i]);
+    std::string str = StringUtils::format("%i. %s", (i + 1) % 10, rtvMenuStrings[i]);
 
     // last entry is current map, so we need 'No' vote count for that
     if (i == arrSize - 1) {
       str += StringUtils::format(": %i(%i)", cgs.voteNo, cgs.voteNoSpectators);
     } else {
-      str += StringUtils::format(": %i(%i)",
-                                 cgame.systems.rtv->getTotalVotesForMap(i),
+      str += StringUtils::format(": %i(%i)", cgame.systems.rtv->getTotalVotesForMap(i),
                                  (*rtvMaps)[i].voteCountInfo.spectatorCount);
     }
 
-    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
-                      button->font->scaley, button->font->colour, str, 0, 0,
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex, button->font->scaley, button->font->colour, str, 0, 0,
                       button->font->style, button->font->font);
 
     y += button->rect.h;
@@ -184,8 +179,7 @@ qboolean RtvDrawable::checkExecKey(int key, qboolean doAction) {
     // so 0 = 'Keep current map'
     int selection = key - '0';
 
-    if (selection > static_cast<int>(cgame.systems.rtv->getRtvMaps()->size()) &&
-        selection != 0) {
+    if (selection > static_cast<int>(cgame.systems.rtv->getRtvMaps()->size()) && selection != 0) {
       return qfalse;
     }
 
@@ -221,7 +215,9 @@ bool RtvDrawable::beforeRender() {
   return true;
 }
 
-void RtvDrawable::render() const { BG_PanelButtonsRender(rtvButtonsLayout); }
+void RtvDrawable::render() const {
+  BG_PanelButtonsRender(rtvButtonsLayout);
+}
 
 bool RtvDrawable::canSkipDraw() {
   if (cgs.eventHandling != CGAME_EVENT_RTV) {

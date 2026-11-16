@@ -35,7 +35,7 @@ class Timerun;
 class SavePos {
   enum class PosFlags {
     NoVelocity = 1,
-    NoPitch = 2,
+    NoPitch    = 2,
   };
 
   std::string defaultName = "default";

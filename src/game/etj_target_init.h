@@ -24,18 +24,20 @@
 
 #pragma once
 
+#include "g_local.h"
+
 namespace ETJump {
 class TargetInit {
 private:
   enum class SpawnFlags {
-    None = 0,
-    KeepHealth = 1,
-    KeepAmmo = 2,
-    KeepWeapons = 4,
-    KeepPortalgun = 8,
-    KeepHoldable = 16,
-    KeepIdent = 32,
-    KeepTracker = 64,
+    None                  = 0,
+    KeepHealth            = 1,
+    KeepAmmo              = 2,
+    KeepWeapons           = 4,
+    KeepPortalgun         = 8,
+    KeepHoldable          = 16,
+    KeepIdent             = 32,
+    KeepTracker           = 64,
     RemoveStartingWeapons = 128
   };
 

@@ -23,6 +23,7 @@
  */
 
 #include "etj_keyset_drawer.h"
+
 #include "cg_local.h"
 #include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
@@ -31,7 +32,7 @@
 namespace ETJump {
 KeySetDrawer::KeySetDrawer(const std::vector<KeyShader> &keyShaders,
                            const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : keyShaders(keyShaders), cvarUpdate(cvarUpdate) {
+  : keyShaders(keyShaders), cvarUpdate(cvarUpdate) {
   initAttrs();
   initListeners();
 }
@@ -49,8 +50,9 @@ void KeySetDrawer::initListeners() {
     updateKeysColor(cvar->string);
   });
 
-  cvarUpdate->subscribe(&etj_keysSize,
-                        [this](const vmCvar_t *cvar) { updateKeysSize(cvar); });
+  cvarUpdate->subscribe(&etj_keysSize, [this](const vmCvar_t *cvar) {
+    updateKeysSize(cvar);
+  });
 
   cvarUpdate->subscribe(&etj_keysX, [this](const vmCvar_t *) {
     updateKeysOrigin(etj_keysX.value, etj_keysY.value);
@@ -123,16 +125,15 @@ void KeySetDrawer::drawShader(qhandle_t shader, int position) const {
     return;
   }
 
-  const float sizeX = attrs.size.x / 3;
-  const float sizeY = attrs.size.y / 3;
+  const float sizeX         = attrs.size.x / 3;
+  const float sizeY         = attrs.size.y / 3;
   const float centerOffsetX = attrs.size.x / 2;
   const float centerOffsetY = attrs.size.y / 2;
-  const auto pos = calcGridPosition<3>(sizeX, sizeY, position);
-  const float x = attrs.origin.x + pos.x - centerOffsetX;
-  const float y = attrs.origin.y + pos.y - centerOffsetY;
-  const vec_t *color = attrs.color;
-  const vec_t *shadowColor =
-      attrs.shouldDrawShadow ? attrs.shadowColor : nullptr;
+  const auto pos            = calcGridPosition<3>(sizeX, sizeY, position);
+  const float x             = attrs.origin.x + pos.x - centerOffsetX;
+  const float y             = attrs.origin.y + pos.y - centerOffsetY;
+  const vec_t *color        = attrs.color;
+  const vec_t *shadowColor  = attrs.shouldDrawShadow ? attrs.shadowColor : nullptr;
 
   drawPic(x, y, sizeX, sizeY, shader, color, shadowColor);
 }

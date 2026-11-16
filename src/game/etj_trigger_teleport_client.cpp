@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 
+#include "etj_trigger_teleport_client.h"
+
 #include <algorithm>
 
-#include "g_local.h"
-#include "etj_trigger_teleport_client.h"
 #include "etj_entity_utilities_shared.h"
 
 namespace ETJump {
@@ -34,9 +34,8 @@ void TriggerTeleportClient::touch(gentity_t *self, gentity_t *other) {
     return;
   }
 
-  EntityUtilsShared::teleportPlayer(
-      &other->client->ps, &other->s, &self->s, &other->client->pers.cmd,
-      self->s.origin2, self->s.angles2, other->client->teleportBitFlipped);
+  EntityUtilsShared::teleportPlayer(&other->client->ps, &other->s, &self->s, &other->client->pers.cmd, self->s.origin2,
+                                    self->s.angles2, other->client->teleportBitFlipped);
 }
 
 void TriggerTeleportClient::think(gentity_t *self) {
@@ -54,16 +53,14 @@ void TriggerTeleportClient::think(gentity_t *self) {
     foundTargets.emplace_back(target);
 
     if (foundTargets.size() > 1) {
-      G_Printf(S_COLOR_YELLOW
-               "WARNING: 'trigger_teleport_client' with multiple targets "
-               "found, using the first available target\n");
+      G_Printf(S_COLOR_YELLOW "WARNING: 'trigger_teleport_client' with multiple targets "
+                              "found, using the first available target\n");
       break;
     }
   }
 
   if (foundTargets.empty()) {
-    G_Printf(S_COLOR_YELLOW
-             "WARNING: 'trigger_teleport_client' without a target.\n");
+    G_Printf(S_COLOR_YELLOW "WARNING: 'trigger_teleport_client' without a target.\n");
     G_FreeEntity(self);
   } else {
     VectorCopy(foundTargets[0]->s.origin, self->s.origin2);
@@ -89,8 +86,7 @@ void TriggerTeleportClient::spawn(gentity_t *self) {
   // 'think' re-checks this in scenarios where 'target' key points to
   // an entity that does not actually exist
   if (!self->target) {
-    G_Printf(S_COLOR_YELLOW
-             "WARNING: 'trigger_teleport_client' without a target.\n");
+    G_Printf(S_COLOR_YELLOW "WARNING: 'trigger_teleport_client' without a target.\n");
     G_FreeEntity(self);
     return;
   }
@@ -116,11 +112,11 @@ void TriggerTeleportClient::spawn(gentity_t *self) {
   self->s.constantLight |= (self->spawnflags << 8) & 0xffffff;
 
   self->s.eType = ET_TELEPORT_TRIGGER_CLIENT;
-  self->touch = [](gentity_t *self, gentity_t *other, trace_t *touch) {
+  self->touch   = [](gentity_t *self, gentity_t *other, trace_t *touch) {
     TriggerTeleportClient::touch(self, other);
   };
 
-  self->think = think;
+  self->think     = think;
   self->nextthink = level.time + FRAMETIME;
 
   trap_LinkEntity(self);

@@ -23,16 +23,16 @@
  */
 
 #include "etj_spectatorinfo_drawable.h"
+
 #include "cg_local.h"
 #include "etj_cvar_update_handler.h"
 #include "etj_spectatorinfo_data.h"
 #include "etj_utilities.h"
 
 namespace ETJump {
-SpectatorInfo::SpectatorInfo(
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
-    const std::shared_ptr<SpectatorInfoData> &specInfoData)
-    : cvarUpdate(cvarUpdate), specInfoData(specInfoData) {
+SpectatorInfo::SpectatorInfo(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+                             const std::shared_ptr<SpectatorInfoData> &specInfoData)
+  : cvarUpdate(cvarUpdate), specInfoData(specInfoData) {
   startListeners();
   setTextSize(etj_spectatorInfoScale);
   setRowHeight();
@@ -50,8 +50,9 @@ void SpectatorInfo::startListeners() {
     setRowHeight();
   });
 
-  cvarUpdate->subscribe(&etj_spectatorInfoShadow,
-                        [this](const vmCvar_t *cvar) { setTextStyle(*cvar); });
+  cvarUpdate->subscribe(&etj_spectatorInfoShadow, [this](const vmCvar_t *cvar) {
+    setTextStyle(*cvar);
+  });
 }
 
 void SpectatorInfo::setTextSize(const vmCvar_t &cvar) {
@@ -62,9 +63,7 @@ void SpectatorInfo::setTextSize(const vmCvar_t &cvar) {
 
 void SpectatorInfo::setRowHeight() {
   // for consistent line spacing, use pre-defined string for height calculation
-  rowHeight = static_cast<float>(
-                  CG_Text_Height_Ext("Yy", sizeY, 0, &cgs.media.limboFont2)) *
-              1.75f;
+  rowHeight = static_cast<float>(CG_Text_Height_Ext("Yy", sizeY, 0, &cgs.media.limboFont2)) * 1.75f;
 }
 
 void SpectatorInfo::setTextStyle(const vmCvar_t &cvar) {
@@ -74,12 +73,9 @@ void SpectatorInfo::setTextStyle(const vmCvar_t &cvar) {
 float SpectatorInfo::getTextOffset(const char *name, const float fontWidth) {
   switch (etj_drawSpectatorInfo.integer) {
     case 2: // center align
-      return static_cast<float>(
-                 CG_Text_Width_Ext(name, fontWidth, 0, &cgs.media.limboFont2)) *
-             0.5f;
+      return static_cast<float>(CG_Text_Width_Ext(name, fontWidth, 0, &cgs.media.limboFont2)) * 0.5f;
     case 3: // right align
-      return static_cast<float>(
-          CG_Text_Width_Ext(name, fontWidth, 0, &cgs.media.limboFont2));
+      return static_cast<float>(CG_Text_Width_Ext(name, fontWidth, 0, &cgs.media.limboFont2));
     default: // left align
       return 0;
   }
@@ -108,29 +104,24 @@ void SpectatorInfo::render() const {
   const auto drawRow = [this, x, &y](const char *name, const vec4_t color) {
     const float offset = getTextOffset(name, sizeX);
 
-    if (static_cast<DrawDirection>(etj_spectatorInfoDirection.integer) ==
-        DrawDirection::DOWN) {
+    if (static_cast<DrawDirection>(etj_spectatorInfoDirection.integer) == DrawDirection::DOWN) {
       y += rowHeight;
-      DrawString(x - offset, y, sizeX, sizeY, color, qfalse, name, 0,
-                 textStyle);
+      DrawString(x - offset, y, sizeX, sizeY, color, qfalse, name, 0, textStyle);
     } else {
       // if we're drawing bottom-up, draw first before changing the y pos,
       // because 'DrawString' draws from the bottom left corner
-      DrawString(x - offset, y, sizeX, sizeY, color, qfalse, name, 0,
-                 textStyle);
+      DrawString(x - offset, y, sizeX, sizeY, color, qfalse, name, 0, textStyle);
       y -= rowHeight;
     }
   };
 
-  const auto &activeSpectators = specInfoData->getActiveSpectators();
+  const auto &activeSpectators   = specInfoData->getActiveSpectators();
   const auto &inactiveSpectators = specInfoData->getInactiveSpectators();
 
-  const size_t totalClients =
-      activeSpectators.size() + inactiveSpectators.size();
-  const size_t max = etj_spectatorInfoMaxClients.integer < 0
-                         ? totalClients
-                         : std::min(etj_spectatorInfoMaxClients.integer,
-                                    static_cast<int32_t>(totalClients));
+  const size_t totalClients = activeSpectators.size() + inactiveSpectators.size();
+  const size_t max          = etj_spectatorInfoMaxClients.integer < 0
+                                ? totalClients
+                                : std::min(etj_spectatorInfoMaxClients.integer, static_cast<int32_t>(totalClients));
 
   // simple case, draw all spectators
   if (totalClients <= max) {
@@ -142,9 +133,8 @@ void SpectatorInfo::render() const {
       drawRow(cgs.clientinfo[client].name, inactiveColor);
     }
   } else {
-    const size_t activeDrawCount = std::min(activeSpectators.size(), max);
-    const size_t inactiveDrawCount =
-        activeDrawCount >= max ? 0 : max - activeDrawCount;
+    const size_t activeDrawCount   = std::min(activeSpectators.size(), max);
+    const size_t inactiveDrawCount = activeDrawCount >= max ? 0 : max - activeDrawCount;
 
     for (size_t i = 0; i < activeDrawCount; i++) {
       drawRow(cgs.clientinfo[activeSpectators[i]].name, colorWhite);
@@ -155,12 +145,10 @@ void SpectatorInfo::render() const {
     }
 
     const auto remaining = static_cast<int>(totalClients - max);
-    drawRow(
-        va("(%s hidden)",
-           StringUtils::getPluralizedString(remaining, "spectator").c_str()),
-        colorMdGrey);
+    drawRow(va("(%s hidden)", StringUtils::getPluralizedString(remaining, "spectator").c_str()), colorMdGrey);
   }
 }
+
 bool SpectatorInfo::canSkipDraw() {
   if (!etj_drawSpectatorInfo.integer) {
     return true;

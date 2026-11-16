@@ -2,17 +2,8 @@
 //
 // q_shared.c -- stateless support routines that are included in each code dll
 #include "q_shared.h"
-#include <cstring>
 
-float Com_Clamp(float min, float max, float value) {
-  if (value < min) {
-    return min;
-  }
-  if (value > max) {
-    return max;
-  }
-  return value;
-}
+#include <cstring>
 
 /*
 COM_FixPath()
@@ -61,7 +52,7 @@ void COM_StripExtension(const char *in, char *out) {
 void COM_StripFilename(const char *in, char *out) {
   char *end;
   Q_strncpyz(out, in, strlen(in) + 1);
-  end = COM_SkipPath(out);
+  end  = COM_SkipPath(out);
   *end = 0;
 }
 
@@ -108,8 +99,7 @@ qboolean COM_BitCheck(const int array[], int bitNum) {
     bitNum -= 32;
   }
 
-  return ((array[i] & (1 << bitNum)) != 0) ? qtrue
-                                           : qfalse; // (SA) heh, whoops. :)
+  return ((array[i] & (1 << bitNum)) != 0) ? qtrue : qfalse; // (SA) heh, whoops. :)
 }
 
 /*
@@ -149,6 +139,7 @@ void COM_BitClear(int array[], int bitNum) {
 
   array[i] &= ~(1 << bitNum);
 }
+
 //============================================================================
 
 /*
@@ -161,24 +152,46 @@ void COM_BitClear(int array[], int bitNum) {
 
 // can't just use function pointers, or dll linkage can
 // mess up when qcommon is included in multiple places
-static short (*_BigShort)(short l) = NULL;
-static short (*_LittleShort)(short l) = NULL;
-static int (*_BigLong)(int l) = NULL;
-static int (*_LittleLong)(int l) = NULL;
-static qint64 (*_BigLong64)(qint64 l) = NULL;
+static short (*_BigShort)(short l)       = NULL;
+static short (*_LittleShort)(short l)    = NULL;
+static int (*_BigLong)(int l)            = NULL;
+static int (*_LittleLong)(int l)         = NULL;
+static qint64 (*_BigLong64)(qint64 l)    = NULL;
 static qint64 (*_LittleLong64)(qint64 l) = NULL;
-static float (*_BigFloat)(float l) = NULL;
-static float (*_LittleFloat)(float l) = NULL;
+static float (*_BigFloat)(float l)       = NULL;
+static float (*_LittleFloat)(float l)    = NULL;
 
-short LittleShort(short l) { return _LittleShort(l); }
-int LittleLong(int l) { return _LittleLong(l); }
-qint64 LittleLong64(qint64 l) { return _LittleLong64(l); }
-float LittleFloat(float l) { return _LittleFloat(l); }
+short LittleShort(short l) {
+  return _LittleShort(l);
+}
 
-short BigShort(short l) { return _BigShort(l); }
-int BigLong(int l) { return _BigLong(l); }
-qint64 BigLong64(qint64 l) { return _BigLong64(l); }
-float BigFloat(float l) { return _BigFloat(l); }
+int LittleLong(int l) {
+  return _LittleLong(l);
+}
+
+qint64 LittleLong64(qint64 l) {
+  return _LittleLong64(l);
+}
+
+float LittleFloat(float l) {
+  return _LittleFloat(l);
+}
+
+short BigShort(short l) {
+  return _BigShort(l);
+}
+
+int BigLong(int l) {
+  return _BigLong(l);
+}
+
+qint64 BigLong64(qint64 l) {
+  return _BigLong64(l);
+}
+
+float BigFloat(float l) {
+  return _BigFloat(l);
+}
 
 short ShortSwap(short l) {
   byte b1, b2;
@@ -189,7 +202,9 @@ short ShortSwap(short l) {
   return (b1 << 8) + b2;
 }
 
-short ShortNoSwap(short l) { return l; }
+short ShortNoSwap(short l) {
+  return l;
+}
 
 int LongSwap(int l) {
   byte b1, b2, b3, b4;
@@ -202,7 +217,9 @@ int LongSwap(int l) {
   return ((int)b1 << 24) + ((int)b2 << 16) + ((int)b3 << 8) + b4;
 }
 
-int LongNoSwap(int l) { return l; }
+int LongNoSwap(int l) {
+  return l;
+}
 
 qint64 Long64Swap(qint64 ll) {
   qint64 result;
@@ -219,7 +236,9 @@ qint64 Long64Swap(qint64 ll) {
   return result;
 }
 
-qint64 Long64NoSwap(qint64 ll) { return ll; }
+qint64 Long64NoSwap(qint64 ll) {
+  return ll;
+}
 
 float FloatSwap(float f) {
   union {
@@ -227,7 +246,7 @@ float FloatSwap(float f) {
     byte b[4];
   } dat1, dat2;
 
-  dat1.f = f;
+  dat1.f    = f;
   dat2.b[0] = dat1.b[3];
   dat2.b[1] = dat1.b[2];
   dat2.b[2] = dat1.b[1];
@@ -235,7 +254,9 @@ float FloatSwap(float f) {
   return dat2.f;
 }
 
-float FloatNoSwap(float f) { return f; }
+float FloatNoSwap(float f) {
+  return f;
+}
 
 /*
 ================
@@ -247,23 +268,23 @@ void Swap_Init(void) {
 
   // set the byte swapping variables in a portable manner
   if (*(short *)swaptest == 1) {
-    _BigShort = ShortSwap;
-    _LittleShort = ShortNoSwap;
-    _BigLong = LongSwap;
-    _LittleLong = LongNoSwap;
-    _BigLong64 = Long64Swap;
+    _BigShort     = ShortSwap;
+    _LittleShort  = ShortNoSwap;
+    _BigLong      = LongSwap;
+    _LittleLong   = LongNoSwap;
+    _BigLong64    = Long64Swap;
     _LittleLong64 = Long64NoSwap;
-    _BigFloat = FloatSwap;
-    _LittleFloat = FloatNoSwap;
+    _BigFloat     = FloatSwap;
+    _LittleFloat  = FloatNoSwap;
   } else {
-    _BigShort = ShortNoSwap;
-    _LittleShort = ShortSwap;
-    _BigLong = LongNoSwap;
-    _LittleLong = LongSwap;
-    _BigLong64 = Long64NoSwap;
+    _BigShort     = ShortNoSwap;
+    _LittleShort  = ShortSwap;
+    _BigLong      = LongNoSwap;
+    _LittleLong   = LongSwap;
+    _BigLong64    = Long64NoSwap;
     _LittleLong64 = Long64Swap;
-    _BigFloat = FloatNoSwap;
-    _LittleFloat = FloatSwap;
+    _BigFloat     = FloatNoSwap;
+    _LittleFloat  = FloatSwap;
   }
 }
 
@@ -289,19 +310,25 @@ void COM_BeginParseSession(const char *name) {
 
 void COM_BackupParseSession(const char **data_p) {
   backup_lines = com_lines;
-  backup_text = *data_p;
+  backup_text  = *data_p;
 }
 
 void COM_RestoreParseSession(const char **data_p) {
   com_lines = backup_lines;
-  *data_p = backup_text;
+  *data_p   = backup_text;
 }
 
-void COM_SetCurrentParseLine(int line) { com_lines = line; }
+void COM_SetCurrentParseLine(int line) {
+  com_lines = line;
+}
 
-int COM_GetCurrentParseLine(void) { return com_lines; }
+int COM_GetCurrentParseLine(void) {
+  return com_lines;
+}
 
-char *COM_Parse(const char **data_p) { return COM_ParseExt(data_p, qtrue); }
+char *COM_Parse(const char **data_p) {
+  return COM_ParseExt(data_p, qtrue);
+}
 
 void COM_ParseError(const char *format, ...) {
   va_list argptr;
@@ -354,53 +381,14 @@ static const char *SkipWhitespace(const char *data, qboolean *hasNewLines) {
   return data;
 }
 
-int COM_Compress(char *data_p) {
-  char *datai, *datao;
-  int c, size;
-
-  size = 0;
-  datai = datao = data_p;
-  if (datai) {
-    while ((c = static_cast<unsigned char>(*datai)) != 0) {
-      if (c == 13 || c == 10) {
-        *datao = static_cast<char>(c);
-        datao++;
-        datai++;
-        size++;
-        // skip double slash comments
-      } else if (c == '/' && datai[1] == '/') {
-        while (*datai && *datai != '\n') {
-          datai++;
-        }
-        // skip /* */ comments
-      } else if (c == '/' && datai[1] == '*') {
-        datai += 2; // Arnout: skip over '/*'
-        while (*datai && (*datai != '*' || datai[1] != '/')) {
-          datai++;
-        }
-        if (*datai) {
-          datai += 2;
-        }
-      } else {
-        *datao = static_cast<char>(c);
-        datao++;
-        datai++;
-        size++;
-      }
-    }
-  }
-  *datao = 0;
-  return size;
-}
-
 char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
   int c, len;
   qboolean hasNewLines = qfalse;
   const char *data;
   constexpr int MAX_TOKEN_LEN = MAX_TOKEN_CHARS - 1;
 
-  data = *data_p;
-  len = 0;
+  data         = *data_p;
+  len          = 0;
   com_token[0] = 0;
 
   // make sure incoming data is valid
@@ -465,7 +453,7 @@ char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
 
           if (!c) {
             com_token[len] = 0;
-            *data_p = data;
+            *data_p        = data;
             break;
           }
           if ((c == '\\' && *(data) == '\"')) {
@@ -485,7 +473,7 @@ char *COM_ParseExt(const char **data_p, qboolean allowLineBreaks) {
       }
       if (c == '\"' || !c) {
         com_token[len] = 0;
-        *data_p = data;
+        *data_p        = data;
         return com_token;
       }
       if (len < MAX_TOKEN_LEN) {
@@ -603,7 +591,7 @@ void Parse1DMatrix(const char **buf_p, int x, float *m) {
 
   for (i = 0; i < x; i++) {
     token = COM_Parse(buf_p);
-    m[i] = Q_atof(token);
+    m[i]  = Q_atof(token);
   }
 
   COM_MatchToken(buf_p, ")");
@@ -735,24 +723,42 @@ int Q_isalphanumeric(int c) {
 }
 
 int Q_isforfilename(int c) {
-  if ((Q_isalphanumeric(c) || c == '_') &&
-      c != ' ') // space not allowed in filename
+  if ((Q_isalphanumeric(c) || c == '_') && c != ' ') // space not allowed in filename
   {
     return (1);
   }
   return (0);
 }
 
+inline constexpr uint32_t FLOAT_MAGNITUDE_MASK = 0x7FFFFFFFu;
+inline constexpr uint32_t FLOAT_INFINITY_BITS  = 0xFFu << 23;
+
 float Q_atof(const char *str) {
   const float f = std::strtof(str, nullptr);
-  return (std::isfinite(f) ? f : 0);
+
+  // we can't use 'std::isfinite()' to check for infinity here because release
+  // builds use fast math, so check the magnitude against infinity bit
+  // pattern instead
+  uint32_t bits = 0;
+  std::memcpy(&bits, &f, sizeof(bits));
+  return (bits & FLOAT_MAGNITUDE_MASK) < FLOAT_INFINITY_BITS ? f : 0;
+}
+
+float Q_atof(const std::string &str) {
+  return Q_atof(str.c_str());
+}
+
+float Q_atof(const std::string_view str) {
+  return Q_atof(std::string{str}.c_str());
 }
 
 int32_t Q_atoi(const char *str) {
   return static_cast<int32_t>(std::strtol(str, nullptr, 10));
 }
 
-int32_t Q_atoi(const std::string &str) { return Q_atoi(str.c_str()); }
+int32_t Q_atoi(const std::string &str) {
+  return Q_atoi(str.c_str());
+}
 
 int32_t Q_atoi(std::string_view str) {
   return Q_atoi(std::string{str}.c_str());
@@ -765,8 +771,8 @@ Q_strncpyz
 Safe strncpy that ensures a trailing zero
 =============
 */
-void Q_strncpyz_fn(char *dest, const char *src, const int destsize,
-                   const char *func, const char *file, const int line) {
+void Q_strncpyz_fn(char *dest, const char *src, const int destsize, const char *func, const char *file,
+                   const int line) {
   if (!dest) {
     Com_Error(ERR_FATAL, "Q_strncpyz: NULL dest (%s, %s:%i)", func, file, line);
   }
@@ -774,8 +780,7 @@ void Q_strncpyz_fn(char *dest, const char *src, const int destsize,
     Com_Error(ERR_FATAL, "Q_strncpyz: NULL src (%s, %s:%i)", func, file, line);
   }
   if (destsize < 1) {
-    Com_Error(ERR_FATAL, "Q_strncpyz: destsize < 1 (%s, %s:%i)", func, file,
-              line);
+    Com_Error(ERR_FATAL, "Q_strncpyz: destsize < 1 (%s, %s:%i)", func, file, line);
   }
 
   strncpy(dest, src, destsize - 1);
@@ -857,13 +862,11 @@ char *Q_strupr(char *s1) {
 }
 
 // never goes past bounds or leaves without a terminating 0
-void Q_strcat_fn(char *dest, const int size, const char *src, const char *func,
-                 const char *file, const int line) {
+void Q_strcat_fn(char *dest, const int size, const char *src, const char *func, const char *file, const int line) {
   const int l1 = static_cast<int>(strlen(dest));
 
   if (l1 >= size) {
-    Com_Error(ERR_FATAL, "Q_strcat: already overflowed (%s, %s:%i)", func, file,
-              line);
+    Com_Error(ERR_FATAL, "Q_strcat: already overflowed (%s, %s:%i)", func, file, line);
   }
 
   // we want to use the actual function here and pass the arguments to that,
@@ -881,7 +884,7 @@ int Q_PrintStrlen(const char *string) {
   }
 
   len = 0;
-  p = string;
+  p   = string;
   while (*p) {
     if (Q_IsColorString(p)) {
       p += 2;
@@ -952,8 +955,7 @@ char *Q_CleanDirName(char *dirname) {
   return dirname;
 }
 
-size_t Q_strnlen_fn(const char *str, const size_t maxlen, const char *func,
-                    const char *file, const int line) {
+size_t Q_strnlen_fn(const char *str, const size_t maxlen, const char *func, const char *file, const int line) {
   if (!str) {
     Com_Error(ERR_FATAL, "Q_strnlen: NULL str (%s, %s:%i)", func, file, line);
     return 0; // blah blah silence warning about str being null
@@ -1032,7 +1034,7 @@ float *tv(float x, float y, float z) {
 
   // use an array so that multiple tempvectors won't collide
   // for a while
-  v = vecs[index];
+  v     = vecs[index];
   index = (index + 1) & 7;
 
   v[0] = x;
@@ -1056,20 +1058,21 @@ char *vtos(const vec3_t v) {
   char *s;
 
   // use an array so that multiple vtos won't collide
-  s = str[index];
+  s     = str[index];
   index = (index + 1) & 7;
 
   Com_sprintf(s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
 
   return s;
 }
+
 char *vtosf(const vec3_t v) {
   static int index;
   static char str[8][64];
   char *s;
 
   // use an array so that multiple vtos won't collide
-  s = str[index];
+  s     = str[index];
   index = (index + 1) & 7;
 
   Com_sprintf(s, 64, "(%f %f %f)", v[0], v[1], v[2]);
@@ -1109,8 +1112,7 @@ char *Info_ValueForKey(const char *s, const char *key) {
   }
 
   if (strlen(s) >= BIG_INFO_STRING) {
-    Com_Error(ERR_DROP, "Info_ValueForKey: oversize infostring [%s] [%s]", s,
-              key);
+    Com_Error(ERR_DROP, "Info_ValueForKey: oversize infostring [%s] [%s]", s, key);
   }
 
   valueindex ^= 1;
@@ -1168,13 +1170,13 @@ void Info_NextPair(const char **head, char *key, char *value) {
   if (*s == '\\') {
     s++;
   }
-  key[0] = 0;
+  key[0]   = 0;
   value[0] = 0;
 
   o = key;
   while (*s != '\\') {
     if (!*s) {
-      *o = 0;
+      *o    = 0;
       *head = s;
       return;
     }
@@ -1204,8 +1206,7 @@ void Info_RemoveKey(char *s, const char *key) {
   char *o;
 
   if (strlen(s) >= MAX_INFO_STRING) {
-    Com_Error(ERR_DROP, "Info_RemoveKey: oversize infostring [%s] [%s]", s,
-              key);
+    Com_Error(ERR_DROP, "Info_RemoveKey: oversize infostring [%s] [%s]", s, key);
   }
 
   if (strchr(key, '\\')) {
@@ -1262,8 +1263,7 @@ void Info_RemoveKey_Big(char *s, const char *key) {
   char *o;
 
   if (strlen(s) >= BIG_INFO_STRING) {
-    Com_Error(ERR_DROP, "Info_RemoveKey_Big: oversize infostring [%s] [%s]", s,
-              key);
+    Com_Error(ERR_DROP, "Info_RemoveKey_Big: oversize infostring [%s] [%s]", s, key);
   }
 
   if (strchr(key, '\\')) {
@@ -1338,9 +1338,7 @@ void Info_SetValueForKey(char *s, const char *key, const char *value) {
   }
 
   if (strlen(s) >= MAX_INFO_STRING) {
-    Com_Error(ERR_DROP,
-              "Info_SetValueForKey: oversize infostring [%s] [%s] [%s]", s, key,
-              value);
+    Com_Error(ERR_DROP, "Info_SetValueForKey: oversize infostring [%s] [%s] [%s]", s, key, value);
   }
 
   if (strchr(key, '\\') || strchr(value, '\\')) {

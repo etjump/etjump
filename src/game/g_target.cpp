@@ -6,12 +6,12 @@
  */
 
 #include "etj_deathrun_system.h"
-#include "g_local.h"
-#include "etj_utilities.h"
-#include "etj_save_system.h"
 #include "etj_printer.h"
+#include "etj_save_system.h"
 #include "etj_string_utilities.h"
 #include "etj_target_spawn_relay.h"
+#include "etj_utilities.h"
+#include "g_local.h"
 
 //==========================================================
 
@@ -44,7 +44,9 @@ void Use_Target_Give(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   }
 }
 
-void SP_target_give(gentity_t *ent) { ent->use = Use_Target_Give; }
+void SP_target_give(gentity_t *ent) {
+  ent->use = Use_Target_Give;
+}
 
 //==========================================================
 
@@ -52,19 +54,16 @@ void SP_target_give(gentity_t *ent) { ent->use = Use_Target_Give; }
 takes away all the activators powerups.
 Used to drop flight powerups into death puts.
 */
-void Use_target_remove_powerups(gentity_t *ent, gentity_t *other,
-                                gentity_t *activator) {
+void Use_target_remove_powerups(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   if (!activator->client) {
     return;
   }
 
-  if (activator->client->ps.powerups[PW_REDFLAG] ||
-      activator->client->ps.powerups[PW_BLUEFLAG]) {
+  if (activator->client->ps.powerups[PW_REDFLAG] || activator->client->ps.powerups[PW_BLUEFLAG]) {
     Team_ReturnFlag(&g_entities[activator->client->flagParent]);
   }
 
-  memset(activator->client->ps.powerups, 0,
-         sizeof(activator->client->ps.powerups));
+  memset(activator->client->ps.powerups, 0, sizeof(activator->client->ps.powerups));
 }
 
 void SP_target_remove_powerups(gentity_t *ent) {
@@ -83,14 +82,14 @@ enum class TargetDelaySpawnflags {
 };
 
 bool anyDelaysQueued(const gentity_t *ent) {
-  return std::any_of(ent->targetDelayActivationTime.cbegin(),
-                     ent->targetDelayActivationTime.cend(),
-                     [](const int value) { return value != 0; });
+  return std::any_of(ent->targetDelayActivationTime.cbegin(), ent->targetDelayActivationTime.cend(),
+                     [](const int value) {
+                       return value != 0;
+                     });
 }
 
 size_t getNextActivationTimeIndex(const gentity_t *ent) {
-  const auto it = std::min_element(ent->targetDelayActivationTime.cbegin(),
-                                   ent->targetDelayActivationTime.cend(),
+  const auto it = std::min_element(ent->targetDelayActivationTime.cbegin(), ent->targetDelayActivationTime.cend(),
                                    [](const int a, const int b) {
                                      if (a == 0) {
                                        return false;
@@ -103,8 +102,7 @@ size_t getNextActivationTimeIndex(const gentity_t *ent) {
                                      return a < b;
                                    });
 
-  return static_cast<size_t>(
-      std::distance(ent->targetDelayActivationTime.cbegin(), it));
+  return static_cast<size_t>(std::distance(ent->targetDelayActivationTime.cbegin(), it));
 }
 
 void thinkTargetDelayPerClient(gentity_t *ent) {
@@ -113,8 +111,7 @@ void thinkTargetDelayPerClient(gentity_t *ent) {
 
   // check if there are other delays that need to trigger this frame
   for (size_t i = 0; i < ent->targetDelayActivationTime.size(); i++) {
-    if (ent->targetDelayActivationTime[i] != 0 &&
-        ent->targetDelayActivationTime[i] <= level.time) {
+    if (ent->targetDelayActivationTime[i] != 0 && ent->targetDelayActivationTime[i] <= level.time) {
       G_UseTargets(ent, &g_entities[i]);
       ent->targetDelayActivationTime[i] = 0;
     }
@@ -124,43 +121,40 @@ void thinkTargetDelayPerClient(gentity_t *ent) {
   // otherwise any activation will cancel out the ongoing queue
   if (anyDelaysQueued(ent)) {
     const size_t index = getNextActivationTimeIndex(ent);
-    ent->nextthink = ent->targetDelayActivationTime[index];
-    ent->activator = &g_entities[index];
+    ent->nextthink     = ent->targetDelayActivationTime[index];
+    ent->activator     = &g_entities[index];
   }
 }
 } // namespace ETJump
 
-void Think_Target_Delay(gentity_t *ent) { G_UseTargets(ent, ent->activator); }
+void Think_Target_Delay(gentity_t *ent) {
+  G_UseTargets(ent, ent->activator);
+}
 
 void Use_Target_Delay(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  const int nextThink =
-      level.time +
-      static_cast<int>((ent->wait + ent->random * crandom()) * 1000);
+  const int nextThink = level.time + static_cast<int>((ent->wait + ent->random * crandom()) * 1000);
 
-  if (ent->spawnflags &
-      static_cast<int>(ETJump::TargetDelaySpawnflags::PerClientDelay)) {
+  if (ent->spawnflags & static_cast<int>(ETJump::TargetDelaySpawnflags::PerClientDelay)) {
     if (!activator || !activator->client) {
-      G_Error("%s: call to client-only 'target_delay' with no activator.\n",
-              __func__);
+      G_Error("%s: call to client-only 'target_delay' with no activator.\n", __func__);
     }
 
     const int cnum = ClientNum(activator);
 
     // we must determine this *before* we set the activation time,
     // otherwise we never set nextthink as the array will never be empty
-    const bool setNextThink = !ETJump::anyDelaysQueued(ent) ||
-                              ent->targetDelayActivationTime[cnum] != 0;
+    const bool setNextThink = !ETJump::anyDelaysQueued(ent) || ent->targetDelayActivationTime[cnum] != 0;
 
-    ent->think = ETJump::thinkTargetDelayPerClient;
+    ent->think                           = ETJump::thinkTargetDelayPerClient;
     ent->targetDelayActivationTime[cnum] = nextThink;
 
     if (setNextThink) {
       const size_t index = ETJump::getNextActivationTimeIndex(ent);
-      ent->nextthink = ent->targetDelayActivationTime[index];
-      ent->activator = &g_entities[index];
+      ent->nextthink     = ent->targetDelayActivationTime[index];
+      ent->activator     = &g_entities[index];
     }
   } else {
-    ent->think = Think_Target_Delay;
+    ent->think     = Think_Target_Delay;
     ent->nextthink = nextThink;
     ent->activator = activator;
   }
@@ -199,11 +193,11 @@ void SP_target_score(gentity_t *ent) {
 }
 
 enum class TargetPrintSpawnFlags {
-  None = 0,
-  AxisOnly = 1,
-  AlliedOnly = 2,
-  Private = 4,
-  LocationCPM = 8,
+  None                   = 0,
+  AxisOnly               = 1,
+  AlliedOnly             = 2,
+  Private                = 4,
+  LocationCPM            = 8,
   ReplaceETJumpShortcuts = 16
 };
 
@@ -215,19 +209,14 @@ If "private", only the activator gets the message.  If no checks, all clients
 get the message.
 */
 void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  const auto location =
-      ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::LocationCPM)
-          ? "cpm"
-          : "cp";
+  const auto location = ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::LocationCPM) ? "cpm" : "cp";
 
   // if no message to print, print whitespace
   std::string message = ent->message ? ent->message : " ";
 
-  if (ent->spawnflags &
-      static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts)) {
+  if (ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts)) {
     if (activator && activator->client) {
-      const std::string nameStr =
-          StringUtils::format("%s^7", activator->client->pers.netname);
+      const std::string nameStr = StringUtils::format("%s^7", activator->client->pers.netname);
       StringUtils::stringSubstitute(message, '%', nameStr, 1);
       StringUtils::replaceAll(message, "[n]", nameStr);
     } else {
@@ -241,13 +230,11 @@ void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
   if ((ent->spawnflags & static_cast<int>(TargetPrintSpawnFlags::Private))) {
     if (!activator) {
-      G_Error(
-          "G_scripting: call to client only target_print with no activator\n");
+      G_Error("G_scripting: call to client only target_print with no activator\n");
     }
 
     if (activator->client) {
-      trap_SendServerCommand(ClientNum(activator),
-                             va("%s \"%s\"", location, message.c_str()));
+      trap_SendServerCommand(ClientNum(activator), va("%s \"%s\"", location, message.c_str()));
       return;
     }
   }
@@ -265,14 +252,15 @@ void Use_Target_Print(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   trap_SendServerCommand(-1, va("%s \"%s\"", location, message.c_str()));
 }
 
-void SP_target_print(gentity_t *ent) { ent->use = Use_Target_Print; }
+void SP_target_print(gentity_t *ent) {
+  ent->use = Use_Target_Print;
+}
 
 // Deprecated target_printname, this will simply call the use function
 // of target_print with the appropriate spawnflags set
 void SP_target_printname(gentity_t *ent) {
-  const int defaultSpawnFlags =
-      static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts) |
-      static_cast<int>(TargetPrintSpawnFlags::LocationCPM);
+  const int defaultSpawnFlags = static_cast<int>(TargetPrintSpawnFlags::ReplaceETJumpShortcuts) |
+                                static_cast<int>(TargetPrintSpawnFlags::LocationCPM);
 
   // add the necessary flags if not present to make target_print
   // behave like target_printname used to behave
@@ -298,8 +286,7 @@ cost. NO_PVS - this sound will not turn off when not in the player's PVS "wait"
 : Seconds between auto triggerings, 0 = don't auto trigger "random" : wait
 variance, default is 0 "volume" volume control 255 is default
 */
-void Use_Target_Speaker(gentity_t *ent, gentity_t *other,
-                        gentity_t *activator) {
+void Use_Target_Speaker(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   if (ent->spawnflags & 3) // looping sound toggles
   {
     if (ent->s.loopSound) {
@@ -332,8 +319,7 @@ void target_speaker_multiple(gentity_t *ent) {
   if (vis_dummy) {
     ent->s.otherEntityNum = vis_dummy->s.number;
   } else {
-    G_Error("target_speaker cant find vis_dummy_multiple %s",
-            vtos(ent->s.origin));
+    G_Error("target_speaker cant find vis_dummy_multiple %s", vtos(ent->s.origin));
   }
 }
 
@@ -364,9 +350,9 @@ void SP_target_speaker(gentity_t *ent) {
   ent->noise_index = G_SoundIndex(buffer);
 
   // a repeating speaker can be done completely client side
-  ent->s.eType = ET_SPEAKER;
+  ent->s.eType     = ET_SPEAKER;
   ent->s.eventParm = ent->noise_index;
-  ent->s.frame = ent->wait * 10;
+  ent->s.frame     = ent->wait * 10;
   ent->s.clientNum = ent->random * 10;
 
   // check for prestarted looping sound
@@ -384,7 +370,7 @@ void SP_target_speaker(gentity_t *ent) {
   VectorCopy(ent->s.origin, ent->s.pos.trBase);
 
   if (ent->spawnflags & 16) {
-    ent->think = target_speaker_multiple;
+    ent->think     = target_speaker_multiple;
     ent->nextthink = level.time + 50;
   }
 
@@ -428,8 +414,8 @@ void misc_beam_think(gentity_t *self) {
     if (self->enemy != self) {
       // VectorCopy ( self->enemy->s.origin,
       // self->s.origin2 );
-      self->s.apos.trType = self->enemy->s.pos.trType;
-      self->s.apos.trTime = self->enemy->s.pos.trTime;
+      self->s.apos.trType     = self->enemy->s.pos.trType;
+      self->s.apos.trTime     = self->enemy->s.pos.trTime;
       self->s.apos.trDuration = self->enemy->s.pos.trDuration;
       VectorCopy(self->enemy->s.pos.trBase, self->s.apos.trBase);
       VectorCopy(self->enemy->s.pos.trDelta, self->s.apos.trDelta);
@@ -441,8 +427,8 @@ void misc_beam_think(gentity_t *self) {
     }
   }
 
-  self->s.pos.trType = self->target_ent->s.pos.trType;
-  self->s.pos.trTime = self->target_ent->s.pos.trTime;
+  self->s.pos.trType     = self->target_ent->s.pos.trType;
+  self->s.pos.trTime     = self->target_ent->s.pos.trTime;
   self->s.pos.trDuration = self->target_ent->s.pos.trDuration;
   VectorCopy(self->target_ent->s.pos.trBase, self->s.pos.trBase);
   VectorCopy(self->target_ent->s.pos.trDelta, self->s.pos.trDelta);
@@ -451,8 +437,7 @@ void misc_beam_think(gentity_t *self) {
 
   self->nextthink = level.time + FRAMETIME;
 
-  if (self->s.pos.trType != TR_STATIONARY ||
-      self->s.apos.trType != TR_STATIONARY || !self->accuracy) {
+  if (self->s.pos.trType != TR_STATIONARY || self->s.apos.trType != TR_STATIONARY || !self->accuracy) {
     int i;
 
     self->accuracy = 1;
@@ -463,7 +448,7 @@ void misc_beam_think(gentity_t *self) {
 
     for (i = 0; i < 3; i++) {
       if (self->r.maxs[i] < self->r.mins[i]) {
-        float bleh = self->r.mins[i];
+        float bleh      = self->r.mins[i];
         self->r.mins[i] = self->r.maxs[i];
         self->r.maxs[i] = bleh;
       }
@@ -492,15 +477,13 @@ void misc_beam_start(gentity_t *self) {
   if (self->target) {
     ent = G_FindByTargetname(NULL, self->target);
     if (!ent) {
-      G_Printf("%s at %s: %s is a bad target\n", self->classname,
-               vtos(self->s.origin), self->target);
+      G_Printf("%s at %s: %s is a bad target\n", self->classname, vtos(self->s.origin), self->target);
       G_FreeEntity(self);
       return;
     }
     self->target_ent = ent;
   } else {
-    G_Printf("%s at %s: with no target\n", self->classname,
-             vtos(self->s.origin));
+    G_Printf("%s at %s: with no target\n", self->classname, vtos(self->s.origin));
     G_FreeEntity(self);
     return;
   }
@@ -508,8 +491,7 @@ void misc_beam_start(gentity_t *self) {
   if (self->message) {
     ent = G_FindByTargetname(NULL, self->message);
     if (!ent) {
-      G_Printf("%s at %s: %s is a bad target2\n", self->classname,
-               vtos(self->s.origin), self->message);
+      G_Printf("%s at %s: %s is a bad target2\n", self->classname, vtos(self->s.origin), self->message);
       G_FreeEntity(self);
       return; // No targets by this name.
     }
@@ -519,8 +501,8 @@ void misc_beam_start(gentity_t *self) {
     self->enemy = self;
   }
 
-  self->accuracy = 0;
-  self->think = misc_beam_think;
+  self->accuracy  = 0;
+  self->think     = misc_beam_think;
   self->nextthink = level.time + FRAMETIME;
 }
 
@@ -541,8 +523,8 @@ void SP_misc_beam(gentity_t *self) {
   G_SpawnVector("color", "1 1 1", self->s.angles2);
 
   // let everything else get spawned before we start firing
-  self->accuracy = 0;
-  self->think = misc_beam_start;
+  self->accuracy  = 0;
+  self->think     = misc_beam_start;
   self->nextthink = level.time + FRAMETIME;
 }
 
@@ -567,13 +549,12 @@ void target_laser_think(gentity_t *self) {
   // fire forward and see what we hit
   VectorMA(self->s.origin, 2048, self->movedir, end);
 
-  trap_Trace(&tr, self->s.origin, NULL, NULL, end, self->s.number,
-             CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE);
+  trap_Trace(&tr, self->s.origin, NULL, NULL, end, self->s.number, CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE);
 
   if (tr.fraction != 1.0f) {
     // hurt it if we can
-    G_Damage(&g_entities[tr.entityNum], self, self->activator, self->movedir,
-             tr.endpos, self->damage, DAMAGE_NO_KNOCKBACK, MOD_TARGET_LASER);
+    G_Damage(&g_entities[tr.entityNum], self, self->activator, self->movedir, tr.endpos, self->damage,
+             DAMAGE_NO_KNOCKBACK, MOD_TARGET_LASER);
   }
 
   VectorCopy(tr.endpos, self->s.origin2);
@@ -611,15 +592,14 @@ void target_laser_start(gentity_t *self) {
   if (self->target) {
     ent = G_FindByTargetname(NULL, self->target);
     if (!ent) {
-      G_Printf("%s at %s: %s is a bad target\n", self->classname,
-               vtos(self->s.origin), self->target);
+      G_Printf("%s at %s: %s is a bad target\n", self->classname, vtos(self->s.origin), self->target);
     }
     self->enemy = ent;
   } else {
     G_SetMovedir(self->s.angles, self->movedir);
   }
 
-  self->use = target_laser_use;
+  self->use   = target_laser_use;
   self->think = target_laser_think;
 
   if (self->spawnflags & 1) {
@@ -645,7 +625,7 @@ void SP_target_laser(gentity_t *self) {
   }
 
   // let everything else get spawned before we start firing
-  self->think = target_laser_start;
+  self->think     = target_laser_start;
   self->nextthink = level.time + FRAMETIME;
 }
 
@@ -653,8 +633,7 @@ void SP_target_laser(gentity_t *self) {
 target_teleporter
 =====================
 */
-void target_teleporter_use(gentity_t *self, gentity_t *other,
-                           gentity_t *activator) {
+void target_teleporter_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   gentity_t *dest;
 
   if (!activator->client) {
@@ -676,16 +655,14 @@ void target_teleporter_use(gentity_t *self, gentity_t *other,
     }
 
     VectorNormalize(activator->client->ps.velocity);
-    VectorScale(activator->client->ps.velocity, static_cast<int>(self->speed),
-                activator->client->ps.velocity);
+    VectorScale(activator->client->ps.velocity, static_cast<int>(self->speed), activator->client->ps.velocity);
   }
 
   if (self->noise_index) {
     G_AddEvent(activator, EV_GENERAL_SOUND, self->noise_index);
   }
 
-  ETJump::teleportPlayer(activator, other, dest->s.origin, dest->s.angles,
-                         self->spawnflags);
+  ETJump::teleportPlayer(activator, other, dest->s.origin, dest->s.angles, self->spawnflags);
 }
 
 /*QUAKED target_teleporter (1 0 0) (-8 -8 -8) (8 8 8)
@@ -722,12 +699,10 @@ doesn't have the necessary key. By default this sound is
 will be silent if activated without proper key
 */
 void target_relay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
-  if ((self->spawnflags & 1) && activator && activator->client &&
-      activator->client->sess.sessionTeam != TEAM_AXIS) {
+  if ((self->spawnflags & 1) && activator && activator->client && activator->client->sess.sessionTeam != TEAM_AXIS) {
     return;
   }
-  if ((self->spawnflags & 2) && activator && activator->client &&
-      activator->client->sess.sessionTeam != TEAM_ALLIES) {
+  if ((self->spawnflags & 2) && activator && activator->client && activator->client->sess.sessionTeam != TEAM_ALLIES) {
     return;
   }
 
@@ -795,8 +770,7 @@ void SP_target_relay(gentity_t *self) {
     if (G_SpawnString("lockednoise", "0", &sound)) {
       self->soundPos1 = G_SoundIndex(sound);
     } else {
-      self->soundPos1 =
-          G_SoundIndex("sound/movers/doors/default_door_locked.wav");
+      self->soundPos1 = G_SoundIndex("sound/movers/doors/default_door_locked.wav");
     }
   }
 }
@@ -810,12 +784,10 @@ If targets, they will be killed when this is fired
 is only kill targets, not activator)
 */
 
-void G_KillEnts(const char *target, gentity_t *ignore, gentity_t *killer,
-                meansOfDeath_t mod) {
+void G_KillEnts(const char *target, gentity_t *ignore, gentity_t *killer, meansOfDeath_t mod) {
   gentity_t *targ = G_FindByTargetname(NULL, target);
 
   for (; targ; targ = G_FindByTargetname(targ, target)) {
-
     // make sure it isn't going to respawn or show any events
     targ->nextthink = 0;
 
@@ -824,10 +796,8 @@ void G_KillEnts(const char *target, gentity_t *ignore, gentity_t *killer,
     }
 
     // RF, script_movers should die!
-    if (targ->s.eType == ET_MOVER &&
-        !Q_stricmp(targ->classname, "script_mover") && targ->die) {
-      G_Damage(targ, killer, killer, NULL, NULL, 100000, DAMAGE_NO_PROTECTION,
-               MOD_TELEFRAG);
+    if (targ->s.eType == ET_MOVER && !Q_stricmp(targ->classname, "script_mover") && targ->die) {
+      G_Damage(targ, killer, killer, NULL, NULL, 100000, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
       //			targ->die(targ, killer,
       // killer, targ->health,
       // 0);
@@ -836,8 +806,7 @@ void G_KillEnts(const char *target, gentity_t *ignore, gentity_t *killer,
 
     if (targ->s.eType == ET_CONSTRUCTIBLE) {
       if (killer) {
-        G_AddKillSkillPointsForDestruction(killer, mod,
-                                           &targ->constructibleStats);
+        G_AddKillSkillPointsForDestruction(killer, mod, &targ->constructibleStats);
       }
       targ->die(targ, killer, killer, targ->health, 0);
       continue;
@@ -850,7 +819,7 @@ void G_KillEnts(const char *target, gentity_t *ignore, gentity_t *killer,
     trap_UnlinkEntity(targ);
     targ->nextthink = level.time + FRAMETIME;
 
-    targ->use = nullptr;
+    targ->use   = nullptr;
     targ->touch = nullptr;
     targ->think = G_FreeEntity;
   }
@@ -859,19 +828,22 @@ void G_KillEnts(const char *target, gentity_t *ignore, gentity_t *killer,
 void target_kill_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (self->spawnflags & 1) // kill usertoo
   {
-    G_Damage(activator, NULL, NULL, NULL, NULL, 100000, DAMAGE_NO_PROTECTION,
-             MOD_TELEFRAG);
+    G_Damage(activator, NULL, NULL, NULL, NULL, 100000, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
   }
 
   G_KillEnts(self->target, activator, self, MOD_UNKNOWN);
 }
 
-void SP_target_kill(gentity_t *self) { self->use = target_kill_use; }
+void SP_target_kill(gentity_t *self) {
+  self->use = target_kill_use;
+}
 
 /*DEFUNCT target_position (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as a positional target for in-game calculation, like jumppad targets.
 */
-void SP_target_position(gentity_t *self) { G_SetOrigin(self, self->s.origin); }
+void SP_target_position(gentity_t *self) {
+  G_SetOrigin(self, self->s.origin);
+}
 
 /*QUAKED target_location (0 0.5 0) (-8 -8 -8) (8 8 8)
 Set "message" to the name of this location.
@@ -895,8 +867,7 @@ void SP_target_location(gentity_t *self) {
 Use_Target_Counter
 ==============
 */
-void Use_Target_Counter(gentity_t *ent, gentity_t *other,
-                        gentity_t *activator) {
+void Use_Target_Counter(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   if (ent->count < 0) // if the count has already been hit, ignore this
   {
     return;
@@ -942,10 +913,9 @@ void Use_target_fog(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   //		density
   //		r,g,b
   //		time to complete
-  trap_SetConfigstring(
-      CS_FOGVARS, va("%f %f %f %f %f %f %i", 1.0f, (float)ent->s.density, 1.0f,
-                     (float)ent->dl_color[0], (float)ent->dl_color[1],
-                     (float)ent->dl_color[2], ent->s.time));
+  trap_SetConfigstring(CS_FOGVARS,
+                       va("%f %f %f %f %f %f %i", 1.0f, (float)ent->s.density, 1.0f, (float)ent->dl_color[0],
+                          (float)ent->dl_color[1], (float)ent->dl_color[2], ent->s.time));
 }
 
 /*QUAKED target_fog (1 1 0) (-8 -8 -8) (8 8 8)
@@ -1005,7 +975,9 @@ key:0  unlocks the door
 key:-1 locks the door until a target_lock with key:0
 key:n  means the door now requires key n
 */
-void SP_target_lock(gentity_t *ent) { ent->use = Use_Target_Lock; }
+void SP_target_lock(gentity_t *ent) {
+  ent->use = Use_Target_Lock;
+}
 
 void Use_Target_Alarm(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   G_UseTargets(ent, other);
@@ -1014,7 +986,9 @@ void Use_Target_Alarm(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 /*QUAKED target_alarm (1 1 0) (-4 -4 -4) (4 4 4)
 does nothing yet (effectively a relay right now)
 */
-void SP_target_alarm(gentity_t *ent) { ent->use = Use_Target_Alarm; }
+void SP_target_alarm(gentity_t *ent) {
+  ent->use = Use_Target_Alarm;
+}
 
 //---- end
 
@@ -1076,7 +1050,7 @@ void smoke_think(gentity_t *ent) {
   if (ent->s.dl_intensity) {
     ent->s.dl_intensity--;
     if (!ent->s.dl_intensity) {
-      ent->think = G_FreeEntity;
+      ent->think     = G_FreeEntity;
       ent->nextthink = level.time + FRAMETIME;
     }
   }
@@ -1097,7 +1071,7 @@ void smoke_init(gentity_t *ent) {
   gentity_t *target;
   vec3_t vec;
 
-  ent->think = smoke_think;
+  ent->think     = smoke_think;
   ent->nextthink = level.time + FRAMETIME;
 
   if (ent->target) {
@@ -1134,12 +1108,12 @@ void SP_target_smoke(gentity_t *ent) {
 
   ent->use = smoke_toggle;
 
-  ent->think = smoke_init;
+  ent->think     = smoke_init;
   ent->nextthink = level.time + FRAMETIME;
 
   G_SetOrigin(ent, ent->s.origin);
   ent->r.svFlags = 0;
-  ent->s.eType = ET_SMOKER;
+  ent->s.eType   = ET_SMOKER;
 
   if (ent->spawnflags & 2) {
     ent->s.density = 4;
@@ -1181,7 +1155,7 @@ void SP_target_smoke(gentity_t *ent) {
     ent->s.frame = 1;
   }
 
-  ent->s.dl_intensity = ent->health;
+  ent->s.dl_intensity  = ent->health;
   ent->s.constantLight = ent->delay;
 
   if (ent->spawnflags & 4) {
@@ -1195,8 +1169,7 @@ must have a target
 
 when used it will fire its targets
 */
-void target_script_trigger_use(gentity_t *ent, gentity_t *other,
-                               gentity_t *activator) {
+void target_script_trigger_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   // START	Mad Doctor I changes, 8/16/2002
 
   qboolean found = qfalse;
@@ -1236,8 +1209,8 @@ void target_script_trigger_use(gentity_t *ent, gentity_t *other,
 void SP_target_script_trigger(gentity_t *ent) {
   G_SetOrigin(ent, ent->s.origin);
   ent->r.svFlags = 0;
-  ent->s.eType = ET_GENERAL;
-  ent->use = target_script_trigger_use;
+  ent->s.eType   = ET_GENERAL;
+  ent->use       = target_script_trigger_use;
 }
 
 /*QUAKED target_rumble (0 0.75 0.8) (-8 -8 -8) (8 8 8) STARTOFF
@@ -1276,19 +1249,17 @@ void target_rumble_think(gentity_t *ent) {
   }
 
   dapitch = ent->delay;
-  dayaw = ent->random;
-  ratio = 1.0f;
+  dayaw   = ent->random;
+  ratio   = 1.0f;
 
   if (ent->start_size) {
     if (level.time < (ent->timestamp + ent->start_size)) {
-      time = level.time - ent->timestamp;
+      time  = level.time - ent->timestamp;
       time2 = (ent->timestamp + ent->start_size) - ent->timestamp;
       ratio = time / time2;
-    } else if (level.time <
-               (ent->timestamp + ent->end_size + ent->start_size)) {
-      time = level.time - ent->timestamp;
-      time2 =
-          (ent->timestamp + ent->start_size + ent->end_size) - ent->timestamp;
+    } else if (level.time < (ent->timestamp + ent->end_size + ent->start_size)) {
+      time  = level.time - ent->timestamp;
+      time2 = (ent->timestamp + ent->start_size + ent->end_size) - ent->timestamp;
       ratio = time2 / time;
     } else {
       validrumble = qfalse;
@@ -1318,15 +1289,15 @@ void target_rumble_think(gentity_t *ent) {
 void target_rumble_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   if (ent->spawnflags & 1) {
     ent->spawnflags &= ~1;
-    ent->think = target_rumble_think;
-    ent->count = 0;
-    ent->nextthink = level.time + 50;
+    ent->think       = target_rumble_think;
+    ent->count       = 0;
+    ent->nextthink   = level.time + 50;
   } else {
-    ent->spawnflags |= 1;
-    ent->think = nullptr;
-    ent->nextthink = 0;
-    ent->s.loopSound = 0; // turn it off since the entity is off
-    ent->count = 0;
+    ent->spawnflags  |= 1;
+    ent->think        = nullptr;
+    ent->nextthink    = 0;
+    ent->s.loopSound  = 0; // turn it off since the entity is off
+    ent->count        = 0;
   }
 }
 
@@ -1356,14 +1327,14 @@ void SP_target_rumble(gentity_t *self) {
   self->use = target_rumble_use;
 
   G_SpawnString("pitch", "0", &pitch);
-  dapitch = Q_atof(pitch);
+  dapitch     = Q_atof(pitch);
   self->delay = dapitch;
   if (!(self->delay)) {
     self->delay = 5;
   }
 
   G_SpawnString("yaw", "0", &yaw);
-  dayaw = Q_atof(yaw);
+  dayaw        = Q_atof(yaw);
   self->random = dayaw;
   if (!(self->random)) {
     self->random = 5;
@@ -1397,8 +1368,7 @@ Sets activator's identity value to ident <val>.
 "ident"
 */
 
-void target_set_ident_use(gentity_t *ent, gentity_t *other,
-                          gentity_t *activator) {
+void target_set_ident_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
     return;
   }
@@ -1407,7 +1377,6 @@ void target_set_ident_use(gentity_t *ent, gentity_t *other,
 }
 
 void SP_target_set_ident(gentity_t *ent) {
-
   G_SpawnInt("ident", "0", &ent->ident);
 
   ent->use = target_set_ident_use;
@@ -1420,8 +1389,7 @@ Target target_activate to another entity.
 right one <reqidentval> the entity will not activate.
 */
 
-void target_activate_use(gentity_t *self, gentity_t *other,
-                         gentity_t *activator) {
+void target_activate_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   qboolean activate = qfalse;
 
   if (!activator || !activator->client) {
@@ -1460,7 +1428,6 @@ void target_activate_use(gentity_t *self, gentity_t *other,
 }
 
 void SP_target_activate(gentity_t *ent) {
-
   G_SpawnInt("reqident", "0", &ent->reqident);
 
   ent->use = target_activate_use;
@@ -1471,8 +1438,7 @@ void SP_target_activate(gentity_t *ent) {
 Fires once
 */
 
-void target_fireonce_use(gentity_t *self, gentity_t *other,
-                         gentity_t *activator) {
+void target_fireonce_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   // Mostly to give backwards compability to maps
   // Activate this at the beginning to show new stuff, if it does not
   // work the old stuff works like in any other mod.
@@ -1482,19 +1448,20 @@ void target_fireonce_use(gentity_t *self, gentity_t *other,
   if (ent && ent->use) {
     G_UseEntity(ent, self, activator);
   }
-  self->think = G_FreeEntity;
+  self->think     = G_FreeEntity;
   self->nextthink = level.time + FRAMETIME;
 }
 
-void SP_target_fireonce(gentity_t *self) { self->use = target_fireonce_use; }
+void SP_target_fireonce(gentity_t *self) {
+  self->use = target_fireonce_use;
+}
 
 //===============================================================
 /*QUAKED target_savereset (0 0 1) (-8 -8 -8) (8 8 8)
 Resets saved positions
 */
 
-void target_savereset_use(gentity_t *self, gentity_t *other,
-                          gentity_t *activator) {
+void target_savereset_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
     G_DPrintf("Error: trying to activate \"target_savereset\" without an "
               "activator.\n");
@@ -1508,15 +1475,16 @@ void target_savereset_use(gentity_t *self, gentity_t *other,
   }
 }
 
-void SP_target_savereset(gentity_t *self) { self->use = target_savereset_use; }
+void SP_target_savereset(gentity_t *self) {
+  self->use = target_savereset_use;
+}
 
 //===============================================================
 /*QUAKED target_increase_ident (0 0 1) (-8 -8 -8) (8 8 8)
 Resets saved positions
 */
 
-void target_increase_ident_use(gentity_t *self, gentity_t *other,
-                               gentity_t *activator) {
+void target_increase_ident_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   int inc = 1;
 
   if (!activator || !activator->client) {
@@ -1542,7 +1510,6 @@ void target_increase_ident_use(gentity_t *self, gentity_t *other,
 }
 
 void SP_target_increase_ident(gentity_t *self) {
-
   G_SpawnInt("inc", "1", &self->inc);
 
   self->use = target_increase_ident_use;
@@ -1558,13 +1525,14 @@ void target_save_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   ETJump::saveSystem->forceSave(self, activator);
 }
 
-void SP_target_save(gentity_t *self) { self->use = target_save_use; }
+void SP_target_save(gentity_t *self) {
+  self->use = target_save_use;
+}
 
-inline constexpr int SF_REMOVE_PORTALS_NO_TEXT = 0x1;
+inline constexpr int SF_REMOVE_PORTALS_NO_TEXT          = 0x1;
 inline constexpr int SF_REMOVE_PORTALS_ACTIVATE_TARGETS = 0x2;
 
-void target_remove_portals_use(gentity_t *self, gentity_t *other,
-                               gentity_t *activator) {
+void target_remove_portals_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
     G_DPrintf("Error: trying to activate "
               "\"target_remove_portals\" without an "
@@ -1581,13 +1549,13 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
   if (activator->portalBlue) {
     G_FreeEntity(activator->portalBlue);
     activator->portalBlue = nullptr;
-    hadActivePortals = true;
+    hadActivePortals      = true;
   }
 
   if (activator->portalRed) {
     G_FreeEntity(activator->portalRed);
     activator->portalRed = nullptr;
-    hadActivePortals = true;
+    hadActivePortals     = true;
   }
 
   if (hadActivePortals) {
@@ -1598,16 +1566,14 @@ void target_remove_portals_use(gentity_t *self, gentity_t *other,
     // play sound to client
     if (self->noise_index) {
       gentity_t *noiseEnt =
-          ETJump::soundEvent(activator->r.currentOrigin,
-                             EV_GENERAL_CLIENT_SOUND_VOLUME, self->noise_index);
+        ETJump::soundEvent(activator->r.currentOrigin, EV_GENERAL_CLIENT_SOUND_VOLUME, self->noise_index);
 
       noiseEnt->s.onFireStart = self->s.onFireStart;
-      noiseEnt->s.teamNum = ClientNum(activator);
+      noiseEnt->s.teamNum     = ClientNum(activator);
     }
 
     if (!(self->spawnflags & SF_REMOVE_PORTALS_NO_TEXT)) {
-      Printer::center(ClientNum(activator),
-                      "^7Your portal gun portals have been reset.");
+      Printer::center(activator, "^7Your portal gun portals have been reset.");
     }
   }
 
@@ -1631,10 +1597,8 @@ void SP_target_remove_portals(gentity_t *self) {
   }
 }
 
-void target_portal_relay_use(gentity_t *self, gentity_t *other,
-                             gentity_t *activator) {
-  if (!activator || !activator->client ||
-      activator->client->sess.sessionTeam == TEAM_SPECTATOR || !self->target) {
+void target_portal_relay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
+  if (!activator || !activator->client || activator->client->sess.sessionTeam == TEAM_SPECTATOR || !self->target) {
     return;
   }
 
@@ -1650,13 +1614,13 @@ void SP_target_portal_relay(gentity_t *self) {
 
 namespace ETJump {
 enum class FTRelaySpawnflags {
-  AxisOnly = 1,
+  AxisOnly   = 1,
   AlliesOnly = 2,
   // this matches 'target_relay' random spawnflag,
   // so it's sort of consistent with that (this uses random by default)
-  AllTargets = 4,
+  AllTargets  = 4,
   TimerunOnly = 8,
-  NoTimerun = 16,
+  NoTimerun   = 16,
   NoActivator = 32,
 };
 
@@ -1675,13 +1639,11 @@ static bool canFireFTRelay(gentity_t *self, gentity_t *activator) {
     return false;
   }
 
-  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::TimerunOnly) &&
-      !activator->client->sess.timerunActive) {
+  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::TimerunOnly) && !activator->client->sess.timerunActive) {
     return false;
   }
 
-  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::NoTimerun) &&
-      activator->client->sess.timerunActive) {
+  if (self->spawnflags & static_cast<int>(FTRelaySpawnflags::NoTimerun) && activator->client->sess.timerunActive) {
     return false;
   }
 
@@ -1696,18 +1658,15 @@ static void G_ActivateTarget(gentity_t *self, gentity_t *activator) {
   }
 }
 
-void target_ftrelay_use(gentity_t *self, gentity_t *other,
-                        gentity_t *activator) {
+void target_ftrelay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
     G_Printf("target_ftrelay_use: cannot activate entity with no activator.\n");
     return;
   }
 
   fireteamData_t *ft;
-  const int clientNum = ClientNum(activator);
-  const bool allTargets =
-      self->spawnflags &
-      static_cast<int>(ETJump::FTRelaySpawnflags::AllTargets);
+  const int clientNum   = ClientNum(activator);
+  const bool allTargets = self->spawnflags & static_cast<int>(ETJump::FTRelaySpawnflags::AllTargets);
 
   // if activator is not in a fireteam or teamjump mode is off,
   // just fire the target and exit
@@ -1716,14 +1675,11 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other,
       return;
     }
 
-    allTargets ? G_UseTargets(self, activator)
-               : G_ActivateTarget(self, activator);
+    allTargets ? G_UseTargets(self, activator) : G_ActivateTarget(self, activator);
     return;
   }
 
-  const bool noActivator =
-      self->spawnflags &
-      static_cast<int>(ETJump::FTRelaySpawnflags::NoActivator);
+  const bool noActivator = self->spawnflags & static_cast<int>(ETJump::FTRelaySpawnflags::NoActivator);
 
   for (int i = 0; i < level.numConnectedClients; i++) {
     if (ft->joinOrder[i] == -1) {
@@ -1744,17 +1700,17 @@ void target_ftrelay_use(gentity_t *self, gentity_t *other,
   }
 }
 
-void SP_target_ftrelay(gentity_t *self) { self->use = target_ftrelay_use; }
+void SP_target_ftrelay(gentity_t *self) {
+  self->use = target_ftrelay_use;
+}
 
-void target_savelimit_set_use(gentity_t *self, gentity_t *other,
-                              gentity_t *activator) {}
+void target_savelimit_set_use(gentity_t *self, gentity_t *other, gentity_t *activator) {}
 
 void SP_target_savelimit_set(gentity_t *self) {
   self->use = target_savelimit_set_use;
 }
 
-void target_savelimit_inc_use(gentity_t *self, gentity_t *other,
-                              gentity_t *activator) {}
+void target_savelimit_inc_use(gentity_t *self, gentity_t *other, gentity_t *activator) {}
 
 void SP_target_savelimit_inc(gentity_t *self) {
   self->use = target_savelimit_inc_use;
@@ -1762,7 +1718,7 @@ void SP_target_savelimit_inc(gentity_t *self) {
 
 inline constexpr int NO_DECAY_IDENT = -1;
 inline constexpr int NO_DECAY_VALUE = -1;
-inline constexpr int NO_DECAY_TIME = -1;
+inline constexpr int NO_DECAY_TIME  = -1;
 
 void target_decay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (self->decayTime == NO_DECAY_TIME) {
@@ -1785,19 +1741,16 @@ void target_decay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   }
 
   if (self->ident != NO_DECAY_IDENT) {
-    activator->client->sess.upcomingClientMapProgression =
-        activator->client->sess.clientMapProgression;
+    activator->client->sess.upcomingClientMapProgression = activator->client->sess.clientMapProgression;
   } else {
     activator->client->sess.upcomingClientMapProgression = self->decayValue;
   }
 
-  activator->client->sess.previousClientMapProgression =
-      activator->client->sess.clientMapProgression;
-  activator->client->sess.clientMapProgression = self->ident;
+  activator->client->sess.previousClientMapProgression = activator->client->sess.clientMapProgression;
+  activator->client->sess.clientMapProgression         = self->ident;
 
-  activator->client->sess.nextProgressionDecayEvent =
-      level.time + self->decayTime;
-  activator->client->sess.decayProgression = qtrue;
+  activator->client->sess.nextProgressionDecayEvent = level.time + self->decayTime;
+  activator->client->sess.decayProgression          = qtrue;
 }
 
 void SP_target_decay(gentity_t *self) {
@@ -1814,11 +1767,9 @@ void SP_target_decay(gentity_t *self) {
 // or
 // linename : indicate the line string name.
 
-void target_tjldisplay_use(gentity_t *self, gentity_t *other,
-                           gentity_t *activator) {
+void target_tjldisplay_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (self->tjlLineNumber > -1) {
-    trap_SendServerCommand((activator - g_entities),
-                           va("tjl_displaybynumber %d", self->tjlLineNumber));
+    trap_SendServerCommand((activator - g_entities), va("tjl_displaybynumber %d", self->tjlLineNumber));
   } else {
     trap_SendServerCommand(-1, va("tjl_displaybyname %s", self->tjlLineName));
   }
@@ -1840,12 +1791,13 @@ void SP_target_tjldisplay(gentity_t *self) {
 }
 
 // target_cleartjl
-void target_tjlclear_use(gentity_t *self, gentity_t *other,
-                         gentity_t *activator) {
+void target_tjlclear_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   trap_SendServerCommand((activator - g_entities), "tjl_clearrender");
 }
 
-void SP_target_tjlclear(gentity_t *self) { self->use = target_tjlclear_use; }
+void SP_target_tjlclear(gentity_t *self) {
+  self->use = target_tjlclear_use;
+}
 
 // target_activate_if_velocity
 // # Keys
@@ -1858,16 +1810,14 @@ void SP_target_tjlclear(gentity_t *self) { self->use = target_tjlclear_use; }
 // 1: only horizontal velocity
 // 2: only vertical velocity
 
-void target_activate_if_velocity_use(gentity_t *self, gentity_t *other,
-                                     gentity_t *activator) {
+void target_activate_if_velocity_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   float lowerLimit = self->velocityLowerLimit;
   float upperLimit = self->velocityUpperLimit;
-  float velocity = VectorLength(activator->client->ps.velocity);
+  float velocity   = VectorLength(activator->client->ps.velocity);
 
   if (self->spawnflags & 1) {
-    velocity = sqrt(
-        activator->client->ps.velocity[0] * activator->client->ps.velocity[0] +
-        activator->client->ps.velocity[1] * activator->client->ps.velocity[1]);
+    velocity = sqrt(activator->client->ps.velocity[0] * activator->client->ps.velocity[0] +
+                    activator->client->ps.velocity[1] * activator->client->ps.velocity[1]);
   } else if (self->spawnflags & 2) {
     velocity = activator->client->ps.velocity[2];
   }
@@ -1898,16 +1848,14 @@ void SP_target_activate_if_velocity(gentity_t *self) {
 // # Keys
 // scale: multiplier that velocity will be scaled with
 
-void target_scale_velocity_use(gentity_t *self, gentity_t *other,
-                               gentity_t *activator) {
+void target_scale_velocity_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (self->spawnflags & 1) {
-    activator->scaleTime = level.time + (self->scaleTime * 1000);
+    activator->scaleTime                  = level.time + (self->scaleTime * 1000);
     activator->client->sess.velocityScale = self->speed;
     return;
   }
 
-  VectorScale(activator->client->ps.velocity, self->speed,
-              activator->client->ps.velocity);
+  VectorScale(activator->client->ps.velocity, self->speed, activator->client->ps.velocity);
 }
 
 void SP_target_scale_velocity(gentity_t *self) {
@@ -1917,8 +1865,7 @@ void SP_target_scale_velocity(gentity_t *self) {
   self->use = target_scale_velocity_use;
 }
 
-void target_interrupt_timerun(gentity_t *self, gentity_t *other,
-                              gentity_t *activator) {
+void target_interrupt_timerun(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (activator && activator->client) {
     InterruptRun(activator);
   }
@@ -1936,14 +1883,12 @@ void SP_target_interrupt_timerun(gentity_t *self) {
 // delay => how long in ms before next activation by same player
 inline constexpr int SF_SET_HEALTH_ONCE = 0x1;
 
-void target_set_health_use(gentity_t *self, gentity_t *other,
-                           gentity_t *activator) {
+void target_set_health_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
     return;
   }
 
-  if (self->spawnflags & SF_SET_HEALTH_ONCE &&
-      activator->client->alreadyActivatedSetHealth) {
+  if (self->spawnflags & SF_SET_HEALTH_ONCE && activator->client->alreadyActivatedSetHealth) {
     return;
   }
 
@@ -1953,9 +1898,9 @@ void target_set_health_use(gentity_t *self, gentity_t *other,
 
   // don't heal dead players
   if (activator->health > 0) {
-    activator->health = self->count;
+    activator->health                             = self->count;
     activator->client->pers.previousSetHealthTime = level.time;
-    activator->client->alreadyActivatedSetHealth = qtrue;
+    activator->client->alreadyActivatedSetHealth  = qtrue;
   }
 }
 
@@ -1992,8 +1937,7 @@ ETJump::DeathrunSystem::PrintLocation parseLocation(const char *locationStr) {
   return ETJump::DeathrunSystem::PrintLocation::Left;
 }
 
-void target_deathrun_start_use(gentity_t *self, gentity_t *other,
-                               gentity_t *activator) {
+void target_deathrun_start_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
     return;
   }
@@ -2004,29 +1948,26 @@ void target_deathrun_start_use(gentity_t *self, gentity_t *other,
 
   ETJump::saveSystem->resetSavedPositions(activator);
 
-  activator->client->sess.deathrunFlags |=
-      static_cast<int>(DeathrunFlags::Active);
+  activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::Active);
 
   if (self->spawnflags & static_cast<int>(DeathrunFlags::NoDamageRuns)) {
-    activator->client->sess.deathrunFlags |=
-        static_cast<int>(DeathrunFlags::NoDamageRuns);
-    activator->health = 1;
+    activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::NoDamageRuns);
+    activator->health                      = 1;
   }
 
   if (self->spawnflags & static_cast<int>(DeathrunFlags::NoSave)) {
-    activator->client->sess.deathrunFlags |=
-        static_cast<int>(DeathrunFlags::NoSave);
+    activator->client->sess.deathrunFlags |= static_cast<int>(DeathrunFlags::NoSave);
   }
 
-  auto clientNum = ClientNum(activator);
+  auto clientNum       = ClientNum(activator);
   auto affectedClients = Utilities::getSpectators(clientNum);
   affectedClients.push_back(clientNum);
-  auto message = ETJump::deathrunSystem->getStartMessage();
+  auto message  = ETJump::deathrunSystem->getStartMessage();
   auto location = ETJump::deathrunSystem->getPrintLocation();
   if (message.length() > 0) {
     StringUtils::replaceAll(message, "[n]", activator->client->pers.netname);
     auto fmtString = ETJump::DeathrunSystem::getMessageFormat(location);
-    auto output = va(fmtString.c_str(), message.c_str());
+    auto output    = va(fmtString.c_str(), message.c_str());
     for (const auto &c : affectedClients) {
       trap_SendServerCommand(c, output);
     }
@@ -2041,18 +1982,15 @@ void SP_target_deathrun_start(gentity_t *self) {
   ETJump::deathrunSystem->addStartMessage(s);
   G_SpawnString("endMessage", "[n] ^7died! Score: [s]", &s);
   ETJump::deathrunSystem->addEndMessage(s);
-  G_SpawnString("checkpointMessage", "[n] ^7hit the checkpoint! Score: [s]",
-                &s);
+  G_SpawnString("checkpointMessage", "[n] ^7hit the checkpoint! Score: [s]", &s);
   ETJump::deathrunSystem->addDefaultCheckpointMessage(s);
   G_SpawnString("sound", "", &s);
   ETJump::deathrunSystem->addDefaultSoundPath(s);
   G_SpawnString("location", "left", &s);
-  ETJump::deathrunSystem->addStartAndCheckpointMessageLocation(
-      parseLocation(s));
+  ETJump::deathrunSystem->addStartAndCheckpointMessageLocation(parseLocation(s));
 }
 
-void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other,
-                                    gentity_t *activator) {
+void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
     return;
   }
@@ -2061,9 +1999,9 @@ void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other,
     return;
   }
 
-  auto message = ETJump::deathrunSystem->getCheckpointMessage(self->id);
-  auto sound = ETJump::deathrunSystem->getSoundPath(self->id);
-  auto clientNum = ClientNum(activator);
+  auto message         = ETJump::deathrunSystem->getCheckpointMessage(self->id);
+  auto sound           = ETJump::deathrunSystem->getSoundPath(self->id);
+  auto clientNum       = ClientNum(activator);
   auto affectedPlayers = Utilities::getSpectators(clientNum);
   affectedPlayers.push_back(clientNum);
 
@@ -2075,11 +2013,10 @@ void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other,
   }
 
   if (message.length() > 0) {
-    auto location = ETJump::deathrunSystem->getPrintLocation(self->id);
-    auto fmtString = ETJump::DeathrunSystem::getMessageFormat(location);
-    auto checkpointMessage =
-        ETJump::deathrunSystem->getCheckpointMessage(self->id);
-    auto score = ETJump::deathrunSystem->getScore(clientNum);
+    auto location          = ETJump::deathrunSystem->getPrintLocation(self->id);
+    auto fmtString         = ETJump::DeathrunSystem::getMessageFormat(location);
+    auto checkpointMessage = ETJump::deathrunSystem->getCheckpointMessage(self->id);
+    auto score             = ETJump::deathrunSystem->getScore(clientNum);
     StringUtils::replaceAll(message, "[n]", activator->client->pers.netname);
     StringUtils::replaceAll(message, "[s]", std::to_string(score));
     auto output = va(fmtString.c_str(), message.c_str());
@@ -2091,12 +2028,12 @@ void target_deathrun_checkpoint_use(gentity_t *self, gentity_t *other,
 
 void SP_target_deathrun_checkpoint(gentity_t *self) {
   char *locationStr = nullptr;
-  char *message = nullptr;
-  char *sound = nullptr;
+  char *message     = nullptr;
+  char *sound       = nullptr;
   G_SpawnString("location", "left", &locationStr);
   auto location = parseLocation(locationStr);
   G_SpawnString("message", "", &message);
   G_SpawnString("sound", "", &sound);
-  self->id = ETJump::deathrunSystem->createCheckpoint(location, message, sound);
+  self->id  = ETJump::deathrunSystem->createCheckpoint(location, message, sound);
   self->use = target_deathrun_checkpoint_use;
 }

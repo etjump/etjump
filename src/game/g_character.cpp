@@ -13,9 +13,7 @@ G_ParseAnimationFiles
   Read in all the configuration and script files for this model.
 =====================
 */
-static bool G_ParseAnimationFiles(bg_character_t *character,
-                                  const char *animationGroup,
-                                  const char *animationScript) {
+static bool G_ParseAnimationFiles(bg_character_t *character, const char *animationGroup, const char *animationScript) {
   // set the name of the animationGroup and animationScript in the
   // animModelInfo structure
   Q_strncpyz(character->animModelInfo->animationGroup, animationGroup,
@@ -26,7 +24,7 @@ static bool G_ParseAnimationFiles(bg_character_t *character,
   BG_R_RegisterAnimationGroup(animationGroup, character->animModelInfo);
 
   // load the script file
-  fileHandle_t f = 0;
+  fileHandle_t f    = 0;
   const int32_t len = trap_FS_FOpenFile(animationScript, &f, FS_READ);
 
   if (len <= 0) {
@@ -43,8 +41,7 @@ static bool G_ParseAnimationFiles(bg_character_t *character,
   trap_FS_FCloseFile(f);
 
   // parse the text
-  BG_AnimParseAnimScript(character->animModelInfo, &level.animScriptData,
-                         animationScript, text);
+  BG_AnimParseAnimScript(character->animModelInfo, &level.animScriptData, animationScript, text);
 
   return qtrue;
 }
@@ -59,18 +56,14 @@ information. Otherwise, set the modelInfo pointer to the first free slot.
   returns qtrue if existing model found, qfalse otherwise
 ==================
 */
-static qboolean
-G_CheckForExistingAnimModelInfo(const char *animationGroup,
-                                const char *animationScript,
-                                animModelInfo_t **animModelInfo) {
+static qboolean G_CheckForExistingAnimModelInfo(const char *animationGroup, const char *animationScript,
+                                                animModelInfo_t **animModelInfo) {
   int i;
   animModelInfo_t *trav, *firstFree = NULL;
 
-  for (i = 0, trav = level.animScriptData.modelInfo; i < MAX_ANIMSCRIPT_MODELS;
-       i++, trav++) {
+  for (i = 0, trav = level.animScriptData.modelInfo; i < MAX_ANIMSCRIPT_MODELS; i++, trav++) {
     if (*trav->animationGroup && *trav->animationScript) {
-      if (!Q_stricmp(trav->animationGroup, animationGroup) &&
-          !Q_stricmp(trav->animationScript, animationScript)) {
+      if (!Q_stricmp(trav->animationGroup, animationGroup) && !Q_stricmp(trav->animationScript, animationScript)) {
         // found a match, use this animModelInfo
         *animModelInfo = trav;
         return qtrue;
@@ -99,8 +92,7 @@ G_CheckForExistingAnimModelInfo(const char *animationGroup,
 G_RegisterCharacter
 ===================
 */
-qboolean G_RegisterCharacter(const char *characterFile,
-                             bg_character_t *character) {
+qboolean G_RegisterCharacter(const char *characterFile, bg_character_t *character) {
   bg_characterDef_t characterDef;
 
   memset(&characterDef, 0, sizeof(characterDef));
@@ -110,11 +102,9 @@ qboolean G_RegisterCharacter(const char *characterFile,
   }
 
   // Parse Animation Files
-  if (!G_CheckForExistingAnimModelInfo(characterDef.animationGroup,
-                                       characterDef.animationScript,
+  if (!G_CheckForExistingAnimModelInfo(characterDef.animationGroup, characterDef.animationScript,
                                        &character->animModelInfo)) {
-    if (!G_ParseAnimationFiles(character, characterDef.animationGroup,
-                               characterDef.animationScript)) {
+    if (!G_ParseAnimationFiles(character, characterDef.animationGroup, characterDef.animationScript)) {
       G_Printf(S_COLOR_YELLOW "WARNING: failed to load animation "
                               "files referenced from '%s'\n",
                characterFile);
@@ -140,15 +130,13 @@ void G_RegisterPlayerClasses(void) {
       classInfo = BG_GetPlayerClassInfo(team, cls);
       character = BG_GetCharacter(team, cls);
 
-      Q_strncpyz(character->characterFile, classInfo->characterFile,
-                 sizeof(character->characterFile));
+      Q_strncpyz(character->characterFile, classInfo->characterFile, sizeof(character->characterFile));
 
       if (!G_RegisterCharacter(character->characterFile, character)) {
         G_Error("ERROR: G_RegisterPlayerClasses: "
                 "failed to load character file "
                 "'%s' for the %s %s\n",
-                character->characterFile,
-                (team == TEAM_AXIS ? "Axis" : "Allied"),
+                character->characterFile, (team == TEAM_AXIS ? "Axis" : "Allied"),
                 BG_ClassnameForNumber(classInfo->classNum));
       }
     }
@@ -176,8 +164,7 @@ void G_UpdateCharacter(gclient_t *client) {
 
     if (client->pers.characterIndex != characterIndex) {
       client->pers.characterIndex = characterIndex;
-      trap_GetConfigstring(CS_CHARACTERS + characterIndex, infostring,
-                           MAX_INFO_STRING);
+      trap_GetConfigstring(CS_CHARACTERS + characterIndex, infostring, MAX_INFO_STRING);
       client->pers.character = BG_FindCharacter(infostring);
       if (!(client->pers.character)) {
         // not found - create it (this should
@@ -189,8 +176,7 @@ void G_UpdateCharacter(gclient_t *client) {
           goto set_default_character;
         }
 
-        Q_strncpyz(client->pers.character->characterFile, infostring,
-                   sizeof(client->pers.character->characterFile));
+        Q_strncpyz(client->pers.character->characterFile, infostring, sizeof(client->pers.character->characterFile));
 
         if (!G_RegisterCharacter(infostring, client->pers.character)) {
           G_Printf(S_COLOR_YELLOW "WARNING: "
@@ -213,9 +199,9 @@ void G_UpdateCharacter(gclient_t *client) {
       // also reset the timer so we can properly start
       // the next animation
 
-      client->ps.legsAnim = 0;
-      client->ps.torsoAnim = 0;
-      client->ps.legsTimer = 0;
+      client->ps.legsAnim   = 0;
+      client->ps.torsoAnim  = 0;
+      client->ps.legsTimer  = 0;
       client->ps.torsoTimer = 0;
     }
     return;
@@ -223,15 +209,14 @@ void G_UpdateCharacter(gclient_t *client) {
 
 set_default_character:
   // set default character
-  character =
-      BG_GetCharacter(client->sess.sessionTeam, client->sess.playerType);
+  character = BG_GetCharacter(client->sess.sessionTeam, client->sess.playerType);
   if (client->pers.character != character) {
     client->pers.characterIndex = -1;
-    client->pers.character = character;
+    client->pers.character      = character;
 
-    client->ps.legsAnim = 0;
-    client->ps.torsoAnim = 0;
-    client->ps.legsTimer = 0;
+    client->ps.legsAnim   = 0;
+    client->ps.torsoAnim  = 0;
+    client->ps.legsTimer  = 0;
     client->ps.torsoTimer = 0;
   }
 }

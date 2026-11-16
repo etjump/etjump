@@ -1,0 +1,694 @@
+// ETJump mapscript for the_biome_expedition.bsp
+// Modifications:
+// - adjusted flags to be hidden by default and appear as captured
+// - recreated end prints with 'target_delay' + 'target_print' entities with per-client wait cycles,
+//   to fix them breaking when multiple people trigger the end simultaneously
+// - re-created Crumblewall TOI, now shows the name when hovered over in limbo menu
+
+game_manager
+{
+    spawn
+    {
+			create
+			{
+				"classname" "target_print"
+				"origin" "-23544 4080 2128"
+				"targetname" "target_print3"
+				"message" "You have conquered The End!"
+				"spawnflags" "12"
+			}
+
+			create
+			{
+				"classname" "target_delay"
+				"origin" "-23544 4048 2128"
+				"targetname" "target_print3"
+				"wait" "2.5"
+				"spawnflags" "1"
+				"target" "target_print10"
+			}
+
+			create
+			{
+				"classname" "target_print"
+				"origin" "-23512 4080 2128"
+				"targetname" "target_print10"
+				"message" "Map by purga&wing"
+				"spawnflags" "12"
+			}
+
+			create
+			{
+				"classname" "target_delay"
+				"origin" "-23512 4048 2128"
+				"targetname" "target_print10"
+				"wait" "1.5"
+				"spawnflags" "1"
+				"target" "target_print11"
+			}
+
+			create
+			{
+				"classname" "target_delay"
+				"origin" "-23480 4048 2128"
+				"targetname" "target_print11"
+				"wait" "1.5"
+				"spawnflags" "1"
+				"target" "target_print12"
+			}
+
+			create
+			{
+				"classname" "target_print"
+				"origin" "-23480 4080 2128"
+				"targetname" "target_print11"
+				"message" "Big Thanks to:"
+				"spawnflags" "12"
+			}
+
+			create
+			{
+				"classname" "target_delay"
+				"origin" "-23448 4048 2128"
+				"targetname" "target_print12"
+				"wait" "1.5"
+				"spawnflags" "1"
+				"target" "target_print13"
+			}
+
+			create
+			{
+				"classname" "target_print"
+				"origin" "-23448 4080 2128"
+				"targetname" "target_print12"
+				"message" "-pierdole"
+				"spawnflags" "12"
+			}
+
+			create
+			{
+				"classname" "target_print"
+				"origin" "-23416 4080 2128"
+				"targetname" "target_print13"
+				"message" "-aciz"
+				"spawnflags" "12"
+			}
+
+			create
+			{
+				"classname" "target_delay"
+				"origin" "-23416 4048 2128"
+				"targetname" "target_print13"
+				"wait" "1.5"
+				"spawnflags" "1"
+				"target" "target_print14"
+			}
+
+			create
+			{
+				"classname" "target_delay"
+				"origin" "-23384 4048 2128"
+				"targetname" "target_print14"
+				"wait" "1.5"
+				"spawnflags" "1"
+				"target" "target_print15"
+			}
+
+			create
+			{
+				"classname" "target_print"
+				"origin" "-23384 4080 2128"
+				"targetname" "target_print14"
+				"message" "-sungi"
+				"spawnflags" "12"
+			}
+
+			create
+			{
+				"classname" "target_print"
+				"origin" "-23352 4080 2128"
+				"targetname" "target_print15"
+				"message" "And to YOU for playing!"
+				"spawnflags" "12"
+			}
+
+			delete
+			{
+				classname "trigger_objective_info"
+				track "the Crumblewall"
+			}
+
+			create
+			{
+				"classname" "trigger_objective_info"
+				"target" "func_explosive1"
+				"track" "the Crumblewall"
+				"shortname" "Crumblewall"
+				"spawnflags" "17"
+				"model" "*13"
+			}
+
+        wait 100
+        setstate objreturn_trigger invisible
+        setstate obutrans default
+        setstate trapdoor default
+        trigger piston1 reset
+        trigger piston2 reset
+        trigger piston3 reset
+        trigger piston4 reset
+        trigger piston5 reset
+        setstate endtele1 invisible
+        setstate endtele2 invisible
+        setstate eye default
+        alertentity flag0_wobj
+        alertentity flag0_wobj
+    remapshader "textures/mc/itemframe_empty" "textures/mc/itemframe_empty"
+    remapshader "textures/mc/itemframe_ender" "textures/mc/itemframe_ender"
+    remapshader "textures/mc/stonepick" "textures/mc/stonepick"
+    remapshader "textures/mc/bucket" "textures/mc/bucket"
+    remapshader "textures/mc/ironingot" "textures/mc/ironingot"
+    remapshader "textures/mc/ironpick" "textures/mc/ironpick"
+    remapshader "textures/mc/diamonditem" "textures/mc/diamonditem"
+    remapshader "textures/mc/diamondhelmet" "textures/mc/diamondhelmet"
+    remapshader "textures/mc/blazerod" "textures/mc/blazerod"
+    remapshader "textures/mc/potion" "textures/mc/potion"
+    remapshaderflush
+
+	setautospawn "The Echoing Cavern" 1
+
+
+
+
+
+			wait 200
+			setstate flag1_wobj invisible
+			setstate flag2_wobj invisible
+			setstate flag3_wobj invisible
+			setstate flag4_wobj invisible
+			setstate flag5_wobj invisible
+			setstate flag6_wobj invisible
+			setstate flag7_wobj invisible
+			setstate flag8_wobj invisible
+			setstate flag9_wobj invisible
+			setstate flag10_wobj invisible
+    }
+}
+
+obu
+{
+    trigger stolen
+    {
+        wait 45000
+        setstate objreturn_trigger default
+        wait 50
+        setstate objreturn_trigger invisible
+    }
+
+    trigger captured
+    {
+        resetscript
+        setstate objreturn_trigger invisible
+	wm_teamvoiceannounce 1 "allies_hq_objective_captured"
+        setstate trapdoor invisible
+    remapshader "textures/mc/itemframe_empty" "textures/mc/itemframe_key"
+    remapshaderflush
+    }
+    trigger dropped
+    {
+        resetscript
+        setstate objreturn_trigger invisible
+    }
+    trigger returned
+    {
+        resetscript
+        setstate objreturn_trigger invisible
+	  wm_teamvoiceannounce 1 "allies_hq_objective_lost"
+
+    }
+}
+
+vittu
+{
+    activate
+    {
+        trigger piston1 move
+    }
+}
+
+piston1
+{
+    trigger reset
+    {
+        setposition pistonin1
+    }
+    trigger move
+    {
+        gotomarker pistonout1 500
+        wait 1000
+        gotomarker pistonin1 500
+    }
+}
+
+vittu2
+{
+    activate
+    {
+        trigger piston2 move
+    }
+}
+
+piston2
+{
+    trigger reset
+    {
+        setposition pistonin2
+    }
+    trigger move
+    {
+        gotomarker pistonout2 500
+        wait 1000
+        gotomarker pistonin2 500
+    }
+}
+vittu3
+{
+    activate
+    {
+        trigger piston3 move
+    }
+}
+
+piston3
+{
+    trigger reset
+    {
+        setposition pistonin3
+    }
+    trigger move
+    {
+        gotomarker pistonout3 500
+        wait 1000
+        gotomarker pistonin3 500
+    }
+}
+vittu4
+{
+    activate
+    {
+        trigger piston4 move
+    }
+}
+
+piston4
+{
+    trigger reset
+    {
+        setposition pistonin4
+    }
+    trigger move
+    {
+        gotomarker pistonout4 500
+        wait 1000
+        gotomarker pistonin4 500
+    }
+}
+vittu5
+{
+    activate
+    {
+        trigger piston5 move
+    }
+}
+
+piston5
+{
+    trigger reset
+    {
+        setposition pistonin5
+    }
+    trigger move
+    {
+        gotomarker pistonout5 500
+        wait 1000
+        gotomarker pistonin5 500
+    }
+}
+
+Crumblewall
+{
+	spawn
+	{
+		wait 50
+		constructible_class 3
+	}
+	death
+	{
+	wm_announce "Allies have blown up the Crumblewall!"
+	}
+}
+endtele
+{
+    trigger perkele
+    {
+        setstate endtele1 default
+        setstate eye invisible
+        setstate endtele2 invisible
+    }
+}
+endvittu
+{
+    trigger saatana
+    {
+        setstate endtele2 default
+    }
+}
+
+
+
+flag1
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger allied_capture				// Touched by an allied player
+	{
+		accum 0 abort_if_equal 1 		// do Allies own flag?
+
+		accum 0 set 1 			// Allied own the flag
+		setstate flag1_wobj default
+
+		wm_announce "^7Allies captured Timberclimb!"
+          alertentity flag1_wobj
+          alertentity flag1_wobj
+
+
+		setautospawn "Timberclimb"	1	// Set Allies to forward spawn
+	}
+}
+flag2
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger allied_capture				// Touched by an allied player
+	{
+		accum 0 abort_if_equal 1 		// do Allies own flag?
+
+		accum 0 set 1 			// Allied own the flag
+		setstate flag2_wobj default
+
+		wm_announce "^7Allies captured Stonecove!"
+          alertentity flag2_wobj
+          alertentity flag2_wobj
+
+
+		setautospawn "Stonecove"	1	// Set Allies to forward spawn
+	}
+}
+flag3
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger allied_capture				// Touched by an allied player
+	{
+		accum 0 abort_if_equal 1 		// do Allies own flag?
+
+		accum 0 set 1 			// Allied own the flag
+		setstate flag3_wobj default
+
+		wm_announce "^7Allies captured Subterra Base!"
+          alertentity flag3_wobj
+          alertentity flag3_wobj
+
+
+		setautospawn "Subterra Base"	1	// Set Allies to forward spawn
+	}
+}
+flag4
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger allied_capture				// Touched by an allied player
+	{
+		accum 0 abort_if_equal 1 		// do Allies own flag?
+
+		accum 0 set 1 			// Allied own the flag
+		setstate flag4_wobj default
+
+		wm_announce "^7Allies captured Subterra Base Part 2!"
+          alertentity flag4_wobj
+          alertentity flag4_wobj
+
+
+		setautospawn "Subterra Base Part 2"	1	// Set Allies to forward spawn
+	}
+}
+flag5
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger allied_capture				// Touched by an allied player
+	{
+		accum 0 abort_if_equal 1 		// do Allies own flag?
+
+		accum 0 set 1 			// Allied own the flag
+		setstate flag5_wobj default
+
+		wm_announce "^7Allies captured Woodchamber!"
+          alertentity flag5_wobj
+          alertentity flag5_wobj
+
+
+		setautospawn "Woodchamber"	1	// Set Allies to forward spawn
+	}
+}
+flag6
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger allied_capture				// Touched by an allied player
+	{
+		accum 0 abort_if_equal 1 		// do Allies own flag?
+
+		accum 0 set 1 			// Allied own the flag
+		setstate flag6_wobj default
+
+		wm_announce "^7Allies captured Seabed Citadel!"
+          alertentity flag6_wobj
+          alertentity flag6_wobj
+
+
+		setautospawn "Seabed Citadel"	1	// Set Allies to forward spawn
+	}
+}
+flag7
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger allied_capture				// Touched by an allied player
+	{
+		accum 0 abort_if_equal 1 		// do Allies own flag?
+
+		accum 0 set 1 			// Allied own the flag
+		setstate flag7_wobj default
+
+		wm_announce "^7Allies captured Bedrock Spire!"
+          alertentity flag7_wobj
+          alertentity flag7_wobj
+
+
+		setautospawn "Bedrock Spire"	1	// Set Allies to forward spawn
+	}
+}
+flag8
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger allied_capture				// Touched by an allied player
+	{
+		accum 0 abort_if_equal 1 		// do Allies own flag?
+
+		accum 0 set 1 			// Allied own the flag
+		setstate flag8_wobj default
+
+		wm_announce "^7Allies captured Blazehold!"
+          alertentity flag8_wobj
+          alertentity flag8_wobj
+
+
+		setautospawn "Blazehold"	1	// Set Allies to forward spawn
+	}
+}
+flag9
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger allied_capture				// Touched by an allied player
+	{
+		accum 0 abort_if_equal 1 		// do Allies own flag?
+
+		accum 0 set 1 			// Allied own the flag
+		setstate flag9_wobj default
+
+		wm_announce "^7Allies captured Riversweep!"
+          alertentity flag9_wobj
+          alertentity flag9_wobj
+
+
+		setautospawn "Riversweep"	1	// Set Allies to forward spawn
+	}
+}
+flag10
+{
+	spawn
+	{
+		accum 1 set -1
+	}
+
+	trigger allied_capture				// Touched by an allied player
+	{
+		accum 0 abort_if_equal 1 		// do Allies own flag?
+
+		accum 0 set 1 			// Allied own the flag
+		setstate flag10_wobj default
+
+		wm_announce "^7Allies captured The End?"
+          alertentity flag10_wobj
+          alertentity flag10_wobj
+
+
+		setautospawn "The End?"	1	// Set Allies to forward spawn
+	}
+}
+
+alliedfo_body
+{
+    spawn
+    {
+        wait 50
+        startanimation 0 13 15
+    }
+}
+alliedfo_head
+{
+    spawn
+    {
+        wait 100
+        attachtotag alliedfo_body tag_weapon
+    }
+}
+
+alliedfo_body1
+{
+    spawn
+    {
+        wait 50
+        startanimation 0 13 15
+    }
+}
+alliedfo_head1
+{
+    spawn
+    {
+        wait 100
+        attachtotag alliedfo_body1 tag_head
+    }
+}
+
+alliedfo_body3
+{
+    spawn
+    {
+        wait 50
+        startanimation 0 13 15
+    }
+}
+alliedfo_head3
+{
+    spawn
+    {
+        wait 100
+        attachtotag alliedfo_body3 tag_head
+    }
+}
+col1
+{
+    trigger esine1
+    {
+        setstate func1 invisible
+    }
+}
+col2
+{
+    trigger esine2
+    {
+        setstate func2 invisible
+    }
+}
+col3
+{
+    trigger esine3
+    {
+        setstate func3 invisible
+    }
+}
+col4
+{
+    trigger esine4
+    {
+        setstate func4 invisible
+    }
+}
+col5
+{
+    trigger esine5
+    {
+        setstate func5 invisible
+    }
+}
+col6
+{
+    trigger esine6
+    {
+        setstate func6 invisible
+    }
+}
+col7
+{
+    trigger esine7
+    {
+        setstate func7 invisible
+    }
+}
+col8
+{
+    trigger esine8
+    {
+        setstate func8 invisible
+    }
+}

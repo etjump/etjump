@@ -26,8 +26,8 @@
 
 #include <optional>
 
-#include "../game/q_shared.h"
 #include "../game/etj_string_utilities.h"
+#include "../game/q_shared.h"
 
 namespace ETJump {
 class CvarValue {
@@ -40,6 +40,11 @@ public:
   struct Scale {
     float x;
     float y;
+  };
+
+  struct Pair {
+    float val1;
+    float val2;
   };
 };
 
@@ -55,8 +60,9 @@ public:
         return true;
       }
 
-      return std::all_of(str.cbegin(), str.cend(),
-                         [](const char c) { return std::isspace(c); });
+      return std::all_of(str.cbegin(), str.cend(), [](const char c) {
+        return std::isspace(c);
+      });
     };
 
     // user set the string empty or entirely whitespace, return sane defaults
@@ -72,10 +78,11 @@ public:
     auto scaleComponents = StringUtils::split(cvar.string, " ");
 
     // remove any whitespace, if user inputs a string like "  2   3  "
-    scaleComponents.erase(
-        std::remove_if(scaleComponents.begin(), scaleComponents.end(),
-                       [](const std::string_view s) { return s.empty(); }),
-        scaleComponents.end());
+    scaleComponents.erase(std::remove_if(scaleComponents.begin(), scaleComponents.end(),
+                                         [](const std::string_view s) {
+                                           return s.empty();
+                                         }),
+                          scaleComponents.end());
 
     // single component = uniform scaling
     if (scaleComponents.size() == 1) {

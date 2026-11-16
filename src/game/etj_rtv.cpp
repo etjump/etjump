@@ -22,19 +22,20 @@
  * SOFTWARE.
  */
 
+#include "etj_rtv.h"
+
 #include <random>
 
-#include "etj_rtv.h"
+#include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_utilities.h"
-#include "etj_printer.h"
 
 namespace ETJump {
 
 RockTheVote::RockTheVote() {
   rtvMaps.clear();
-  isRtvVote = false;
-  autoRtvStartTime = level.startTime;
+  isRtvVote                 = false;
+  autoRtvStartTime          = level.startTime;
   anyonePlayedSinceLastVote = false;
 }
 
@@ -45,7 +46,7 @@ std::vector<std::string> RockTheVote::getMostVotedMaps() {
 
   for (size_t i = 0; i < rtvMaps.size(); ++i) {
     const auto &map = rtvMaps[i];
-    voteCount = getTotalVotesForMap(i);
+    voteCount       = getTotalVotesForMap(i);
     if (voteCount == 0) {
       continue;
     }
@@ -74,8 +75,7 @@ void RockTheVote::setRtvWinner() {
     G_increasePassedCount(maps[0].c_str());
   }
 
-  Q_strncpyz(level.voteInfo.vote_value, maps[0].c_str(),
-             sizeof(level.voteInfo.vote_value));
+  Q_strncpyz(level.voteInfo.vote_value, maps[0].c_str(), sizeof(level.voteInfo.vote_value));
 }
 
 void RockTheVote::setRtvConfigstrings() {
@@ -83,26 +83,32 @@ void RockTheVote::setRtvConfigstrings() {
   std::string newcs;
 
   for (size_t i = 0; i < maxMaps; ++i) {
-    newcs += StringUtils::format(
-        "%s\\%i,%i%s", rtvMaps[i].mapName, rtvMaps[i].voteCountInfo.playerCount,
-        rtvMaps[i].voteCountInfo.spectatorCount, i == maxMaps - 1 ? "" : "\\");
+    newcs += StringUtils::format("%s\\%i,%i%s", rtvMaps[i].mapName, rtvMaps[i].voteCountInfo.playerCount,
+                                 rtvMaps[i].voteCountInfo.spectatorCount, i == maxMaps - 1 ? "" : "\\");
   }
 
   trap_SetConfigstring(CS_VOTE_YES, newcs.c_str());
 }
 
-std::vector<RtvMapVoteInfo> *RockTheVote::getRtvMaps() { return &rtvMaps; }
-
-int RockTheVote::getTotalVotesForMap(int mapIndex) {
-  return rtvMaps[mapIndex].voteCountInfo.playerCount +
-         rtvMaps[mapIndex].voteCountInfo.spectatorCount;
+std::vector<RtvMapVoteInfo> *RockTheVote::getRtvMaps() {
+  return &rtvMaps;
 }
 
-void RockTheVote::clearRtvMaps() { rtvMaps.clear(); }
+int RockTheVote::getTotalVotesForMap(int mapIndex) {
+  return rtvMaps[mapIndex].voteCountInfo.playerCount + rtvMaps[mapIndex].voteCountInfo.spectatorCount;
+}
 
-bool RockTheVote::rtvVoteActive() const { return isRtvVote; }
+void RockTheVote::clearRtvMaps() {
+  rtvMaps.clear();
+}
 
-void RockTheVote::setRtvStatus(bool status) { isRtvVote = status; }
+bool RockTheVote::rtvVoteActive() const {
+  return isRtvVote;
+}
+
+void RockTheVote::setRtvStatus(bool status) {
+  isRtvVote = status;
+}
 
 bool RockTheVote::checkAutoRtv() {
   // check for upper bounds here in case server admins set it manually
@@ -110,8 +116,7 @@ bool RockTheVote::checkAutoRtv() {
   // abs so that overflow = over max time
   if (std::abs(g_autoRtv.integer) > AUTORTV_MAX_TIME) {
     trap_Cvar_Set("g_autoRtv", std::to_string(AUTORTV_MAX_TIME).c_str());
-    G_LogPrintf("WARNING: g_autoRtv out of range (max %i), setting to %i.\n",
-                AUTORTV_MAX_TIME, AUTORTV_MAX_TIME);
+    G_LogPrintf("WARNING: g_autoRtv out of range (max %i), setting to %i.\n", AUTORTV_MAX_TIME, AUTORTV_MAX_TIME);
   }
 
   if (!level.numConnectedClients || g_autoRtv.integer <= 0) {
@@ -140,17 +145,15 @@ bool RockTheVote::checkAutoRtv() {
     }
   }
 
-  const int autoRtvMsec = g_autoRtv.integer * 1000 * 60;
+  const int autoRtvMsec     = g_autoRtv.integer * 1000 * 60;
   const int autoRtvCooldown = autoRtvStartTime + autoRtvMsec;
 
   // checks for exactly 2 minutes until vote, this should be fine as long as
   // server doesn't randomly lag or something and skip a frame, but this
   // isn't really critical anyway and is the simplest way to solve this getting
   // printed when adjusting auto rtv time so that it gets instantly called
-  if (level.time == autoRtvCooldown - (1000 * 60 * 2) &&
-      g_autoRtv.integer >= 2) {
-    Printer::chatAll(
-        "^7Server: automatic Rock The Vote will be called in ^32 ^7minutes.");
+  if (level.time == autoRtvCooldown - (1000 * 60 * 2) && g_autoRtv.integer >= 2) {
+    Printer::chatAll("^7Server: automatic Rock The Vote will be called in ^32 ^7minutes.");
     return false;
   }
 
@@ -173,36 +176,33 @@ void RockTheVote::callAutoRtv() {
 
   if (i != G_OK) {
     if (i == G_NOTFOUND) {
-      G_LogPrintf(
-          "callAutoRtv: Could not find vote command for '%s'. This should not "
-          "happen, please file a bug report at github.com/etjump/etjump\n",
-          voteArg);
+      G_LogPrintf("callAutoRtv: Could not find vote command for '%s'. This should not "
+                  "happen, please file a bug report at github.com/etjump/etjump\n",
+                  voteArg);
     }
 
     // if we fail here, it's because we don't have enough maps,
     // so push back auto rtv timer so that we don't flood the logs
-    autoRtvStartTime = level.time;
+    autoRtvStartTime             = level.time;
     level.voteInfo.isAutoRtvVote = false; // reset in case vote cmd fails
     return;
   }
 
-  Q_strncpyz(level.voteInfo.voteString, voteArg,
-             sizeof(level.voteInfo.voteString));
+  Q_strncpyz(level.voteInfo.voteString, voteArg, sizeof(level.voteInfo.voteString));
 
-  level.voteInfo.voteYes = 0;
+  level.voteInfo.voteYes           = 0;
   level.voteInfo.voteYesSpectators = 0;
-  level.voteInfo.voteNo = 0;
-  level.voteInfo.voteNoSpectators = 0;
-  level.voteInfo.voteTime = level.time;
-  level.voteInfo.voter_cn = -1;
-  level.voteInfo.voter_team = TEAM_FREE;
+  level.voteInfo.voteNo            = 0;
+  level.voteInfo.voteNoSpectators  = 0;
+  level.voteInfo.voteTime          = level.time;
+  level.voteInfo.voter_cn          = -1;
+  level.voteInfo.voter_team        = TEAM_FREE;
 
-  autoRtvStartTime = level.time; // reset cooldown in case this vote fails
+  autoRtvStartTime          = level.time; // reset cooldown in case this vote fails
   anyonePlayedSinceLastVote = false;
-  isRtvVote = true;
+  isRtvVote                 = true;
 
-  std::string voteMsg = StringUtils::format("Server called an automatic %s.\n",
-                                            level.voteInfo.voteString);
+  std::string voteMsg = StringUtils::format("Server called an automatic %s.\n", level.voteInfo.voteString);
 
   Printer::consoleAll(voteMsg);
   Printer::centerAll("Server called an automatic vote.");

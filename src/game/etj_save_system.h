@@ -24,26 +24,27 @@
 
 #pragma once
 
-#include <unordered_map>
-#include <string>
 #include <deque>
+#include <string>
+#include <unordered_map>
 
 #include "etj_local.h"
 
 namespace ETJump {
 class SaveSystem {
 public:
-  explicit SaveSystem(const std::shared_ptr<Session> &session)
-      : _session(session) {}
+  explicit SaveSystem(const std::shared_ptr<Session> &session) : _session(session) {}
+
   ~SaveSystem() = default;
 
-  static constexpr int MAX_SAVED_POSITIONS = 3;
+  static constexpr int MAX_SAVED_POSITIONS  = 3;
   static constexpr int MAX_BACKUP_POSITIONS = 3;
 
   struct SavePosition {
     SavePosition()
-        : isValid(false), isLatest(false), origin{0, 0, 0}, vangles{0, 0, 0},
-          stance(PlayerStance::Stand), isTimerunSave(false) {}
+      : isValid(false), isLatest(false), origin{0, 0, 0}, vangles{0, 0, 0}, stance(PlayerStance::Stand),
+        isTimerunSave(false) {}
+
     bool isValid;
     bool isLatest;
     vec3_t origin;

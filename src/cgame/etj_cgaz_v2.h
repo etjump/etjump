@@ -36,8 +36,7 @@ class SnaphudData;
 
 class CGazV2 : public IRenderable {
 public:
-  CGazV2(const std::shared_ptr<CGazData> &cgazData,
-         const std::shared_ptr<SnaphudData> &snaphudData,
+  CGazV2(const std::shared_ptr<CGazData> &cgazData, const std::shared_ptr<SnaphudData> &snaphudData,
          const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~CGazV2() override;
 
@@ -86,6 +85,7 @@ private:
 
   struct CGaz2 {
     float velAngle;
+    float optAngle;
     float velSize;
 
     float y;

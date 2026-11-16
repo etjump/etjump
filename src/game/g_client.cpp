@@ -1,12 +1,13 @@
-#include "g_local.h"
-#include "etj_save_system.h"
-#include "etj_string_utilities.h"
-#include "etj_printer.h"
-#include "etj_rtv.h"
 #include "etj_entity_utilities.h"
+#include "etj_printer.h"
 #include "etj_progression_tracker.h"
-#include "etj_worldspawn.h"
+#include "etj_rtv.h"
+#include "etj_save_system.h"
 #include "etj_session_v2.h"
+#include "etj_string_utilities.h"
+#include "etj_utilities.h"
+#include "etj_worldspawn.h"
+#include "g_local.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -19,7 +20,6 @@ If the start position is targeting an entity, the players camera will start out
 facing that ent (like an info_notnull)
 */
 void SP_info_player_deathmatch(gentity_t *ent) {
-  int i;
   vec3_t dir;
 
   ent->enemy = G_PickTarget(ent->target);
@@ -83,11 +83,9 @@ gentity_t *SelectNearestDeathmatchSpawnPoint(vec3_t from) {
 
   nearestDist = 999999;
   nearestSpot = NULL;
-  spot = NULL;
+  spot        = NULL;
 
-  while ((spot = G_Find(spot, FOFS(classname), "info_player_deathmatch")) !=
-         NULL) {
-
+  while ((spot = G_Find(spot, FOFS(classname), "info_player_deathmatch")) != NULL) {
     VectorSubtract(spot->r.currentOrigin, from, delta);
     dist = VectorLength(delta);
     if (dist < nearestDist) {
@@ -109,11 +107,10 @@ go to a random point that doesn't telefrag
 gentity_t *SelectRandomDeathmatchSpawnPoint() {
   gentity_t *spots[MAX_SPAWN_POINTS];
 
-  int count = 0;
+  int count       = 0;
   gentity_t *spot = nullptr;
 
-  while ((spot = G_Find(spot, FOFS(classname), "info_player_deathmatch")) !=
-         nullptr) {
+  while ((spot = G_Find(spot, FOFS(classname), "info_player_deathmatch")) != nullptr) {
     spots[count] = spot;
     count++;
   }
@@ -224,9 +221,9 @@ void InitBodyQue(void) {
 
   level.bodyQueIndex = 0;
   for (i = 0; i < BODY_QUEUE_SIZE; i++) {
-    ent = G_Spawn();
-    ent->classname = "bodyque";
-    ent->neverFree = qtrue;
+    ent              = G_Spawn();
+    ent->classname   = "bodyque";
+    ent->neverFree   = qtrue;
     level.bodyQue[i] = ent;
   }
 }
@@ -252,10 +249,10 @@ After sitting around for five seconds, fall into the ground and dissapear
 */
 void BodySink2(gentity_t *ent) {
   ent->physicsObject = qfalse;
-  ent->nextthink = level.time + BODY_TIME + 1500;
-  ent->think = BodyUnlink;
-  ent->s.pos.trType = TR_LINEAR;
-  ent->s.pos.trTime = level.time;
+  ent->nextthink     = level.time + BODY_TIME + 1500;
+  ent->think         = BodyUnlink;
+  ent->s.pos.trType  = TR_LINEAR;
+  ent->s.pos.trTime  = level.time;
   VectorCopy(ent->r.currentOrigin, ent->s.pos.trBase);
   VectorSet(ent->s.pos.trDelta, 0, 0, -8);
 }
@@ -302,15 +299,15 @@ void CopyToBodyQue(gentity_t *ent) {
 
   // if client is in a nodrop area, don't leave the body
   contents = trap_PointContents(ent->client->ps.origin, -1);
-  if (!BG_DropItems(contents, shared.integer)) {
+  if (!BG_DropItems(contents, game.worldspawn->sharedKeys.noDrop)) {
     return;
   }
 
   // grab a body que and cycle to the next one
-  body = level.bodyQue[level.bodyQueIndex];
+  body               = level.bodyQue[level.bodyQueIndex];
   level.bodyQueIndex = (level.bodyQueIndex + 1) % BODY_QUEUE_SIZE;
 
-  body->s = ent->s;
+  body->s        = ent->s;
   body->s.eFlags = EF_DEAD; // clear EF_TALK, etc
 
   if (ent->client->ps.eFlags & EF_HEADSHOT) {
@@ -318,12 +315,12 @@ void CopyToBodyQue(gentity_t *ent) {
     body->s.eFlags |= EF_HEADSHOT;
   }
 
-  body->s.eType = ET_CORPSE;
-  body->classname = "corpse";
-  body->s.powerups = 0;  // clear powerups
-  body->s.loopSound = 0; // clear lava burning
-  body->s.number = static_cast<int>(body - g_entities);
-  body->timestamp = level.time;
+  body->s.eType       = ET_CORPSE;
+  body->classname     = "corpse";
+  body->s.powerups    = 0; // clear powerups
+  body->s.loopSound   = 0; // clear lava burning
+  body->s.number      = static_cast<int>(body - g_entities);
+  body->timestamp     = level.time;
   body->physicsObject = qtrue;
   body->physicsBounce = 0; // don't bounce
   if (body->s.groundEntityNum == ENTITYNUM_NONE) {
@@ -336,7 +333,8 @@ void CopyToBodyQue(gentity_t *ent) {
   body->s.event = 0;
 
   // DHM - Clear out event system
-  for (i = 0; i < MAX_EVENTS; i++) body->s.events[i] = 0;
+  for (i = 0; i < MAX_EVENTS; i++)
+    body->s.events[i] = 0;
   body->s.eventSequence = 0;
 
   // DHM - Nerve
@@ -373,11 +371,11 @@ void CopyToBodyQue(gentity_t *ent) {
   body->r.contents = CONTENTS_CORPSE;
   body->r.ownerNum = ent->r.ownerNum;
 
-  BODY_TEAM(body) = ent->client->sess.sessionTeam;
-  BODY_CLASS(body) = ent->client->sess.playerType;
+  BODY_TEAM(body)      = ent->client->sess.sessionTeam;
+  BODY_CLASS(body)     = ent->client->sess.playerType;
   BODY_CHARACTER(body) = ent->client->pers.characterIndex;
-  BODY_VALUE(body) = 0;
-  body->s.time = level.time;
+  BODY_VALUE(body)     = 0;
+  body->s.time         = level.time;
 
   body->s.time2 = 0;
 
@@ -415,9 +413,8 @@ void SetClientViewAngle(gentity_t *ent, const vec3_t angle) {
   for (i = 0; i < 3; i++) {
     int cmdAngle;
 
-    cmdAngle = ANGLE2SHORT(angle[i]);
-    ent->client->ps.delta_angles[i] =
-        cmdAngle - ent->client->pers.cmd.angles[i];
+    cmdAngle                        = ANGLE2SHORT(angle[i]);
+    ent->client->ps.delta_angles[i] = cmdAngle - ent->client->pers.cmd.angles[i];
   }
   VectorCopy(angle, ent->s.angles);
   VectorCopy(ent->s.angles, ent->client->ps.viewangles);
@@ -426,9 +423,8 @@ void SetClientViewAngle(gentity_t *ent, const vec3_t angle) {
 void SetClientViewAnglePitch(gentity_t *ent, vec_t angle) {
   int cmdAngle;
 
-  cmdAngle = ANGLE2SHORT(angle);
-  ent->client->ps.delta_angles[PITCH] =
-      cmdAngle - ent->client->pers.cmd.angles[PITCH];
+  cmdAngle                            = ANGLE2SHORT(angle);
+  ent->client->ps.delta_angles[PITCH] = cmdAngle - ent->client->pers.cmd.angles[PITCH];
 
   ent->s.angles[PITCH] = 0;
   VectorCopy(ent->s.angles, ent->client->ps.viewangles);
@@ -464,16 +460,15 @@ void limbo(gentity_t *ent, qboolean makeCorpse) {
     }
 
     // DHM - Nerve :: reset these values
-    ent->client->ps.viewlocked = 0;
+    ent->client->ps.viewlocked        = 0;
     ent->client->ps.viewlocked_entNum = 0;
 
-    ent->r.maxs[2] = 0;
+    ent->r.maxs[2]           = 0;
     ent->r.currentOrigin[2] += 8;
-    contents = trap_PointContents(ent->r.currentOrigin, -1);
+    contents                 = trap_PointContents(ent->r.currentOrigin, -1);
     // stored in player_die()
     ent->s.weapon = ent->client->limboDropWeapon;
-    if (makeCorpse && BG_DropItems(contents, shared.integer) &&
-        !ent->client->sess.timerunActive) {
+    if (makeCorpse && BG_DropItems(contents, game.worldspawn->sharedKeys.noDrop) && !ent->client->sess.timerunActive) {
       TossClientItems(ent);
     }
 
@@ -531,6 +526,7 @@ void reinforce(gentity_t *ent) {
 
   respawn(ent);
 }
+
 // jpw
 
 /*
@@ -539,7 +535,6 @@ respawn
 ================
 */
 void respawn(gentity_t *ent) {
-
   ent->client->ps.pm_flags &= ~PMF_LIMBO; // JPW NERVE turns off limbo
 
   ClientSpawn(ent, qfalse);
@@ -575,6 +570,7 @@ team_t TeamCount(int ignoreClientNum, int team) {
 
   return static_cast<team_t>(count);
 }
+
 // -NERVE - SMF
 
 /*
@@ -587,7 +583,7 @@ team_t PickTeam(int ignoreClientNum) {
   int counts[TEAM_NUM_TEAMS] = {0, 0, 0};
 
   counts[TEAM_ALLIES] = TeamCount(ignoreClientNum, TEAM_ALLIES);
-  counts[TEAM_AXIS] = TeamCount(ignoreClientNum, TEAM_AXIS);
+  counts[TEAM_AXIS]   = TeamCount(ignoreClientNum, TEAM_AXIS);
 
   if (counts[TEAM_ALLIES] > counts[TEAM_AXIS]) {
     return (TEAM_AXIS);
@@ -597,9 +593,7 @@ team_t PickTeam(int ignoreClientNum) {
   }
 
   // equal team count, so join the team with the lowest score
-  return (((level.teamScores[TEAM_ALLIES] > level.teamScores[TEAM_AXIS])
-               ? TEAM_AXIS
-               : TEAM_ALLIES));
+  return (((level.teamScores[TEAM_ALLIES] > level.teamScores[TEAM_AXIS]) ? TEAM_AXIS : TEAM_ALLIES));
 }
 
 /*
@@ -618,17 +612,14 @@ static void AddExtraSpawnAmmo(gclient_t *client, weapon_t weaponNum) {
     case WP_KAR98:
     case WP_SILENCED_COLT:
       if (client->sess.skill[SK_LIGHT_WEAPONS] >= 1) {
-        client->ps.ammo[BG_FindAmmoForWeapon(weaponNum)] +=
-            GetAmmoTableData(weaponNum)->maxclip;
+        client->ps.ammo[BG_FindAmmoForWeapon(weaponNum)] += GetAmmoTableData(weaponNum)->maxclip;
       }
       break;
     case WP_MP40:
     case WP_THOMPSON:
-      if ((client->sess.skill[SK_FIRST_AID] >= 1 &&
-           client->sess.playerType == PC_MEDIC) ||
+      if ((client->sess.skill[SK_FIRST_AID] >= 1 && client->sess.playerType == PC_MEDIC) ||
           client->sess.skill[SK_LIGHT_WEAPONS] >= 1) {
-        client->ps.ammo[BG_FindAmmoForWeapon(weaponNum)] +=
-            GetAmmoTableData(weaponNum)->maxclip;
+        client->ps.ammo[BG_FindAmmoForWeapon(weaponNum)] += GetAmmoTableData(weaponNum)->maxclip;
       }
       break;
     case WP_M7:
@@ -668,20 +659,16 @@ static void AddExtraSpawnAmmo(gclient_t *client, weapon_t weaponNum) {
     case WP_GARAND:
     case WP_K43:
     case WP_FG42:
-      if (client->sess.skill[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS] >=
-              1 ||
+      if (client->sess.skill[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS] >= 1 ||
           client->sess.skill[SK_LIGHT_WEAPONS] >= 1) {
-        client->ps.ammo[BG_FindAmmoForWeapon(weaponNum)] +=
-            GetAmmoTableData(weaponNum)->maxclip;
+        client->ps.ammo[BG_FindAmmoForWeapon(weaponNum)] += GetAmmoTableData(weaponNum)->maxclip;
       }
       break;
     case WP_GARAND_SCOPE:
     case WP_K43_SCOPE:
     case WP_FG42SCOPE:
-      if (client->sess.skill[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS] >=
-          1) {
-        client->ps.ammo[BG_FindAmmoForWeapon(weaponNum)] +=
-            GetAmmoTableData(weaponNum)->maxclip;
+      if (client->sess.skill[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS] >= 1) {
+        client->ps.ammo[BG_FindAmmoForWeapon(weaponNum)] += GetAmmoTableData(weaponNum)->maxclip;
       }
       break;
     default:
@@ -689,11 +676,10 @@ static void AddExtraSpawnAmmo(gclient_t *client, weapon_t weaponNum) {
   }
 }
 
-qboolean AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo,
-                           int ammoclip, qboolean setcurrent) {
+qboolean AddWeaponToPlayer(gclient_t *client, weapon_t weapon, int ammo, int ammoclip, qboolean setcurrent) {
   COM_BitSet(client->ps.weapons, weapon);
   client->ps.ammoclip[BG_FindClipForWeapon(weapon)] = ammoclip;
-  client->ps.ammo[BG_FindAmmoForWeapon(weapon)] = ammo;
+  client->ps.ammo[BG_FindAmmoForWeapon(weapon)]     = ammo;
   if (setcurrent) {
     client->ps.weapon = weapon;
   }
@@ -719,28 +705,28 @@ void ResetPlayerAmmo(gclient_t *client, gentity_t *ent) {
   // and grenade count per class, as these do not follow ammotable data
   // ammo from skill bonuses is handled in AddWeaponToPlayer
   int ammoMultiplier = 0;
-  int nadeCount = 0;
+  int nadeCount      = 0;
 
   switch (client->sess.playerType) {
     case PC_SOLDIER:
       ammoMultiplier = 2;
-      nadeCount = 4;
+      nadeCount      = 4;
       break;
     case PC_COVERTOPS:
       ammoMultiplier = 2;
-      nadeCount = 2;
+      nadeCount      = 2;
       break;
     case PC_MEDIC:
       ammoMultiplier = 0;
-      nadeCount = 1;
+      nadeCount      = 1;
       break;
     case PC_ENGINEER:
       ammoMultiplier = 1;
-      nadeCount = 4;
+      nadeCount      = 4;
       break;
     case PC_FIELDOPS:
       ammoMultiplier = 1;
-      nadeCount = 1;
+      nadeCount      = 1;
       break;
     default:
       break;
@@ -762,47 +748,39 @@ void ResetPlayerAmmo(gclient_t *client, gentity_t *ent) {
       }
 
       if ((i == WP_DYNAMITE || i == WP_PLIERS) &&
-          game.worldspawn->noExplosives !=
-              ETJump::Worldspawn::NoExplosives::NO_DYNAMITE) {
+          game.worldspawn->noExplosives != ETJump::Worldspawn::NoExplosivesOpts::NO_DYNAMITE) {
         AddWeaponToPlayer(client, static_cast<weapon_t>(i), 0, 1, qfalse);
         continue;
       }
 
-      if (i == WP_SATCHEL && game.worldspawn->noExplosives ==
-                                 ETJump::Worldspawn::NoExplosives::OFF) {
+      if (i == WP_SATCHEL && game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF) {
         AddWeaponToPlayer(client, WP_SATCHEL, 0, 1, qfalse);
         AddWeaponToPlayer(client, WP_SATCHEL_DET, 0, 0, qfalse);
         continue;
       }
 
-      if (game.worldspawn->noExplosives !=
-              ETJump::Worldspawn::NoExplosives::OFF &&
+      if (game.worldspawn->noExplosives != ETJump::Worldspawn::NoExplosivesOpts::OFF &&
           !ETJump::weaponAllowedWithNoExplosives(i)) {
         continue;
       }
 
       if (i == WP_MP40 || i == WP_THOMPSON || i == WP_STEN) {
-        AddWeaponToPlayer(client, static_cast<weapon_t>(i),
-                          GetAmmoTableData(i)->defaultStartingAmmo *
-                              ammoMultiplier,
+        AddWeaponToPlayer(client, static_cast<weapon_t>(i), GetAmmoTableData(i)->defaultStartingAmmo * ammoMultiplier,
                           GetAmmoTableData(i)->defaultStartingClip, qfalse);
       } else if (BG_IsAkimboWeapon(i)) {
-        client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(
-            BG_AkimboSidearm(i)))] = GetAmmoTableData(i)->defaultStartingClip;
-        AddWeaponToPlayer(client, static_cast<weapon_t>(i),
-                          GetAmmoTableData(i)->defaultStartingAmmo,
+        client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(i)))] =
+          GetAmmoTableData(i)->defaultStartingClip;
+        AddWeaponToPlayer(client, static_cast<weapon_t>(i), GetAmmoTableData(i)->defaultStartingAmmo,
                           GetAmmoTableData(i)->defaultStartingClip, qfalse);
       } else {
-        AddWeaponToPlayer(client, static_cast<weapon_t>(i),
-                          GetAmmoTableData(i)->defaultStartingAmmo,
+        AddWeaponToPlayer(client, static_cast<weapon_t>(i), GetAmmoTableData(i)->defaultStartingAmmo,
                           GetAmmoTableData(i)->defaultStartingClip, qfalse);
       }
     }
   }
 
   // no nades if explosives are disabled or timerun is active
-  if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosives::OFF &&
-      !client->sess.timerunActive) {
+  if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF && !client->sess.timerunActive) {
     weapon_t nadeType;
     switch (client->sess.sessionTeam) {
       case TEAM_AXIS:
@@ -861,8 +839,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
     }
     // Engineer gets dynamite
     if (pc == PC_ENGINEER) {
-      if (game.worldspawn->noExplosives !=
-              ETJump::Worldspawn::NoExplosives::NO_DYNAMITE &&
+      if (game.worldspawn->noExplosives != ETJump::Worldspawn::NoExplosivesOpts::NO_DYNAMITE &&
           !client->sess.timerunActive) {
         AddWeaponToPlayer(client, WP_DYNAMITE, 0, 1, qfalse);
         AddWeaponToPlayer(client, WP_PLIERS, 0, 1, qfalse);
@@ -872,84 +849,57 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         if (client->sess.sessionTeam == TEAM_AXIS) {
           switch (client->sess.playerWeapon) {
             case WP_KAR98:
-              AddWeaponToPlayer(client, WP_KAR98,
-                                GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
-                                GetAmmoTableData(WP_KAR98)->defaultStartingClip,
-                                qtrue);
-              if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+              AddWeaponToPlayer(client, WP_KAR98, GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_KAR98)->defaultStartingClip, qtrue);
+              if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   !client->sess.timerunActive) {
-                AddWeaponToPlayer(
-                    client, WP_GPG40,
-                    GetAmmoTableData(WP_GPG40)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_GPG40)->defaultStartingClip, qfalse);
+                AddWeaponToPlayer(client, WP_GPG40, GetAmmoTableData(WP_GPG40)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_GPG40)->defaultStartingClip, qfalse);
               }
               break;
             case WP_K43:
-              AddWeaponToPlayer(
-                  client, WP_K43, GetAmmoTableData(WP_K43)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_K43)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_K43_SCOPE,
-                  GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
+              AddWeaponToPlayer(client, WP_K43, GetAmmoTableData(WP_K43)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_K43)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_K43_SCOPE, GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
               break;
             default:
-              AddWeaponToPlayer(client, WP_MP40,
-                                GetAmmoTableData(WP_MP40)->defaultStartingAmmo,
-                                GetAmmoTableData(WP_MP40)->defaultStartingClip,
-                                qtrue);
+              AddWeaponToPlayer(client, WP_MP40, GetAmmoTableData(WP_MP40)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
               break;
           }
-          if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+          if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
-            AddWeaponToPlayer(
-                client, WP_LANDMINE,
-                GetAmmoTableData(WP_LANDMINE)->defaultStartingAmmo,
-                GetAmmoTableData(WP_LANDMINE)->defaultStartingClip, qfalse);
+            AddWeaponToPlayer(client, WP_LANDMINE, GetAmmoTableData(WP_LANDMINE)->defaultStartingAmmo,
+                              GetAmmoTableData(WP_LANDMINE)->defaultStartingClip, qfalse);
             AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 4, qfalse);
           }
         } else {
           switch (client->sess.playerWeapon) {
             case WP_CARBINE:
-              AddWeaponToPlayer(
-                  client, WP_CARBINE,
-                  GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
-              if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+              AddWeaponToPlayer(client, WP_CARBINE, GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
+              if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   !client->sess.timerunActive) {
-                AddWeaponToPlayer(
-                    client, WP_M7, GetAmmoTableData(WP_M7)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_M7)->defaultStartingClip, qfalse);
+                AddWeaponToPlayer(client, WP_M7, GetAmmoTableData(WP_M7)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_M7)->defaultStartingClip, qfalse);
               }
               break;
             case WP_GARAND:
-              AddWeaponToPlayer(
-                  client, WP_GARAND,
-                  GetAmmoTableData(WP_GARAND)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_GARAND)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_GARAND_SCOPE,
-                  GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip,
-                  qfalse);
+              AddWeaponToPlayer(client, WP_GARAND, GetAmmoTableData(WP_GARAND)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_GARAND)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_GARAND_SCOPE, GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip, qfalse);
               break;
             default:
-              AddWeaponToPlayer(
-                  client, WP_THOMPSON,
-                  GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_THOMPSON, GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
               break;
           }
-          if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+          if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
-            AddWeaponToPlayer(
-                client, WP_LANDMINE,
-                GetAmmoTableData(WP_LANDMINE)->defaultStartingAmmo,
-                GetAmmoTableData(WP_LANDMINE)->defaultStartingClip, qfalse);
+            AddWeaponToPlayer(client, WP_LANDMINE, GetAmmoTableData(WP_LANDMINE)->defaultStartingAmmo,
+                              GetAmmoTableData(WP_LANDMINE)->defaultStartingClip, qfalse);
             AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 4, qfalse);
           }
         }
@@ -974,136 +924,94 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         if (client->sess.sessionTeam == TEAM_AXIS) {
           switch (client->sess.playerWeapon) {
             case WP_KAR98:
-              AddWeaponToPlayer(client, WP_KAR98,
-                                GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
-                                GetAmmoTableData(WP_KAR98)->defaultStartingClip,
-                                qtrue);
+              AddWeaponToPlayer(client, WP_KAR98, GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_KAR98)->defaultStartingClip, qtrue);
               break;
             case WP_K43:
-              AddWeaponToPlayer(
-                  client, WP_K43, GetAmmoTableData(WP_K43)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_K43)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_K43_SCOPE,
-                  GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
+              AddWeaponToPlayer(client, WP_K43, GetAmmoTableData(WP_K43)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_K43)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_K43_SCOPE, GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
               break;
             default:
-              AddWeaponToPlayer(client, WP_MP40,
-                                GetAmmoTableData(WP_MP40)->defaultStartingAmmo,
-                                GetAmmoTableData(WP_MP40)->defaultStartingClip,
-                                qtrue);
+              AddWeaponToPlayer(client, WP_MP40, GetAmmoTableData(WP_MP40)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
               break;
           }
-          if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+          if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
           }
         } else {
           switch (client->sess.playerWeapon) {
             case WP_CARBINE:
-              AddWeaponToPlayer(
-                  client, WP_CARBINE,
-                  GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_CARBINE, GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
               break;
             case WP_GARAND:
-              AddWeaponToPlayer(
-                  client, WP_GARAND,
-                  GetAmmoTableData(WP_GARAND)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_GARAND)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_GARAND_SCOPE,
-                  GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip,
-                  qfalse);
+              AddWeaponToPlayer(client, WP_GARAND, GetAmmoTableData(WP_GARAND)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_GARAND)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_GARAND_SCOPE, GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip, qfalse);
               break;
             default:
-              AddWeaponToPlayer(
-                  client, WP_THOMPSON,
-                  GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_THOMPSON, GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
               break;
           }
-          if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+          if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
           }
         }
       } else if (pc == PC_MEDIC) {
-        AddWeaponToPlayer(
-            client, WP_MEDIC_SYRINGE,
-            GetAmmoTableData(WP_MEDIC_SYRINGE)->defaultStartingAmmo,
-            GetAmmoTableData(WP_MEDIC_SYRINGE)->defaultStartingClip, qfalse);
+        AddWeaponToPlayer(client, WP_MEDIC_SYRINGE, GetAmmoTableData(WP_MEDIC_SYRINGE)->defaultStartingAmmo,
+                          GetAmmoTableData(WP_MEDIC_SYRINGE)->defaultStartingClip, qfalse);
         if (client->sess.skill[SK_FIRST_AID] >= 0) {
-          AddWeaponToPlayer(
-              client, WP_MEDIC_ADRENALINE,
-              GetAmmoTableData(WP_MEDIC_ADRENALINE)->defaultStartingAmmo,
-              GetAmmoTableData(WP_MEDIC_ADRENALINE)->defaultStartingClip,
-              qfalse);
+          AddWeaponToPlayer(client, WP_MEDIC_ADRENALINE, GetAmmoTableData(WP_MEDIC_ADRENALINE)->defaultStartingAmmo,
+                            GetAmmoTableData(WP_MEDIC_ADRENALINE)->defaultStartingClip, qfalse);
         }
 
-        AddWeaponToPlayer(
-            client, WP_MEDKIT, GetAmmoTableData(WP_MEDKIT)->defaultStartingAmmo,
-            GetAmmoTableData(WP_MEDKIT)->defaultStartingClip, qfalse);
+        AddWeaponToPlayer(client, WP_MEDKIT, GetAmmoTableData(WP_MEDKIT)->defaultStartingAmmo,
+                          GetAmmoTableData(WP_MEDKIT)->defaultStartingClip, qfalse);
 
         if (client->sess.sessionTeam == TEAM_AXIS) {
           switch (client->sess.playerWeapon) {
             case WP_KAR98:
-              AddWeaponToPlayer(client, WP_KAR98,
-                                GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
-                                GetAmmoTableData(WP_KAR98)->defaultStartingClip,
-                                qtrue);
+              AddWeaponToPlayer(client, WP_KAR98, GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_KAR98)->defaultStartingClip, qtrue);
               break;
             case WP_K43:
-              AddWeaponToPlayer(
-                  client, WP_K43, GetAmmoTableData(WP_K43)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_K43)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_K43_SCOPE,
-                  GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
+              AddWeaponToPlayer(client, WP_K43, GetAmmoTableData(WP_K43)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_K43)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_K43_SCOPE, GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
               break;
             default:
-              AddWeaponToPlayer(client, WP_MP40, 0,
-                                GetAmmoTableData(WP_MP40)->defaultStartingClip,
-                                qtrue);
+              AddWeaponToPlayer(client, WP_MP40, 0, GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
               break;
           }
-          if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+          if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 1, qfalse);
           }
         } else {
           switch (client->sess.playerWeapon) {
             case WP_CARBINE:
-              AddWeaponToPlayer(
-                  client, WP_CARBINE,
-                  GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_CARBINE, GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
               break;
             case WP_GARAND:
-              AddWeaponToPlayer(
-                  client, WP_GARAND,
-                  GetAmmoTableData(WP_GARAND)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_GARAND)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_GARAND_SCOPE,
-                  GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip,
-                  qfalse);
+              AddWeaponToPlayer(client, WP_GARAND, GetAmmoTableData(WP_GARAND)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_GARAND)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_GARAND_SCOPE, GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip, qfalse);
               break;
             default:
-              AddWeaponToPlayer(
-                  client, WP_THOMPSON, 0,
-                  GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_THOMPSON, 0, GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
               break;
           }
-          if (game.worldspawn->noExplosives ==
-                  ETJump::Worldspawn::NoExplosives::OFF &&
+          if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
               !client->sess.timerunActive) {
             AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 1, qfalse);
           }
@@ -1112,143 +1020,91 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         if (client->sess.sessionTeam == TEAM_AXIS) {
           switch (client->sess.playerWeapon) {
             default:
-              AddWeaponToPlayer(
-                  client, WP_MP40,
-                  2 * (GetAmmoTableData(WP_MP40)->defaultStartingAmmo),
-                  GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_MP40, 2 * (GetAmmoTableData(WP_MP40)->defaultStartingAmmo),
+                                GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
               break;
             case WP_PANZERFAUST:
-              if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+              if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   team_maxPanzers.integer && !client->sess.timerunActive) {
-                AddWeaponToPlayer(
-                    client, WP_PANZERFAUST,
-                    GetAmmoTableData(WP_PANZERFAUST)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_PANZERFAUST)->defaultStartingClip,
-                    qtrue);
+                AddWeaponToPlayer(client, WP_PANZERFAUST, GetAmmoTableData(WP_PANZERFAUST)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_PANZERFAUST)->defaultStartingClip, qtrue);
               }
               break;
             case WP_FLAMETHROWER:
               if (!client->sess.timerunActive) {
-                AddWeaponToPlayer(
-                    client, WP_FLAMETHROWER,
-                    GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingClip,
-                    qtrue);
+                AddWeaponToPlayer(client, WP_FLAMETHROWER, GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingClip, qtrue);
               }
               break;
             case WP_MOBILE_MG42:
-              AddWeaponToPlayer(
-                  client, WP_MOBILE_MG42,
-                  GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_MOBILE_MG42_SET,
-                  GetAmmoTableData(WP_MOBILE_MG42_SET)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_MOBILE_MG42_SET)->defaultStartingClip,
-                  qfalse);
+              AddWeaponToPlayer(client, WP_MOBILE_MG42, GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_MOBILE_MG42_SET, GetAmmoTableData(WP_MOBILE_MG42_SET)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_MOBILE_MG42_SET)->defaultStartingClip, qfalse);
               break;
             case WP_MORTAR:
-              if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+              if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   !client->sess.timerunActive) {
-                AddWeaponToPlayer(
-                    client, WP_MORTAR,
-                    GetAmmoTableData(WP_MORTAR)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_MORTAR)->defaultStartingClip, qtrue);
-                AddWeaponToPlayer(
-                    client, WP_MORTAR_SET,
-                    GetAmmoTableData(WP_MORTAR_SET)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_MORTAR_SET)->defaultStartingClip,
-                    qfalse);
+                AddWeaponToPlayer(client, WP_MORTAR, GetAmmoTableData(WP_MORTAR)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_MORTAR)->defaultStartingClip, qtrue);
+                AddWeaponToPlayer(client, WP_MORTAR_SET, GetAmmoTableData(WP_MORTAR_SET)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_MORTAR_SET)->defaultStartingClip, qfalse);
               }
               break;
             case WP_KAR98:
-              AddWeaponToPlayer(client, WP_KAR98,
-                                GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
-                                GetAmmoTableData(WP_KAR98)->defaultStartingClip,
-                                qtrue);
+              AddWeaponToPlayer(client, WP_KAR98, GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_KAR98)->defaultStartingClip, qtrue);
               break;
             case WP_K43:
-              AddWeaponToPlayer(
-                  client, WP_K43, GetAmmoTableData(WP_K43)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_K43)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_K43_SCOPE,
-                  GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
+              AddWeaponToPlayer(client, WP_K43, GetAmmoTableData(WP_K43)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_K43)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_K43_SCOPE, GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
               break;
           }
         } else {
           switch (client->sess.playerWeapon) {
             default:
-              AddWeaponToPlayer(
-                  client, WP_THOMPSON,
-                  2 * (GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo),
-                  GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_THOMPSON, 2 * (GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo),
+                                GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
               break;
             case WP_PANZERFAUST:
-              if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+              if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   team_maxPanzers.integer && !client->sess.timerunActive) {
-                AddWeaponToPlayer(
-                    client, WP_PANZERFAUST,
-                    GetAmmoTableData(WP_PANZERFAUST)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_PANZERFAUST)->defaultStartingClip,
-                    qtrue);
+                AddWeaponToPlayer(client, WP_PANZERFAUST, GetAmmoTableData(WP_PANZERFAUST)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_PANZERFAUST)->defaultStartingClip, qtrue);
               }
               break;
             case WP_FLAMETHROWER:
               if (!client->sess.timerunActive) {
-                AddWeaponToPlayer(
-                    client, WP_FLAMETHROWER,
-                    GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingClip,
-                    qtrue);
+                AddWeaponToPlayer(client, WP_FLAMETHROWER, GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_FLAMETHROWER)->defaultStartingClip, qtrue);
               }
               break;
             case WP_MOBILE_MG42:
-              AddWeaponToPlayer(
-                  client, WP_MOBILE_MG42,
-                  GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_MOBILE_MG42_SET,
-                  GetAmmoTableData(WP_MOBILE_MG42_SET)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_MOBILE_MG42_SET)->defaultStartingClip,
-                  qfalse);
+              AddWeaponToPlayer(client, WP_MOBILE_MG42, GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_MOBILE_MG42)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_MOBILE_MG42_SET, GetAmmoTableData(WP_MOBILE_MG42_SET)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_MOBILE_MG42_SET)->defaultStartingClip, qfalse);
               break;
             case WP_MORTAR:
-              if (game.worldspawn->noExplosives ==
-                      ETJump::Worldspawn::NoExplosives::OFF &&
+              if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF &&
                   !client->sess.timerunActive) {
-                AddWeaponToPlayer(
-                    client, WP_MORTAR,
-                    GetAmmoTableData(WP_MORTAR)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_MORTAR)->defaultStartingClip, qtrue);
-                AddWeaponToPlayer(
-                    client, WP_MORTAR_SET,
-                    GetAmmoTableData(WP_MORTAR_SET)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_MORTAR_SET)->defaultStartingClip,
-                    qfalse);
+                AddWeaponToPlayer(client, WP_MORTAR, GetAmmoTableData(WP_MORTAR)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_MORTAR)->defaultStartingClip, qtrue);
+                AddWeaponToPlayer(client, WP_MORTAR_SET, GetAmmoTableData(WP_MORTAR_SET)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_MORTAR_SET)->defaultStartingClip, qfalse);
               }
               break;
             case WP_CARBINE:
-              AddWeaponToPlayer(
-                  client, WP_CARBINE,
-                  GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_CARBINE, GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
               break;
             case WP_GARAND:
-              AddWeaponToPlayer(
-                  client, WP_GARAND,
-                  GetAmmoTableData(WP_GARAND)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_GARAND)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_GARAND_SCOPE,
-                  GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip,
-                  qfalse);
+              AddWeaponToPlayer(client, WP_GARAND, GetAmmoTableData(WP_GARAND)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_GARAND)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_GARAND_SCOPE, GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip, qfalse);
               break;
           }
         }
@@ -1257,55 +1113,38 @@ void SetWolfSpawnWeapons(gclient_t *client) {
           case WP_K43:
           case WP_GARAND:
             if (client->sess.sessionTeam == TEAM_AXIS) {
-              AddWeaponToPlayer(
-                  client, WP_K43, GetAmmoTableData(WP_K43)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_K43)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_K43_SCOPE,
-                  GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
+              AddWeaponToPlayer(client, WP_K43, GetAmmoTableData(WP_K43)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_K43)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_K43_SCOPE, GetAmmoTableData(WP_K43_SCOPE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_K43_SCOPE)->defaultStartingClip, qfalse);
               break;
             } else {
-              AddWeaponToPlayer(
-                  client, WP_GARAND,
-                  GetAmmoTableData(WP_GARAND)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_GARAND)->defaultStartingClip, qtrue);
-              AddWeaponToPlayer(
-                  client, WP_GARAND_SCOPE,
-                  GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip,
-                  qfalse);
+              AddWeaponToPlayer(client, WP_GARAND, GetAmmoTableData(WP_GARAND)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_GARAND)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_GARAND_SCOPE, GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_GARAND_SCOPE)->defaultStartingClip, qfalse);
               break;
             }
           case WP_KAR98:
           case WP_CARBINE:
             if (client->sess.sessionTeam == TEAM_AXIS) {
-              AddWeaponToPlayer(client, WP_KAR98,
-                                GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
-                                GetAmmoTableData(WP_KAR98)->defaultStartingClip,
-                                qtrue);
+              AddWeaponToPlayer(client, WP_KAR98, GetAmmoTableData(WP_KAR98)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_KAR98)->defaultStartingClip, qtrue);
               break;
             } else {
-              AddWeaponToPlayer(
-                  client, WP_CARBINE,
-                  GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
-                  GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
+              AddWeaponToPlayer(client, WP_CARBINE, GetAmmoTableData(WP_CARBINE)->defaultStartingAmmo,
+                                GetAmmoTableData(WP_CARBINE)->defaultStartingClip, qtrue);
               break;
             }
           case WP_FG42:
-            AddWeaponToPlayer(
-                client, WP_FG42, GetAmmoTableData(WP_FG42)->defaultStartingAmmo,
-                GetAmmoTableData(WP_FG42)->defaultStartingClip, qtrue);
-            AddWeaponToPlayer(
-                client, WP_FG42SCOPE,
-                GetAmmoTableData(WP_FG42SCOPE)->defaultStartingAmmo,
-                GetAmmoTableData(WP_FG42SCOPE)->defaultStartingClip, qfalse);
+            AddWeaponToPlayer(client, WP_FG42, GetAmmoTableData(WP_FG42)->defaultStartingAmmo,
+                              GetAmmoTableData(WP_FG42)->defaultStartingClip, qtrue);
+            AddWeaponToPlayer(client, WP_FG42SCOPE, GetAmmoTableData(WP_FG42SCOPE)->defaultStartingAmmo,
+                              GetAmmoTableData(WP_FG42SCOPE)->defaultStartingClip, qfalse);
             break;
           default:
-            AddWeaponToPlayer(
-                client, WP_STEN,
-                2 * (GetAmmoTableData(WP_STEN)->defaultStartingAmmo),
-                GetAmmoTableData(WP_STEN)->defaultStartingClip, qtrue);
+            AddWeaponToPlayer(client, WP_STEN, 2 * (GetAmmoTableData(WP_STEN)->defaultStartingAmmo),
+                              GetAmmoTableData(WP_STEN)->defaultStartingClip, qtrue);
             break;
         }
         // Smoke is useless.
@@ -1319,9 +1158,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         // charge placed - NOTE: maybe we want
         // to change this so the thing voids on
         // death
-        if (game.worldspawn->noExplosives ==
-                ETJump::Worldspawn::NoExplosives::OFF &&
-            !client->sess.timerunActive) {
+        if (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF && !client->sess.timerunActive) {
           if (G_FindSatchel(&g_entities[client->ps.clientNum])) {
             AddWeaponToPlayer(client, WP_SATCHEL, 0, 0,
                               qfalse); // Big
@@ -1356,73 +1193,47 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         case TEAM_AXIS:
           switch (pc) {
             case PC_SOLDIER:
-              if (client->sess.skill[SK_HEAVY_WEAPONS] >= 4 &&
-                  client->sess.playerWeapon2 == WP_MP40) {
-                AddWeaponToPlayer(
-                    client, WP_MP40,
-                    2 * (GetAmmoTableData(WP_MP40)->defaultStartingAmmo),
-                    GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
-              } else if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 &&
-                         client->sess.playerWeapon2 == WP_AKIMBO_LUGER) {
-                client->ps.ammoclip[BG_FindClipForWeapon(
-                    static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_LUGER)))] =
-                    GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip;
-                AddWeaponToPlayer(
-                    client, WP_AKIMBO_LUGER,
-                    GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip,
-                    qfalse);
+              if (client->sess.skill[SK_HEAVY_WEAPONS] >= 4 && client->sess.playerWeapon2 == WP_MP40) {
+                AddWeaponToPlayer(client, WP_MP40, 2 * (GetAmmoTableData(WP_MP40)->defaultStartingAmmo),
+                                  GetAmmoTableData(WP_MP40)->defaultStartingClip, qtrue);
+              } else if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 && client->sess.playerWeapon2 == WP_AKIMBO_LUGER) {
+                client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_LUGER)))] =
+                  GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip;
+                AddWeaponToPlayer(client, WP_AKIMBO_LUGER, GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip, qfalse);
               } else {
-                AddWeaponToPlayer(
-                    client, WP_LUGER,
-                    GetAmmoTableData(WP_LUGER)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_LUGER)->defaultStartingClip, qfalse);
+                AddWeaponToPlayer(client, WP_LUGER, GetAmmoTableData(WP_LUGER)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_LUGER)->defaultStartingClip, qfalse);
               }
               break;
 
             case PC_COVERTOPS:
-              if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 &&
-                  (client->sess.playerWeapon2 == WP_AKIMBO_SILENCEDLUGER ||
-                   client->sess.playerWeapon2 == WP_AKIMBO_LUGER)) {
-                client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(
-                    BG_AkimboSidearm(WP_AKIMBO_SILENCEDLUGER)))] =
-                    GetAmmoTableData(WP_AKIMBO_SILENCEDLUGER)
-                        ->defaultStartingClip;
+              if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 && (client->sess.playerWeapon2 == WP_AKIMBO_SILENCEDLUGER ||
+                                                                client->sess.playerWeapon2 == WP_AKIMBO_LUGER)) {
+                client->ps
+                  .ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_SILENCEDLUGER)))] =
+                  GetAmmoTableData(WP_AKIMBO_SILENCEDLUGER)->defaultStartingClip;
                 AddWeaponToPlayer(client, WP_AKIMBO_SILENCEDLUGER,
-                                  GetAmmoTableData(WP_AKIMBO_SILENCEDLUGER)
-                                      ->defaultStartingAmmo,
-                                  GetAmmoTableData(WP_AKIMBO_SILENCEDLUGER)
-                                      ->defaultStartingClip,
-                                  qfalse);
+                                  GetAmmoTableData(WP_AKIMBO_SILENCEDLUGER)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_AKIMBO_SILENCEDLUGER)->defaultStartingClip, qfalse);
               } else {
-                AddWeaponToPlayer(
-                    client, WP_LUGER,
-                    GetAmmoTableData(WP_LUGER)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_LUGER)->defaultStartingClip, qfalse);
-                AddWeaponToPlayer(
-                    client, WP_SILENCER,
-                    GetAmmoTableData(WP_SILENCER)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_SILENCER)->defaultStartingClip, qfalse);
+                AddWeaponToPlayer(client, WP_LUGER, GetAmmoTableData(WP_LUGER)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_LUGER)->defaultStartingClip, qfalse);
+                AddWeaponToPlayer(client, WP_SILENCER, GetAmmoTableData(WP_SILENCER)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_SILENCER)->defaultStartingClip, qfalse);
                 client->pmext.silencedSideArm = 1;
               }
               break;
 
             default:
-              if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 &&
-                  client->sess.playerWeapon2 == WP_AKIMBO_LUGER) {
-                client->ps.ammoclip[BG_FindClipForWeapon(
-                    static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_LUGER)))] =
-                    GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip;
-                AddWeaponToPlayer(
-                    client, WP_AKIMBO_LUGER,
-                    GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip,
-                    qfalse);
+              if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 && client->sess.playerWeapon2 == WP_AKIMBO_LUGER) {
+                client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_LUGER)))] =
+                  GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip;
+                AddWeaponToPlayer(client, WP_AKIMBO_LUGER, GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_AKIMBO_LUGER)->defaultStartingClip, qfalse);
               } else {
-                AddWeaponToPlayer(
-                    client, WP_LUGER,
-                    GetAmmoTableData(WP_LUGER)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_LUGER)->defaultStartingClip, qfalse);
+                AddWeaponToPlayer(client, WP_LUGER, GetAmmoTableData(WP_LUGER)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_LUGER)->defaultStartingClip, qfalse);
               }
               break;
           }
@@ -1430,82 +1241,53 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         default:
           switch (pc) {
             case PC_SOLDIER:
-              if (client->sess.skill[SK_HEAVY_WEAPONS] >= 4 &&
-                  client->sess.playerWeapon2 == WP_THOMPSON) {
-                AddWeaponToPlayer(
-                    client, WP_THOMPSON,
-                    2 * (GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo),
-                    GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
-              } else if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 &&
-                         client->sess.playerWeapon2 == WP_AKIMBO_COLT) {
-                client->ps.ammoclip[BG_FindClipForWeapon(
-                    static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_COLT)))] =
-                    GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip;
-                AddWeaponToPlayer(
-                    client, WP_AKIMBO_COLT,
-                    GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip,
-                    qfalse);
+              if (client->sess.skill[SK_HEAVY_WEAPONS] >= 4 && client->sess.playerWeapon2 == WP_THOMPSON) {
+                AddWeaponToPlayer(client, WP_THOMPSON, 2 * (GetAmmoTableData(WP_THOMPSON)->defaultStartingAmmo),
+                                  GetAmmoTableData(WP_THOMPSON)->defaultStartingClip, qtrue);
+              } else if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 && client->sess.playerWeapon2 == WP_AKIMBO_COLT) {
+                client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_COLT)))] =
+                  GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip;
+                AddWeaponToPlayer(client, WP_AKIMBO_COLT, GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip, qfalse);
               } else {
-                AddWeaponToPlayer(
-                    client, WP_COLT,
-                    GetAmmoTableData(WP_COLT)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_COLT)->defaultStartingClip, qfalse);
+                AddWeaponToPlayer(client, WP_COLT, GetAmmoTableData(WP_COLT)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_COLT)->defaultStartingClip, qfalse);
               }
               break;
 
             case PC_COVERTOPS:
-              if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 &&
-                  (client->sess.playerWeapon2 == WP_AKIMBO_SILENCEDCOLT ||
-                   client->sess.playerWeapon2 == WP_AKIMBO_COLT)) {
-                client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(
-                    BG_AkimboSidearm(WP_AKIMBO_SILENCEDCOLT)))] =
-                    GetAmmoTableData(WP_AKIMBO_SILENCEDCOLT)
-                        ->defaultStartingClip;
+              if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 && (client->sess.playerWeapon2 == WP_AKIMBO_SILENCEDCOLT ||
+                                                                client->sess.playerWeapon2 == WP_AKIMBO_COLT)) {
+                client->ps
+                  .ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_SILENCEDCOLT)))] =
+                  GetAmmoTableData(WP_AKIMBO_SILENCEDCOLT)->defaultStartingClip;
                 AddWeaponToPlayer(client, WP_AKIMBO_SILENCEDCOLT,
-                                  GetAmmoTableData(WP_AKIMBO_SILENCEDCOLT)
-                                      ->defaultStartingAmmo,
-                                  GetAmmoTableData(WP_AKIMBO_SILENCEDCOLT)
-                                      ->defaultStartingClip,
-                                  qfalse);
+                                  GetAmmoTableData(WP_AKIMBO_SILENCEDCOLT)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_AKIMBO_SILENCEDCOLT)->defaultStartingClip, qfalse);
               } else {
-                AddWeaponToPlayer(
-                    client, WP_COLT,
-                    GetAmmoTableData(WP_COLT)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_COLT)->defaultStartingClip, qfalse);
-                AddWeaponToPlayer(
-                    client, WP_SILENCED_COLT,
-                    GetAmmoTableData(WP_SILENCED_COLT)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_SILENCED_COLT)->defaultStartingClip,
-                    qfalse);
+                AddWeaponToPlayer(client, WP_COLT, GetAmmoTableData(WP_COLT)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_COLT)->defaultStartingClip, qfalse);
+                AddWeaponToPlayer(client, WP_SILENCED_COLT, GetAmmoTableData(WP_SILENCED_COLT)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_SILENCED_COLT)->defaultStartingClip, qfalse);
                 client->pmext.silencedSideArm = 1;
               }
               break;
 
             default:
-              if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 &&
-                  client->sess.playerWeapon2 == WP_AKIMBO_COLT) {
-                client->ps.ammoclip[BG_FindClipForWeapon(
-                    static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_COLT)))] =
-                    GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip;
-                AddWeaponToPlayer(
-                    client, WP_AKIMBO_COLT,
-                    GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip,
-                    qfalse);
+              if (client->sess.skill[SK_LIGHT_WEAPONS] >= 0 && client->sess.playerWeapon2 == WP_AKIMBO_COLT) {
+                client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(BG_AkimboSidearm(WP_AKIMBO_COLT)))] =
+                  GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip;
+                AddWeaponToPlayer(client, WP_AKIMBO_COLT, GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_AKIMBO_COLT)->defaultStartingClip, qfalse);
               } else {
-                AddWeaponToPlayer(
-                    client, WP_COLT,
-                    GetAmmoTableData(WP_COLT)->defaultStartingAmmo,
-                    GetAmmoTableData(WP_COLT)->defaultStartingClip, qfalse);
+                AddWeaponToPlayer(client, WP_COLT, GetAmmoTableData(WP_COLT)->defaultStartingAmmo,
+                                  GetAmmoTableData(WP_COLT)->defaultStartingClip, qfalse);
               }
               break;
           }
       }
 
-      if (pc == PC_SOLDIER &&
-          (game.worldspawn->noExplosives ==
-           ETJump::Worldspawn::NoExplosives::OFF) &&
+      if (pc == PC_SOLDIER && (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF) &&
           !client->sess.timerunActive) {
         if (client->sess.sessionTeam == TEAM_AXIS) {
           AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 4, qfalse);
@@ -1513,9 +1295,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
           AddWeaponToPlayer(client, WP_GRENADE_PINEAPPLE, 0, 4, qfalse);
         }
       }
-      if (pc == PC_COVERTOPS &&
-          (game.worldspawn->noExplosives ==
-           ETJump::Worldspawn::NoExplosives::OFF) &&
+      if (pc == PC_COVERTOPS && (game.worldspawn->noExplosives == ETJump::Worldspawn::NoExplosivesOpts::OFF) &&
           !client->sess.timerunActive) {
         if (client->sess.sessionTeam == TEAM_AXIS) {
           AddWeaponToPlayer(client, WP_GRENADE_LAUNCHER, 0, 2, qfalse);
@@ -1524,8 +1304,7 @@ void SetWolfSpawnWeapons(gclient_t *client) {
         }
       }
 
-      if (!g_portalMode.integer && game.worldspawn->portalgunSpawn &&
-          !client->sess.timerunActive) {
+      if (!g_portalMode.integer && game.worldspawn->portalgunSpawn && !client->sess.timerunActive) {
         AddWeaponToPlayer(client, WP_PORTAL_GUN, 0, 1, qfalse);
       }
     } else {
@@ -1562,8 +1341,7 @@ int G_CountTeamMedics(team_t team, qboolean alivecheck) {
         continue;
       }
 
-      if (level.clients[j].ps.pm_type == PM_DEAD ||
-          level.clients[j].ps.pm_flags & PMF_LIMBO) {
+      if (level.clients[j].ps.pm_type == PM_DEAD || level.clients[j].ps.pm_flags & PMF_LIMBO) {
         continue;
       }
     }
@@ -1608,11 +1386,11 @@ static void ClientCleanName(const char *in, char *out, int outSize) {
   // save room for trailing null byte
   outSize--;
 
-  len = 0;
+  len          = 0;
   colorlessLen = 0;
-  p = out;
-  *p = 0;
-  spaces = 0;
+  p            = out;
+  *p           = 0;
+  spaces       = 0;
 
   while (1) {
     ch = *in++;
@@ -1706,22 +1484,18 @@ void G_NameChanged(gentity_t *ent) {
     return;
   }
 
-  if (level.time >
-      client->sess.lastNameChangeTime + (g_nameChangeInterval.integer) * 1000) {
+  if (level.time > client->sess.lastNameChangeTime + (g_nameChangeInterval.integer) * 1000) {
     client->sess.nameChangeCount = 0;
   }
 
   if (g_nameChangeLimit.integer - client->sess.nameChangeCount == 0) {
-    Printer::popup(
-        ent, va("^3WARNING: ^7You must wait at least %s before renaming.",
-                StringUtils::getSecondsString(g_nameChangeInterval.integer)
-                    .c_str()));
+    Printer::popup(ent, "^3WARNING: ^7You must wait at least %s before renaming.",
+                   StringUtils::getSecondsString(g_nameChangeInterval.integer));
   } else if (client->sess.nameChangeCount > g_nameChangeLimit.integer) {
     trap_DropClient(ClientNum(ent), "You were kicked for spamming rename.", 0);
   } else {
-    Printer::popup(
-        ent, va("^3WARNING: ^7You have %d name changes left",
-                (g_nameChangeLimit.integer - client->sess.nameChangeCount)));
+    Printer::popup(ent, "^3WARNING: ^7You have %d name changes left",
+                   (g_nameChangeLimit.integer - client->sess.nameChangeCount));
   }
 
   client->sess.nameChangeCount++;
@@ -1751,7 +1525,8 @@ const char *GetParsedIP(const char *ipadd) {
   if (strspn(ipadd, "0123456789.:") < strlen(ipadd)) {
     return NULL;
   }
-  sprintf(ipge, "%u.%u.%u.%u", b1, b2, b3, b4);
+
+  Com_sprintf(ipge, sizeof(ipge), "%u.%u.%u.%u", b1, b2, b3, b4);
   return ipge;
 }
 
@@ -1781,21 +1556,17 @@ bool UpdateClientConfigString(const gentity_t &gent) {
   // send over a subset of the userinfo keys so other clients can
   // print scoreboards, display models, and play custom sounds
   auto newcs =
-      va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%"
-         "i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%"
-         "i\\sl\\%"
-         "i\\tr\\%i\\vs\\%i\\i\\%i",
-         gent.client->pers.netname, gent.client->sess.sessionTeam,
-         gent.client->sess.playerType, gent.client->sess.rank, medalStr,
-         skillStr, gent.client->disguiseNetname, gent.client->disguiseRank,
-         gent.client->sess.playerWeapon, gent.client->sess.latchPlayerWeapon,
-         gent.client->sess.latchPlayerWeapon2, gent.client->sess.muted ? 1 : 0,
-         gent.client->pers.pmoveFixed ? 1 : 0, gent.client->pers.maxFPS,
-         gent.client->pers.cgaz > 0 ? gent.client->pers.cgaz : 0,
-         gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0,
-         gent.client->sess.specLocked ? 1 : 0,
-         gent.client->sess.timerunActive ? 1 : 0,
-         gent.client->pers.snaphud ? 1 : 0, gent.client->sess.inactive ? 1 : 0);
+    va("n\\%s\\t\\%i\\c\\%i\\r\\%i\\m\\%s\\s\\%s\\dn\\%s\\dr\\%i\\w\\%"
+       "i\\lw\\%i\\sw\\%i\\mu\\%i\\pm\\%i\\fps\\%i\\cgaz\\%i\\h\\%"
+       "i\\sl\\%"
+       "i\\tr\\%i\\vs\\%i\\i\\%i",
+       gent.client->pers.netname, gent.client->sess.sessionTeam, gent.client->sess.playerType, gent.client->sess.rank,
+       medalStr, skillStr, gent.client->disguiseNetname, gent.client->disguiseRank, gent.client->sess.playerWeapon,
+       gent.client->sess.latchPlayerWeapon, gent.client->sess.latchPlayerWeapon2, gent.client->sess.muted ? 1 : 0,
+       gent.client->pers.pmoveFixed ? 1 : 0, gent.client->pers.maxFPS,
+       gent.client->pers.cgaz > 0 ? gent.client->pers.cgaz : 0,
+       gent.client->pers.hideMe > 0 ? gent.client->pers.hideMe : 0, gent.client->sess.specLocked ? 1 : 0,
+       gent.client->sess.timerunActive ? 1 : 0, gent.client->pers.snaphud ? 1 : 0, gent.client->sess.inactive ? 1 : 0);
 
   trap_GetConfigstring(CS_PLAYERS + ClientNum(&gent), oldcs, sizeof(oldcs));
 
@@ -1828,7 +1599,7 @@ void ClientUserinfoChanged(int clientNum) {
   gclient_t *client;
   int i;
 
-  ent = g_entities + clientNum;
+  ent    = g_entities + clientNum;
   client = ent->client;
 
   client->ps.clientNum = clientNum;
@@ -1855,55 +1626,42 @@ void ClientUserinfoChanged(int clientNum) {
   // TODO: Check for hardware info spoofing
 
   s = Info_ValueForKey(userinfo, "cg_uinfo");
-  sscanf(s, "%u %u %u %u %f %i", &client->pers.clientFlags,
-         &client->pers.clientTimeNudge, &client->pers.clientMaxPackets,
-         &client->pers.maxFPS, &client->pers.noclipScale,
+  sscanf(s, "%u %u %u %i %f %i", &client->pers.clientFlags, &client->pers.clientTimeNudge,
+         &client->pers.clientMaxPackets, &client->pers.maxFPS, &client->pers.noclipScale,
          &client->pers.touchPickupWeapons);
 
-  client->pers.autoActivate = (client->pers.clientFlags & CGF_AUTOACTIVATE)
-                                  ? PICKUP_TOUCH
-                                  : PICKUP_ACTIVATE;
+  client->pers.autoActivate = (client->pers.clientFlags & CGF_AUTOACTIVATE) ? PICKUP_TOUCH : PICKUP_ACTIVATE;
 
   if (client->pers.clientFlags & CGF_AUTORELOAD) {
     client->pers.bAutoReloadAux = qtrue;
-    client->pmext.bAutoReload = qtrue;
+    client->pmext.bAutoReload   = qtrue;
   } else {
     client->pers.bAutoReloadAux = qfalse;
-    client->pmext.bAutoReload = qfalse;
+    client->pmext.bAutoReload   = qfalse;
   }
 
   if (client->pers.nofatigue && !(client->pers.clientFlags & CGF_NOFATIGUE)) {
     client->ps.powerups[PW_ADRENALINE] = 0;
   }
 
-  client->pers.nofatigue =
-      (client->pers.clientFlags & CGF_NOFATIGUE) != 0 ? qtrue : qfalse;
-  client->pers.pmoveFixed =
-      (client->pers.clientFlags & CGF_PMOVEFIXED) != 0 ? qtrue : qfalse;
-  client->pers.cgaz =
-      (client->pers.clientFlags & CGF_CGAZ) != 0 ? qtrue : qfalse;
-  client->pers.loadViewAngles =
-      (client->pers.clientFlags & CGF_LOADVIEWANGLES) != 0 ? qtrue : qfalse;
-  client->pers.hideMe =
-      (client->pers.clientFlags & CGF_HIDEME) != 0 ? qtrue : qfalse;
-  client->pers.enableTimeruns =
-      (client->pers.clientFlags & CGF_ENABLE_TIMERUNS) != 0 ? qtrue : qfalse;
-  client->pers.noActivateLean =
-      (client->pers.clientFlags & CGF_NOACTIVATELEAN) != 0 ? qtrue : qfalse;
-  client->pers.autoLoad =
-      (client->pers.clientFlags & CGF_AUTO_LOAD) != 0 ? qtrue : qfalse;
-  client->pers.quickFollow =
-      (client->pers.clientFlags & CGF_QUICK_FOLLOW) != 0 ? qtrue : qfalse;
-  client->pers.snaphud = (client->pers.clientFlags & CGF_SNAPHUD) != 0;
-  client->pers.noPanzerAutoswitch =
-      (client->pers.clientFlags & CGF_NOPANZERSWITCH) != 0;
+  client->pers.nofatigue          = (client->pers.clientFlags & CGF_NOFATIGUE) != 0 ? qtrue : qfalse;
+  client->pers.pmoveFixed         = (client->pers.clientFlags & CGF_PMOVEFIXED) != 0 ? qtrue : qfalse;
+  client->pers.cgaz               = (client->pers.clientFlags & CGF_CGAZ) != 0 ? qtrue : qfalse;
+  client->pers.loadViewAngles     = (client->pers.clientFlags & CGF_LOADVIEWANGLES) != 0 ? qtrue : qfalse;
+  client->pers.hideMe             = (client->pers.clientFlags & CGF_HIDEME) != 0 ? qtrue : qfalse;
+  client->pers.enableTimeruns     = (client->pers.clientFlags & CGF_ENABLE_TIMERUNS) != 0 ? qtrue : qfalse;
+  client->pers.noActivateLean     = (client->pers.clientFlags & CGF_NOACTIVATELEAN) != 0 ? qtrue : qfalse;
+  client->pers.autoLoad           = (client->pers.clientFlags & CGF_AUTO_LOAD) != 0 ? qtrue : qfalse;
+  client->pers.quickFollow        = (client->pers.clientFlags & CGF_QUICK_FOLLOW) != 0 ? qtrue : qfalse;
+  client->pers.snaphud            = (client->pers.clientFlags & CGF_SNAPHUD) != 0;
+  client->pers.noPanzerAutoswitch = (client->pers.clientFlags & CGF_NOPANZERSWITCH) != 0;
 
   if (client->pers.clientFlags & CGF_AUTOSPRINT) {
     client->pers.autoSprintAux = true;
-    client->pmext.autoSprint = true;
+    client->pmext.autoSprint   = true;
   } else {
     client->pers.autoSprintAux = false;
-    client->pmext.autoSprint = false;
+    client->pmext.autoSprint   = false;
   }
 
   // set name
@@ -1914,15 +1672,13 @@ void ClientUserinfoChanged(int clientNum) {
 
   if (client->pers.connected == CON_CONNECTED) {
     if (strcmp(oldname, client->pers.netname) != 0) {
-
 #ifdef NEW_AUTH
       game.sessionV2->storeNewName(ent);
 #else
       ClientNameChanged(ent);
 #endif
 
-      Printer::consoleAll(StringUtils::format("%s ^7renamed to %s\n", oldname,
-                                              client->pers.netname));
+      Printer::consoleAll("%s ^7renamed to %s\n", oldname, client->pers.netname);
 
       G_NameChanged(ent);
     }
@@ -1940,8 +1696,7 @@ void ClientUserinfoChanged(int clientNum) {
 
   if (!client->pers.pmoveFixed) {
     if (!client->sess.runSpawnflags ||
-        client->sess.runSpawnflags &
-            static_cast<int>(ETJump::TimerunSpawnflags::ResetNoPmove)) {
+        client->sess.runSpawnflags & static_cast<int>(ETJump::TimerunSpawnflags::ResetNoPmove)) {
       InterruptRun(ent);
     }
   }
@@ -2019,14 +1774,13 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
 
     trap_GetUserinfo(clientNum2, userinfo2, sizeof(userinfo2));
 
-    value = Info_ValueForKey(userinfo2, "ip");
+    value                = Info_ValueForKey(userinfo2, "ip");
     const char *parsedIP = GetParsedIP(value);
 
     if (!parsedIP) {
       G_LogPrintf("Possible DoS attack by client %i - malformed userinfo read "
                   "for client %i: %s\n",
-                  clientNum, clientNum2,
-                  userinfo2[0] != '\0' ? userinfo2 : "empty userinfo!");
+                  clientNum, clientNum2, userinfo2[0] != '\0' ? userinfo2 : "empty userinfo!");
       continue;
     }
 
@@ -2037,12 +1791,9 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   }
 
   if (g_maxConnsPerIP.integer > 0 && connPerIP > g_maxConnsPerIP.integer) {
-    G_LogPrintf(
-        "Possible DoS attack. Rejecting client from %s "
-        "(%s already)\n",
-        ip,
-        StringUtils::getPluralizedString(g_maxConnsPerIP.integer, "connection")
-            .c_str());
+    G_LogPrintf("Possible DoS attack. Rejecting client from %s "
+                "(%s already)\n",
+                ip, StringUtils::getPluralizedString(g_maxConnsPerIP.integer, "connection").c_str());
     return "Too many connections from your ip.";
   }
 
@@ -2051,14 +1802,11 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   // we don't check password for bots and local client
   // NOTE: local client <-> "ip" "localhost"
   //   this means this client is not running in our current process
-  if (!isBot && !(ent->r.svFlags & SVF_BOT) &&
-      (strcmp(Info_ValueForKey(userinfo, "ip"), "localhost") != 0)) {
+  if (!isBot && !(ent->r.svFlags & SVF_BOT) && (strcmp(Info_ValueForKey(userinfo, "ip"), "localhost") != 0)) {
     // check for a password
     value = Info_ValueForKey(userinfo, "password");
-    if (g_password.string[0] && Q_stricmp(g_password.string, "none") &&
-        strcmp(g_password.string, value) != 0) {
-      if (!sv_privatepassword.string[0] ||
-          strcmp(sv_privatepassword.string, value)) {
+    if (g_password.string[0] && Q_stricmp(g_password.string, "none") && strcmp(g_password.string, value) != 0) {
+      if (!sv_privatepassword.string[0] || strcmp(sv_privatepassword.string, value)) {
         return "Invalid password";
       }
     }
@@ -2078,34 +1826,33 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
 
   // they can connect
   ent->client = level.clients + clientNum;
-  client = ent->client;
+  client      = ent->client;
 
   memset(client, 0, sizeof(*client));
 
-  client->pers.connected = CON_CONNECTING;
+  client->pers.connected   = CON_CONNECTING;
   client->pers.connectTime = level.time; // DHM - Nerve
 
   if (firstTime) {
-    client->pers.initialSpawn = qtrue; // DHM - Nerve
-    client->sess.gotoAllowed = qtrue;
-    client->sess.saveAllowed = qtrue;
-    client->last8BallTime = 0;
-    client->lastVoteTime = 0;
-    client->cheatDetected = qfalse;
-    client->sess.motdPrinted = qfalse;
-    client->sess.timerunActive = qfalse;
-    client->sess.inactive = false;
+    client->pers.initialSpawn     = qtrue; // DHM - Nerve
+    client->sess.gotoAllowed      = qtrue;
+    client->sess.saveAllowed      = qtrue;
+    client->last8BallTime         = 0;
+    client->lastVoteTime          = 0;
+    client->cheatDetected         = qfalse;
+    client->sess.motdPrinted      = qfalse;
+    client->sess.timerunActive    = qfalse;
+    client->sess.inactive         = false;
     client->sess.clientLastActive = level.time;
   } else {
     client->sess.gotoAllowed = qtrue; // Feen: TEMP FIX! - Also added these two
                                       // here as well.
-    client->sess.saveAllowed =
-        qtrue; //		They are not being red in
-               // G_ReadSessionData, so
-               // they 		default to qfalse/NULL. Feen:
-               // TODO - Make sure sess vars are in InfoString
-               // and read
-               //             properly in G_ReadSessionData()
+    client->sess.saveAllowed = qtrue; //		They are not being red in
+                                      // G_ReadSessionData, so
+                                      // they 		default to qfalse/NULL. Feen:
+                                      // TODO - Make sure sess vars are in InfoString
+                                      // and read
+                                      //             properly in G_ReadSessionData()
   }
 
   ent->client->sess.receivedTimerunStates = qfalse;
@@ -2113,7 +1860,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   // read or initialize the session data
   if (firstTime) {
     G_InitSessionData(client, userinfo);
-    client->pers.enterTime = level.time;
+    client->pers.enterTime            = level.time;
     client->ps.persistant[PERS_SCORE] = 0;
   } else {
     G_ReadSessionData(client);
@@ -2123,8 +1870,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
 
   if (firstTime) {
     // force into spectator
-    client->sess.sessionTeam = TEAM_SPECTATOR;
-    client->sess.spectatorState = SPECTATOR_FREE;
+    client->sess.sessionTeam     = TEAM_SPECTATOR;
+    client->sess.spectatorState  = SPECTATOR_FREE;
     client->sess.spectatorClient = 0;
 
     // unlink the entity - just in case they were already
@@ -2141,18 +1888,17 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   // don't do the "xxx connected" messages if they were
   // carried over from previous level
   if (firstTime) {
-    trap_SendServerCommand(-1, va("cpm \"%s" S_COLOR_WHITE " connected\n\"",
-                                  client->pers.netname));
+    trap_SendServerCommand(-1, va("cpm \"%s" S_COLOR_WHITE " connected\n\"", client->pers.netname));
   }
 
-  client->sess.noGoto = qtrue;
-  client->sess.noCall = qtrue;
+  client->sess.noGoto          = qtrue;
+  client->sess.noCall          = qtrue;
   client->sess.nameChangeCount = 0;
   // Zero: target_set_ident id.
-  client->sess.clientMapProgression = 0;
-  ent->client->sess.muted = qfalse;
+  client->sess.clientMapProgression   = 0;
+  ent->client->sess.muted             = qfalse;
   ent->client->pers.race.isRouteMaker = qfalse;
-  client->sess.saveLimit = game.worldspawn->limitedSaves;
+  client->sess.saveLimit              = game.worldspawn->limitedSaves;
 
   // count current clients and rank for scoreboard
   CalculateRanks();
@@ -2193,11 +1939,11 @@ void ClientBegin(int clientNum) {
   }
 
   G_InitGentity(ent);
-  ent->touch = 0;
-  ent->pain = 0;
+  ent->touch  = 0;
+  ent->pain   = 0;
   ent->client = client;
 
-  client->pers.connected = CON_CONNECTED;
+  client->pers.connected       = CON_CONNECTED;
   client->pers.teamState.state = TEAM_BEGIN;
 
   // save eflags around this, because changing teams will
@@ -2208,9 +1954,9 @@ void ClientBegin(int clientNum) {
   // DHM - Nerve :: Also save PERS_SPAWN_COUNT, so that CG_Respawn
   // happens
   spawn_count = client->ps.persistant[PERS_SPAWN_COUNT];
-  flags = client->ps.eFlags;
+  flags       = client->ps.eFlags;
   memset(&client->ps, 0, sizeof(client->ps));
-  client->ps.eFlags = flags;
+  client->ps.eFlags                       = flags;
   client->ps.persistant[PERS_SPAWN_COUNT] = spawn_count;
 
   // locate ent at a spawn point
@@ -2218,24 +1964,21 @@ void ClientBegin(int clientNum) {
 
   // DHM - Nerve :: Start players in limbo mode if they change teams
   // during the match
-  if (client->sess.sessionTeam != TEAM_SPECTATOR &&
-      (level.time - level.startTime > FRAMETIME * GAME_INIT_FRAMES)) {
-    ent->health = 0;
+  if (client->sess.sessionTeam != TEAM_SPECTATOR && (level.time - level.startTime > FRAMETIME * GAME_INIT_FRAMES)) {
+    ent->health     = 0;
     ent->r.contents = CONTENTS_CORPSE;
 
-    client->ps.pm_type = PM_DEAD;
+    client->ps.pm_type            = PM_DEAD;
     client->ps.stats[STAT_HEALTH] = 0;
 
     limbo(ent, qfalse);
   }
 
   if (client->sess.sessionTeam != TEAM_SPECTATOR) {
-    Printer::consoleAll(
-        StringUtils::format("%s ^7entered the game\n", client->pers.netname));
+    Printer::consoleAll(StringUtils::format("%s ^7entered the game\n", client->pers.netname));
   }
 
-  client->pers.nofatigue =
-      (client->pers.clientFlags & CGF_NOFATIGUE) != 0 ? qtrue : qfalse;
+  client->pers.nofatigue = (client->pers.clientFlags & CGF_NOFATIGUE) != 0 ? qtrue : qfalse;
 
   G_LogPrintf("ClientBegin: %i\n", clientNum);
 
@@ -2255,9 +1998,9 @@ void ClientBegin(int clientNum) {
   }
 
   for (i = 0; i < ETJump::MAX_TOKENS_PER_DIFFICULTY; ++i) {
-    ent->client->pers.collectedEasyTokens[i] = false;
+    ent->client->pers.collectedEasyTokens[i]   = false;
     ent->client->pers.collectedMediumTokens[i] = false;
-    ent->client->pers.collectedHardTokens[i] = false;
+    ent->client->pers.collectedHardTokens[i]   = false;
   }
 
   ent->client->pers.tokenCollectionStartTime = level.time;
@@ -2272,19 +2015,17 @@ void ClientBegin(int clientNum) {
   // clear out last jump speed
   client->ps.persistant[PERS_JUMP_SPEED] = 0;
 
-  if (!Q_stricmp(level.rawmapname, "solstice") ||
-      !Q_stricmp(level.rawmapname, "stonehalls2")) {
+  if (!Q_stricmp(level.rawmapname, "solstice") || !Q_stricmp(level.rawmapname, "stonehalls2")) {
     client->pers.jumpDelayBug = true;
   }
 }
 
-gentity_t *SelectSpawnPointFromList(const char *list, vec3_t spawn_origin,
-                                    vec3_t spawn_angles) {
+gentity_t *SelectSpawnPointFromList(const char *list, vec3_t spawn_origin, vec3_t spawn_angles) {
   const char *pStr, *token;
-  gentity_t *spawnPoint = nullptr;
+  gentity_t *spawnPoint                              = nullptr;
   static constexpr int MAX_SPAWNPOINTFROMLIST_POINTS = 16;
-  int valid[MAX_SPAWNPOINTFROMLIST_POINTS] = {};
-  int numValid = 0;
+  int valid[MAX_SPAWNPOINTFROMLIST_POINTS]           = {};
+  int numValid                                       = 0;
 
   pStr = list;
   while ((token = COM_Parse(&pStr)) != nullptr && token[0]) {
@@ -2346,14 +2087,14 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   int savedPing;
   int savedTeam;
   int savedSlotNumber;
-  index = ent - g_entities;
+  index  = ent - g_entities;
   client = ent->client;
 
   G_UpdateSpawnCounts();
 
-  client->pers.lastSpawnTime = level.time;
+  client->pers.lastSpawnTime            = level.time;
   client->pers.lastBattleSenseBonusTime = level.timeCurrent;
-  client->pers.lastHQMineReportTime = level.timeCurrent;
+  client->pers.lastHQMineReportTime     = level.timeCurrent;
 
   // find a spawn point
   // do it before setting health back up, so farthest
@@ -2369,8 +2110,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     // the bad thing!) if( client->sess.sessionTeam ==
     // TEAM_SPECTATOR || client->sess.sessionTeam == TEAM_FREE )
     // {
-    if (client->sess.sessionTeam != TEAM_AXIS &&
-        client->sess.sessionTeam != TEAM_ALLIES) {
+    if (client->sess.sessionTeam != TEAM_AXIS && client->sess.sessionTeam != TEAM_ALLIES) {
       spawnPoint = SelectSpectatorSpawnPoint(spawn_origin, spawn_angles);
     } else {
       // RF, if we have requested a specific spawn
@@ -2396,8 +2136,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
       } else if (client->sess.autoSpawnObjectiveIndex > 0) {
         spawnObjective = client->sess.autoSpawnObjectiveIndex;
       }
-      spawnPoint = SelectCTFSpawnPoint(client->sess.sessionTeam, spawn_origin,
-                                       spawn_angles, spawnObjective);
+      spawnPoint = SelectCTFSpawnPoint(client->sess.sessionTeam, spawn_origin, spawn_angles, spawnObjective);
       //			}
     }
   }
@@ -2405,14 +2144,14 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   client->pers.teamState.state = TEAM_ACTIVE;
 
   // toggle the teleport bit so the client knows to not lerp
-  flags = ent->client->ps.eFlags & EF_TELEPORT_BIT;
+  flags  = ent->client->ps.eFlags & EF_TELEPORT_BIT;
   flags ^= EF_TELEPORT_BIT;
   flags |= (client->ps.eFlags & EF_VOTED);
   // clear everything but the persistant data
 
   ent->s.eFlags &= ~EF_MOUNTEDTANK;
 
-  saved = client->pers;
+  saved     = client->pers;
   savedSess = client->sess;
   savedPing = client->ps.ping;
   savedTeam = client->ps.teamNum;
@@ -2434,9 +2173,9 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     client->maxlivescalced = set;
   }
 
-  client->pers = saved;
-  client->sess = savedSess;
-  client->ps.ping = savedPing;
+  client->pers       = saved;
+  client->sess       = savedSess;
+  client->ps.ping    = savedPing;
   client->ps.teamNum = savedTeam;
   // START	xkan, 8/27/2002
   client->botSlotNumber = savedSlotNumber;
@@ -2453,38 +2192,38 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   if (revived) {
     client->ps.persistant[PERS_REVIVE_COUNT]++;
   }
-  client->ps.persistant[PERS_TEAM] = client->sess.sessionTeam;
+  client->ps.persistant[PERS_TEAM]        = client->sess.sessionTeam;
   client->ps.persistant[PERS_HWEAPON_USE] = 0;
 
   client->airOutTime = level.time + 12000;
 
   // clear entity values
   client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
-  client->ps.eFlags = flags;
+  client->ps.eFlags                 = flags;
   // MrE: use capsules for AI and player
   // client->ps.eFlags |= EF_CAPSULE;
 
   ent->s.groundEntityNum = ENTITYNUM_NONE;
-  ent->client = &level.clients[index];
-  ent->takedamage = qtrue;
-  ent->inuse = qtrue;
+  ent->client            = &level.clients[index];
+  ent->takedamage        = qtrue;
+  ent->inuse             = qtrue;
   if (ent->r.svFlags & SVF_BOT) {
     ent->classname = "bot";
   } else {
     ent->classname = "player";
   }
   ent->r.contents = CONTENTS_BODY;
-  ent->clipmask = MASK_PLAYERSOLID;
+  ent->clipmask   = MASK_PLAYERSOLID;
 
   // DHM - Nerve :: Init to -1 on first spawn;
   if (!revived) {
     ent->props_frame_state = -1;
   }
 
-  ent->die = player_die;
+  ent->die        = player_die;
   ent->waterlevel = 0;
-  ent->watertype = 0;
-  ent->flags = 0;
+  ent->watertype  = 0;
+  ent->flags      = 0;
 
   VectorCopy(playerMins, ent->r.mins);
   VectorCopy(playerMaxs, ent->r.maxs);
@@ -2494,19 +2233,18 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   VectorCopy(ent->r.maxs, client->ps.maxs);
 
   client->ps.crouchViewHeight = CROUCH_VIEWHEIGHT;
-  client->ps.standViewHeight = DEFAULT_VIEWHEIGHT;
-  client->ps.deadViewHeight = DEAD_VIEWHEIGHT;
+  client->ps.standViewHeight  = DEFAULT_VIEWHEIGHT;
+  client->ps.deadViewHeight   = DEAD_VIEWHEIGHT;
 
-  client->ps.crouchMaxZ = client->ps.maxs[2] - (client->ps.standViewHeight -
-                                                client->ps.crouchViewHeight);
+  client->ps.crouchMaxZ = client->ps.maxs[2] - (client->ps.standViewHeight - client->ps.crouchViewHeight);
 
-  client->ps.runSpeedScale = 0.8;
+  client->ps.runSpeedScale    = 0.8;
   client->ps.sprintSpeedScale = 1.1;
   client->ps.crouchSpeedScale = 0.25;
-  client->ps.weaponstate = WEAPON_READY;
+  client->ps.weaponstate      = WEAPON_READY;
 
   // Rafael
-  client->pmext.sprintTime = SPRINTTIME;
+  client->pmext.sprintTime   = SPRINTTIME;
   client->ps.sprintExertTime = 0;
 
   client->ps.friction = 1.0;
@@ -2540,25 +2278,21 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 
     client->sess.playerType = client->sess.latchPlayerType;
 
-    if (G_IsWeaponDisabled(
-            ent, static_cast<weapon_t>(client->sess.latchPlayerWeapon))) {
-      bg_playerclass_t *classInfo =
-          BG_PlayerClassForPlayerState(&ent->client->ps);
+    if (G_IsWeaponDisabled(ent, static_cast<weapon_t>(client->sess.latchPlayerWeapon))) {
+      bg_playerclass_t *classInfo    = BG_PlayerClassForPlayerState(&ent->client->ps);
       client->sess.latchPlayerWeapon = classInfo->classWeapons[0];
-      update = qtrue;
+      update                         = qtrue;
     }
 
     if (client->sess.playerWeapon != client->sess.latchPlayerWeapon) {
       client->sess.playerWeapon = client->sess.latchPlayerWeapon;
-      update = qtrue;
+      update                    = qtrue;
     }
 
-    if (G_IsWeaponDisabled(ent,
-                           static_cast<weapon_t>(client->sess.playerWeapon))) {
-      bg_playerclass_t *classInfo =
-          BG_PlayerClassForPlayerState(&ent->client->ps);
-      client->sess.playerWeapon = classInfo->classWeapons[0];
-      update = qtrue;
+    if (G_IsWeaponDisabled(ent, static_cast<weapon_t>(client->sess.playerWeapon))) {
+      bg_playerclass_t *classInfo = BG_PlayerClassForPlayerState(&ent->client->ps);
+      client->sess.playerWeapon   = classInfo->classWeapons[0];
+      update                      = qtrue;
     }
 
     client->sess.playerWeapon2 = client->sess.latchPlayerWeapon2;
@@ -2577,11 +2311,9 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   if (!revived) {
     // store weapon & ammo data on spawn so it can be restored
     // easily
-    memcpy(client->sess.weaponsOnSpawn, client->ps.weapons,
-           sizeof(client->ps.weapons));
+    memcpy(client->sess.weaponsOnSpawn, client->ps.weapons, sizeof(client->ps.weapons));
     memcpy(client->sess.ammoOnSpawn, client->ps.ammo, sizeof(client->ps.ammo));
-    memcpy(client->sess.ammoclipOnSpawn, client->ps.ammoclip,
-           sizeof(client->ps.ammoclip));
+    memcpy(client->sess.ammoclipOnSpawn, client->ps.ammoclip, sizeof(client->ps.ammoclip));
   }
 
   // START	Mad Doctor I changes, 8/17/2002
@@ -2604,11 +2336,9 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
   if (client->sess.skill[SK_BATTLE_SENSE] >= 3) {
     // We get some extra max health, but don't spawn with that
     // much
-    ent->health = client->ps.stats[STAT_HEALTH] =
-        client->ps.stats[STAT_MAX_HEALTH] - 15;
+    ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] - 15;
   } else {
-    ent->health = client->ps.stats[STAT_HEALTH] =
-        client->ps.stats[STAT_MAX_HEALTH];
+    ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH];
   }
 
   G_SetOrigin(ent, spawn_origin);
@@ -2625,10 +2355,9 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     // direction when revived
     vec3_t newangle;
 
-    newangle[YAW] = SHORT2ANGLE(ent->client->pers.cmd.angles[YAW] +
-                                ent->client->ps.delta_angles[YAW]);
+    newangle[YAW]   = SHORT2ANGLE(ent->client->pers.cmd.angles[YAW] + ent->client->ps.delta_angles[YAW]);
     newangle[PITCH] = 0;
-    newangle[ROLL] = 0;
+    newangle[ROLL]  = 0;
 
     SetClientViewAngle(ent, newangle);
   }
@@ -2638,9 +2367,9 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
     trap_LinkEntity(ent);
   }
 
-  client->respawnTime = level.timeCurrent;
-  client->inactivityTime = level.time + g_inactivity.integer * 1000;
-  client->latched_buttons = 0;
+  client->respawnTime      = level.timeCurrent;
+  client->inactivityTime   = level.time + g_inactivity.integer * 1000;
+  client->latched_buttons  = 0;
   client->latched_wbuttons = 0; //----(SA)	added
 
   // xkan, 1/13/2003 - reset death time
@@ -2668,7 +2397,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 
   // run a client frame to drop exactly to the floor,
   // initialize animations and other things
-  client->ps.commandTime = level.time - 100;
+  client->ps.commandTime           = level.time - 100;
   ent->client->pers.cmd.serverTime = level.time;
   ClientThink(ent - g_entities);
 
@@ -2684,8 +2413,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 
   // set idle animation on weapon
   ent->client->ps.weapAnim =
-      ((ent->client->ps.weapAnim & ANIM_TOGGLEBIT) ^ ANIM_TOGGLEBIT) |
-      PM_IdleAnimForWeapon(ent->client->ps.weapon);
+    ((ent->client->ps.weapAnim & ANIM_TOGGLEBIT) ^ ANIM_TOGGLEBIT) | PM_IdleAnimForWeapon(ent->client->ps.weapon);
 
   // clear entity state values
   BG_PlayerStateToEntityState(&client->ps, &ent->s, qtrue);
@@ -2701,8 +2429,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 
   // fire off spawn relay for spectators here
   // axis/allies are handled in 'respawn', see the comment above the function
-  if (!revived && client->sess.sessionTeam == TEAM_SPECTATOR &&
-      level.spawnRelayEntities.spectatorRelay) {
+  if (!revived && client->sess.sessionTeam == TEAM_SPECTATOR && level.spawnRelayEntities.spectatorRelay) {
     G_UseEntity(level.spawnRelayEntities.spectatorRelay, nullptr, ent);
   }
 
@@ -2724,7 +2451,7 @@ server system housekeeping.
 void ClientDisconnect(int clientNum) {
   gentity_t *ent;
   gentity_t *flag = NULL;
-  gitem_t *item = NULL;
+  gitem_t *item   = NULL;
   vec3_t launchvel;
   int i;
 
@@ -2741,13 +2468,11 @@ void ClientDisconnect(int clientNum) {
   // stop any following clients
   for (i = 0; i < level.numConnectedClients; i++) {
     flag = g_entities + level.sortedClients[i];
-    if (flag->client->sess.sessionTeam == TEAM_SPECTATOR &&
-        flag->client->sess.spectatorState == SPECTATOR_FOLLOW &&
+    if (flag->client->sess.sessionTeam == TEAM_SPECTATOR && flag->client->sess.spectatorState == SPECTATOR_FOLLOW &&
         flag->client->sess.spectatorClient == clientNum) {
       StopFollowing(flag);
     }
-    if (flag->client->ps.pm_flags & PMF_LIMBO &&
-        flag->client->sess.spectatorClient == clientNum) {
+    if (flag->client->ps.pm_flags & PMF_LIMBO && flag->client->sess.spectatorClient == clientNum) {
       Cmd_FollowCycle_f(flag, 1);
     }
     // invalidate our specinvites
@@ -2767,8 +2492,7 @@ void ClientDisconnect(int clientNum) {
     for (i = 0; i < 2; i++) {
       teamList = &mapEntityData[i];
 
-      if ((mEnt = G_FindMapEntityData(&mapEntityData[0], ent - g_entities)) !=
-          NULL) {
+      if ((mEnt = G_FindMapEntityData(&mapEntityData[0], ent - g_entities)) != NULL) {
         G_FreeMapEntityData(teamList, mEnt);
       }
 
@@ -2777,8 +2501,7 @@ void ClientDisconnect(int clientNum) {
       while (mEnt) {
         mapEntityData_t *mEntFree = mEnt;
 
-        mEnt =
-            G_FindMapEntityDataSingleClient(teamList, mEnt, ent->s.number, -1);
+        mEnt = G_FindMapEntityDataSingleClient(teamList, mEnt, ent->s.number, -1);
 
         G_FreeMapEntityData(teamList, mEntFree);
       }
@@ -2786,10 +2509,8 @@ void ClientDisconnect(int clientNum) {
   }
 
   // send effect if they were completely connected
-  if (ent->client->pers.connected == CON_CONNECTED &&
-      ent->client->sess.sessionTeam != TEAM_SPECTATOR &&
+  if (ent->client->pers.connected == CON_CONNECTED && ent->client->sess.sessionTeam != TEAM_SPECTATOR &&
       !(ent->client->ps.pm_flags & PMF_LIMBO)) {
-
     // They don't get to take powerups with them!
     // Especially important for stuff like CTF flags
     TossClientItems(ent);
@@ -2819,18 +2540,17 @@ void ClientDisconnect(int clientNum) {
       launchvel[1] = 0; // crandom()*20;
       launchvel[2] = 0; // 10+random()*10;
 
-      flag =
-          LaunchItem(item, ent->r.currentOrigin, launchvel, ent - g_entities);
+      flag                = LaunchItem(item, ent->r.currentOrigin, launchvel, ent - g_entities);
       flag->s.modelindex2 = ent->s.otherEntityNum2; // JPW NERVE FIXME set
                                                     // player->otherentitynum2
                                                     // with old modelindex2
                                                     // from flag and restore
                                                     // here
-      flag->message = ent->message; // DHM - Nerve :: also restore
-                                    // item name
+      flag->message       = ent->message;           // DHM - Nerve :: also restore
+                                                    // item name
       // Clear out player's temp copies
       ent->s.otherEntityNum2 = 0;
-      ent->message = NULL;
+      ent->message           = NULL;
     }
 
     // OSP - Log stats too
@@ -2840,15 +2560,15 @@ void ClientDisconnect(int clientNum) {
   G_LogPrintf("ClientDisconnect: %i\n", clientNum);
 
   trap_UnlinkEntity(ent);
-  ent->s.modelindex = 0;
-  ent->inuse = qfalse;
-  ent->classname = "disconnected";
-  ent->client->pers.connected = CON_DISCONNECTED;
+  ent->s.modelindex                     = 0;
+  ent->inuse                            = qfalse;
+  ent->classname                        = "disconnected";
+  ent->client->pers.connected           = CON_DISCONNECTED;
   ent->client->ps.persistant[PERS_TEAM] = TEAM_FREE;
-  i = ent->client->sess.sessionTeam;
-  ent->client->sess.sessionTeam = TEAM_FREE;
-  ent->active = qfalse;
-  ent->client->sess.muted = qfalse;
+  i                                     = ent->client->sess.sessionTeam;
+  ent->client->sess.sessionTeam         = TEAM_FREE;
+  ent->active                           = qfalse;
+  ent->client->sess.muted               = qfalse;
 
   trap_SetConfigstring(CS_PLAYERS + clientNum, "");
 
@@ -2859,13 +2579,12 @@ void ClientDisconnect(int clientNum) {
   if (level.voteInfo.voteTime) {
     if (level.voteInfo.voter_cn == clientNum) {
       Printer::popupAll("^7Vote canceled: caller disconnected.");
-      G_LogPrintf("Vote canceled: %s (caller %s disconnected)\n",
-                  level.voteInfo.voteString, ent->client->pers.netname);
+      G_LogPrintf("Vote canceled: %s (caller %s disconnected)\n", level.voteInfo.voteString, ent->client->pers.netname);
       resetVote();
-      level.voteInfo.voteYes = 0;
+      level.voteInfo.voteYes           = 0;
       level.voteInfo.voteYesSpectators = 0;
-      level.voteInfo.voteNo = level.numConnectedClients;
-      level.voteInfo.voteNoSpectators = 0;
+      level.voteInfo.voteNo            = level.numConnectedClients;
+      level.voteInfo.voteNoSpectators  = 0;
     } else if (ent->client->ps.eFlags & EF_VOTED) {
       if (ent->client->pers.votingInfo.isVotedYes) {
         level.voteInfo.voteYes--;
@@ -2878,18 +2597,15 @@ void ClientDisconnect(int clientNum) {
           auto *rtvMaps = game.rtv->getRtvMaps();
 
           if (ent->client->pers.votingInfo.lastTeamVotedOn == TEAM_SPECTATOR) {
-            (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
-                .voteCountInfo.spectatorCount--;
+            (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].voteCountInfo.spectatorCount--;
           } else {
-            (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted]
-                .voteCountInfo.playerCount--;
+            (*rtvMaps)[ent->client->pers.votingInfo.lastRtvMapVoted].voteCountInfo.playerCount--;
           }
 
           game.rtv->setRtvConfigstrings();
         } else {
           trap_SetConfigstring(CS_VOTE_YES,
-                               va("tot\\%i\\spe\\%i", level.voteInfo.voteYes,
-                                  level.voteInfo.voteYesSpectators));
+                               va("tot\\%i\\spe\\%i", level.voteInfo.voteYes, level.voteInfo.voteYesSpectators));
         }
       } else {
         level.voteInfo.voteNo--;
@@ -2899,8 +2615,7 @@ void ClientDisconnect(int clientNum) {
         }
 
         trap_SetConfigstring(CS_VOTE_NO,
-                             va("tot\\%i\\spe\\%i", level.voteInfo.voteNo,
-                                level.voteInfo.voteNoSpectators));
+                             va("tot\\%i\\spe\\%i", level.voteInfo.voteNo, level.voteInfo.voteNoSpectators));
       }
     }
   }

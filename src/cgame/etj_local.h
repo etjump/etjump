@@ -36,44 +36,44 @@ inline constexpr int MAX_BACKUP_STATES = CMD_BACKUP_EXT + 2;
 
 enum class FTMenuOptions {
   FT_DISBAND_PROPOSE = 0,
-  FT_CREATE_LEAVE = 1,
-  FT_INVITE = 2,
-  FT_KICK = 3,
-  FT_WARN = 4,
-  FT_RULES = 5,
-  FT_TJMODE = 6,
+  FT_CREATE_LEAVE    = 1,
+  FT_INVITE          = 2,
+  FT_KICK            = 3,
+  FT_WARN            = 4,
+  FT_RULES           = 5,
+  FT_TJMODE          = 6,
   FT_COUNTDOWN_START = 7,
-  FT_MAX_OPTIONS = 8,
+  FT_MAX_OPTIONS     = 8,
 };
 
 enum class FTMenuMode {
-  FT_VSAY = 0,
-  FT_MANAGE = 1, // create, leave, disband
-  FT_APPLY = 2,
+  FT_VSAY    = 0,
+  FT_MANAGE  = 1, // create, leave, disband
+  FT_APPLY   = 2,
   FT_PROPOSE = 3,
-  FT_ADMIN = 4
+  FT_ADMIN   = 4
 };
 
 // sub-pages of fireteam menus
 enum class FTMenuPos {
-  FT_MENUPOS_NONE = -1,
+  FT_MENUPOS_NONE   = -1,
   FT_MENUPOS_INVITE = 2,
-  FT_MENUPOS_KICK = 3,
-  FT_MENUPOS_WARN = 4,
-  FT_MENUPOS_RULES = 5,
+  FT_MENUPOS_KICK   = 3,
+  FT_MENUPOS_WARN   = 4,
+  FT_MENUPOS_RULES  = 5,
 };
 
 enum class FTMenuRulesPos {
-  FT_RULES_RESET = 0,
+  FT_RULES_RESET     = 0,
   FT_RULES_SAVELIMIT = 1,
-  FT_RULES_NOGHOST = 2
+  FT_RULES_NOGHOST   = 2
 };
 
 enum AutoSwitchFlags {
-  Disabled = 0 << 0,
-  Enabled = 1 << 0,
+  Disabled           = 0 << 0,
+  Enabled            = 1 << 0,
   IfReplacingPrimary = 1 << 1,
-  IgnorePortalGun = 1 << 2,
+  IgnorePortalGun    = 1 << 2,
 };
 
 enum extraTraceOptions {
@@ -89,29 +89,29 @@ enum extraTraceOptions {
 
 enum class ChatHighlightFlags {
   HIGHLIGHT_BEEPER = 1,
-  HIGHLIGHT_FLASH = 2,
+  HIGHLIGHT_FLASH  = 2,
 };
 
 enum class HUDLerpFlags {
-  DRAWSPEED2 = 1 << 0,
-  CGAZ = 1 << 1,
-  SNAPHUD = 1 << 2,
+  DRAWSPEED2     = 1 << 0,
+  CGAZ           = 1 << 1,
+  SNAPHUD        = 1 << 2,
   STRAFE_QUALITY = 1 << 3,
 };
 
 enum class ExecFileType {
-  NONE = 0,
-  MAP_AUTOEXEC = 1 << 0,
+  NONE          = 0,
+  MAP_AUTOEXEC  = 1 << 0,
   TEAM_AUTOEXEC = 1 << 1,
 };
 
 enum class HideFlamethrowerFlags {
-  HIDE_SELF = 1 << 0,
+  HIDE_SELF   = 1 << 0,
   HIDE_OTHERS = 1 << 1,
 };
 
 enum class ChatMessageType {
-  DEFAULT = 0,         // normal message from any team
+  DEFAULT    = 0,      // normal message from any team
   REPLAY_MSG = 1 << 0, // chat replay message
   SERVER_MSG = 1 << 1, // server console chat message
 };
@@ -124,6 +124,9 @@ void shutdown();
 // to work around issues that certain actions have when they are performed
 // on the same frame as the module is initialized
 void delayedInit();
+
+void parseWorldspawnKeys();
+void parseWorldspawnKeyOverrides();
 
 extern CGameContext cgame;
 } // namespace ETJump

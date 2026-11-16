@@ -30,9 +30,9 @@ namespace ETJump {
 class ColorPicker {
   enum ColorType {
     COLOR_UNKNOWN = 0,
-    COLOR_HSV = 1,
-    COLOR_RGB = 2,
-    COLOR_ALPHA = 3,
+    COLOR_HSV     = 1,
+    COLOR_RGB     = 2,
+    COLOR_ALPHA   = 3,
   };
 
   vec4_t pickerHSV{};
@@ -53,8 +53,7 @@ class ColorPicker {
 
   static inline void setHSV(vec4_t hsv, float h, float s, float v, float a);
   static inline void setRGB(vec4_t rgb, float r, float g, float b, float a);
-  static inline void setRGBNormalized(vec4_t rgb, float r, float g, float b,
-                                      float a);
+  static inline void setRGBNormalized(vec4_t rgb, float r, float g, float b, float a);
 
   void updateRGBSliderState(const vec4_t rgb) const;
   static void updateHSVSliderState(const vec4_t hsv);
@@ -86,8 +85,7 @@ public:
   static void setColorSliderValue(const std::string &colorVar, float value);
   void updateSliderState(const itemDef_t *item);
 
-  void colorPickerDragFunc(const itemDef_t *item, float cursorX, float cursorY,
-                           int key);
+  void colorPickerDragFunc(const itemDef_t *item, float cursorX, float cursorY, int key);
 
   // toggle RGB sliders between normalized and full RGB
   void toggleRGBSliderValues();

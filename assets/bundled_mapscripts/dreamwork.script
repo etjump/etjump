@@ -1,0 +1,151 @@
+// ETJump mapscript for dreamwork.bsp
+// Modifications:
+// - added 'target_delay' entity between 'target_spawn_relay' -> 'target_give'
+//   chain to delay automatic rifle pickup on spawn, to ensure autoswitch works reliably
+
+game_manager
+{
+    spawn
+    {
+			create
+			{
+				classname "target_delay"
+				origin "1472 3008 128"
+				wait "0.1"
+				spawnflags "1"
+				targetname "target_give1"
+				target "spawn_give"
+			}
+
+			wait 100
+
+			// edit the targetname for the 'target_give', which targets the rifle,
+			// so that it's targeted by the 'target_delay' we created earlier
+			editentity
+			{
+				match
+				{
+					origin "1472 2976 128"
+				}
+
+				set
+				{
+					targetname "spawn_give"
+				}
+			}
+
+		trigger secret_teleporter invisible_state
+        wait 50
+		trigger justice_for_all invisible_state
+		wait 50
+        alertentity rifle
+		wait 50
+		alertentity sten
+    }
+}
+
+rifle_pickup
+{
+    trigger respawn
+    {
+        wait 250
+        alertentity rifle
+    }
+}
+
+sten_pickup
+{
+    trigger respawn
+    {
+        wait 250
+        alertentity sten
+    }
+}
+
+secret_teleporter
+{
+
+	trigger invisible_state
+	{
+		wait 50
+		setstate secret_teleporter invisible
+	}
+
+	trigger default_state
+	{
+		wait 50
+		setstate secret_teleporter default
+	}
+}
+
+justice_for_all
+{
+
+	trigger invisible_state
+	{
+		wait 50
+		setstate justice_for_all invisible
+	}
+
+	trigger default_state
+	{
+		wait 50
+		setstate justice_for_all default
+	}
+}
+
+secret_button
+{
+	trigger invisible_state
+	{
+		wait 50
+		setstate secret_button invisible
+	}
+
+	trigger default_state
+	{
+		wait 50
+		setstate secret_button default
+	}
+}
+
+secret_button_trigger
+{
+	trigger justice
+	{
+		wait 50
+		trigger secret_teleporter default_state
+		wait 50
+		wm_announce "Jumpers, behold the end! This is your fate — earned, deserved, and inescapable!"
+		wait 50
+		trigger secret_button invisible_state
+		wait 1000
+        wm_announce "10"
+        wait 1000
+        wm_announce "9"
+        wait 1000
+        wm_announce "8"
+        wait 1000
+        wm_announce "7"
+        wait 1000
+        wm_announce "6"
+        wait 1000
+        wm_announce "5"
+        wait 1000
+        wm_announce "4"
+        wait 1000
+        wm_announce "3"
+        wait 1000
+        wm_announce "2"
+        wait 1000
+        wm_announce "1"
+        wait 1000
+        trigger secret_teleporter invisible_state
+        wait 50
+		trigger justice_for_all default_state
+		wait 50
+		trigger secret_button default_state
+		wait 50
+		trigger justice_for_all invisible_state
+	}
+}

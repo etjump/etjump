@@ -24,10 +24,11 @@
 
 #ifdef __APPLE__
 
-  #include "etj_operating_system.h"
-  #include "../game/etj_crypto.h"
-
   #include <IOKit/IOKitLib.h>
+
+  #include "etj_operating_system.h"
+
+  #include "../game/etj_crypto.h"
 
   #ifdef NEW_AUTH
     #include "../game/etj_shared.h"
@@ -42,10 +43,9 @@ void ETJump::OperatingSystem::minimize() {}
 // TODO: improve this? this is VERY basic
 std::vector<std::string> ETJump::OperatingSystem::getHwid() {
   char buf[512]{};
-  io_registry_entry_t ioRegistryRoot =
-      IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
-  auto uuidCf = (CFStringRef)IORegistryEntryCreateCFProperty(
-      ioRegistryRoot, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, 0);
+  io_registry_entry_t ioRegistryRoot = IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
+  auto uuidCf =
+    (CFStringRef)IORegistryEntryCreateCFProperty(ioRegistryRoot, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, 0);
   IOObjectRelease(ioRegistryRoot);
   CFStringGetCString(uuidCf, buf, sizeof(buf), kCFStringEncodingMacRoman);
   CFRelease(uuidCf);
@@ -79,10 +79,9 @@ int ETJump::OperatingSystem::getOS() {
 
 std::string ETJump::OperatingSystem::getHwid() {
   char buf[512];
-  io_registry_entry_t ioRegistryRoot =
-      IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
-  auto uuidCf = (CFStringRef)IORegistryEntryCreateCFProperty(
-      ioRegistryRoot, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, 0);
+  io_registry_entry_t ioRegistryRoot = IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
+  auto uuidCf =
+    (CFStringRef)IORegistryEntryCreateCFProperty(ioRegistryRoot, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, 0);
   IOObjectRelease(ioRegistryRoot);
   CFStringGetCString(uuidCf, buf, sizeof(buf), kCFStringEncodingMacRoman);
   CFRelease(uuidCf);

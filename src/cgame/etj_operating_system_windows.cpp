@@ -25,12 +25,13 @@
 #ifdef WIN32
 
   #include <windows.h>
-  #include <sddl.h>
-  #include "etj_operating_system.h"
-  #include "etj_client_authentication.h"
-  #include "../game/etj_crypto.h"
-
   #include <iostream>
+  #include <sddl.h>
+
+  #include "etj_client_authentication.h"
+  #include "etj_operating_system.h"
+
+  #include "../game/etj_crypto.h"
 
   #ifdef NEW_AUTH
     #include <array>
@@ -44,18 +45,16 @@
     #include "../game/etj_string_utilities.h"
   #endif
 
-void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer,
-                                    int bufsize);
+void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer, int bufsize);
 
 static void addMinimizeButton() {
   char buffer[64];
   auto *WindowClassName = "Enemy Territory";
   trap_Cvar_VariableStringBuffer("win_hinstance", buffer, sizeof buffer);
   const auto etHandle = reinterpret_cast<HINSTANCE>(atoll(buffer));
-  HWND wnd = nullptr;
+  HWND wnd            = nullptr;
   while ((wnd = FindWindowEx(nullptr, wnd, WindowClassName, WindowClassName))) {
-    const auto hInst =
-        reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWLP_HINSTANCE));
+    const auto hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWLP_HINSTANCE));
     if (etHandle == hInst) {
       const auto style = GetWindowLongPtr(wnd, GWL_STYLE);
       SetWindowLongPtr(wnd, GWL_STYLE, style | WS_MINIMIZEBOX);
@@ -64,7 +63,9 @@ static void addMinimizeButton() {
   }
 }
 
-ETJump::OperatingSystem::OperatingSystem() { addMinimizeButton(); }
+ETJump::OperatingSystem::OperatingSystem() {
+  addMinimizeButton();
+}
 
 void ETJump::OperatingSystem::minimize() {
   HWND wnd = GetForegroundWindow();
@@ -92,11 +93,10 @@ std::vector<std::string> ETJump::OperatingSystem::getHwid() {
 // https://learn.microsoft.com/en-us/windows/win32/api/iptypes/ns-iptypes-ip_adapter_info
 std::string ETJump::OperatingSystem::getMACAddress() {
   PIP_ADAPTER_INFO pAdapter = nullptr;
-  DWORD dwRetVal = 0;
-  ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
+  DWORD dwRetVal            = 0;
+  ULONG ulOutBufLen         = sizeof(IP_ADAPTER_INFO);
 
-  auto pAdapterInfo =
-      static_cast<IP_ADAPTER_INFO *>(malloc(sizeof(IP_ADAPTER_INFO)));
+  auto pAdapterInfo = static_cast<IP_ADAPTER_INFO *>(malloc(sizeof(IP_ADAPTER_INFO)));
 
   if (pAdapterInfo == nullptr) {
     return NOHWID_MAC_ADDR;
@@ -126,19 +126,16 @@ std::string ETJump::OperatingSystem::getMACAddress() {
   while (pAdapter) {
     // skip invalid adapters to try to ensure that this is the active adapter
     // TODO: this might filter out too aggressively?
-    if (pAdapter->Type == MIB_IF_TYPE_LOOPBACK ||
-        pAdapter->AddressLength == 0 || pAdapter->Address[0] == 0x00) {
+    if (pAdapter->Type == MIB_IF_TYPE_LOOPBACK || pAdapter->AddressLength == 0 || pAdapter->Address[0] == 0x00) {
       pAdapter = pAdapter->Next;
       continue;
     }
 
     for (UINT i = 0; i < pAdapter->AddressLength; i++) {
       if (i == pAdapter->AddressLength - 1) {
-        macAddress +=
-            StringUtils::format("%.2X", static_cast<int>(pAdapter->Address[i]));
+        macAddress += StringUtils::format("%.2X", static_cast<int>(pAdapter->Address[i]));
       } else {
-        macAddress += StringUtils::format(
-            "%.2X-", static_cast<int>(pAdapter->Address[i]));
+        macAddress += StringUtils::format("%.2X-", static_cast<int>(pAdapter->Address[i]));
       }
     }
 
@@ -162,10 +159,9 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
   __cpuid(cpuInfo.data(), 0x0);
 
   // note: vendor string register order is EBX -> EDX -> ECX
-  const std::string vendor =
-      std::string(reinterpret_cast<const char *>(&cpuInfo[EBX]), 4) +
-      std::string(reinterpret_cast<const char *>(&cpuInfo[EDX]), 4) +
-      std::string(reinterpret_cast<const char *>(&cpuInfo[ECX]), 4);
+  const std::string vendor = std::string(reinterpret_cast<const char *>(&cpuInfo[EBX]), 4) +
+                             std::string(reinterpret_cast<const char *>(&cpuInfo[EDX]), 4) +
+                             std::string(reinterpret_cast<const char *>(&cpuInfo[ECX]), 4);
 
   // get the CPU info and feature bits
   __cpuid(cpuInfo.data(), 0x1);
@@ -218,8 +214,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
     vendorExt.pop_back();
   }
 
-  const std::string cpuID = StringUtils::format(
-      "%s %u %u %s %u", vendor, cpuFamily, model, vendorExt, stepping);
+  const std::string cpuID = StringUtils::format("%s %u %u %s %u", vendor, cpuFamily, model, vendorExt, stepping);
   return Crypto::sha2(cpuID);
 }
 
@@ -236,13 +231,11 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   // figure out where Windows is installed
   std::array<char, MAX_PATH> windowsDir{};
   GetWindowsDirectory(windowsDir.data(), MAX_PATH);
-  const auto driveLetter =
-      std::wstring(windowsDir.begin(), windowsDir.end()).substr(0, 2);
+  const auto driveLetter = std::wstring(windowsDir.begin(), windowsDir.end()).substr(0, 2);
 
   IEnumWbemClassObject *pEnum = nullptr;
-  hr = pServices->ExecQuery(
-      _bstr_t(L"WQL"), _bstr_t(L"SELECT * FROM Win32_LogicalDiskToPartition"),
-      WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum);
+  hr = pServices->ExecQuery(_bstr_t(L"WQL"), _bstr_t(L"SELECT * FROM Win32_LogicalDiskToPartition"),
+                            WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum);
 
   if (FAILED(hr)) {
     pServices->Release();
@@ -251,7 +244,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
 
   // find matching partition for the drive letter
   IWbemClassObject *pClsObj = nullptr;
-  ULONG ret = 0;
+  ULONG ret                 = 0;
   std::wstring partitionDeviceID;
 
   while (pEnum->Next(WBEM_INFINITE, 1, &pClsObj, &ret) == S_OK) {
@@ -263,11 +256,11 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
 
     if (dependent.find(driveLetter) != std::wstring::npos) {
       std::wstring antecedent = vtAntecedent.bstrVal;
-      size_t start = antecedent.find(L"DeviceID=\"");
+      size_t start            = antecedent.find(L"DeviceID=\"");
 
       if (start != std::wstring::npos) {
-        start += wcslen(L"DeviceID=\"");
-        const size_t end = antecedent.find(L"\"", start);
+        start            += wcslen(L"DeviceID=\"");
+        const size_t end  = antecedent.find(L"\"", start);
 
         if (end != std::wstring::npos) {
           partitionDeviceID = antecedent.substr(start, end - start);
@@ -293,9 +286,8 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   }
 
   // find the physical device which has our partition
-  hr = pServices->ExecQuery(
-      _bstr_t(L"WQL"), _bstr_t(L"SELECT * FROM Win32_DiskDriveToDiskPartition"),
-      WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum);
+  hr = pServices->ExecQuery(_bstr_t(L"WQL"), _bstr_t(L"SELECT * FROM Win32_DiskDriveToDiskPartition"),
+                            WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum);
 
   if (FAILED(hr)) {
     pServices->Release();
@@ -313,11 +305,11 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
 
     if (dependent.find(partitionDeviceID) != std::wstring::npos) {
       std::wstring antecedent = vtAntecedent.bstrVal;
-      size_t start = antecedent.find(LR"(DeviceID=")");
+      size_t start            = antecedent.find(LR"(DeviceID=")");
 
       if (start != std::wstring::npos) {
-        start += wcslen(LR"(DeviceID=")");
-        const size_t end = antecedent.find(L'\"', start);
+        start            += wcslen(LR"(DeviceID=")");
+        const size_t end  = antecedent.find(L'\"', start);
 
         if (end != std::wstring::npos) {
           diskDeviceID = antecedent.substr(start, end - start);
@@ -347,9 +339,8 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   }
 
   // get the physical disk devices
-  hr = pServices->ExecQuery(
-      _bstr_t(L"WQL"), _bstr_t(L"SELECT * FROM Win32_PhysicalMedia"),
-      WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum);
+  hr = pServices->ExecQuery(_bstr_t(L"WQL"), _bstr_t(L"SELECT * FROM Win32_PhysicalMedia"),
+                            WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum);
 
   if (FAILED(hr)) {
     pServices->Release();
@@ -368,9 +359,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
     if (tag == diskDeviceID) {
       VARIANT vtSerial;
 
-      if (SUCCEEDED(
-              pClsObj->Get(L"SerialNumber", 0, &vtSerial, nullptr, nullptr)) &&
-          vtSerial.vt == VT_BSTR) {
+      if (SUCCEEDED(pClsObj->Get(L"SerialNumber", 0, &vtSerial, nullptr, nullptr)) && vtSerial.vt == VT_BSTR) {
         serial = vtSerial.bstrVal;
         VariantClear(&vtSerial);
       }
@@ -386,22 +375,20 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   pServices->Release();
 
   // convert from wide string for hashing
-  const int size = WideCharToMultiByte(CP_UTF8, 0, serial.c_str(), -1, nullptr,
-                                       0, nullptr, nullptr);
+  const int size = WideCharToMultiByte(CP_UTF8, 0, serial.c_str(), -1, nullptr, 0, nullptr, nullptr);
   std::string result(size - 1, 0); // -1 to discard null terminator
-  WideCharToMultiByte(CP_UTF8, 0, serial.c_str(), -1, &result[0], size, nullptr,
-                      nullptr);
+  WideCharToMultiByte(CP_UTF8, 0, serial.c_str(), -1, &result[0], size, nullptr, nullptr);
 
   return Crypto::sha2(result);
 }
 
-    #define CLOSEHANDLE(x)                                                     \
-      if (x) {                                                                 \
-        CloseHandle(x);                                                        \
+    #define CLOSEHANDLE(x) \
+      if (x) {             \
+        CloseHandle(x);    \
       }
-    #define LOCALFREE(x)                                                       \
-      if (x) {                                                                 \
-        LocalFree(x);                                                          \
+    #define LOCALFREE(x) \
+      if (x) {           \
+        LocalFree(x);    \
       }
 
 std::string ETJump::OperatingSystem::getCurrentUserSID() {
@@ -419,16 +406,14 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
     return NOHWID_SID;
   }
 
-  const auto pTokenUser =
-      static_cast<PTOKEN_USER>(LocalAlloc(LPTR, dwBufferSize));
+  const auto pTokenUser = static_cast<PTOKEN_USER>(LocalAlloc(LPTR, dwBufferSize));
 
   if (!pTokenUser) {
     CLOSEHANDLE(hToken)
     return NOHWID_SID;
   }
 
-  if (!GetTokenInformation(hToken, TokenUser, pTokenUser, dwBufferSize,
-                           &dwBufferSize)) {
+  if (!GetTokenInformation(hToken, TokenUser, pTokenUser, dwBufferSize, &dwBufferSize)) {
     LOCALFREE(pTokenUser);
     CLOSEHANDLE(hToken);
     return NOHWID_SID;
@@ -470,9 +455,7 @@ std::string ETJump::OperatingSystem::getMBSerial() {
   return Crypto::sha2(mbSerial);
 }
 
-std::string
-ETJump::OperatingSystem::getWMIProperty(const std::wstring &wmiClass,
-                                        const std::wstring &propName) {
+std::string ETJump::OperatingSystem::getWMIProperty(const std::wstring &wmiClass, const std::wstring &propName) {
   HRESULT hr;
   IWbemServices *pServices = getWMIService();
 
@@ -483,9 +466,8 @@ ETJump::OperatingSystem::getWMIProperty(const std::wstring &wmiClass,
   IEnumWbemClassObject *pEnum = nullptr;
 
   const std::wstring wmiQuery = L"SELECT * FROM " + wmiClass;
-  hr = pServices->ExecQuery(
-      bstr_t("WQL"), bstr_t(wmiQuery.c_str()),
-      WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum);
+  hr = pServices->ExecQuery(bstr_t("WQL"), bstr_t(wmiQuery.c_str()),
+                            WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum);
 
   if (FAILED(hr)) {
     pServices->Release();
@@ -493,7 +475,7 @@ ETJump::OperatingSystem::getWMIProperty(const std::wstring &wmiClass,
   }
 
   IWbemClassObject *pClsObj = nullptr;
-  ULONG ret = 0;
+  ULONG ret                 = 0;
 
   if (pEnum->Next(WBEM_INFINITE, 1, &pClsObj, &ret) != S_OK || ret == 0) {
     pEnum->Release();
@@ -523,37 +505,32 @@ ETJump::OperatingSystem::getWMIProperty(const std::wstring &wmiClass,
   }
 
   // convert from wide string for hashing
-  const int size = WideCharToMultiByte(CP_UTF8, 0, prop.c_str(), -1, nullptr, 0,
-                                       nullptr, nullptr);
+  const int size = WideCharToMultiByte(CP_UTF8, 0, prop.c_str(), -1, nullptr, 0, nullptr, nullptr);
   std::string result(size - 1, 0); // -1 to discard null terminator
-  WideCharToMultiByte(CP_UTF8, 0, prop.c_str(), -1, &result[0], size, nullptr,
-                      nullptr);
+  WideCharToMultiByte(CP_UTF8, 0, prop.c_str(), -1, &result[0], size, nullptr, nullptr);
 
   return result;
 }
 
 IWbemServices *ETJump::OperatingSystem::getWMIService() {
-  IWbemLocator *pLocator = nullptr;
+  IWbemLocator *pLocator   = nullptr;
   IWbemServices *pServices = nullptr;
 
-  HRESULT hr =
-      CoCreateInstance(CLSID_WbemLocator, nullptr, CLSCTX_INPROC_SERVER,
-                       IID_IWbemLocator, reinterpret_cast<LPVOID *>(&pLocator));
+  HRESULT hr = CoCreateInstance(CLSID_WbemLocator, nullptr, CLSCTX_INPROC_SERVER, IID_IWbemLocator,
+                                reinterpret_cast<LPVOID *>(&pLocator));
 
   if (FAILED(hr)) {
     return nullptr;
   }
 
-  hr = pLocator->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), nullptr, nullptr,
-                               nullptr, 0, nullptr, nullptr, &pServices);
+  hr = pLocator->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), nullptr, nullptr, nullptr, 0, nullptr, nullptr, &pServices);
   pLocator->Release();
 
   if (FAILED(hr)) {
     return nullptr;
   }
 
-  hr = CoSetProxyBlanket(pServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE,
-                         nullptr, RPC_C_AUTHN_LEVEL_CALL,
+  hr = CoSetProxyBlanket(pServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL,
                          RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
 
   if (FAILED(hr)) {
@@ -583,9 +560,8 @@ std::string ETJump::OperatingSystem::getHwid() {
   GetSystemInfo(&systemInfo);
 
   // Random data from processor
-  const unsigned int systemInfoSum = systemInfo.dwProcessorType +
-                                     systemInfo.wProcessorLevel +
-                                     systemInfo.wProcessorArchitecture;
+  const unsigned int systemInfoSum =
+    systemInfo.dwProcessorType + systemInfo.wProcessorLevel + systemInfo.wProcessorArchitecture;
 
   hardwareId += std::to_string(systemInfoSum);
 
@@ -594,8 +570,7 @@ std::string ETJump::OperatingSystem::getHwid() {
   GetEnvironmentVariable("HOMEDRIVE", buffer, sizeof(buffer));
   rootDrive = std::string(buffer) + "\\";
 
-  if (GetVolumeInformation(rootDrive.c_str(), nullptr, 0, &vsn, nullptr,
-                           nullptr, nullptr, 0) == 0) {
+  if (GetVolumeInformation(rootDrive.c_str(), nullptr, 0, &vsn, nullptr, nullptr, nullptr, 0) == 0) {
     // failed to get volume info (noop)
   }
 

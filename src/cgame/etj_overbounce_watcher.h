@@ -26,8 +26,8 @@
 
 #include <map>
 
-#include "etj_irenderable.h"
 #include "etj_cvar_parser.h"
+#include "etj_irenderable.h"
 
 #include "../game/q_shared.h"
 
@@ -37,9 +37,8 @@ class CvarUpdateHandler;
 
 class OverbounceWatcher : public IRenderable {
 public:
-  OverbounceWatcher(
-      const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
-      const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  OverbounceWatcher(const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+                    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~OverbounceWatcher() override;
 
 private:

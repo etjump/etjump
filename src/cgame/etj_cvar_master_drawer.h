@@ -45,8 +45,7 @@ class CvarBasedMasterDrawer : public IRenderable {
   [[nodiscard]] bool shouldRender() const;
 
 public:
-  CvarBasedMasterDrawer(const vmCvar_t *cvar,
-                        const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  CvarBasedMasterDrawer(const vmCvar_t *cvar, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~CvarBasedMasterDrawer() override;
   bool beforeRender() override;
   void render() const override;

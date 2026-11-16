@@ -42,26 +42,21 @@
   #undef max
 #endif
 
-#include <string>
 #include <functional>
 #include <map>
-#include <vector>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace ETJump {
 class PlayerEventsHandler {
-  std::map<std::string,
-           std::vector<std::function<void(const std::vector<std::string> &)>>>
-      _callbacks;
+  std::map<std::string, std::vector<std::function<void(const std::vector<std::string> &)>>> _callbacks;
 
 public:
   PlayerEventsHandler();
   ~PlayerEventsHandler();
-  bool check(const std::string &event,
-             const std::vector<std::string> &arguments);
-  bool subscribe(
-      const std::string &event,
-      const std::function<void(const std::vector<std::string> &)> &callback);
+  bool check(const std::string &event, const std::vector<std::string> &arguments);
+  bool subscribe(const std::string &event, const std::function<void(const std::vector<std::string> &)> &callback);
   bool unsubscribe(const std::string &event);
 };
 } // namespace ETJump

@@ -27,15 +27,17 @@
 
 #include <sqlite3.h>
 #include <string>
+
 #include "etj_local.h"
 
 // All async operation objects need to be dynamically allocated
 class AsyncOperation {
 public:
   AsyncOperation() : db_(NULL), stmt_(NULL) {}
+
   virtual ~AsyncOperation() {
     sqlite3_finalize(stmt_);
-    stmt_ = NULL;
+    stmt_  = NULL;
     int rc = sqlite3_close(db_);
     if (rc != SQLITE_OK) {
       G_LogPrintf("ERROR: COULDN'T CLOSE SQLITE FILE "

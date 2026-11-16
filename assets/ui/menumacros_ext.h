@@ -121,15 +121,15 @@
                        EDITFIELD_CVAR, EDITFIELD_MAXCHARS,                     \
                        EDITFIELD_MAXPAINTCHARS, EDITFIELD_TOOLTIP )            \
   itemDef {                                                                    \
-    name            "efback"##EDITFIELD_TEXT                                   \
-    group           GROUP_NAME                                                 \
-    rect            $evalfloat(EDITFIELD_X + .5 * EDITFIELD_W + 6)             \
-                    $evalfloat(EDITFIELD_Y)                                    \
-                    $evalfloat(.5 * EDITFIELD_TEXTBOX_W - 6)                   \
-                    $evalfloat(EDITFIELD_H)                                    \
-    style           WINDOW_STYLE_FILLED                                        \
-    backcolor       .5 .5 .5 .2                                                \
-    visible         1                                                          \
+    name              "efback"##EDITFIELD_TEXT                                 \
+    group             GROUP_NAME                                               \
+    rect              $evalfloat(EDITFIELD_X + .5 * EDITFIELD_W + 6)           \
+                      $evalfloat(EDITFIELD_Y)                                  \
+                      $evalfloat(.5 * EDITFIELD_TEXTBOX_W - 6)                 \
+                      $evalfloat(EDITFIELD_H)                                  \
+    style             WINDOW_STYLE_FILLED                                      \
+    backcolor         .5 .5 .5 .2                                              \
+    visible           1                                                        \
     decoration                                                                 \
   }                                                                            \
                                                                                \
@@ -154,22 +154,105 @@
     tooltip           EDITFIELD_TOOLTIP                                        \
   }
 
+// cached editfield
+#define CACHEDEDITFIELD( EDITFIELD_X, EDITFIELD_Y, EDITFIELD_W, EDITFIELD_H,   \
+                         EDITFIELD_TEXT, EDITFIELD_TEXT_SCALE,                 \
+                         EDITFIELD_TEXT_ALIGN_Y, EDITFIELD_CVAR,               \
+                         EDITFIELD_MAXCHARS, EDITFIELD_MAXPAINTCHARS,          \
+                         EDITFIELD_TOOLTIP )                                   \
+  itemDef {                                                                    \
+    name              "efback"##EDITFIELD_TEXT                                 \
+    group             GROUP_NAME                                               \
+    rect              $evalfloat(EDITFIELD_X + .5 * EDITFIELD_W + 6)           \
+                      $evalfloat(EDITFIELD_Y)                                  \
+                      $evalfloat(.5 * EDITFIELD_W - 6)                         \
+                      $evalfloat(EDITFIELD_H)                                  \
+    style             WINDOW_STYLE_FILLED                                      \
+    backcolor         .5 .5 .5 .2                                              \
+    visible           1                                                        \
+    decoration                                                                 \
+  }                                                                            \
+                                                                               \
+  itemDef {                                                                    \
+    name              "ef"##EDITFIELD_TEXT                                     \
+    group             GROUP_NAME                                               \
+    rect              $evalfloat(EDITFIELD_X) $evalfloat(EDITFIELD_Y)          \
+                      $evalfloat(EDITFIELD_W) $evalfloat(EDITFIELD_H)          \
+    type              ITEM_TYPE_EDITFIELD                                      \
+    text              EDITFIELD_TEXT                                           \
+    textfont          UI_FONT_COURBD_21                                        \
+    textstyle         ITEM_TEXTSTYLE_SHADOWED                                  \
+    textscale         EDITFIELD_TEXT_SCALE                                     \
+    textalign         ITEM_ALIGN_RIGHT                                         \
+    textalignx        $evalfloat(0.5 * EDITFIELD_W)                            \
+    textaligny        EDITFIELD_TEXT_ALIGN_Y                                   \
+    forecolor         .6 .6 .6 1                                               \
+    cvar              EDITFIELD_CVAR                                           \
+    maxChars          EDITFIELD_MAXCHARS                                       \
+    maxPaintChars     EDITFIELD_MAXPAINTCHARS                                  \
+    visible           1                                                        \
+    tooltip           EDITFIELD_TOOLTIP                                        \
+    cacheCvar                                                                  \
+  }
+
+// cached editfield with an adjustable textbox width
+#define CACHEDEDITFIELD_EXT( EDITFIELD_X, EDITFIELD_Y, EDITFIELD_W,            \
+                             EDITFIELD_H, EDITFIELD_TEXTBOX_W, EDITFIELD_TEXT, \
+                             EDITFIELD_TEXT_SCALE, EDITFIELD_TEXT_ALIGN_Y,     \
+                             EDITFIELD_CVAR, EDITFIELD_MAXCHARS,               \
+                             EDITFIELD_MAXPAINTCHARS, EDITFIELD_TOOLTIP )      \
+  itemDef {                                                                    \
+    name              "efback"##EDITFIELD_TEXT                                 \
+    group             GROUP_NAME                                               \
+    rect              $evalfloat(EDITFIELD_X + .5 * EDITFIELD_W + 6)           \
+                      $evalfloat(EDITFIELD_Y)                                  \
+                      $evalfloat(.5 * EDITFIELD_TEXTBOX_W - 6)                 \
+                      $evalfloat(EDITFIELD_H)                                  \
+    style             WINDOW_STYLE_FILLED                                      \
+    backcolor         .5 .5 .5 .2                                              \
+    visible           1                                                        \
+    decoration                                                                 \
+  }                                                                            \
+                                                                               \
+  itemDef {                                                                    \
+    name              "ef"##EDITFIELD_TEXT                                     \
+    group             GROUP_NAME                                               \
+    rect              $evalfloat(EDITFIELD_X) $evalfloat(EDITFIELD_Y)          \
+                      $evalfloat(EDITFIELD_W) $evalfloat(EDITFIELD_H)          \
+    type              ITEM_TYPE_EDITFIELD                                      \
+    text              EDITFIELD_TEXT                                           \
+    textfont          UI_FONT_COURBD_21                                        \
+    textstyle         ITEM_TEXTSTYLE_SHADOWED                                  \
+    textscale         EDITFIELD_TEXT_SCALE                                     \
+    textalign         ITEM_ALIGN_RIGHT                                         \
+    textalignx        $evalfloat(0.5 * EDITFIELD_W)                            \
+    textaligny        EDITFIELD_TEXT_ALIGN_Y                                   \
+    forecolor         .6 .6 .6 1                                               \
+    cvar              EDITFIELD_CVAR                                           \
+    maxChars          EDITFIELD_MAXCHARS                                       \
+    maxPaintChars     EDITFIELD_MAXPAINTCHARS                                  \
+    visible           1                                                        \
+    tooltip           EDITFIELD_TOOLTIP                                        \
+    cacheCvar                                                                  \
+  }
+
 // numericfield with an adjustable textbox width
 #define NUMERICFIELD_EXT( NUMERICFIELD_X, NUMERICFIELD_Y, NUMERICFIELD_W,      \
                           NUMERICFIELD_H, NUMERICFIELD_TEXTBOX_W,              \
                           NUMERICFIELD_TEXT, NUMERICFIELD_TEXT_SCALE,          \
                           NUMERICFIELD_TEXT_ALIGN_Y, NUMERICFIELD_CVAR,        \
-                          NUMERICFIELD_MAXCHARS, NUMERICFIELD_TOOLTIP )        \
+                          NUMERICFIELD_MAXCHARS, NUMERICFIELD_MAXPAINTCHARS,   \
+                          NUMERICFIELD_TOOLTIP )                               \
   itemDef {                                                                    \
-    name            "nfback"##NUMERICFIELD_TEXT                                \
-    group           GROUP_NAME                                                 \
-    rect            $evalfloat(NUMERICFIELD_X + .5 * NUMERICFIELD_W + 6)       \
-                    $evalfloat(NUMERICFIELD_Y)                                 \
-                    $evalfloat(.5 * NUMERICFIELD_TEXTBOX_W - 6)                \
-                    $evalfloat(NUMERICFIELD_H)                                 \
-    style           WINDOW_STYLE_FILLED                                        \
-    backcolor       .5 .5 .5 .2                                                \
-    visible         1                                                          \
+    name              "nfback"##NUMERICFIELD_TEXT                              \
+    group             GROUP_NAME                                               \
+    rect              $evalfloat(NUMERICFIELD_X + .5 * NUMERICFIELD_W + 6)     \
+                      $evalfloat(NUMERICFIELD_Y)                               \
+                      $evalfloat(.5 * NUMERICFIELD_TEXTBOX_W - 6)              \
+                      $evalfloat(NUMERICFIELD_H)                               \
+    style             WINDOW_STYLE_FILLED                                      \
+    backcolor         .5 .5 .5 .2                                              \
+    visible           1                                                        \
     decoration                                                                 \
   }                                                                            \
                                                                                \
@@ -189,8 +272,95 @@
     forecolor         .6 .6 .6 1                                               \
     cvar              NUMERICFIELD_CVAR                                        \
     maxChars          NUMERICFIELD_MAXCHARS                                    \
+    maxChars          NUMERICFIELD_MAXPAINTCHARS                               \
     visible           1                                                        \
     tooltip           NUMERICFIELD_TOOLTIP                                     \
+  }
+
+// cached numericfield
+#define CACHEDNUMERICFIELD( NUMERICFIELD_X, NUMERICFIELD_Y, NUMERICFIELD_W,    \
+                            NUMERICFIELD_H, NUMERICFIELD_TEXT,                 \
+                            NUMERICFIELD_TEXT_SCALE,                           \
+                            NUMERICFIELD_TEXT_ALIGN_Y, NUMERICFIELD_CVAR,      \
+                            NUMERICFIELD_MAXCHARS, NUMERICFIELD_MAXPAINTCHARS, \
+                            NUMERICFIELD_TOOLTIP )                             \
+  itemDef {                                                                    \
+    name              "nfback"##NUMERICFIELD_TEXT                              \
+    group             GROUP_NAME                                               \
+    rect              $evalfloat(NUMERICFIELD_X + .5 * NUMERICFIELD_W + 6)     \
+                      $evalfloat(NUMERICFIELD_Y)                               \
+                      $evalfloat(.5 * NUMERICFIELD_W - 6)                      \
+                      $evalfloat(NUMERICFIELD_H)                               \
+    style             WINDOW_STYLE_FILLED                                      \
+    backcolor         .5 .5 .5 .2                                              \
+    visible           1                                                        \
+    decoration                                                                 \
+  }                                                                            \
+                                                                               \
+  itemDef {                                                                    \
+    name              "nf"##NUMERICFIELD_TEXT                                  \
+    group             GROUP_NAME                                               \
+    rect              $evalfloat(NUMERICFIELD_X) $evalfloat(NUMERICFIELD_Y)    \
+                      $evalfloat(NUMERICFIELD_W) $evalfloat(NUMERICFIELD_H)    \
+    type              ITEM_TYPE_NUMERICFIELD                                   \
+    text              NUMERICFIELD_TEXT                                        \
+    textfont          UI_FONT_COURBD_21                                        \
+    textstyle         ITEM_TEXTSTYLE_SHADOWED                                  \
+    textscale         NUMERICFIELD_TEXT_SCALE                                  \
+    textalign         ITEM_ALIGN_RIGHT                                         \
+    textalignx        $evalfloat(0.5 * NUMERICFIELD_W)                         \
+    textaligny        NUMERICFIELD_TEXT_ALIGN_Y                                \
+    forecolor         .6 .6 .6 1                                               \
+    cvar              NUMERICFIELD_CVAR                                        \
+    maxChars          NUMERICFIELD_MAXCHARS                                    \
+    maxChars          NUMERICFIELD_MAXPAINTCHARS                               \
+    visible           1                                                        \
+    tooltip           NUMERICFIELD_TOOLTIP                                     \
+    cacheCvar                                                                  \
+  }
+
+// cached numericfield with an adjustable textbox width
+#define CACHEDNUMERICFIELD_EXT( NUMERICFIELD_X, NUMERICFIELD_Y,                \
+                                NUMERICFIELD_W, NUMERICFIELD_H,                \
+                                NUMERICFIELD_TEXTBOX_W, NUMERICFIELD_TEXT,     \
+                                NUMERICFIELD_TEXT_SCALE,                       \
+                                NUMERICFIELD_TEXT_ALIGN_Y, NUMERICFIELD_CVAR,  \
+                                NUMERICFIELD_MAXCHARS,                         \
+                                NUMERICFIELD_MAXPAINTCHARS,                    \
+                                NUMERICFIELD_TOOLTIP )                         \
+  itemDef {                                                                    \
+    name              "nfback"##NUMERICFIELD_TEXT                              \
+    group             GROUP_NAME                                               \
+    rect              $evalfloat(NUMERICFIELD_X + .5 * NUMERICFIELD_W + 6)     \
+                      $evalfloat(NUMERICFIELD_Y)                               \
+                      $evalfloat(.5 * NUMERICFIELD_TEXTBOX_W - 6)              \
+                      $evalfloat(NUMERICFIELD_H)                               \
+    style             WINDOW_STYLE_FILLED                                      \
+    backcolor         .5 .5 .5 .2                                              \
+    visible           1                                                        \
+    decoration                                                                 \
+  }                                                                            \
+                                                                               \
+  itemDef {                                                                    \
+    name              "nf"##NUMERICFIELD_TEXT                                  \
+    group             GROUP_NAME                                               \
+    rect              $evalfloat(NUMERICFIELD_X) $evalfloat(NUMERICFIELD_Y)    \
+                      $evalfloat(NUMERICFIELD_W) $evalfloat(NUMERICFIELD_H)    \
+    type              ITEM_TYPE_NUMERICFIELD                                   \
+    text              NUMERICFIELD_TEXT                                        \
+    textfont          UI_FONT_COURBD_21                                        \
+    textstyle         ITEM_TEXTSTYLE_SHADOWED                                  \
+    textscale         NUMERICFIELD_TEXT_SCALE                                  \
+    textalign         ITEM_ALIGN_RIGHT                                         \
+    textalignx        $evalfloat(0.5 * NUMERICFIELD_W)                         \
+    textaligny        NUMERICFIELD_TEXT_ALIGN_Y                                \
+    forecolor         .6 .6 .6 1                                               \
+    cvar              NUMERICFIELD_CVAR                                        \
+    maxChars          NUMERICFIELD_MAXCHARS                                    \
+    maxChars          NUMERICFIELD_MAXPAINTCHARS                               \
+    visible           1                                                        \
+    tooltip           NUMERICFIELD_TOOLTIP                                     \
+    cacheCvar                                                                  \
   }
 
 // dropdown menu

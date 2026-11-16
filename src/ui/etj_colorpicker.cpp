@@ -23,20 +23,23 @@
  */
 
 #include "etj_colorpicker.h"
+
 #include "etj_local.h"
 
 #include "../cgame/etj_color_parser.h"
-
 #include "../game/etj_string_utilities.h"
 
 extern displayContextDef_t *DC;
 
 namespace ETJump {
 static std::unordered_map<std::string, float> colorPickerValues{
-    {COLOR_PICKER_H, 0.0f},   {COLOR_PICKER_S, 100.0f},
-    {COLOR_PICKER_V, 100.0f}, {COLOR_PICKER_R, 255.0f},
-    {COLOR_PICKER_G, 0.0f},   {COLOR_PICKER_B, 0.0f},
-    {COLOR_PICKER_A, 1.0f},
+  {COLOR_PICKER_H, 0.0f  },
+  {COLOR_PICKER_S, 100.0f},
+  {COLOR_PICKER_V, 100.0f},
+  {COLOR_PICKER_R, 255.0f},
+  {COLOR_PICKER_G, 0.0f  },
+  {COLOR_PICKER_B, 0.0f  },
+  {COLOR_PICKER_A, 1.0f  },
 };
 
 ColorPicker::ColorPicker() {
@@ -51,10 +54,8 @@ void ColorPicker::drawPreviewOld(const rectDef_t *rect) const {
 void ColorPicker::drawPreviewNew(const rectDef_t *rect) {
   if (!normalizedRGBSliders) {
     Vector4Copy(fullRGB, normalizedRGB);
-    setRGBNormalized(normalizedRGB, colorPickerValues[COLOR_PICKER_R],
-                     colorPickerValues[COLOR_PICKER_G],
-                     colorPickerValues[COLOR_PICKER_B],
-                     colorPickerValues[COLOR_PICKER_A]);
+    setRGBNormalized(normalizedRGB, colorPickerValues[COLOR_PICKER_R], colorPickerValues[COLOR_PICKER_G],
+                     colorPickerValues[COLOR_PICKER_B], colorPickerValues[COLOR_PICKER_A]);
   }
 
   DC->fillRect(rect->x, rect->y, rect->w, rect->h, normalizedRGB);
@@ -69,20 +70,16 @@ void ColorPicker::drawColorPicker(const rectDef_t *rect) {
 
   // color selector
   DC->fillRect(rect->x, rect->y, rect->w, rect->h, pickerRGB);
-  DC->drawHandlePic(rect->x, rect->y, rect->w, rect->h,
-                    DC->Assets.colorPickerMask);
+  DC->drawHandlePic(rect->x, rect->y, rect->w, rect->h, DC->Assets.colorPickerMask);
 
   // color picker "crosshair"
-  DC->fillRect(rect->x + colorPickerValues[COLOR_PICKER_S], rect->y, 1, rect->h,
-               pickerColor);
-  DC->fillRect(rect->x, rect->y + (rect->h - colorPickerValues[COLOR_PICKER_V]),
-               rect->w, 1, pickerColor);
+  DC->fillRect(rect->x + colorPickerValues[COLOR_PICKER_S], rect->y, 1, rect->h, pickerColor);
+  DC->fillRect(rect->x, rect->y + (rect->h - colorPickerValues[COLOR_PICKER_V]), rect->w, 1, pickerColor);
 }
 
 void ColorPicker::cvarToColorPickerState(const std::string &cvar) {
   if (cvar.empty()) {
-    Com_Printf(S_COLOR_YELLOW "%s: cannot set slider state from empty cvar\n",
-               __func__);
+    Com_Printf(S_COLOR_YELLOW "%s: cannot set slider state from empty cvar\n", __func__);
     return;
   }
 
@@ -108,8 +105,7 @@ void ColorPicker::cvarToColorPickerState(const std::string &cvar) {
 
 void ColorPicker::colorPickerStateToCvar(const bool reset) const {
   if (currentCvar.empty()) {
-    Com_Printf(S_COLOR_YELLOW "%s: cannot set slider state to empty cvar\n",
-               __func__);
+    Com_Printf(S_COLOR_YELLOW "%s: cannot set slider state to empty cvar\n", __func__);
     return;
   }
 
@@ -117,8 +113,7 @@ void ColorPicker::colorPickerStateToCvar(const bool reset) const {
     DC->setCVar(currentCvar.c_str(), currentCvarOldValue.c_str());
   } else {
     const std::string &value =
-        StringUtils::format("%f %f %f %f", normalizedRGB[0], normalizedRGB[1],
-                            normalizedRGB[2], normalizedRGB[3]);
+      StringUtils::format("%f %f %f %f", normalizedRGB[0], normalizedRGB[1], normalizedRGB[2], normalizedRGB[3]);
     DC->setCVar(currentCvar.c_str(), value.c_str());
   }
 }
@@ -135,23 +130,18 @@ void ColorPicker::resetColorPickerState() {
   colorPickerStateToCvar(true);
 }
 
-inline void ColorPicker::setHSV(vec4_t hsv, const float h, const float s,
-                                const float v, const float a) {
-  Vector4Set(hsv, std::clamp(h, 0.0f, 360.0f), std::clamp(s, 0.0f, 100.0f),
-             std::clamp(v, 0.0f, 100.0f), std::clamp(a, 0.0f, 1.0f));
+inline void ColorPicker::setHSV(vec4_t hsv, const float h, const float s, const float v, const float a) {
+  Vector4Set(hsv, std::clamp(h, 0.0f, 360.0f), std::clamp(s, 0.0f, 100.0f), std::clamp(v, 0.0f, 100.0f),
+             std::clamp(a, 0.0f, 1.0f));
 }
 
-inline void ColorPicker::setRGB(vec4_t rgb, const float r, const float g,
-                                const float b, const float a) {
-  Vector4Set(rgb, std::clamp(r, 0.0f, 255.0f), std::clamp(g, 0.0f, 255.0f),
-             std::clamp(b, 0.0f, 255.0f), std::clamp(a, 0.0f, 1.0f));
+inline void ColorPicker::setRGB(vec4_t rgb, const float r, const float g, const float b, const float a) {
+  Vector4Set(rgb, std::clamp(r, 0.0f, 255.0f), std::clamp(g, 0.0f, 255.0f), std::clamp(b, 0.0f, 255.0f),
+             std::clamp(a, 0.0f, 1.0f));
 }
 
-inline void ColorPicker::setRGBNormalized(vec4_t rgb, const float r,
-                                          const float g, const float b,
-                                          const float a) {
-  Vector4Set(rgb, std::clamp(r / 255, 0.0f, 1.0f),
-             std::clamp(g / 255, 0.0f, 1.0f), std::clamp(b / 255, 0.0f, 1.0f),
+inline void ColorPicker::setRGBNormalized(vec4_t rgb, const float r, const float g, const float b, const float a) {
+  Vector4Set(rgb, std::clamp(r / 255, 0.0f, 1.0f), std::clamp(g / 255, 0.0f, 1.0f), std::clamp(b / 255, 0.0f, 1.0f),
              std::clamp(a, 0.0f, 1.0f));
 }
 
@@ -178,32 +168,23 @@ void ColorPicker::updateSliderState(const itemDef_t *item) {
   // updated as that's what 'colorPickerStateToCvar' uses to set the cvar value
   switch (item->colorSliderData.colorType) {
     case COLOR_HSV:
-      setHSV(HSV, colorPickerValues[COLOR_PICKER_H],
-             colorPickerValues[COLOR_PICKER_S],
-             colorPickerValues[COLOR_PICKER_V],
-             colorPickerValues[COLOR_PICKER_A]);
+      setHSV(HSV, colorPickerValues[COLOR_PICKER_H], colorPickerValues[COLOR_PICKER_S],
+             colorPickerValues[COLOR_PICKER_V], colorPickerValues[COLOR_PICKER_A]);
       BG_HSVtoRGB(HSV, fullRGB, false);
-      setRGBNormalized(normalizedRGB, fullRGB[0], fullRGB[1], fullRGB[2],
-                       fullRGB[3]);
+      setRGBNormalized(normalizedRGB, fullRGB[0], fullRGB[1], fullRGB[2], fullRGB[3]);
       updateRGBSliderState(fullRGB);
       break;
     case COLOR_RGB:
     case COLOR_ALPHA:
       if (normalizedRGBSliders) {
-        setRGB(normalizedRGB, colorPickerValues[COLOR_PICKER_R],
-               colorPickerValues[COLOR_PICKER_G],
-               colorPickerValues[COLOR_PICKER_B],
-               colorPickerValues[COLOR_PICKER_A]);
+        setRGB(normalizedRGB, colorPickerValues[COLOR_PICKER_R], colorPickerValues[COLOR_PICKER_G],
+               colorPickerValues[COLOR_PICKER_B], colorPickerValues[COLOR_PICKER_A]);
         Vector4Scale(normalizedRGB, 255, fullRGB);
       } else {
-        setRGB(fullRGB, colorPickerValues[COLOR_PICKER_R],
-               colorPickerValues[COLOR_PICKER_G],
-               colorPickerValues[COLOR_PICKER_B],
-               colorPickerValues[COLOR_PICKER_A]);
-        setRGBNormalized(normalizedRGB, colorPickerValues[COLOR_PICKER_R],
-                         colorPickerValues[COLOR_PICKER_G],
-                         colorPickerValues[COLOR_PICKER_B],
-                         colorPickerValues[COLOR_PICKER_A]);
+        setRGB(fullRGB, colorPickerValues[COLOR_PICKER_R], colorPickerValues[COLOR_PICKER_G],
+               colorPickerValues[COLOR_PICKER_B], colorPickerValues[COLOR_PICKER_A]);
+        setRGBNormalized(normalizedRGB, colorPickerValues[COLOR_PICKER_R], colorPickerValues[COLOR_PICKER_G],
+                         colorPickerValues[COLOR_PICKER_B], colorPickerValues[COLOR_PICKER_A]);
       }
 
       BG_RGBtoHSV(fullRGB, HSV);
@@ -230,25 +211,22 @@ const char *ColorPicker::getColorSliderString(const int handle) {
     }
   }
 
-  Com_Printf(S_COLOR_YELLOW "%s: invalid color slider string '%s'\n", __func__,
-             colorVar);
+  Com_Printf(S_COLOR_YELLOW "%s: invalid color slider string '%s'\n", __func__, colorVar);
   return nullptr;
 }
 
 void ColorPicker::setColorSliderType(itemDef_t *item) {
   const std::string &colorVar = item->colorSliderData.colorVar;
 
-  if (colorVar == COLOR_PICKER_H || colorVar == COLOR_PICKER_S ||
-      colorVar == COLOR_PICKER_V) {
+  if (colorVar == COLOR_PICKER_H || colorVar == COLOR_PICKER_S || colorVar == COLOR_PICKER_V) {
     item->colorSliderData.colorType = COLOR_HSV;
-  } else if (colorVar == COLOR_PICKER_R || colorVar == COLOR_PICKER_G ||
-             colorVar == COLOR_PICKER_B) {
+  } else if (colorVar == COLOR_PICKER_R || colorVar == COLOR_PICKER_G || colorVar == COLOR_PICKER_B) {
     item->colorSliderData.colorType = COLOR_RGB;
   } else if (colorVar == COLOR_PICKER_A) {
     item->colorSliderData.colorType = COLOR_ALPHA;
   } else {
-    Com_Printf(S_COLOR_YELLOW "%s: unable to set color slider type for %s\n",
-               __func__, item->window.name ? item->window.name : "(unnamed)");
+    Com_Printf(S_COLOR_YELLOW "%s: unable to set color slider type for %s\n", __func__,
+               item->window.name ? item->window.name : "(unnamed)");
     item->colorSliderData.colorType = COLOR_UNKNOWN;
   }
 }
@@ -260,13 +238,11 @@ float ColorPicker::getColorSliderValue(const std::string &colorVar) {
     return it->second;
   }
 
-  Com_Printf(S_COLOR_YELLOW "%s: unable to find color slider value for '%s'\n",
-             __func__, colorVar.c_str());
+  Com_Printf(S_COLOR_YELLOW "%s: unable to find color slider value for '%s'\n", __func__, colorVar.c_str());
   return 0.0f;
 }
 
-void ColorPicker::setColorSliderValue(const std::string &colorVar,
-                                      const float value) {
+void ColorPicker::setColorSliderValue(const std::string &colorVar, const float value) {
   colorPickerValues[colorVar] = value;
 }
 
@@ -275,14 +251,13 @@ void ColorPicker::toggleRGBSliderValues() {
 
   // this should never happen, we already have the menu open...
   if (menu == nullptr) {
-    Com_Printf(S_COLOR_YELLOW "%s: unable to find color picker menu '%s'\n",
-               __func__, COLOR_PICKER_MENU);
+    Com_Printf(S_COLOR_YELLOW "%s: unable to find color picker menu '%s'\n", __func__, COLOR_PICKER_MENU);
     return;
   }
 
-  bool redFound = false;
+  bool redFound   = false;
   bool greenFound = false;
-  bool blueFound = false;
+  bool blueFound  = false;
 
   // flip flop
   normalizedRGBSliders = !normalizedRGBSliders;
@@ -304,7 +279,7 @@ void ColorPicker::toggleRGBSliderValues() {
       continue;
     }
 
-    const auto editDef = static_cast<editFieldDef_t *>(item->typeData);
+    const auto editDef          = static_cast<editFieldDef_t *>(item->typeData);
     const std::string &colorVar = item->colorSliderData.colorVar;
 
     if (colorVar == COLOR_PICKER_R) {
@@ -313,8 +288,8 @@ void ColorPicker::toggleRGBSliderValues() {
       } else {
         editDef->defVal = normalizedRGBSliders ? 1.0f : 255.0f;
         editDef->maxVal = normalizedRGBSliders ? 1.0f : 255.0f;
-        editDef->step = normalizedRGBSliders ? 0.01f : 1.0f;
-        redFound = true;
+        editDef->step   = normalizedRGBSliders ? 0.01f : 1.0f;
+        redFound        = true;
       }
     } else if (colorVar == COLOR_PICKER_G) {
       if (item->type == ITEM_TYPE_TEXT) {
@@ -322,8 +297,8 @@ void ColorPicker::toggleRGBSliderValues() {
       } else {
         editDef->defVal = 0.0f;
         editDef->maxVal = normalizedRGBSliders ? 1.0f : 255.0f;
-        editDef->step = normalizedRGBSliders ? 0.01f : 1.0f;
-        greenFound = true;
+        editDef->step   = normalizedRGBSliders ? 0.01f : 1.0f;
+        greenFound      = true;
       }
     } else if (colorVar == COLOR_PICKER_B) {
       if (item->type == ITEM_TYPE_TEXT) {
@@ -331,8 +306,8 @@ void ColorPicker::toggleRGBSliderValues() {
       } else {
         editDef->defVal = 0.0f;
         editDef->maxVal = normalizedRGBSliders ? 1.0f : 255.0f;
-        editDef->step = normalizedRGBSliders ? 0.01f : 1.0f;
-        blueFound = true;
+        editDef->step   = normalizedRGBSliders ? 0.01f : 1.0f;
+        blueFound       = true;
       }
     }
   }
@@ -341,15 +316,11 @@ void ColorPicker::toggleRGBSliderValues() {
   if (redFound && greenFound && blueFound) {
     updateRGBSliderState(fullRGB);
   } else {
-    Com_Printf(S_COLOR_YELLOW
-               "%s: unable to find color sliders for conversion\n",
-               __func__);
+    Com_Printf(S_COLOR_YELLOW "%s: unable to find color sliders for conversion\n", __func__);
   }
 }
 
-void ColorPicker::colorPickerDragFunc(const itemDef_t *item,
-                                      const float cursorX, const float cursorY,
-                                      const int key) {
+void ColorPicker::colorPickerDragFunc(const itemDef_t *item, const float cursorX, const float cursorY, const int key) {
   rectDef_t rect = item->window.rect;
   shrinkRectForColorPicker(rect);
 
@@ -365,8 +336,7 @@ void ColorPicker::colorPickerDragFunc(const itemDef_t *item,
     setColorSliderValue(COLOR_PICKER_S, x - rect.x);
   }
 
-  setHSV(HSV, colorPickerValues[COLOR_PICKER_H],
-         colorPickerValues[COLOR_PICKER_S], colorPickerValues[COLOR_PICKER_V],
+  setHSV(HSV, colorPickerValues[COLOR_PICKER_H], colorPickerValues[COLOR_PICKER_S], colorPickerValues[COLOR_PICKER_V],
          colorPickerValues[COLOR_PICKER_A]);
   BG_HSVtoRGB(HSV, normalizedRGB, true);
   Vector4Scale(normalizedRGB, 255, fullRGB);

@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+
 #include "../src/game/etj_string_utilities.h"
 
 class StringUtilitiesTests : public testing::Test {
@@ -7,8 +8,7 @@ class StringUtilitiesTests : public testing::Test {
   void TearDown() override {}
 };
 
-TEST_F(StringUtilitiesTests,
-       trimStart_ShouldRemoveWhitespaceFromTheBeginingOfString) {
+TEST_F(StringUtilitiesTests, trimStart_ShouldRemoveWhitespaceFromTheBeginingOfString) {
   std::string inputStr{"  foo bar"};
   std::string expectedStr{"foo bar"};
 
@@ -26,8 +26,7 @@ TEST_F(StringUtilitiesTests, trimEnd_ShouldRemoveWhitespaceFromTheEndOfString) {
   EXPECT_EQ(outputStr, expectedStr);
 }
 
-TEST_F(StringUtilitiesTests,
-       trim_ShouldRemoveWhitespaceFromBothStartAndEndOfString) {
+TEST_F(StringUtilitiesTests, trim_ShouldRemoveWhitespaceFromBothStartAndEndOfString) {
   std::string inputStr{"   foo bar  "};
   std::string expectedStr{"foo bar"};
 
@@ -36,12 +35,10 @@ TEST_F(StringUtilitiesTests,
   EXPECT_EQ(outputStr, expectedStr);
 }
 
-TEST_F(StringUtilitiesTests,
-       wrapWords_ShouldEffectivelySplitStringOnSeparatorEncounter) {
+TEST_F(StringUtilitiesTests, wrapWords_ShouldEffectivelySplitStringOnSeparatorEncounter) {
   std::string input = "Lorem ipsum \ndolor sit amet, \nconsectetur "
                       "\nadipisicing elit. \nTenetur, fuga!";
-  std::vector<std::string> expectedSplits{"Lorem ipsum \ndolor sit amet, \n",
-                                          "consectetur \nadipisicing elit. \n",
+  std::vector<std::string> expectedSplits{"Lorem ipsum \ndolor sit amet, \n", "consectetur \nadipisicing elit. \n",
                                           "Tenetur, fuga!"};
   auto splits = StringUtils::wrapWords(input, '\n', 40);
   EXPECT_EQ(splits.size(), expectedSplits.size());
@@ -50,13 +47,11 @@ TEST_F(StringUtilitiesTests,
   }
 }
 
-TEST_F(StringUtilitiesTests,
-       wrapWords_ShouldEffectivelySplitStringOnMaxWidthExceed) {
+TEST_F(StringUtilitiesTests, wrapWords_ShouldEffectivelySplitStringOnMaxWidthExceed) {
   std::string input = "Lorem ipsum dolor sit amet, consectetur adipisicing "
                       "elit. Tenetur, fuga!";
-  std::vector<std::string> expectedSplits{
-      "Lorem ipsum dolor sit amet, consectetur ",
-      "adipisicing elit. Tenetur, fuga!"};
+  std::vector<std::string> expectedSplits{"Lorem ipsum dolor sit amet, consectetur ",
+                                          "adipisicing elit. Tenetur, fuga!"};
   auto splits = StringUtils::wrapWords(input, '\n', 40);
   EXPECT_EQ(splits.size(), expectedSplits.size());
   for (int i = 0; i < static_cast<int>(splits.size()); i++) {
@@ -64,13 +59,11 @@ TEST_F(StringUtilitiesTests,
   }
 }
 
-TEST_F(StringUtilitiesTests,
-       wrapWords_SplitShouldNotExceedMaxLengthIfLandingOnSeparator) {
+TEST_F(StringUtilitiesTests, wrapWords_SplitShouldNotExceedMaxLengthIfLandingOnSeparator) {
   std::string input = "Lorem ipsum \ndolor sit amet, \nconsectetur "
                       "\nadipisicing elit. \nTenetur, fuga!";
-  std::vector<std::string> expectedSplits{
-      "Lorem ipsum \ndolor sit amet, \n", "consectetur \n",
-      "adipisicing elit. \n", "Tenetur, fuga!"};
+  std::vector<std::string> expectedSplits{"Lorem ipsum \ndolor sit amet, \n", "consectetur \n", "adipisicing elit. \n",
+                                          "Tenetur, fuga!"};
   auto splits = StringUtils::wrapWords(input, '\n', 31);
   EXPECT_EQ(splits.size(), expectedSplits.size());
   for (int i = 0; i < static_cast<int>(splits.size()); i++) {
@@ -78,31 +71,27 @@ TEST_F(StringUtilitiesTests,
   }
 }
 
-TEST_F(StringUtilitiesTests,
-       toLowerCase_ShouldConvertStringIntoLowercasedCopy) {
+TEST_F(StringUtilitiesTests, toLowerCase_ShouldConvertStringIntoLowercasedCopy) {
   std::string input = "HELLO WORLD";
-  auto fixedString = StringUtils::toLowerCase(input);
+  auto fixedString  = StringUtils::toLowerCase(input);
   EXPECT_EQ(fixedString, "hello world");
 }
 
-TEST_F(StringUtilitiesTests,
-       toUpperCase_ShouldConvertStringIntoUppercasedCopy) {
+TEST_F(StringUtilitiesTests, toUpperCase_ShouldConvertStringIntoUppercasedCopy) {
   std::string input = "hello world";
-  auto fixedString = StringUtils::toUpperCase(input);
+  auto fixedString  = StringUtils::toUpperCase(input);
   EXPECT_EQ(fixedString, "HELLO WORLD");
 }
 
-TEST_F(StringUtilitiesTests,
-       eraseLast_ShouldEraseLastSubstringOccurenceFromInputStringCopy) {
+TEST_F(StringUtilitiesTests, eraseLast_ShouldEraseLastSubstringOccurenceFromInputStringCopy) {
   std::string input = "hello world, hello world";
-  auto fixedString = StringUtils::eraseLast(input, "hello");
+  auto fixedString  = StringUtils::eraseLast(input, "hello");
   EXPECT_EQ(fixedString, "hello world,  world");
 }
 
-TEST_F(StringUtilitiesTests,
-       join_ShouldConcatenateStringChunksIntoOneDelimitedPiece) {
+TEST_F(StringUtilitiesTests, join_ShouldConcatenateStringChunksIntoOneDelimitedPiece) {
   std::vector<std::string> input = {"hello world", "hello world"};
-  auto fixedString = StringUtils::join(input, ", ");
+  auto fixedString               = StringUtils::join(input, ", ");
   EXPECT_EQ(fixedString, "hello world, hello world");
 }
 
@@ -161,8 +150,7 @@ TEST_F(StringUtilitiesTests, normalizeNumberString_EdgeCases) {
   EXPECT_EQ(StringUtils::normalizeNumberString("0.0"), "0");
   EXPECT_EQ(StringUtils::normalizeNumberString("-0"), "-0");
   EXPECT_EQ(StringUtils::normalizeNumberString("0.0000000001"), "0.0000000001");
-  EXPECT_EQ(StringUtils::normalizeNumberString("-0.0000000001"),
-            "-0.0000000001");
+  EXPECT_EQ(StringUtils::normalizeNumberString("-0.0000000001"), "-0.0000000001");
 }
 
 TEST_F(StringUtilitiesTests, normalizeNumberString_InvalidInput) {
@@ -173,21 +161,17 @@ TEST_F(StringUtilitiesTests, normalizeNumberString_InvalidInput) {
 }
 
 TEST_F(StringUtilitiesTests, normalizeNumberString_PrecisionAndRounding) {
-  EXPECT_EQ(StringUtils::normalizeNumberString("123.4567890123456789"),
-            "123.4567890123");
+  EXPECT_EQ(StringUtils::normalizeNumberString("123.4567890123456789"), "123.4567890123");
   // rounds up
-  EXPECT_EQ(StringUtils::normalizeNumberString("123.45678901235"),
-            "123.4567890124");
+  EXPECT_EQ(StringUtils::normalizeNumberString("123.45678901235"), "123.4567890124");
 }
 
-TEST_F(StringUtilitiesTests,
-       normalizeNumberString_LeadingZerosAndDecimalPoint) {
+TEST_F(StringUtilitiesTests, normalizeNumberString_LeadingZerosAndDecimalPoint) {
   EXPECT_EQ(StringUtils::normalizeNumberString("0123.4500"), "123.45");
   EXPECT_EQ(StringUtils::normalizeNumberString("0123.0"), "123");
 }
 
-TEST_F(StringUtilitiesTests,
-       normalizeNumberString_TrailingZerosAndDecimalPoint) {
+TEST_F(StringUtilitiesTests, normalizeNumberString_TrailingZerosAndDecimalPoint) {
   EXPECT_EQ(StringUtils::normalizeNumberString("123.4500"), "123.45");
   EXPECT_EQ(StringUtils::normalizeNumberString("123.0"), "123");
 }

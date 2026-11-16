@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
-#include "../src/cgame/etj_entity_events_handler.h"
+
 #include "../src/cgame/cg_local.h"
+#include "../src/cgame/etj_entity_events_handler.h"
 
 using namespace ETJump;
 
@@ -21,9 +22,11 @@ public:
 
 TEST_F(EntityEventsHandlerTests, SubscribeShouldCreateACallback) {
   auto eventName = "event";
-  auto called = false;
+  auto called    = false;
 
-  handler.subscribe(eventName, [&called](centity_t *cent) { called = true; });
+  handler.subscribe(eventName, [&called](centity_t *cent) {
+    called = true;
+  });
 
   handler.check(eventName, &ent1);
   ASSERT_TRUE(called);
@@ -31,9 +34,11 @@ TEST_F(EntityEventsHandlerTests, SubscribeShouldCreateACallback) {
 
 TEST_F(EntityEventsHandlerTests, UnsubScribeShouldRemoveCallback) {
   auto eventName = "event";
-  auto called = false;
+  auto called    = false;
 
-  handler.subscribe(eventName, [&called](centity_t *cent) { called = true; });
+  handler.subscribe(eventName, [&called](centity_t *cent) {
+    called = true;
+  });
 
   handler.check(eventName, &ent1);
   ASSERT_TRUE(called);
@@ -45,9 +50,11 @@ TEST_F(EntityEventsHandlerTests, UnsubScribeShouldRemoveCallback) {
 
 TEST_F(EntityEventsHandlerTests, DifferentCallbackShouldntBeCalled) {
   auto eventName = "event";
-  auto called = false;
+  auto called    = false;
 
-  handler.subscribe(eventName, [&called](centity_t *cent) { called = true; });
+  handler.subscribe(eventName, [&called](centity_t *cent) {
+    called = true;
+  });
 
   handler.check("otherEvent", &ent1);
   ASSERT_FALSE(called);
@@ -55,9 +62,11 @@ TEST_F(EntityEventsHandlerTests, DifferentCallbackShouldntBeCalled) {
 
 TEST_F(EntityEventsHandlerTests, HandlerShouldBeCaseInsensitive) {
   auto eventName = "event";
-  auto called = false;
+  auto called    = false;
 
-  handler.subscribe(eventName, [&called](centity_t *cent) { called = true; });
+  handler.subscribe(eventName, [&called](centity_t *cent) {
+    called = true;
+  });
 
   handler.check("EVeNT", &ent1);
   ASSERT_TRUE(called);
@@ -65,9 +74,11 @@ TEST_F(EntityEventsHandlerTests, HandlerShouldBeCaseInsensitive) {
 
 TEST_F(EntityEventsHandlerTests, SubscribeShouldBeCaseInsensitive) {
   auto eventName = "EvEnt";
-  auto called = false;
+  auto called    = false;
 
-  handler.subscribe(eventName, [&called](centity_t *cent) { called = true; });
+  handler.subscribe(eventName, [&called](centity_t *cent) {
+    called = true;
+  });
 
   handler.check("event", &ent1);
   ASSERT_TRUE(called);
@@ -75,7 +86,7 @@ TEST_F(EntityEventsHandlerTests, SubscribeShouldBeCaseInsensitive) {
 
 TEST_F(EntityEventsHandlerTests, SubscribeShouldPassCorrectEntityInCallback) {
   auto command = "event";
-  auto called = false;
+  auto called  = false;
 
   handler.subscribe(command, [&called](centity_t *cent) {
     if (cent->currentState.number == ent1.currentState.number) {
@@ -89,11 +100,15 @@ TEST_F(EntityEventsHandlerTests, SubscribeShouldPassCorrectEntityInCallback) {
 
 TEST_F(EntityEventsHandlerTests, SubscribeShouldAllowMultipleCallbacks) {
   auto command = "event";
-  auto count = 0;
+  auto count   = 0;
 
-  handler.subscribe(command, [&count](centity_t *cent) { count++; });
+  handler.subscribe(command, [&count](centity_t *cent) {
+    count++;
+  });
 
-  handler.subscribe(command, [&count](centity_t *cent) { count++; });
+  handler.subscribe(command, [&count](centity_t *cent) {
+    count++;
+  });
 
   handler.check("event", &ent1);
   ASSERT_TRUE(count == 2);
@@ -102,8 +117,9 @@ TEST_F(EntityEventsHandlerTests, SubscribeShouldAllowMultipleCallbacks) {
 TEST_F(EntityEventsHandlerTests, CheckShouldWorkWithIntAsName) {
   auto called = false;
 
-  handler.subscribe("__event__24",
-                    [&called](centity_t *cent) { called = true; });
+  handler.subscribe("__event__24", [&called](centity_t *cent) {
+    called = true;
+  });
 
   handler.check(EV_JUMP, &ent1);
   ASSERT_TRUE(called);
@@ -112,7 +128,9 @@ TEST_F(EntityEventsHandlerTests, CheckShouldWorkWithIntAsName) {
 TEST_F(EntityEventsHandlerTests, SubscribeShouldWorkWithIntAsName) {
   auto called = false;
 
-  handler.subscribe(EV_JUMP, [&called](centity_t *cent) { called = true; });
+  handler.subscribe(EV_JUMP, [&called](centity_t *cent) {
+    called = true;
+  });
 
   handler.check("__event__24", &ent1);
   ASSERT_TRUE(called);

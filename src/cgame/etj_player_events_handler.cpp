@@ -23,26 +23,28 @@
  */
 
 #include "etj_player_events_handler.h"
+
 #include "../game/etj_string_utilities.h"
 
 ETJump::PlayerEventsHandler::PlayerEventsHandler() {}
 
-ETJump::PlayerEventsHandler::~PlayerEventsHandler() { _callbacks.clear(); }
+ETJump::PlayerEventsHandler::~PlayerEventsHandler() {
+  _callbacks.clear();
+}
 
-bool ETJump::PlayerEventsHandler::check(
-    const std::string &event, const std::vector<std::string> &arguments) {
+bool ETJump::PlayerEventsHandler::check(const std::string &event, const std::vector<std::string> &arguments) {
   auto lowerEvent = StringUtils::toLowerCase(event);
-  auto match = _callbacks.find(lowerEvent);
+  auto match      = _callbacks.find(lowerEvent);
   if (match != end(_callbacks)) {
-    for (const auto &listener : match->second) listener(arguments);
+    for (const auto &listener : match->second)
+      listener(arguments);
     return true;
   }
   return false;
 }
 
-bool ETJump::PlayerEventsHandler::subscribe(
-    const std::string &event,
-    const std::function<void(const std::vector<std::string> &)> &callback) {
+bool ETJump::PlayerEventsHandler::subscribe(const std::string &event,
+                                            const std::function<void(const std::vector<std::string> &)> &callback) {
   auto lowerEvent = StringUtils::toLowerCase(event);
   _callbacks[lowerEvent].push_back(callback);
   return true;
@@ -50,7 +52,7 @@ bool ETJump::PlayerEventsHandler::subscribe(
 
 bool ETJump::PlayerEventsHandler::unsubscribe(const std::string &event) {
   auto lowerEvent = StringUtils::toLowerCase(event);
-  auto listeners = _callbacks.find(lowerEvent);
+  auto listeners  = _callbacks.find(lowerEvent);
   if (listeners == end(_callbacks))
     return false;
   _callbacks.erase(listeners);

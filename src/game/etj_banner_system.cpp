@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-#include <utility>
-
 #include "etj_banner_system.h"
+
+#include <utility>
 
 #include "etj_common.h"
 #include "etj_printer.h"
@@ -34,14 +34,14 @@ static const char *LocationText[] = {"Center", "Top", "Chat", "Left"};
 
 ETJump::BannerSystem::BannerSystem(Options options) : _bannerIdx(0) {
   _options = std::move(options);
-  subscribeToRunFrame([=](int levelTime) { check(levelTime); });
-  Printer::logLn(StringUtils::format("Initialized banner system\n"
-                                     "- %d banners\n"
-                                     "- %ds interval\n"
-                                     "- %s location",
-                                     _options.messages.size(),
-                                     (_options.interval / 1000),
-                                     LocationText[_options.location]));
+  subscribeToRunFrame([=](int levelTime) {
+    check(levelTime);
+  });
+  Printer::logLn("Initialized banner system\n"
+                 "- %d banners\n"
+                 "- %ds interval\n"
+                 "- %s location",
+                 _options.messages.size(), (_options.interval / 1000), LocationText[_options.location]);
 }
 
 void ETJump::BannerSystem::check(int levelTime) {
@@ -73,7 +73,7 @@ void ETJump::BannerSystem::check(int levelTime) {
       break;
   }
 
-  _bannerIdx = static_cast<int>((_bannerIdx + 1) % _options.messages.size());
+  _bannerIdx      = static_cast<int>((_bannerIdx + 1) % _options.messages.size());
   _nextBannerTime = levelTime + _options.interval;
 }
 

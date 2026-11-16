@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+
 #include "etj_local.h"
 
 typedef float vec_t;
@@ -28,10 +29,8 @@ bool ToFloat(const std::string &toConvert, float &value);
 std::string ToString(vec3_t toConvert);
 std::string ToString(vec_t x, vec_t y, vec_t z);
 
-gentity_t *PlayerGentityFromString(char *name, char *err, int size,
-                                   team_t filter = TEAM_FREE);
-gentity_t *PlayerGentityFromString(const std::string &name, std::string &err,
-                                   team_t filter = TEAM_FREE);
+gentity_t *PlayerGentityFromString(char *name, char *err, int size, team_t filter = TEAM_FREE);
+gentity_t *PlayerGentityFromString(const std::string &name, std::string &err, team_t filter = TEAM_FREE);
 
 std::string ValueForKey(gentity_t *ent, const std::string &key);
 std::string ValueForKey(int clientNum, const std::string &key);

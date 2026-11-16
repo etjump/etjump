@@ -23,6 +23,7 @@
  */
 
 #include "etj_console_shader.h"
+
 #include "cg_local.h"
 #include "etj_color_parser.h"
 #include "etj_utilities.h"
@@ -47,46 +48,48 @@ std::string ConsoleShader::createBackground() {
 }
 
 std::string ConsoleShader::createTexturedBackground() const {
-  auto alphaGen =
-      StringUtils::format("alphaGen const %f", etj_consoleAlpha.value);
+  auto alphaGen = StringUtils::format("alphaGen const %f", etj_consoleAlpha.value);
 
-  return composeShader(shaderName, {"nopicmip"},
-                       {{"map textures/skies_sd/wurzburg_clouds.tga",
-                         "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
-                         alphaGen.c_str(), "rgbGen identityLighting",
-                         "tcMod scale 1.5 .75", "tcMod scroll 0.01 -0.005"},
-                        {
-                            "map textures/skies_sd/wurzburg_clouds.tga",
-                            "blendFunc GL_DST_COLOR GL_ONE",
-                            "rgbGen identityLighting",
-                            "tcMod scale 1.25 .85",
-                            "tcMod transform 0 1 1 0 0 0",
-                            "tcMod scroll 0.03 -0.015",
-                        },
-                        {
-                            "clampmap textures/skies_sd/colditz_mask.tga",
-                            "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
-                            alphaGen.c_str(),
-                            "rgbGen identityLighting",
-                            "tcMod scale 0.85 0.5",
-                            "tcMod transform 1 0 0 1 -0.075 0.42",
-                        }});
+  return composeShader(
+    shaderName,
+    {
+      "nopicmip"
+  },
+    {{"map textures/skies_sd/wurzburg_clouds.tga", "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA", alphaGen.c_str(),
+      "rgbGen identityLighting", "tcMod scale 1.5 .75", "tcMod scroll 0.01 -0.005"},
+     {
+       "map textures/skies_sd/wurzburg_clouds.tga",
+       "blendFunc GL_DST_COLOR GL_ONE",
+       "rgbGen identityLighting",
+       "tcMod scale 1.25 .85",
+       "tcMod transform 0 1 1 0 0 0",
+       "tcMod scroll 0.03 -0.015",
+     },
+     {
+       "clampmap textures/skies_sd/colditz_mask.tga",
+       "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
+       alphaGen.c_str(),
+       "rgbGen identityLighting",
+       "tcMod scale 0.85 0.5",
+       "tcMod transform 1 0 0 1 -0.075 0.42",
+     }});
 }
 
 std::string ConsoleShader::createSolidBackground() const {
   vec4_t bg;
   cgame.utils.colorParser->parseColorString(etj_consoleColor.string, bg);
-  auto alphaGen =
-      StringUtils::format("alphaGen const %f", etj_consoleAlpha.value);
-  auto colorGen =
-      StringUtils::format("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
+  auto alphaGen = StringUtils::format("alphaGen const %f", etj_consoleAlpha.value);
+  auto colorGen = StringUtils::format("rgbGen const ( %f %f %f )", bg[0], bg[1], bg[2]);
 
-  return composeShader(shaderName, {"nopicmip"},
+  return composeShader(shaderName,
+                       {
+                         "nopicmip"
+  },
                        {{
-                           "map $whiteimage",
-                           "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
-                           alphaGen.c_str(),
-                           colorGen.c_str(),
+                         "map $whiteimage",
+                         "blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA",
+                         alphaGen.c_str(),
+                         colorGen.c_str(),
                        }});
 }
 

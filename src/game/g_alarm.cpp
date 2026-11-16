@@ -101,11 +101,10 @@ void alarmbox_use(gentity_t *ent, gentity_t *other, gentity_t *foo) {
 alarmbox_die
 ==============
 */
-void alarmbox_die(gentity_t *ent, gentity_t *inflictor, gentity_t *attacker,
-                  int damage, int mod) {
+void alarmbox_die(gentity_t *ent, gentity_t *inflictor, gentity_t *attacker, int damage, int mod) {
   propExplosion(ent);
-  ent->s.frame = 2;
-  ent->active = qfalse;
+  ent->s.frame    = 2;
+  ent->active     = qfalse;
   ent->takedamage = qfalse;
   alarmbox_updateparts(ent, qtrue);
 }
@@ -156,8 +155,7 @@ void SP_alarm_box(gentity_t *ent) {
 
   // model
   trap_SetBrushModel(ent, ent->model);
-  ent->s.modelindex2 =
-      G_ModelIndex("models/mapobjects/electronics/alarmbox.md3");
+  ent->s.modelindex2 = G_ModelIndex("models/mapobjects/electronics/alarmbox.md3");
 
   // sound
   if (G_SpawnString("noise", "0", &s)) {
@@ -170,8 +168,7 @@ void SP_alarm_box(gentity_t *ent) {
   G_SetAngle(ent, ent->s.angles);
 
   // Gordon: FIXME: temp
-  G_Printf("Alarm: %f %f %f\n", ent->s.origin[0], ent->s.origin[1],
-           ent->s.origin[2]);
+  G_Printf("Alarm: %f %f %f\n", ent->s.origin[0], ent->s.origin[1], ent->s.origin[2]);
 
   if (!ent->health) {
     ent->health = 10;
@@ -183,13 +180,13 @@ void SP_alarm_box(gentity_t *ent) {
     ent->s.frame = 0;
   }
 
-  ent->active = qtrue;
-  ent->s.eType = ET_ALARMBOX;
+  ent->active     = qtrue;
+  ent->s.eType    = ET_ALARMBOX;
   ent->takedamage = qtrue;
-  ent->die = alarmbox_die;
-  ent->use = alarmbox_use;
-  ent->think = alarmbox_finishspawning;
-  ent->nextthink = level.time + FRAMETIME;
+  ent->die        = alarmbox_die;
+  ent->use        = alarmbox_use;
+  ent->think      = alarmbox_finishspawning;
+  ent->nextthink  = level.time + FRAMETIME;
 
   trap_LinkEntity(ent);
 }

@@ -9,10 +9,12 @@
  *
  */
 
-#include "g_local.h"
+#include "etj_local.h"
 #include "etj_timerun_v2.h"
+#include "etj_worldspawn.h"
+#include "g_local.h"
 
-inline constexpr int RESPAWN_SP = -1;
+inline constexpr int RESPAWN_SP   = -1;
 inline constexpr int RESPAWN_AMMO = 40;
 
 //======================================================================
@@ -22,8 +24,8 @@ inline constexpr int RESPAWN_AMMO = 40;
 // returns whether ammo was added to the clip
 int AddToClip(playerState_t *ps, // which player
               int weapon,        // weapon to add ammo for
-              int ammomove, // ammount to add. 0 means fill the clip if possible
-              int outOfReserve) // is the amount to be added out of reserve
+              int ammomove,      // ammount to add. 0 means fill the clip if possible
+              int outOfReserve)  // is the amount to be added out of reserve
 {
   int inclip, maxclip;
   int ammoweap = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
@@ -32,7 +34,7 @@ int AddToClip(playerState_t *ps, // which player
     return qfalse;
   }
 
-  inclip = ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(weapon))];
+  inclip  = ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(weapon))];
   maxclip = GetAmmoTableData(weapon)->maxclip;
 
   if (!ammomove) // amount to add to the clip not specified
@@ -53,8 +55,7 @@ int AddToClip(playerState_t *ps, // which player
     if (outOfReserve) {
       ps->ammo[ammoweap] -= ammomove;
     }
-    ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(weapon))] +=
-        ammomove;
+    ps->ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(weapon))] += ammomove;
     return qtrue;
   }
   return qfalse;
@@ -88,8 +89,7 @@ rest in reserve
 int Add_Ammo(gentity_t *ent, int weapon, int count, qboolean fillClip) {
   int ammoweap = BG_FindAmmoForWeapon(static_cast<weapon_t>(weapon));
   int originalCount;
-  int maxammo = BG_MaxAmmoForWeapon(static_cast<weapon_t>(ammoweap),
-                                    ent->client->sess.skill);
+  int maxammo = BG_MaxAmmoForWeapon(static_cast<weapon_t>(ammoweap), ent->client->sess.skill);
 
   originalCount = ent->client->ps.ammo[ammoweap];
 
@@ -117,17 +117,15 @@ int Add_Ammo(gentity_t *ent, int weapon, int count, qboolean fillClip) {
     ent->client->ps.ammoclip[ammoweap] += count;
 
     if (ent->client->ps.ammoclip[ammoweap] > maxammo) {
-      ent->client->ps.ammoclip[ammoweap] =
-          maxammo; // -
-                   // ent->client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
+      ent->client->ps.ammoclip[ammoweap] = maxammo; // -
+                                                    // ent->client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
     }
   } else {
     ent->client->ps.ammo[ammoweap] += count;
 
     if (ent->client->ps.ammo[ammoweap] > maxammo) {
-      ent->client->ps.ammo[ammoweap] =
-          maxammo; // -
-                   // ent->client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
+      ent->client->ps.ammo[ammoweap] = maxammo; // -
+                                                // ent->client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
     }
   }
 
@@ -166,8 +164,8 @@ for any two-handed weapon
 =================================================================
 */
 qboolean AddMagicAmmo(gentity_t *receiver, int numOfClips) {
-  return BG_AddMagicAmmo(&receiver->client->ps, receiver->client->sess.skill,
-                         receiver->client->sess.sessionTeam, numOfClips);
+  return BG_AddMagicAmmo(&receiver->client->ps, receiver->client->sess.skill, receiver->client->sess.sessionTeam,
+                         numOfClips);
 }
 
 //======================================================================
@@ -176,8 +174,7 @@ weapon_t G_GetPrimaryWeaponForClient(gclient_t *client) {
   int i;
   bg_playerclass_t *classInfo;
 
-  if (client->sess.sessionTeam != TEAM_ALLIES &&
-      client->sess.sessionTeam != TEAM_AXIS) {
+  if (client->sess.sessionTeam != TEAM_ALLIES && client->sess.sessionTeam != TEAM_AXIS) {
     return WP_NONE;
   }
 
@@ -192,8 +189,7 @@ weapon_t G_GetPrimaryWeaponForClient(gclient_t *client) {
 
   classInfo = &bg_allies_playerclasses[client->sess.playerType];
   for (i = 0; i < MAX_WEAPS_PER_CLASS; i++) {
-    if (classInfo->classWeapons[i] == WP_MP40 ||
-        classInfo->classWeapons[i] == WP_THOMPSON) {
+    if (classInfo->classWeapons[i] == WP_MP40 || classInfo->classWeapons[i] == WP_THOMPSON) {
       continue;
     }
 
@@ -204,8 +200,7 @@ weapon_t G_GetPrimaryWeaponForClient(gclient_t *client) {
 
   classInfo = &bg_axis_playerclasses[client->sess.playerType];
   for (i = 0; i < MAX_WEAPS_PER_CLASS; i++) {
-    if (classInfo->classWeapons[i] == WP_MP40 ||
-        classInfo->classWeapons[i] == WP_THOMPSON) {
+    if (classInfo->classWeapons[i] == WP_MP40 || classInfo->classWeapons[i] == WP_THOMPSON) {
       continue;
     }
 
@@ -245,8 +240,7 @@ void G_DropWeapon(gentity_t *ent, weapon_t weapon) {
   VectorSet(mins, -ITEM_RADIUS, -ITEM_RADIUS, 0);
   VectorSet(maxs, ITEM_RADIUS, ITEM_RADIUS, 2 * ITEM_RADIUS);
 
-  trap_Trace(&tr, client->ps.origin, mins, maxs, org, ent->s.number,
-             MASK_SOLID);
+  trap_Trace(&tr, client->ps.origin, mins, maxs, org, ent->s.number, MASK_SOLID);
   VectorCopy(tr.endpos, org);
 
   ent2 = LaunchItem(item, org, velocity, client->ps.clientNum);
@@ -276,15 +270,13 @@ void G_DropWeapon(gentity_t *ent, weapon_t weapon) {
   }
 
   if (weapon == WP_MORTAR) {
-    ent2->count = client->ps.ammo[BG_FindAmmoForWeapon(weapon)] +
-                  client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
+    ent2->count = client->ps.ammo[BG_FindAmmoForWeapon(weapon)] + client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
   } else {
     ent2->count = client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
   }
 
   if (weapon == WP_KAR98 || weapon == WP_CARBINE) {
-    ent2->delay = client->ps.ammo[BG_FindAmmoForWeapon(
-        static_cast<weapon_t>(weapAlts[weapon]))];
+    ent2->delay = client->ps.ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(weapAlts[weapon]))];
   } else {
     ent2->delay = 0;
   }
@@ -315,13 +307,11 @@ qboolean G_CanPickupWeapon(weapon_t weapon, gentity_t *ent) {
     }
   }
 
-  if (ent->client->sess.skill[SK_HEAVY_WEAPONS] >= 4 &&
-      (weapon == WP_THOMPSON || weapon == WP_MP40)) {
+  if (ent->client->sess.skill[SK_HEAVY_WEAPONS] >= 4 && (weapon == WP_THOMPSON || weapon == WP_MP40)) {
     return qfalse;
   }
 
-  return BG_WeaponIsPrimaryForClassAndTeam(
-      ent->client->sess.playerType, ent->client->sess.sessionTeam, weapon);
+  return BG_WeaponIsPrimaryForClassAndTeam(ent->client->sess.playerType, ent->client->sess.sessionTeam, weapon);
 }
 
 int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
@@ -329,8 +319,7 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
   // ent->delay carries secondary weapon ammo
   const int quantityAlt = static_cast<int>(ent->delay);
 
-  const weapon_t grenadeType =
-      BG_GrenadeTypeForTeam(other->client->sess.sessionTeam);
+  const weapon_t grenadeType = BG_GrenadeTypeForTeam(other->client->sess.sessionTeam);
 
   if (grenadeType != WP_NONE && ent->item->giTag == grenadeType) {
     if (quantity > 0) {
@@ -339,8 +328,7 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
       other->client->ps.ammoclip[grenadeType] += quantity;
 
       const int maxGrenades =
-          BG_GrenadesForClass(other->client->ps.stats[STAT_PLAYER_CLASS],
-                              other->client->sess.skill);
+        BG_GrenadesForClass(other->client->ps.stats[STAT_PLAYER_CLASS], other->client->sess.skill);
 
       if (other->client->ps.ammoclip[grenadeType] > maxGrenades) {
         other->client->ps.ammoclip[grenadeType] = maxGrenades;
@@ -357,10 +345,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
     // enemy, give him some props
     if (other->client->ps.stats[STAT_PLAYER_CLASS] != PC_FIELDOPS) {
       if (ent->parent && ent->parent->client &&
-          other->client->sess.sessionTeam ==
-              ent->parent->client->sess.sessionTeam) {
-        if (!(ent->parent->client->PCSpecialPickedUpCount %
-              LT_SPECIAL_PICKUP_MOD)) {
+          other->client->sess.sessionTeam == ent->parent->client->sess.sessionTeam) {
+        if (!(ent->parent->client->PCSpecialPickedUpCount % LT_SPECIAL_PICKUP_MOD)) {
           AddScore(ent->parent, WOLF_AMMO_UP);
           if (ent->parent && ent->parent->client) {
             G_LogPrintf("Ammo_Pack: %d %d\n", ClientNum(ent->parent),
@@ -369,8 +355,7 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
         }
         ent->parent->client->PCSpecialPickedUpCount++;
         G_AddSkillPoints(ent->parent, SK_SIGNALS, 1.f);
-        G_DebugAddSkillPoints(ent->parent, SK_SIGNALS, 1.f,
-                              "ammo pack picked up");
+        G_DebugAddSkillPoints(ent->parent, SK_SIGNALS, 1.f, "ammo pack picked up");
 
         // extracted code originally here into
         // AddMagicAmmo -xkan, 9/18/2002 add 1
@@ -385,10 +370,8 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
   // hack: fops doesn't spawn with an ammo pack, but we need to treat them as
   // if they have the ammo pack already, otherwise we return a wrong value here
   // and ammo packs picked up by field ops don't disappear once picked up
-  const bool alreadyHave =
-      COM_BitCheck(other->client->ps.weapons, ent->item->giTag) ||
-      other->client->ps.stats[STAT_PLAYER_CLASS] == PC_FIELDOPS &&
-          ent->item->giTag == WP_AMMO;
+  const bool alreadyHave = COM_BitCheck(other->client->ps.weapons, ent->item->giTag) ||
+                           (other->client->ps.stats[STAT_PLAYER_CLASS] == PC_FIELDOPS && ent->item->giTag == WP_AMMO);
 
   // JPW NERVE  prevents drop/pickup weapon "quick reload" exploit
   if (alreadyHave) {
@@ -403,8 +386,7 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
       return 0;
     }
 
-    if (other->client->ps.weapon == WP_MORTAR_SET ||
-        other->client->ps.weapon == WP_MOBILE_MG42_SET) {
+    if (other->client->ps.weapon == WP_MORTAR_SET || other->client->ps.weapon == WP_MOBILE_MG42_SET) {
       return 0;
     }
 
@@ -448,23 +430,18 @@ int Pickup_Weapon(gentity_t *ent, gentity_t *other) {
         COM_BitSet(other->client->ps.weapons, WP_GPG40);
       }
 
-      other->client->ps.ammoclip[BG_FindClipForWeapon(
-          static_cast<weapon_t>(ent->item->giTag))] = 0;
-      other->client->ps
-          .ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ent->item->giTag))] =
-          0;
+      other->client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(ent->item->giTag))] = 0;
+      other->client->ps.ammo[BG_FindAmmoForWeapon(static_cast<weapon_t>(ent->item->giTag))]     = 0;
 
       if (ent->item->giTag == WP_MORTAR) {
-        other->client->ps.ammo[BG_FindClipForWeapon(
-            static_cast<weapon_t>(ent->item->giTag))] = quantity;
+        other->client->ps.ammo[BG_FindClipForWeapon(static_cast<weapon_t>(ent->item->giTag))] = quantity;
 
         // Gordon: secondary weapon ammo
         if (quantityAlt) {
           Add_Ammo(other, weapAlts[ent->item->giTag], quantityAlt, qfalse);
         }
       } else {
-        other->client->ps.ammoclip[BG_FindClipForWeapon(
-            static_cast<weapon_t>(ent->item->giTag))] = quantity;
+        other->client->ps.ammoclip[BG_FindClipForWeapon(static_cast<weapon_t>(ent->item->giTag))] = quantity;
 
         // Gordon: secondary weapon ammo
         if (quantityAlt) {
@@ -489,17 +466,14 @@ int Pickup_Health(gentity_t *ent, gentity_t *other) {
   // give him some props
   if (other->client->ps.stats[STAT_PLAYER_CLASS] != PC_MEDIC) {
     if (ent->parent && ent->parent->client &&
-        other->client->sess.sessionTeam ==
-            ent->parent->client->sess.sessionTeam) {
-      if (!(ent->parent->client->PCSpecialPickedUpCount %
-            MEDIC_SPECIAL_PICKUP_MOD)) {
+        other->client->sess.sessionTeam == ent->parent->client->sess.sessionTeam) {
+      if (!(ent->parent->client->PCSpecialPickedUpCount % MEDIC_SPECIAL_PICKUP_MOD)) {
         AddScore(ent->parent, WOLF_HEALTH_UP);
         G_LogPrintf("Health_Pack: %d %d\n", ClientNum(ent->parent),
                     ClientNum(other)); // OSP
       }
       G_AddSkillPoints(ent->parent, SK_FIRST_AID, 1.f);
-      G_DebugAddSkillPoints(ent->parent, SK_FIRST_AID, 1.f,
-                            "health pack picked up");
+      G_DebugAddSkillPoints(ent->parent, SK_FIRST_AID, 1.f, "health pack picked up");
       ent->parent->client->PCSpecialPickedUpCount++;
     }
   }
@@ -537,17 +511,18 @@ void RespawnItem(gentity_t *ent) {
     }
     master = ent->teammaster;
 
-    for (count = 0, ent = master; ent; ent = ent->teamchain, count++);
+    for (count = 0, ent = master; ent; ent = ent->teamchain, count++)
+      ;
 
     choice = rand() % count;
 
-    for (count = 0, ent = master; count < choice;
-         ent = ent->teamchain, count++);
+    for (count = 0, ent = master; count < choice; ent = ent->teamchain, count++)
+      ;
   }
 
   ent->r.contents = CONTENTS_TRIGGER;
   // ent->s.eFlags &= ~EF_NODRAW;
-  ent->flags &= ~FL_NODRAW;
+  ent->flags     &= ~FL_NODRAW;
   ent->r.svFlags &= ~SVF_NOCLIENT;
   trap_LinkEntity(ent);
 
@@ -578,8 +553,7 @@ void Touch_Item_Auto(gentity_t *ent, gentity_t *other, trace_t *trace) {
         if (other->client->pers.touchPickupWeapons <= 0) {
           return;
         } else if (other->client->pers.touchPickupWeapons == 1) {
-          if (ent->entityOwner != other->s.number &&
-              ent->entityOwner != ENTITYNUM_WORLD) {
+          if (ent->entityOwner != other->s.number && ent->entityOwner != ENTITYNUM_WORLD) {
             return;
           }
         }
@@ -590,9 +564,8 @@ void Touch_Item_Auto(gentity_t *ent, gentity_t *other, trace_t *trace) {
   ent->active = qtrue;
   Touch_Item(ent, other, trace);
 
-  if (other->client->pers.autoActivate ==
-      PICKUP_FORCE) // autoactivate probably forced by the
-                    // "Cmd_Activate_f()" function
+  if (other->client->pers.autoActivate == PICKUP_FORCE) // autoactivate probably forced by the
+                                                        // "Cmd_Activate_f()" function
   {
     other->client->pers.autoActivate = PICKUP_ACTIVATE; // so reset it.
   }
@@ -638,17 +611,13 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace) {
   }
 
   // the same pickup rules are used for client side and server side
-  if (!BG_CanItemBeGrabbed(&ent->s, &other->client->ps,
-                           other->client->sess.skill,
-                           other->client->sess.sessionTeam)) {
+  if (!BG_CanItemBeGrabbed(&ent->s, &other->client->ps, other->client->sess.skill, other->client->sess.sessionTeam)) {
     return;
   }
 
   // ETJump: disable explosives pickup
-  if (ETJump::TimerunV2::weaponIsExplosivePickup(ent->item->giTag) &&
-      other->client->sess.timerunActive &&
-      other->client->sess.runSpawnflags &
-          static_cast<int>(ETJump::TimerunSpawnflags::NoExplosivesPickup)) {
+  if (ETJump::TimerunV2::weaponIsExplosivePickup(ent->item->giTag) && other->client->sess.timerunActive &&
+      other->client->sess.runSpawnflags & static_cast<int>(ETJump::TimerunSpawnflags::NoExplosivesPickup)) {
     return;
   }
 
@@ -656,8 +625,7 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace) {
     G_LogPrintf("Item: %i %s\n", other->s.number, ent->item->classname);
   } else {
     // OSP - Don't let them pickup winning stuff in warmup
-    if (ent->item->giType != IT_WEAPON && ent->item->giType != IT_AMMO &&
-        ent->item->giType != IT_HEALTH) {
+    if (ent->item->giType != IT_WEAPON && ent->item->giType != IT_AMMO && ent->item->giType != IT_HEALTH) {
       return;
     }
   }
@@ -700,9 +668,9 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace) {
 
   // powerup pickups are global broadcasts
   if (ent->item->giType == IT_TEAM) {
-    gentity_t *te = G_TempEntity(ent->s.pos.trBase, EV_GLOBAL_ITEM_PICKUP);
-    te->s.eventParm = ent->s.modelindex;
-    te->r.svFlags |= SVF_BROADCAST;
+    gentity_t *te    = G_TempEntity(ent->s.pos.trBase, EV_GLOBAL_ITEM_PICKUP);
+    te->s.eventParm  = ent->s.modelindex;
+    te->r.svFlags   |= SVF_BROADCAST;
   }
 
   //	G_LogPrintf( "Firing item targets\n" );
@@ -720,9 +688,9 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace) {
   // to be placed on movers.
   // ETJump: portalgun never disappears
   if (ent->item->giTag != WP_PORTAL_GUN) {
-    ent->r.svFlags |= SVF_NOCLIENT;
-    ent->flags |= FL_NODRAW;
-    ent->r.contents = 0;
+    ent->r.svFlags  |= SVF_NOCLIENT;
+    ent->flags      |= FL_NODRAW;
+    ent->r.contents  = 0;
   }
 
   // ZOID
@@ -731,10 +699,10 @@ void Touch_Item(gentity_t *ent, gentity_t *other, trace_t *trace) {
   // third party events such as ctf flags
   if (respawn <= 0) {
     ent->nextthink = 0;
-    ent->think = 0;
+    ent->think     = 0;
   } else {
     ent->nextthink = level.time + respawn * 1000;
-    ent->think = RespawnItem;
+    ent->think     = RespawnItem;
   }
   trap_LinkEntity(ent);
 }
@@ -748,8 +716,7 @@ LaunchItem
 Spawns an item and tosses it forward
 ================
 */
-gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity,
-                      int ownerNum) {
+gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity, int ownerNum) {
   gentity_t *dropped;
   trace_t tr;
   vec3_t vec, temp;
@@ -757,27 +724,25 @@ gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity,
 
   dropped = G_Spawn();
 
-  dropped->s.eType = ET_ITEM;
-  dropped->s.modelindex = item - bg_itemlist; // store item number in modelindex
-  dropped->s.otherEntityNum2 = 1; // DHM - Nerve :: this is taking modelindex2's
-                                  // place for a dropped item
+  dropped->s.eType           = ET_ITEM;
+  dropped->s.modelindex      = item - bg_itemlist; // store item number in modelindex
+  dropped->s.otherEntityNum2 = 1;                  // DHM - Nerve :: this is taking modelindex2's
+                                                   // place for a dropped item
 
   dropped->classname = item->classname;
-  dropped->item = item;
+  dropped->item      = item;
   VectorSet(dropped->r.mins, -ITEM_RADIUS, -ITEM_RADIUS,
             0); //----(SA)	so items sit on the ground
   VectorSet(dropped->r.maxs, ITEM_RADIUS, ITEM_RADIUS,
             2 * ITEM_RADIUS); //----(SA)	so items sit on the ground
   dropped->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
 
-  dropped->clipmask =
-      CONTENTS_SOLID | CONTENTS_MISSILECLIP; // NERVE - SMF - fix for items
-                                             // falling through grates
+  dropped->clipmask = CONTENTS_SOLID | CONTENTS_MISSILECLIP; // NERVE - SMF - fix for items
+                                                             // falling through grates
 
   dropped->touch = Touch_Item_Auto;
 
-  trap_Trace(&tr, origin, dropped->r.mins, dropped->r.maxs, origin, ownerNum,
-             MASK_SOLID);
+  trap_Trace(&tr, origin, dropped->r.mins, dropped->r.maxs, origin, ownerNum, MASK_SOLID);
   if (tr.startsolid) {
     VectorSubtract(g_entities[ownerNum].s.origin, origin, temp);
     VectorNormalize(temp);
@@ -786,8 +751,7 @@ gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity,
       VectorScale(temp, i, vec);
       VectorAdd(origin, vec, origin);
 
-      trap_Trace(&tr, origin, dropped->r.mins, dropped->r.maxs, origin,
-                 ownerNum, MASK_SOLID);
+      trap_Trace(&tr, origin, dropped->r.mins, dropped->r.maxs, origin, ownerNum, MASK_SOLID);
       if (!tr.startsolid) {
         break;
       }
@@ -801,8 +765,8 @@ gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity,
 
   // ydnar: set yaw to parent angles
   temp[PITCH] = 0;
-  temp[YAW] = g_entities[ownerNum].s.apos.trBase[YAW];
-  temp[ROLL] = 0;
+  temp[YAW]   = g_entities[ownerNum].s.apos.trBase[YAW];
+  temp[ROLL]  = 0;
   G_SetAngle(dropped, temp);
 
   dropped->s.eFlags |= EF_BOUNCE_HALF;
@@ -811,18 +775,15 @@ gentity_t *LaunchItem(gitem_t *item, vec3_t origin, vec3_t velocity,
   {
     gentity_t *flag = &g_entities[g_entities[ownerNum].client->flagParent];
 
-    dropped->s.otherEntityNum =
-        g_entities[ownerNum].client->flagParent; // store the entitynum of our
-                                                 // original flag spawner
-    dropped->s.density = 1;
-    dropped->think = Team_DroppedFlagThink;
-    dropped->nextthink = level.time + 30000;
+    dropped->s.otherEntityNum = g_entities[ownerNum].client->flagParent; // store the entitynum of our
+                                                                         // original flag spawner
+    dropped->s.density        = 1;
+    dropped->think            = Team_DroppedFlagThink;
+    dropped->nextthink        = level.time + 30000;
 
     if (level.gameManager) {
       G_Script_ScriptEvent(level.gameManager, "trigger",
-                           flag->item->giTag == PW_REDFLAG
-                               ? "allied_object_dropped"
-                               : "axis_object_dropped");
+                           flag->item->giTag == PW_REDFLAG ? "allied_object_dropped" : "axis_object_dropped");
     }
     G_Script_ScriptEvent(flag, "trigger", "dropped");
   } else // auto-remove after 30 seconds
@@ -849,14 +810,13 @@ Drop_Item
 Spawns an item and tosses it forward
 ================
 */
-gentity_t *Drop_Item(gentity_t *ent, gitem_t *item, float angle,
-                     qboolean novelocity) {
+gentity_t *Drop_Item(gentity_t *ent, gitem_t *item, float angle, qboolean novelocity) {
   vec3_t velocity;
   vec3_t angles;
 
   VectorCopy(ent->s.apos.trBase, angles);
-  angles[YAW] += angle;
-  angles[PITCH] = 0; // always forward
+  angles[YAW]   += angle;
+  angles[PITCH]  = 0; // always forward
 
   if (novelocity) {
     VectorClear(velocity);
@@ -909,19 +869,18 @@ void FinishSpawningItem(gentity_t *ent) {
     maxs[2] /= 2;
   }
 
-  ent->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
-  ent->touch = Touch_Item_Auto;
-  ent->s.eType = ET_ITEM;
-  ent->s.modelindex =
-      ent->item - bg_itemlist; // store item number in modelindex
+  ent->r.contents   = CONTENTS_TRIGGER | CONTENTS_ITEM;
+  ent->touch        = Touch_Item_Auto;
+  ent->s.eType      = ET_ITEM;
+  ent->s.modelindex = ent->item - bg_itemlist; // store item number in modelindex
 
-  ent->entityOwner = ENTITYNUM_WORLD; // Store "world" as owner for
-                                      // etj_touchPickupWeapons 1
-  ent->s.otherEntityNum2 = 0;         // DHM - Nerve :: takes modelindex2's
-                                      // place in signaling a dropped item
-                                      //----(SA)	we don't use this (yet,
-                                      // anyway) so I'm taking it so you
-                                      // can
+  ent->entityOwner       = ENTITYNUM_WORLD; // Store "world" as owner for
+                                            // etj_touchPickupWeapons 1
+  ent->s.otherEntityNum2 = 0;               // DHM - Nerve :: takes modelindex2's
+                                            // place in signaling a dropped item
+                                            //----(SA)	we don't use this (yet,
+                                            // anyway) so I'm taking it so you
+                                            // can
   // specify a model for treasure items and clipboards
   // ent->s.modelindex2 = 0;
   // // zero indicates this isn't a dropped item
@@ -947,11 +906,8 @@ void FinishSpawningItem(gentity_t *ent) {
   {
     G_SetOrigin(ent, ent->s.origin);
   } else {
-
-    VectorSet(dest, ent->s.origin[0], ent->s.origin[1],
-              ent->s.origin[2] - 4096);
-    trap_Trace(&tr, ent->s.origin, ent->r.mins, maxs, dest, ent->s.number,
-               MASK_SOLID);
+    VectorSet(dest, ent->s.origin[0], ent->s.origin[1], ent->s.origin[2] - 4096);
+    trap_Trace(&tr, ent->s.origin, ent->r.mins, maxs, dest, ent->s.number, MASK_SOLID);
 
     if (tr.startsolid) {
       vec3_t temp;
@@ -959,8 +915,7 @@ void FinishSpawningItem(gentity_t *ent) {
       VectorCopy(ent->s.origin, temp);
       temp[2] -= ITEM_RADIUS;
 
-      VectorSet(dest, ent->s.origin[0], ent->s.origin[1],
-                ent->s.origin[2] - 4096);
+      VectorSet(dest, ent->s.origin[0], ent->s.origin[1], ent->s.origin[2] - 4096);
       trap_Trace(&tr, temp, ent->r.mins, maxs, dest, ent->s.number, MASK_SOLID);
     }
 
@@ -970,8 +925,7 @@ void FinishSpawningItem(gentity_t *ent) {
 		trap_Trace(&tr, ent->s.origin, ent->r.mins, maxs, dest, ent->s.number, MASK_SOLID);
 #endif
     if (tr.startsolid) {
-      G_Printf("FinishSpawningItem: %s startsolid at %s\n", ent->classname,
-               vtos(ent->s.origin));
+      G_Printf("FinishSpawningItem: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
       G_FreeEntity(ent);
       return;
     }
@@ -1037,7 +991,7 @@ void G_SpawnItem(gentity_t *ent, gitem_t *item) {
   // some movers spawn on the second frame, so delay item
   // spawns until the third frame so they can ride trains
   ent->nextthink = level.time + FRAMETIME * 2;
-  ent->think = FinishSpawningItem;
+  ent->think     = FinishSpawningItem;
 
   if (G_SpawnString("noise", 0, &noise)) {
     ent->noise_index = G_SoundIndex(noise);
@@ -1055,8 +1009,7 @@ void G_SpawnItem(gentity_t *ent, gitem_t *item) {
     if (!ent->splashDamage) {
       ent->splashDamage = 100;
     }
-  } else if (item->giTag == WP_GRENADE_PINEAPPLE ||
-             item->giTag == WP_GRENADE_LAUNCHER) {
+  } else if (item->giTag == WP_GRENADE_PINEAPPLE || item->giTag == WP_GRENADE_LAUNCHER) {
     G_SpawnInt("count", "1", &ent->count);
 
     if (ent->count < 0) {
@@ -1077,10 +1030,8 @@ void G_BounceItem(gentity_t *ent, trace_t *trace) {
   int hitTime;
 
   // reflect the velocity on the trace plane
-  hitTime =
-      level.previousTime + (level.time - level.previousTime) * trace->fraction;
-  BG_EvaluateTrajectoryDelta(&ent->s.pos, hitTime, velocity, qfalse,
-                             ent->s.effect2Time);
+  hitTime = level.previousTime + (level.time - level.previousTime) * trace->fraction;
+  BG_EvaluateTrajectoryDelta(&ent->s.pos, hitTime, velocity, qfalse, ent->s.effect2Time);
   dot = DotProduct(velocity, trace->plane.normal);
   VectorMA(velocity, -2 * dot, trace->plane.normal, ent->s.pos.trDelta);
 
@@ -1122,8 +1073,7 @@ void G_RunItemProp(gentity_t *ent, vec3_t origin) {
   VectorCopy(origin, end);
   end[2] += 1;
 
-  trap_Trace(&trace, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, end,
-             ent->r.ownerNum, MASK_SHOT);
+  trap_Trace(&trace, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, end, ent->r.ownerNum, MASK_SHOT);
 
   traceEnt = &g_entities[trace.entityNum];
 
@@ -1131,9 +1081,7 @@ void G_RunItemProp(gentity_t *ent, vec3_t origin) {
     ent->enemy = traceEnt;
   }
 
-  if (owner->client && trace.startsolid && traceEnt != owner &&
-      traceEnt != ent /* && !traceEnt->active*/) {
-
+  if (owner->client && trace.startsolid && traceEnt != owner && traceEnt != ent /* && !traceEnt->active*/) {
     ent->takedamage = qfalse;
     ent->die(ent, ent, NULL, 10, 0);
     Prop_Break_Sound(ent);
@@ -1169,9 +1117,8 @@ void G_RunItem(gentity_t *ent) {
     }
   }
 
-  if (ent->s.pos.trType == TR_STATIONARY ||
-      ent->s.pos.trType == TR_GRAVITY_PAUSED) //----(SA)
-  {                                           // check think function
+  if (ent->s.pos.trType == TR_STATIONARY || ent->s.pos.trType == TR_GRAVITY_PAUSED) //----(SA)
+  {                                                                                 // check think function
     G_RunThink(ent);
     return;
   }
@@ -1183,8 +1130,7 @@ void G_RunItem(gentity_t *ent) {
   }
 
   // get current position
-  BG_EvaluateTrajectory(&ent->s.pos, level.time, origin, qfalse,
-                        ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.pos, level.time, origin, qfalse, ent->s.effect2Time);
 
   // trace a line from the previous position to the current position
   if (ent->clipmask) {
@@ -1192,8 +1138,7 @@ void G_RunItem(gentity_t *ent) {
   } else {
     mask = MASK_SOLID;
   }
-  trap_Trace(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
-             ent->r.ownerNum, mask);
+  trap_Trace(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->r.ownerNum, mask);
 
   if (ent->isProp && ent->takedamage) {
     G_RunItemProp(ent, origin);
@@ -1216,7 +1161,7 @@ void G_RunItem(gentity_t *ent) {
 
   // if it is in a nodrop volume, remove it
   contents = trap_PointContents(ent->r.currentOrigin, -1);
-  if (!BG_DropItems(contents, shared.integer)) {
+  if (!BG_DropItems(contents, game.worldspawn->sharedKeys.noDrop)) {
     if (ent->item && ent->item->giType == IT_TEAM) {
       Team_ReturnFlag(ent);
     } else {

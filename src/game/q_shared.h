@@ -26,10 +26,10 @@
 
 inline constexpr char CONFIG_NAME[] = "etconfig.cfg";
 
-#define MOD_CHECK_ETLEGACY(isETLegacy, versionNum, outputValue)                \
-  outputValue = ((isETLegacy) ? true : false);                                 \
-  if (outputValue) {                                                           \
-    (outputValue) = versionNum;                                                \
+#define MOD_CHECK_ETLEGACY(isETLegacy, versionNum, outputValue) \
+  outputValue = ((isETLegacy) ? true : false);                  \
+  if (outputValue) {                                            \
+    (outputValue) = versionNum;                                 \
   }
 
 #if defined _WIN32 && !defined __GNUC__
@@ -87,21 +87,21 @@ inline constexpr char CONFIG_NAME[] = "etconfig.cfg";
 
 #else
 
+  #include <array>
   #include <assert.h>
   #include <cmath>
-  #include <stdio.h>
-  #include <stdarg.h>
-  #include <string.h>
-  #include <stdlib.h>
-  #include <time.h>
-  #include <ctype.h>
-  #include <limits.h>
-  #include <sys/stat.h> // rain
-  #include <float.h>
-  #include <cstdlib>
-  #include <string>
   #include <cstdint>
-  #include <array>
+  #include <cstdlib>
+  #include <ctype.h>
+  #include <float.h>
+  #include <limits.h>
+  #include <stdarg.h>
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <string.h>
+  #include <string>
+  #include <sys/stat.h> // rain
+  #include <time.h>
 
 #endif
 
@@ -112,8 +112,7 @@ inline constexpr char CONFIG_NAME[] = "etconfig.cfg";
 #endif
 
 // this is the define for determining if we have an asm version of a C function
-#if (defined _M_IX86 || defined __i386__) && !defined __sun__ &&               \
-    !defined __LCC__
+#if (defined _M_IX86 || defined __i386__) && !defined __sun__ && !defined __LCC__
   #define id386 1
 #else
   #define id386 0
@@ -148,7 +147,7 @@ inline constexpr char CONFIG_NAME[] = "etconfig.cfg";
   #endif
 
 inline constexpr char PATH_SEP_STRING[] = "\\";
-inline constexpr char PATH_SEP = '\\';
+inline constexpr char PATH_SEP          = '\\';
 
 #endif
 
@@ -161,7 +160,7 @@ inline constexpr char PATH_SEP = '\\';
   #define CPUSTRING "MacOS"
 
 inline constexpr char PATH_SEP_STRING[] = "/";
-inline constexpr char PATH_SEP = '/';
+inline constexpr char PATH_SEP          = '/';
 
 #endif
 
@@ -174,7 +173,7 @@ inline constexpr char PATH_SEP = '/';
   #define CPUSTRING "MacOS-PPC"
 
 inline constexpr char PATH_SEP_STRING[] = "/";
-inline constexpr char PATH_SEP = '/';
+inline constexpr char PATH_SEP          = '/';
 
 void Sys_PumpEvents(void);
 
@@ -201,7 +200,7 @@ void Sys_PumpEvents(void);
   #endif
 
 inline constexpr char PATH_SEP_STRING[] = "/";
-inline constexpr char PATH_SEP = '/';
+inline constexpr char PATH_SEP          = '/';
 
 #endif
 
@@ -219,7 +218,10 @@ inline constexpr char PATH_SEP = '/';
 
 typedef unsigned char byte;
 
-typedef enum { qfalse, qtrue } qboolean;
+typedef enum {
+  qfalse,
+  qtrue
+} qboolean;
 
 typedef union {
   float f;
@@ -234,16 +236,16 @@ typedef int clipHandle_t;
 
 // networked fields in entityState_t and playerState_t,
 // with their respective networked sizes
-using net_uint2_t = int32_t;
-using net_uint4_t = int32_t;
-using net_uint7_t = int32_t;
-using net_uint8_t = int32_t;
-using net_uint9_t = int32_t;
+using net_uint2_t  = int32_t;
+using net_uint4_t  = int32_t;
+using net_uint7_t  = int32_t;
+using net_uint8_t  = int32_t;
+using net_uint9_t  = int32_t;
 using net_uint10_t = int32_t;
 using net_uint16_t = int32_t;
 using net_uint24_t = int32_t;
 
-using net_int8_t = int32_t;
+using net_int8_t  = int32_t;
 using net_int16_t = int32_t;
 using net_int32_t = int32_t;
 
@@ -272,8 +274,8 @@ inline constexpr int32_t MIN_QINT = -MAX_QINT - 1;
 
 // angle indexes
 inline constexpr int PITCH = 0; // up / down
-inline constexpr int YAW = 1;   // left / right
-inline constexpr int ROLL = 2;  // fall over
+inline constexpr int YAW   = 1; // left / right
+inline constexpr int ROLL  = 2; // fall over
 
 // the game guarantees that no string from the network
 // will ever exceed MAX_STRING_CHARS
@@ -285,21 +287,21 @@ inline constexpr int MAX_STRING_TOKENS = 256;
 inline constexpr int MAX_TOKEN_CHARS = 1024;
 
 inline constexpr int MAX_INFO_STRING = 1024;
-inline constexpr int MAX_INFO_KEY = 1024;
-inline constexpr int MAX_INFO_VALUE = 1024;
+inline constexpr int MAX_INFO_KEY    = 1024;
+inline constexpr int MAX_INFO_VALUE  = 1024;
 
 inline constexpr int BIG_INFO_STRING = 8192; // used for system info key only
-inline constexpr int BIG_INFO_KEY = 8192;
-inline constexpr int BIG_INFO_VALUE = 8192;
+inline constexpr int BIG_INFO_KEY    = 8192;
+inline constexpr int BIG_INFO_VALUE  = 8192;
 
-inline constexpr int MAX_QPATH = 64;   // max length of a quake game pathname
+inline constexpr int MAX_QPATH  = 64;  // max length of a quake game pathname
 inline constexpr int MAX_OSPATH = 256; // max length of a filesystem pathname
 
 // rain - increased to 36 to match MAX_NETNAME, fixes #13 - UI stuff breaks
 // with very long names
 inline constexpr int MAX_NAME_LENGTH = 36; // max length of a client name
 
-inline constexpr int MAX_SAY_TEXT = 265;
+inline constexpr int MAX_SAY_TEXT  = 265;
 inline constexpr int MAX_CHAT_TEXT = MAX_SAY_TEXT - 64;
 
 inline constexpr int MAX_BINARY_MESSAGE = 32768; // max length of binary message
@@ -351,9 +353,9 @@ typedef enum {
 
 // font rendering values used by ui and cgame
 
-inline constexpr int PROP_GAP_WIDTH = 3;
-inline constexpr int PROP_SPACE_WIDTH = 8;
-inline constexpr int PROP_HEIGHT = 27;
+inline constexpr int PROP_GAP_WIDTH          = 3;
+inline constexpr int PROP_SPACE_WIDTH        = 8;
+inline constexpr int PROP_HEIGHT             = 27;
 inline constexpr float PROP_SMALL_SIZE_SCALE = 0.75f;
 
 // only used in bitwise checks and should stay int
@@ -361,27 +363,27 @@ inline constexpr int BLINK_DIVISOR = 200;
 // floating point for higher pulse accuracy
 inline constexpr float PULSE_DIVISOR = 75.0f;
 
-inline constexpr int UI_LEFT = 0x00000000; // default
-inline constexpr int UI_CENTER = 0x00000001;
-inline constexpr int UI_RIGHT = 0x00000002;
-inline constexpr int UI_FORMATMASK = 0x00000007;
-inline constexpr int UI_SMALLFONT = 0x00000010;
-inline constexpr int UI_BIGFONT = 0x00000020; // default
-inline constexpr int UI_GIANTFONT = 0x00000040;
-inline constexpr int UI_DROPSHADOW = 0x00000800;
-inline constexpr int UI_BLINK = 0x00001000;
-inline constexpr int UI_INVERSE = 0x00002000;
-inline constexpr int UI_PULSE = 0x00004000;
-inline constexpr int UI_MENULEFT = 0x00008000;
-inline constexpr int UI_MENURIGHT = 0x00010000;
+inline constexpr int UI_LEFT        = 0x00000000; // default
+inline constexpr int UI_CENTER      = 0x00000001;
+inline constexpr int UI_RIGHT       = 0x00000002;
+inline constexpr int UI_FORMATMASK  = 0x00000007;
+inline constexpr int UI_SMALLFONT   = 0x00000010;
+inline constexpr int UI_BIGFONT     = 0x00000020; // default
+inline constexpr int UI_GIANTFONT   = 0x00000040;
+inline constexpr int UI_DROPSHADOW  = 0x00000800;
+inline constexpr int UI_BLINK       = 0x00001000;
+inline constexpr int UI_INVERSE     = 0x00002000;
+inline constexpr int UI_PULSE       = 0x00004000;
+inline constexpr int UI_MENULEFT    = 0x00008000;
+inline constexpr int UI_MENURIGHT   = 0x00010000;
 inline constexpr int UI_EXSMALLFONT = 0x00020000;
-inline constexpr int UI_MENUFULL = 0x00080000;
+inline constexpr int UI_MENUFULL    = 0x00080000;
 
 inline constexpr int UI_SMALLFONT75 = 0x00100000;
 
 inline constexpr int CIN_system = 1;
-inline constexpr int CIN_loop = 2;
-inline constexpr int CIN_hold = 4;
+inline constexpr int CIN_loop   = 2;
+inline constexpr int CIN_hold   = 4;
 inline constexpr int CIN_silent = 8;
 inline constexpr int CIN_shader = 16;
 
@@ -422,84 +424,77 @@ typedef int fixed16_t;
 inline constexpr int NUMVERTEXNORMALS = 162;
 extern vec3_t bytedirs[NUMVERTEXNORMALS];
 
-inline constexpr int MINICHAR_WIDTH = 8;
+inline constexpr int MINICHAR_WIDTH  = 8;
 inline constexpr int MINICHAR_HEIGHT = 12;
 
-inline constexpr int SMALLCHAR_WIDTH = 8;
+inline constexpr int SMALLCHAR_WIDTH  = 8;
 inline constexpr int SMALLCHAR_HEIGHT = 16;
 
-inline constexpr int TINYCHAR_WIDTH = SMALLCHAR_WIDTH;
+inline constexpr int TINYCHAR_WIDTH  = SMALLCHAR_WIDTH;
 inline constexpr int TINYCHAR_HEIGHT = SMALLCHAR_HEIGHT;
 
-inline constexpr int BIGCHAR_WIDTH = 16;
+inline constexpr int BIGCHAR_WIDTH  = 16;
 inline constexpr int BIGCHAR_HEIGHT = 16;
 
-inline constexpr int GIANTCHAR_WIDTH = 32;
+inline constexpr int GIANTCHAR_WIDTH  = 32;
 inline constexpr int GIANTCHAR_HEIGHT = 48;
 
-inline constexpr vec4_t colorBlack = {0, 0, 0, 1};
-inline constexpr vec4_t colorRed = {1, 0, 0, 1};
-inline constexpr vec4_t colorGreen = {0, 1, 0, 1};
-inline constexpr vec4_t colorBlue = {0, 0, 1, 1};
-inline constexpr vec4_t colorYellow = {1, 1, 0, 1};
-inline constexpr vec4_t colorOrange = {1, 0.5, 0, 1};
-inline constexpr vec4_t colorMagenta = {1, 0, 1, 1};
-inline constexpr vec4_t colorCyan = {0, 1, 1, 1};
-inline constexpr vec4_t colorWhite = {1, 1, 1, 1};
-inline constexpr vec4_t colorLtGrey = {0.75, 0.75, 0.75, 1};
-inline constexpr vec4_t colorMdGrey = {0.5, 0.5, 0.5, 1};
-inline constexpr vec4_t colorDkGrey = {0.25, 0.25, 0.25, 1};
-inline constexpr vec4_t colorMdRed = {0.5, 0, 0, 1};
-inline constexpr vec4_t colorMdGreen = {0, 0.5, 0, 1};
-inline constexpr vec4_t colorDkGreen = {0.f, 0.20f, 0.f, 1.f};
-inline constexpr vec4_t colorMdCyan = {0, 0.5, 0.5, 1};
+inline constexpr vec4_t colorBlack    = {0, 0, 0, 1};
+inline constexpr vec4_t colorRed      = {1, 0, 0, 1};
+inline constexpr vec4_t colorGreen    = {0, 1, 0, 1};
+inline constexpr vec4_t colorBlue     = {0, 0, 1, 1};
+inline constexpr vec4_t colorYellow   = {1, 1, 0, 1};
+inline constexpr vec4_t colorOrange   = {1, 0.5, 0, 1};
+inline constexpr vec4_t colorMagenta  = {1, 0, 1, 1};
+inline constexpr vec4_t colorCyan     = {0, 1, 1, 1};
+inline constexpr vec4_t colorWhite    = {1, 1, 1, 1};
+inline constexpr vec4_t colorLtGrey   = {0.75, 0.75, 0.75, 1};
+inline constexpr vec4_t colorMdGrey   = {0.5, 0.5, 0.5, 1};
+inline constexpr vec4_t colorDkGrey   = {0.25, 0.25, 0.25, 1};
+inline constexpr vec4_t colorMdRed    = {0.5, 0, 0, 1};
+inline constexpr vec4_t colorMdGreen  = {0, 0.5, 0, 1};
+inline constexpr vec4_t colorDkGreen  = {0.f, 0.20f, 0.f, 1.f};
+inline constexpr vec4_t colorMdCyan   = {0, 0.5, 0.5, 1};
 inline constexpr vec4_t colorMdYellow = {0.5, 0.5, 0, 1};
 inline constexpr vec4_t colorMdOrange = {0.5, 0.25, 0, 1};
-inline constexpr vec4_t colorMdBlue = {0, 0, 0.5, 1};
+inline constexpr vec4_t colorMdBlue   = {0, 0, 0.5, 1};
 
-inline constexpr vec4_t clrBrown = {0.68f, 0.68f, 0.56f, 1.f};
-inline constexpr vec4_t clrBrownDk = {0.58f * 0.75f, 0.58f * 0.75f,
-                                      0.46f * 0.75f, 1.f};
-inline constexpr vec4_t clrBrownLine = {0.0525f, 0.05f, 0.025f, 0.2f};
+inline constexpr vec4_t clrBrown         = {0.68f, 0.68f, 0.56f, 1.f};
+inline constexpr vec4_t clrBrownDk       = {0.58f * 0.75f, 0.58f * 0.75f, 0.46f * 0.75f, 1.f};
+inline constexpr vec4_t clrBrownLine     = {0.0525f, 0.05f, 0.025f, 0.2f};
 inline constexpr vec4_t clrBrownLineFull = {0.0525f, 0.05f, 0.025f, 1.f};
 
-inline constexpr vec4_t clrBrownTextLt2 = {
-    108.f * 1.8f / 255.f, 88.f * 1.8f / 255.f, 62.f * 1.8f / 255.f, 1.f};
-inline constexpr vec4_t clrBrownTextLt = {
-    108.f * 1.3f / 255.f, 88.f * 1.3f / 255.f, 62.f * 1.3f / 255.f, 1.f};
-inline constexpr vec4_t clrBrownText = {108 / 255.f, 88 / 255.f, 62 / 255.f,
-                                        1.f};
-inline constexpr vec4_t clrBrownTextDk = {20 / 255.f, 2 / 255.f, 0 / 255.f,
-                                          1.f};
-inline constexpr vec4_t clrBrownTextDk2 = {
-    108.f * 0.75f / 255.f, 88.f * 0.75f / 255.f, 62.f * 0.75f / 255.f, 1.f};
+inline constexpr vec4_t clrBrownTextLt2 = {108.f * 1.8f / 255.f, 88.f * 1.8f / 255.f, 62.f * 1.8f / 255.f, 1.f};
+inline constexpr vec4_t clrBrownTextLt  = {108.f * 1.3f / 255.f, 88.f * 1.3f / 255.f, 62.f * 1.3f / 255.f, 1.f};
+inline constexpr vec4_t clrBrownText    = {108 / 255.f, 88 / 255.f, 62 / 255.f, 1.f};
+inline constexpr vec4_t clrBrownTextDk  = {20 / 255.f, 2 / 255.f, 0 / 255.f, 1.f};
+inline constexpr vec4_t clrBrownTextDk2 = {108.f * 0.75f / 255.f, 88.f * 0.75f / 255.f, 62.f * 0.75f / 255.f, 1.f};
 
 inline constexpr int GAME_INIT_FRAMES = 6;
-inline constexpr int FRAMETIME = 100; // msec
+inline constexpr int FRAMETIME        = 100; // msec
 
 inline constexpr char Q_COLOR_ESCAPE = '^';
-#define Q_IsColorString(p)                                                     \
-  (p && *(p) == Q_COLOR_ESCAPE && *((p) + 1) && *((p) + 1) != Q_COLOR_ESCAPE)
+#define Q_IsColorString(p) (p && *(p) == Q_COLOR_ESCAPE && *((p) + 1) && *((p) + 1) != Q_COLOR_ESCAPE)
 
-inline constexpr char COLOR_BLACK = '0';
-inline constexpr char COLOR_RED = '1';
-inline constexpr char COLOR_GREEN = '2';
-inline constexpr char COLOR_YELLOW = '3';
-inline constexpr char COLOR_BLUE = '4';
-inline constexpr char COLOR_CYAN = '5';
-inline constexpr char COLOR_MAGENTA = '6';
-inline constexpr char COLOR_WHITE = '7';
-inline constexpr char COLOR_ORANGE = '8';
-inline constexpr char COLOR_MDGREY = '9';
-inline constexpr char COLOR_LTGREY = ':';
-inline constexpr char COLOR_MDGREEN = '<';
+inline constexpr char COLOR_BLACK    = '0';
+inline constexpr char COLOR_RED      = '1';
+inline constexpr char COLOR_GREEN    = '2';
+inline constexpr char COLOR_YELLOW   = '3';
+inline constexpr char COLOR_BLUE     = '4';
+inline constexpr char COLOR_CYAN     = '5';
+inline constexpr char COLOR_MAGENTA  = '6';
+inline constexpr char COLOR_WHITE    = '7';
+inline constexpr char COLOR_ORANGE   = '8';
+inline constexpr char COLOR_MDGREY   = '9';
+inline constexpr char COLOR_LTGREY   = ':';
+inline constexpr char COLOR_MDGREEN  = '<';
 inline constexpr char COLOR_MDYELLOW = '=';
-inline constexpr char COLOR_MDBLUE = '>';
-inline constexpr char COLOR_MDRED = '?';
+inline constexpr char COLOR_MDBLUE   = '>';
+inline constexpr char COLOR_MDRED    = '?';
 inline constexpr char COLOR_LTORANGE = 'A';
-inline constexpr char COLOR_MDCYAN = 'B';
+inline constexpr char COLOR_MDCYAN   = 'B';
 inline constexpr char COLOR_MDPURPLE = 'C';
-inline constexpr char COLOR_NULL = '*';
+inline constexpr char COLOR_NULL     = '*';
 
 inline constexpr int COLOR_BITS = 31;
 #define ColorIndex(c) (((c) - '0') & COLOR_BITS)
@@ -507,53 +502,50 @@ inline constexpr int COLOR_BITS = 31;
 // these should stay as macros due to the way they are used in variadic print
 // funcs, otherwise we'd have to go and surround all the usages with quotes
 
-#define S_COLOR_BLACK "^0"
-#define S_COLOR_RED "^1"
-#define S_COLOR_GREEN "^2"
-#define S_COLOR_YELLOW "^3"
-#define S_COLOR_BLUE "^4"
-#define S_COLOR_CYAN "^5"
-#define S_COLOR_MAGENTA "^6"
-#define S_COLOR_WHITE "^7"
-#define S_COLOR_ORANGE "^8"
-#define S_COLOR_MDGREY "^9"
-#define S_COLOR_LTGREY "^:"
-#define S_COLOR_MDGREEN "^<"
+#define S_COLOR_BLACK    "^0"
+#define S_COLOR_RED      "^1"
+#define S_COLOR_GREEN    "^2"
+#define S_COLOR_YELLOW   "^3"
+#define S_COLOR_BLUE     "^4"
+#define S_COLOR_CYAN     "^5"
+#define S_COLOR_MAGENTA  "^6"
+#define S_COLOR_WHITE    "^7"
+#define S_COLOR_ORANGE   "^8"
+#define S_COLOR_MDGREY   "^9"
+#define S_COLOR_LTGREY   "^:"
+#define S_COLOR_MDGREEN  "^<"
 #define S_COLOR_MDYELLOW "^="
-#define S_COLOR_MDBLUE "^>"
-#define S_COLOR_MDRED "^?"
+#define S_COLOR_MDBLUE   "^>"
+#define S_COLOR_MDRED    "^?"
 #define S_COLOR_LTORANGE "^A"
-#define S_COLOR_MDCYAN "^B"
+#define S_COLOR_MDCYAN   "^B"
 #define S_COLOR_MDPURPLE "^C"
-#define S_COLOR_NULL "^*"
+#define S_COLOR_NULL     "^*"
 
 extern vec4_t g_color_table[32];
 
-#define MAKERGB(v, r, g, b)                                                    \
-  v[0] = r;                                                                    \
-  v[1] = g;                                                                    \
+#define MAKERGB(v, r, g, b) \
+  v[0] = r;                 \
+  v[1] = g;                 \
   v[2] = b
-#define MAKERGBA(v, r, g, b, a)                                                \
-  v[0] = r;                                                                    \
-  v[1] = g;                                                                    \
-  v[2] = b;                                                                    \
+#define MAKERGBA(v, r, g, b, a) \
+  v[0] = r;                     \
+  v[1] = g;                     \
+  v[2] = b;                     \
   v[3] = a
 #define Q_IsNoneColor(v) v[0] == 0 && v[1] == 0 && v[2] == 0 && v[3] == 0
 
 // Hex Color string support
-#define gethex(ch)                                                             \
-  ((ch) > '9' ? ((ch) >= 'a' ? ((ch) - 'a' + 10) : ((ch) - '7')) : ((ch) - '0'))
-#define ishex(ch)                                                              \
-  ((ch) && (((ch) >= '0' && (ch) <= '9') || ((ch) >= 'A' && (ch) <= 'F') ||    \
-            ((ch) >= 'a' && (ch) <= 'f')))
+#define gethex(ch) ((ch) > '9' ? ((ch) >= 'a' ? ((ch) - 'a' + 10) : ((ch) - '7')) : ((ch) - '0'))
+#define ishex(ch)                                                                                          \
+  ((ch) && (((ch) >= '0' && (ch) <= '9') || ((ch) >= 'A' && (ch) <= 'F') || ((ch) >= 'a' && (ch) <= 'f')))
 // check if it's format rrggbb r,g,b e {0..9} U {A...F}
-#define Q_IsHexColorString(p)                                                  \
-  (ishex(*(p)) && ishex(*((p) + 1)) && ishex(*((p) + 2)) &&                    \
-   ishex(*((p) + 3)) && ishex(*((p) + 4)) && ishex(*((p) + 5)))
+#define Q_IsHexColorString(p) \
+  (ishex(*(p)) && ishex(*((p) + 1)) && ishex(*((p) + 2)) && ishex(*((p) + 3)) && ishex(*((p) + 4)) && ishex(*((p) + 5)))
 #define Q_HexColorStringHasAlpha(p) (ishex(*((p) + 6)) && ishex(*((p) + 7)))
 
-#define DEG2RAD(a) (((a) * M_PI) / 180.0F)
-#define RAD2DEG(a) (((a) * 180.0f) / M_PI)
+#define DEG2RAD(a)   (((a) * M_PI) / 180.0F)
+#define RAD2DEG(a)   (((a) * 180.0f) / M_PI)
 #define RAD2SHORT(a) ((a) * (32768.f / (float)M_PI))
 #define SHORT2RAD(a) ((a) * ((float)M_PI / 32768.f))
 #define SHORT2DEG(a) (((a) / 32768.f) * 180.0f)
@@ -572,68 +564,56 @@ void ByteToDir(int b, vec3_t dir);
 
 #if 1
 
-  #define DotProduct(x, y)                                                     \
-    (((x)[0] * (y)[0]) + ((x)[1] * (y)[1]) + ((x)[2] * (y)[2]))
-  #define VectorSubtract(a, b, c)                                              \
-    ((c)[0] = (a)[0] - (b)[0], (c)[1] = (a)[1] - (b)[1],                       \
-     (c)[2] = (a)[2] - (b)[2])
-  #define VectorAdd(a, b, c)                                                   \
-    ((c)[0] = (a)[0] + (b)[0], (c)[1] = (a)[1] + (b)[1],                       \
-     (c)[2] = (a)[2] + (b)[2])
-  #define VectorCopy(a, b) ((b)[0] = (a)[0], (b)[1] = (a)[1], (b)[2] = (a)[2])
-  #define VectorScale(v, s, o)                                                 \
-    ((o)[0] = (v)[0] * (s), (o)[1] = (v)[1] * (s), (o)[2] = (v)[2] * (s))
-  #define VectorMA(v, s, b, o)                                                 \
-    ((o)[0] = (v)[0] + ((b)[0] * (s)), (o)[1] = (v)[1] + ((b)[1] * (s)),       \
-     (o)[2] = (v)[2] + ((b)[2] * (s)))
+  #define DotProduct(x, y)        (((x)[0] * (y)[0]) + ((x)[1] * (y)[1]) + ((x)[2] * (y)[2]))
+  #define VectorSubtract(a, b, c) ((c)[0] = (a)[0] - (b)[0], (c)[1] = (a)[1] - (b)[1], (c)[2] = (a)[2] - (b)[2])
+  #define VectorAdd(a, b, c)      ((c)[0] = (a)[0] + (b)[0], (c)[1] = (a)[1] + (b)[1], (c)[2] = (a)[2] + (b)[2])
+  #define VectorCopy(a, b)        ((b)[0] = (a)[0], (b)[1] = (a)[1], (b)[2] = (a)[2])
+  #define VectorScale(v, s, o)    ((o)[0] = (v)[0] * (s), (o)[1] = (v)[1] * (s), (o)[2] = (v)[2] * (s))
+  #define VectorMA(v, s, b, o)                                                                             \
+    ((o)[0] = (v)[0] + ((b)[0] * (s)), (o)[1] = (v)[1] + ((b)[1] * (s)), (o)[2] = (v)[2] + ((b)[2] * (s)))
 
 #else
 
-  #define DotProduct(x, y) _DotProduct(x, y)
+  #define DotProduct(x, y)        _DotProduct(x, y)
   #define VectorSubtract(a, b, c) _VectorSubtract(a, b, c)
-  #define VectorAdd(a, b, c) _VectorAdd(a, b, c)
-  #define VectorCopy(a, b) _VectorCopy(a, b)
-  #define VectorScale(v, s, o) _VectorScale(v, s, o)
-  #define VectorMA(v, s, b, o) _VectorMA(v, s, b, o)
+  #define VectorAdd(a, b, c)      _VectorAdd(a, b, c)
+  #define VectorCopy(a, b)        _VectorCopy(a, b)
+  #define VectorScale(v, s, o)    _VectorScale(v, s, o)
+  #define VectorMA(v, s, b, o)    _VectorMA(v, s, b, o)
 
 #endif
 
 #ifdef __LCC__
   #ifdef VectorCopy
     #undef VectorCopy
+
 // this is a little hack to get more efficient copies in our interpreter
 typedef struct {
   float v[3];
 } vec3struct_t;
+
     #define VectorCopy(a, b) *(vec3struct_t *)b = *(vec3struct_t *)a;
   #endif
 #endif
 
-#define VectorClear(a) ((a)[0] = (a)[1] = (a)[2] = 0)
-#define VectorNegate(a, b)                                                     \
-  ((b)[0] = -(a)[0], (b)[1] = -(a)[1], (b)[2] = -(a)[2])
+#define VectorClear(a)        ((a)[0] = (a)[1] = (a)[2] = 0)
+#define VectorNegate(a, b)    ((b)[0] = -(a)[0], (b)[1] = -(a)[1], (b)[2] = -(a)[2])
 #define VectorSet(v, x, y, z) ((v)[0] = (x), (v)[1] = (y), (v)[2] = (z))
 
-#define Vector2Set(v, x, y) ((v)[0] = (x), (v)[1] = (y))
-#define Vector2Copy(a, b) ((b)[0] = (a)[0], (b)[1] = (a)[1])
-#define Vector2Subtract(a, b, c)                                               \
-  ((c)[0] = (a)[0] - (b)[0], (c)[1] = (a)[1] - (b)[1])
+#define Vector2Set(v, x, y)      ((v)[0] = (x), (v)[1] = (y))
+#define Vector2Copy(a, b)        ((b)[0] = (a)[0], (b)[1] = (a)[1])
+#define Vector2Subtract(a, b, c) ((c)[0] = (a)[0] - (b)[0], (c)[1] = (a)[1] - (b)[1])
 
-#define Vector4Set(v, x, y, z, n)                                              \
-  ((v)[0] = (x), (v)[1] = (y), (v)[2] = (z), (v)[3] = (n))
-#define Vector4Copy(a, b)                                                      \
-  ((b)[0] = (a)[0], (b)[1] = (a)[1], (b)[2] = (a)[2], (b)[3] = (a)[3])
-#define Vector4MA(v, s, b, o)                                                  \
-  ((o)[0] = (v)[0] + (b)[0] * (s), (o)[1] = (v)[1] + (b)[1] * (s),             \
-   (o)[2] = (v)[2] + (b)[2] * (s), (o)[3] = (v)[3] + (b)[3] * (s))
-#define Vector4Average(v, b, s, o)                                             \
-  ((o)[0] = ((v)[0] * (1 - (s))) + ((b)[0] * (s)),                             \
-   (o)[1] = ((v)[1] * (1 - (s))) + ((b)[1] * (s)),                             \
-   (o)[2] = ((v)[2] * (1 - (s))) + ((b)[2] * (s)),                             \
-   (o)[3] = ((v)[3] * (1 - (s))) + ((b)[3] * (s)))
+#define Vector4Set(v, x, y, z, n) ((v)[0] = (x), (v)[1] = (y), (v)[2] = (z), (v)[3] = (n))
+#define Vector4Copy(a, b)         ((b)[0] = (a)[0], (b)[1] = (a)[1], (b)[2] = (a)[2], (b)[3] = (a)[3])
+#define Vector4MA(v, s, b, o)                                                                      \
+  ((o)[0] = (v)[0] + (b)[0] * (s), (o)[1] = (v)[1] + (b)[1] * (s), (o)[2] = (v)[2] + (b)[2] * (s), \
+   (o)[3] = (v)[3] + (b)[3] * (s))
+#define Vector4Average(v, b, s, o)                                                                 \
+  ((o)[0] = ((v)[0] * (1 - (s))) + ((b)[0] * (s)), (o)[1] = ((v)[1] * (1 - (s))) + ((b)[1] * (s)), \
+   (o)[2] = ((v)[2] * (1 - (s))) + ((b)[2] * (s)), (o)[3] = ((v)[3] * (1 - (s))) + ((b)[3] * (s)))
 
-#define SnapVector(v)                                                          \
-  (v[0] = ((int)(v[0])), v[1] = ((int)(v[1])), v[2] = ((int)(v[2])))
+#define SnapVector(v) (v[0] = ((int)(v[0])), v[1] = ((int)(v[1])), v[2] = ((int)(v[2])))
 
 // just in case you don't want to use the macros
 vec_t _DotProduct(const vec3_t v1, const vec3_t v2);
@@ -645,8 +625,6 @@ void _VectorMA(const vec3_t veca, float scale, const vec3_t vecb, vec3_t vecc);
 
 unsigned ColorBytes3(float r, float g, float b);
 unsigned ColorBytes4(float r, float g, float b, float a);
-
-float NormalizeColor(const vec3_t in, vec3_t out);
 
 float RadiusFromBounds(const vec3_t mins, const vec3_t maxs);
 void ClearBounds(vec3_t mins, vec3_t maxs);
@@ -660,25 +638,26 @@ vec_t VectorLengthSquared2(vec2_t const v);
 vec_t Distance(const vec3_t p1, const vec3_t p2);
 vec_t DistanceSquared(const vec3_t p1, const vec3_t p2);
 void CrossProduct(const vec3_t v1, const vec3_t v2, vec3_t cross);
-vec_t VectorNormalize(vec3_t v); // returns vector length
-void VectorNormalizeFast(
-    vec3_t v); // does NOT return vector length, uses rsqrt approximation
+vec_t VectorNormalize(vec3_t v);    // returns vector length
+void VectorNormalizeFast(vec3_t v); // does NOT return vector length, uses rsqrt approximation
 vec_t VectorNormalize2(const vec3_t v, vec3_t out);
 void VectorInverse(vec3_t v);
 void Vector4Scale(const vec4_t in, vec_t scale, vec4_t out);
 void VectorRotate(vec3_t in, vec3_t matrix[3], vec3_t out);
 int Q_log2(int val);
 float Q_atof(const char *str);
+float Q_atof(const std::string &str);
+float Q_atof(std::string_view str);
 int32_t Q_atoi(const char *str);
 int32_t Q_atoi(const std::string &str);
-int32_t Q_atoi(const std::string_view str);
+int32_t Q_atoi(std::string_view str);
 float Q_acos(float c);
 
 int Q_rand(int *seed);
 float Q_random(int *seed);
 float Q_crandom(int *seed);
 
-#define random() ((rand() & 0x7fff) / ((float)0x7fff))
+#define random()  ((rand() & 0x7fff) / ((float)0x7fff))
 #define crandom() (2.0 * (random() - 0.5))
 
 void vectoangles(const vec3_t value1, vec3_t angles);
@@ -709,36 +688,28 @@ float AngleNormalize180(float angle);
 int AngleNormalize65536(int angle);
 float AngleDelta(float angle1, float angle2);
 
-qboolean PlaneFromPoints(vec4_t plane, const vec3_t a, const vec3_t b,
-                         const vec3_t c);
+qboolean PlaneFromPoints(vec4_t plane, const vec3_t a, const vec3_t b, const vec3_t c);
 void ProjectPointOnPlane(vec3_t dst, const vec3_t p, const vec3_t normal);
-void RotatePointAroundVector(vec3_t dst, const vec3_t dir, const vec3_t point,
-                             float degrees);
+void RotatePointAroundVector(vec3_t dst, const vec3_t dir, const vec3_t point, float degrees);
 void RotateAroundDirection(vec3_t axis[3], float yaw);
 void MakeNormalVectors(const vec3_t forward, vec3_t right, vec3_t up);
 // perpendicular vector could be replaced by this
 
 int PlaneTypeForNormal(vec3_t normal);
 
-void MatrixMultiply(const float in1[3][3], const float in2[3][3],
-                    float out[3][3]);
+void MatrixMultiply(const float in1[3][3], const float in2[3][3], float out[3][3]);
 void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 void PerpendicularVector(vec3_t dst, const vec3_t src);
 
 // Ridah
-void GetPerpendicularViewVector(const vec3_t point, const vec3_t p1,
-                                const vec3_t p2, vec3_t up);
-void ProjectPointOntoVector(vec3_t point, vec3_t vStart, vec3_t vEnd,
-                            vec3_t vProj);
-void ProjectPointOntoVectorBounded(vec3_t point, vec3_t vStart, vec3_t vEnd,
-                                   vec3_t vProj);
+void GetPerpendicularViewVector(const vec3_t point, const vec3_t p1, const vec3_t p2, vec3_t up);
+void ProjectPointOntoVector(vec3_t point, vec3_t vStart, vec3_t vEnd, vec3_t vProj);
+void ProjectPointOntoVectorBounded(vec3_t point, vec3_t vStart, vec3_t vEnd, vec3_t vProj);
 float DistanceFromLineSquared(vec3_t p, vec3_t lp1, vec3_t lp2);
 float DistanceFromVectorSquared(vec3_t p, vec3_t lp1, vec3_t lp2);
 // done.
 
 //=============================================
-
-float Com_Clamp(float min, float max, float value);
 
 char *COM_SkipPath(char *pathname);
 void COM_FixPath(char *pathname);
@@ -752,7 +723,6 @@ void COM_SetCurrentParseLine(int line);
 int COM_GetCurrentParseLine(void);
 char *COM_Parse(const char **data_p);
 char *COM_ParseExt(const char **data_p, qboolean allowLineBreak);
-int COM_Compress(char *data_p);
 void COM_ParseError(const char *format, ...);
 void COM_ParseWarning(const char *format, ...);
 int Com_ParseInfos(char *buf, int max, char infos[][MAX_INFO_STRING]);
@@ -765,10 +735,10 @@ inline constexpr int MAX_TOKENLENGTH = 1024;
 
 #ifndef TT_STRING
 // token types
-inline constexpr int TT_STRING = 1;      // string
-inline constexpr int TT_LITERAL = 2;     // literal
-inline constexpr int TT_NUMBER = 3;      // number
-inline constexpr int TT_NAME = 4;        // name
+inline constexpr int TT_STRING      = 1; // string
+inline constexpr int TT_LITERAL     = 2; // literal
+inline constexpr int TT_NUMBER      = 3; // number
+inline constexpr int TT_NAME        = 4; // name
 inline constexpr int TT_PUNCTUATION = 5; // punctuation
 #endif
 
@@ -798,9 +768,18 @@ void Parse3DMatrix(const char **buf_p, int z, int y, int x, float *m);
 void QDECL Com_sprintf(char *dest, int size, const char *fmt, ...);
 
 // mode parm for FS_FOpenFile
-typedef enum { FS_READ, FS_WRITE, FS_APPEND, FS_APPEND_SYNC } fsMode_t;
+typedef enum {
+  FS_READ,
+  FS_WRITE,
+  FS_APPEND,
+  FS_APPEND_SYNC
+} fsMode_t;
 
-typedef enum { FS_SEEK_CUR, FS_SEEK_END, FS_SEEK_SET } fsOrigin_t;
+typedef enum {
+  FS_SEEK_CUR,
+  FS_SEEK_END,
+  FS_SEEK_SET
+} fsOrigin_t;
 
 //=============================================
 
@@ -820,15 +799,11 @@ char *Q_strlwr(char *s1);
 char *Q_strupr(char *s1);
 
 // buffer size safe library replacements
-#define Q_strncpyz(dest, src, destsize)                                        \
-  Q_strncpyz_fn(dest, src, destsize, __func__, SRC_FILENAME, __LINE__)
-void Q_strncpyz_fn(char *dest, const char *src, int destsize, const char *func,
-                   const char *file, int line);
+#define Q_strncpyz(dest, src, destsize) Q_strncpyz_fn(dest, src, destsize, __func__, SRC_FILENAME, __LINE__)
+void Q_strncpyz_fn(char *dest, const char *src, int destsize, const char *func, const char *file, int line);
 
-#define Q_strcat(dest, size, src)                                              \
-  Q_strcat_fn(dest, size, src, __func__, SRC_FILENAME, __LINE__)
-void Q_strcat_fn(char *dest, int size, const char *src, const char *func,
-                 const char *file, int line);
+#define Q_strcat(dest, size, src) Q_strcat_fn(dest, size, src, __func__, SRC_FILENAME, __LINE__)
+void Q_strcat_fn(char *dest, int size, const char *src, const char *func, const char *file, int line);
 
 // strlen that discounts Quake color sequences
 int Q_PrintStrlen(const char *string);
@@ -837,10 +812,8 @@ char *Q_CleanStr(char *string);
 // removes whitespaces and other bad directory characters
 char *Q_CleanDirName(char *dirname);
 // safe strlen up to N chars
-#define Q_strnlen(str, maxlen)                                                 \
-  Q_strnlen_fn(str, maxlen, __func__, SRC_FILENAME, __LINE__)
-size_t Q_strnlen_fn(const char *str, size_t maxlen, const char *func,
-                    const char *file, int line);
+#define Q_strnlen(str, maxlen) Q_strnlen_fn(str, maxlen, __func__, SRC_FILENAME, __LINE__)
+size_t Q_strnlen_fn(const char *str, size_t maxlen, const char *func, const char *file, int line);
 
 // #define _vsnprintf use_Q_vsnprintf
 // #define vsnprintf use_Q_vsnprintf
@@ -987,10 +960,10 @@ COLLISION DETECTION
 
 // plane types are used to speed some tests
 // 0-2 are axial planes
-inline constexpr int PLANE_X = 0;
-inline constexpr int PLANE_Y = 1;
-inline constexpr int PLANE_Z = 2;
-inline constexpr int PLANE_NON_AXIAL = 3;
+inline constexpr int PLANE_X          = 0;
+inline constexpr int PLANE_Y          = 1;
+inline constexpr int PLANE_Z          = 2;
+inline constexpr int PLANE_NON_AXIAL  = 3;
 inline constexpr int PLANE_NON_PLANAR = 4;
 
 /*
@@ -1001,15 +974,13 @@ PlaneTypeForNormal
 
 // #define PlaneTypeForNormal(x) (x[0] == 1.0 ? PLANE_X : (x[1] == 1.0 ? PLANE_Y
 //: (x[2] == 1.0 ? PLANE_Z : PLANE_NON_AXIAL) ) )
-#define PlaneTypeForNormal(x)                                                  \
-  (x[0] == 1.0                                                                 \
-       ? PLANE_X                                                               \
-       : (x[1] == 1.0                                                          \
-              ? PLANE_Y                                                        \
-              : (x[2] == 1.0 ? PLANE_Z                                         \
-                             : (x[0] == 0.f && x[1] == 0.f && x[2] == 0.f      \
-                                    ? PLANE_NON_PLANAR                         \
-                                    : PLANE_NON_AXIAL))))
+#define PlaneTypeForNormal(x)                                                                                  \
+  (x[0] == 1.0                                                                                                 \
+     ? PLANE_X                                                                                                 \
+     : (x[1] == 1.0                                                                                            \
+          ? PLANE_Y                                                                                            \
+          : (x[2] == 1.0 ? PLANE_Z                                                                             \
+                         : (x[0] == 0.f && x[1] == 0.f && x[2] == 0.f ? PLANE_NON_PLANAR : PLANE_NON_AXIAL))))
 
 // plane_t structure
 // !!! if this is changed, it must be changed in asm code too !!!
@@ -1055,9 +1026,9 @@ typedef struct {
 // in order from highest priority to lowest
 // if none of the catchers are active, bound key strings will be executed
 inline constexpr int KEYCATCH_CONSOLE = 0x0001;
-inline constexpr int KEYCATCH_UI = 0x0002;
+inline constexpr int KEYCATCH_UI      = 0x0002;
 inline constexpr int KEYCATCH_MESSAGE = 0x0004;
-inline constexpr int KEYCATCH_CGAME = 0x0008;
+inline constexpr int KEYCATCH_CGAME   = 0x0008;
 
 // sound channels
 // channel 0 never willingly overrides
@@ -1102,21 +1073,21 @@ inline constexpr int MAX_CLIENTS = 64;
 // JPW NERVE put q3ta default back for testing
 // don't need to send any more
 inline constexpr int GENTITYNUM_BITS = 10;
-inline constexpr int MAX_GENTITIES = 1 << GENTITYNUM_BITS;
+inline constexpr int MAX_GENTITIES   = 1 << GENTITYNUM_BITS;
 
 // entitynums are communicated with GENTITYNUM_BITS,
 // so any reserved values that are going to be communicated
 // over the net need to also be in this range
-inline constexpr int ENTITYNUM_NONE = MAX_GENTITIES - 1;
-inline constexpr int ENTITYNUM_WORLD = MAX_GENTITIES - 2;
+inline constexpr int ENTITYNUM_NONE       = MAX_GENTITIES - 1;
+inline constexpr int ENTITYNUM_WORLD      = MAX_GENTITIES - 2;
 inline constexpr int ENTITYNUM_MAX_NORMAL = MAX_GENTITIES - 2;
 
 // these are sent over the net as 8 bits (Gordon: upped to 9 bits, erm actually
 // it was already at 9 bits, wtf? NEVAR TRUST GAMECODE COMMENTS, comments are
 // evil :E, lets hope it doesn't horribly break anything....)
-inline constexpr int MAX_MODELS = 256;
-inline constexpr int MAX_SOUNDS = 256; // so they cannot be blindly increased
-inline constexpr int MAX_CS_SKINS = 64;
+inline constexpr int MAX_MODELS    = 256;
+inline constexpr int MAX_SOUNDS    = 256; // so they cannot be blindly increased
+inline constexpr int MAX_CS_SKINS  = 64;
 inline constexpr int MAX_CSSTRINGS = 32;
 
 // Instead of wasting an entire shader index for a single shader, we pack
@@ -1131,10 +1102,8 @@ inline constexpr int32_t MAX_CS_SHADERS = 16;
 // 1 extra to keep 'CS_SKINS' index intact
 inline constexpr int32_t MAX_CS_SHADERSTATES = 17;
 
-inline constexpr int32_t MAX_SHADERS_PER_INDEX =
-    (MAX_STRING_CHARS - 1) / (MAX_QPATH + 1);
-inline constexpr int32_t MAX_SHADER_INDEX =
-    MAX_SHADERS_PER_INDEX * MAX_CS_SHADERS;
+inline constexpr int32_t MAX_SHADERS_PER_INDEX = (MAX_STRING_CHARS - 1) / (MAX_QPATH + 1);
+inline constexpr int32_t MAX_SHADER_INDEX      = MAX_SHADERS_PER_INDEX * MAX_CS_SHADERS;
 
 inline constexpr int32_t MAX_SHADERSTATES_PER_INDEX = MAX_SHADERS_PER_INDEX;
 
@@ -1142,7 +1111,7 @@ inline constexpr int32_t MAX_SHADERSTATES_PER_INDEX = MAX_SHADERS_PER_INDEX;
 inline constexpr int32_t MAX_CS_SHADERS_COMPAT = 32;
 
 inline constexpr int MAX_SERVER_TAGS = 256;
-inline constexpr int MAX_TAG_FILES = 64;
+inline constexpr int MAX_TAG_FILES   = 64;
 
 // cm_local.h in engine
 inline constexpr int MAX_SUBMODELS = 512;
@@ -1152,15 +1121,15 @@ inline constexpr int MAX_MULTI_SPAWNTARGETS = 16; // JPW NERVE
 inline constexpr int MAX_CONFIGSTRINGS = 1024;
 
 inline constexpr size_t MAX_DLIGHT_STYLESTRING = 64;
-inline constexpr int MAX_DLIGHT_CONFIGSTRINGS = 16;
-inline constexpr int MAX_SPLINE_CONFIGSTRINGS = 8;
+inline constexpr int MAX_DLIGHT_CONFIGSTRINGS  = 16;
+inline constexpr int MAX_SPLINE_CONFIGSTRINGS  = 8;
 
 inline constexpr int PARTICLE_SNOW128 = 1;
-inline constexpr int PARTICLE_SNOW64 = 2;
-inline constexpr int PARTICLE_SNOW32 = 3;
+inline constexpr int PARTICLE_SNOW64  = 2;
+inline constexpr int PARTICLE_SNOW32  = 3;
 inline constexpr int PARTICLE_SNOW256 = 0;
 
-inline constexpr int PARTICLE_BUBBLE8 = 4;
+inline constexpr int PARTICLE_BUBBLE8  = 4;
 inline constexpr int PARTICLE_BUBBLE16 = 5;
 inline constexpr int PARTICLE_BUBBLE32 = 6;
 inline constexpr int PARTICLE_BUBBLE64 = 7;
@@ -1204,13 +1173,12 @@ inline constexpr int REF_JUNIOR_DLIGHT = 1 << 30;
 inline constexpr int REF_DIRECTED_DLIGHT = 1 << 29;
 
 // bit field limits
-inline constexpr int MAX_STATS = 16;
+inline constexpr int MAX_STATS      = 16;
 inline constexpr int MAX_PERSISTANT = 16;
-inline constexpr int MAX_POWERUPS = 16;
-inline constexpr int MAX_WEAPONS = 64; // (SA) and yet more!
+inline constexpr int MAX_POWERUPS   = 16;
+inline constexpr int MAX_WEAPONS    = 64; // (SA) and yet more!
 
-inline constexpr int MAX_EVENTS =
-    4; // max events per frame before we drop events
+inline constexpr int MAX_EVENTS = 4; // max events per frame before we drop events
 
 inline constexpr int PS_PMOVEFRAMECOUNTBITS = 6;
 
@@ -1335,9 +1303,9 @@ typedef struct playerState_s {
 
   net_uint16_t stats[MAX_STATS];
   net_uint16_t persistant[MAX_PERSISTANT]; // stats that aren't cleared on death
-  net_int32_t powerups[MAX_POWERUPS]; // level.time that the powerup runs out
-  net_uint16_t ammo[MAX_WEAPONS];     // total amount of ammo
-  net_uint16_t ammoclip[MAX_WEAPONS]; // ammo in clip
+  net_int32_t powerups[MAX_POWERUPS];      // level.time that the powerup runs out
+  net_uint16_t ammo[MAX_WEAPONS];          // total amount of ammo
+  net_uint16_t ammoclip[MAX_WEAPONS];      // ammo in clip
   net_uint16_t holdable[16];
   int holding; // the current item in holdable[] that is selected (held)
   // 64 bits for weapons held
@@ -1464,13 +1432,13 @@ inline constexpr uint8_t BUTTON_ACTIVATE = 64;
 inline constexpr uint8_t BUTTON_ANY = 128;
 
 //----(SA) wolf buttons
-inline constexpr uint8_t WBUTTON_ATTACK2 = 1; // +attack2
-inline constexpr uint8_t WBUTTON_ZOOM = 2;    // +zoom
-inline constexpr uint8_t WBUTTON_RELOAD = 8;
-inline constexpr uint8_t WBUTTON_LEANLEFT = 16;
+inline constexpr uint8_t WBUTTON_ATTACK2   = 1; // +attack2
+inline constexpr uint8_t WBUTTON_ZOOM      = 2; // +zoom
+inline constexpr uint8_t WBUTTON_RELOAD    = 8;
+inline constexpr uint8_t WBUTTON_LEANLEFT  = 16;
 inline constexpr uint8_t WBUTTON_LEANRIGHT = 32;
-inline constexpr uint8_t WBUTTON_DROP = 64; // Arnout: wbutton now
-inline constexpr uint8_t WBUTTON_PRONE = 128;
+inline constexpr uint8_t WBUTTON_DROP      = 64; // Arnout: wbutton now
+inline constexpr uint8_t WBUTTON_PRONE     = 128;
 //----(SA) end
 
 // Arnout: doubleTap buttons - DT_NUM can be max 8
@@ -1655,80 +1623,79 @@ typedef enum {
 } entityType_t;
 
 static constexpr std::array<const char *, ET_EVENTS + 1> entityTypeNames = {
-    "ET_GENERAL",
-    "ET_PLAYER",
-    "ET_ITEM",
-    "ET_MISSILE",
-    "ET_MOVER",
-    "ET_BEAM",
-    "ET_PORTAL",
-    "ET_SPEAKER",
-    "ET_PUSH_TRIGGER",
-    "ET_TELEPORT_TRIGGER",
-    "ET_INVISIBLE",
-    "ET_CONCUSSIVE_TRIGGER",
-    "ET_OID_TRIGGER",
-    "ET_EXPLOSIVE_INDICATOR",
-    "ET_EXPLOSIVE",
-    "ET_EF_SPOTLIGHT",
-    "ET_ALARMBOX",
-    "ET_CORONA",
-    "ET_TRAP",
-    "ET_GAMEMODEL",
-    "ET_FOOTLOCKER",
-    "ET_FLAMEBARREL",
-    "ET_FP_PARTS",
-    "ET_FIRE_COLUMN",
-    "ET_FIRE_COLUMN_SMOKE",
-    "ET_RAMJET",
-    "ET_FLAMETHROWER_CHUNK",
-    "ET_EXPLO_PART",
-    "ET_PROP",
-    "ET_AI_EFFECT",
-    "ET_CAMERA",
-    "ET_MOVERSCALED",
-    "ET_CONSTRUCTIBLE_INDICATOR",
-    "ET_CONSTRUCTIBLE",
-    "ET_CONSTRUCTIBLE_MARKER",
-    "ET_BOMB",
-    "ET_WAYPOINT",
-    "ET_BEAM_2",
-    "ET_TANK_INDICATOR",
-    "ET_TANK_INDICATOR_DEAD",
-    "ET_BOTGOAL_INDICATOR",
-    "ET_CORPSE",
-    "ET_SMOKER",
-    "ET_TEMPHEAD",
-    "ET_MG42_BARREL",
-    "ET_TEMPLEGS",
-    "ET_TRIGGER_MULTIPLE",
-    "ET_TRIGGER_FLAGONLY",
-    "ET_TRIGGER_FLAGONLY_MULTIPLE",
-    "ET_GAMEMANAGER",
-    "ET_AAGUN",
-    "ET_CABINET_H",
-    "ET_CABINET_A",
-    "ET_HEALER",
-    "ET_SUPPLIER",
-    "ET_PORTAL_BLUE",
-    "ET_PORTAL_RED",
-    "ET_TOKEN_EASY",
-    "ET_TOKEN_MEDIUM",
-    "ET_TOKEN_HARD",
-    "ET_LANDMINE_HINT",
-    "ET_ATTRACTOR_HINT",
-    "ET_SNIPER_HINT",
-    "ET_LANDMINESPOT_HINT",
-    "ET_COMMANDMAP_MARKER",
-    "ET_WOLF_OBJECTIVE",
-    "ET_VELOCITY_PUSH_TRIGGER",
-    "ET_TELEPORT_TRIGGER_CLIENT",
-    "ET_FAKEBRUSH",
-    "ET_EVENTS",
+  "ET_GENERAL",
+  "ET_PLAYER",
+  "ET_ITEM",
+  "ET_MISSILE",
+  "ET_MOVER",
+  "ET_BEAM",
+  "ET_PORTAL",
+  "ET_SPEAKER",
+  "ET_PUSH_TRIGGER",
+  "ET_TELEPORT_TRIGGER",
+  "ET_INVISIBLE",
+  "ET_CONCUSSIVE_TRIGGER",
+  "ET_OID_TRIGGER",
+  "ET_EXPLOSIVE_INDICATOR",
+  "ET_EXPLOSIVE",
+  "ET_EF_SPOTLIGHT",
+  "ET_ALARMBOX",
+  "ET_CORONA",
+  "ET_TRAP",
+  "ET_GAMEMODEL",
+  "ET_FOOTLOCKER",
+  "ET_FLAMEBARREL",
+  "ET_FP_PARTS",
+  "ET_FIRE_COLUMN",
+  "ET_FIRE_COLUMN_SMOKE",
+  "ET_RAMJET",
+  "ET_FLAMETHROWER_CHUNK",
+  "ET_EXPLO_PART",
+  "ET_PROP",
+  "ET_AI_EFFECT",
+  "ET_CAMERA",
+  "ET_MOVERSCALED",
+  "ET_CONSTRUCTIBLE_INDICATOR",
+  "ET_CONSTRUCTIBLE",
+  "ET_CONSTRUCTIBLE_MARKER",
+  "ET_BOMB",
+  "ET_WAYPOINT",
+  "ET_BEAM_2",
+  "ET_TANK_INDICATOR",
+  "ET_TANK_INDICATOR_DEAD",
+  "ET_BOTGOAL_INDICATOR",
+  "ET_CORPSE",
+  "ET_SMOKER",
+  "ET_TEMPHEAD",
+  "ET_MG42_BARREL",
+  "ET_TEMPLEGS",
+  "ET_TRIGGER_MULTIPLE",
+  "ET_TRIGGER_FLAGONLY",
+  "ET_TRIGGER_FLAGONLY_MULTIPLE",
+  "ET_GAMEMANAGER",
+  "ET_AAGUN",
+  "ET_CABINET_H",
+  "ET_CABINET_A",
+  "ET_HEALER",
+  "ET_SUPPLIER",
+  "ET_PORTAL_BLUE",
+  "ET_PORTAL_RED",
+  "ET_TOKEN_EASY",
+  "ET_TOKEN_MEDIUM",
+  "ET_TOKEN_HARD",
+  "ET_LANDMINE_HINT",
+  "ET_ATTRACTOR_HINT",
+  "ET_SNIPER_HINT",
+  "ET_LANDMINESPOT_HINT",
+  "ET_COMMANDMAP_MARKER",
+  "ET_WOLF_OBJECTIVE",
+  "ET_VELOCITY_PUSH_TRIGGER",
+  "ET_TELEPORT_TRIGGER_CLIENT",
+  "ET_FAKEBRUSH",
+  "ET_EVENTS",
 };
 
-static_assert(sizeof(entityTypeNames) / sizeof(entityTypeNames[0]) ==
-                  ET_EVENTS + 1,
+static_assert(sizeof(entityTypeNames) / sizeof(entityTypeNames[0]) == ET_EVENTS + 1,
               "Entity types array size does not match enum list");
 
 /*
@@ -1835,10 +1802,10 @@ typedef enum {
 
 // font support
 
-inline constexpr int GLYPH_START = 0;
-inline constexpr int GLYPH_END = 255;
+inline constexpr int GLYPH_START     = 0;
+inline constexpr int GLYPH_END       = 255;
 inline constexpr int GLYPH_CHARSTART = 32;
-inline constexpr int GLYPH_CHAREND = 127;
+inline constexpr int GLYPH_CHAREND   = 127;
 inline constexpr int GLYPHS_PER_FONT = GLYPH_END - GLYPH_START + 1;
 
 typedef struct {
@@ -1881,8 +1848,8 @@ typedef struct qtime_s {
 } qtime_t;
 
 // server browser sources
-inline constexpr int AS_LOCAL = 0;
-inline constexpr int AS_GLOBAL = 1; // NERVE - SMF - modified
+inline constexpr int AS_LOCAL     = 0;
+inline constexpr int AS_GLOBAL    = 1; // NERVE - SMF - modified
 inline constexpr int AS_FAVORITES = 2;
 
 // cinematic states
@@ -1904,9 +1871,9 @@ typedef enum _flag_status {
   FLAG_DROPPED
 } flagStatus_t;
 
-inline constexpr int MAX_GLOBAL_SERVERS = 4096;
-inline constexpr int MAX_OTHER_SERVERS = 128;
-inline constexpr int MAX_PINGREQUESTS = 16;
+inline constexpr int MAX_GLOBAL_SERVERS       = 4096;
+inline constexpr int MAX_OTHER_SERVERS        = 128;
+inline constexpr int MAX_PINGREQUESTS         = 16;
 inline constexpr int MAX_SERVERSTATUSREQUESTS = 16;
 
 // NERVE - SMF - localization
@@ -1933,7 +1900,7 @@ typedef enum {
 
 #define SQR(a) ((a) * (a))
 
-inline constexpr int MAX_TIMERUN_CHECKPOINTS = 16;
+inline constexpr int MAX_TIMERUN_CHECKPOINTS    = 16;
 inline constexpr int TIMERUN_CHECKPOINT_NOT_SET = -1;
 
 #endif // __Q_SHARED_H

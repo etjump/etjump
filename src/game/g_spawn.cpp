@@ -9,25 +9,25 @@
 #include <string>
 #include <unordered_map>
 
-#include "g_local.h"
-#include "etj_save_system.h"
-#include "etj_string_utilities.h"
-#include "etj_timerun_entities.h"
+#include "etj_entity_utilities.h"
+#include "etj_func_static_client.h"
 #include "etj_missilepad.h"
-#include "etj_target_init.h"
-#include "etj_trigger_teleport_client.h"
-#include "etj_target_ft_setrules.h"
-#include "etj_target_spawn_relay.h"
 #include "etj_portalgun.h"
 #include "etj_portalgun_shared.h"
-#include "etj_entity_utilities.h"
 #include "etj_progression_tracker.h"
+#include "etj_save_system.h"
+#include "etj_string_utilities.h"
+#include "etj_target_ft_setrules.h"
+#include "etj_target_init.h"
 #include "etj_target_random.h"
-#include "etj_func_static_client.h"
+#include "etj_target_spawn_relay.h"
+#include "etj_target_wskey_overrides.h"
+#include "etj_timerun_entities.h"
+#include "etj_trigger_teleport_client.h"
 #include "etj_worldspawn.h"
+#include "g_local.h"
 
-qboolean G_SpawnStringExt(const char *key, const char *defaultString,
-                          char **out, const char *file, int line) {
+qboolean G_SpawnStringExt(const char *key, const char *defaultString, char **out, const char *file, int line) {
   int i;
 
   if (!level.spawning) {
@@ -49,28 +49,25 @@ qboolean G_SpawnStringExt(const char *key, const char *defaultString,
   return qfalse;
 }
 
-qboolean G_SpawnFloatExt(const char *key, const char *defaultString, float *out,
-                         const char *file, int line) {
+qboolean G_SpawnFloatExt(const char *key, const char *defaultString, float *out, const char *file, int line) {
   char *s;
   qboolean present;
 
   present = G_SpawnStringExt(key, defaultString, &s, file, line);
-  *out = Q_atof(s);
+  *out    = Q_atof(s);
   return present;
 }
 
-qboolean G_SpawnIntExt(const char *key, const char *defaultString, int *out,
-                       const char *file, int line) {
+qboolean G_SpawnIntExt(const char *key, const char *defaultString, int *out, const char *file, int line) {
   char *s;
   qboolean present;
 
   present = G_SpawnStringExt(key, defaultString, &s, file, line);
-  *out = Q_atoi(s);
+  *out    = Q_atoi(s);
   return present;
 }
 
-qboolean G_SpawnVectorExt(const char *key, const char *defaultString,
-                          float *out, const char *file, int line) {
+qboolean G_SpawnVectorExt(const char *key, const char *defaultString, float *out, const char *file, int line) {
   char *s;
   qboolean present;
 
@@ -79,8 +76,7 @@ qboolean G_SpawnVectorExt(const char *key, const char *defaultString,
   return present;
 }
 
-qboolean G_SpawnVector2DExt(const char *key, const char *defaultString,
-                            float *out, const char *file, int line) {
+qboolean G_SpawnVector2DExt(const char *key, const char *defaultString, float *out, const char *file, int line) {
   char *s;
   qboolean present;
 
@@ -92,107 +88,103 @@ qboolean G_SpawnVector2DExt(const char *key, const char *defaultString,
 // FIXME: this is woefully out of date, it doesn't contain *ANY* custom keys
 //  we've added for ETJump, and is also lacking a lot of stock entity keys
 field_t fields[] = {
-    {"classname", FOFS(classname), F_LSTRING},
-    {"origin", FOFS(s.origin), F_VECTOR},
-    {"model", FOFS(model), F_LSTRING},
-    {"model2", FOFS(model2), F_LSTRING},
-    {"spawnflags", FOFS(spawnflags), F_INT},
-    {"speed", FOFS(speed), F_FLOAT},
-    {"closespeed", FOFS(closespeed), F_FLOAT}, //----(SA)	added
-    {"target", FOFS(target), F_LSTRING},
-    {"targetname", FOFS(targetname), F_LSTRING},
-    {"message", FOFS(message), F_LSTRING},
-    {"popup", FOFS(message),
-     F_LSTRING}, // (SA) mutually exclusive from 'message', but makes the ent
-                 // more logical for the level designer
-    {"book", FOFS(message),
-     F_LSTRING}, // (SA) mutually exclusive from 'message', but makes the ent
-                 // more logical for the level designer
-    {"team", FOFS(team), F_LSTRING},
-    {"wait", FOFS(wait), F_FLOAT},
-    {"random", FOFS(random), F_FLOAT},
-    {"count", FOFS(count), F_INT},
-    {"health", FOFS(health), F_INT},
-    {"light", 0, F_IGNORE},
-    {"dmg", FOFS(damage), F_INT},
-    {"angles", FOFS(s.angles), F_VECTOR},
-    {"angle", FOFS(s.angles), F_ANGLEHACK},
-    // JOSEPH 9-27-99
-    {"duration", FOFS(duration), F_FLOAT},
-    {"rotate", FOFS(rotate), F_VECTOR},
-    // END JOSEPH
-    {"degrees", FOFS(angle), F_FLOAT},
-    {"time", FOFS(speed), F_FLOAT},
+  {"classname", FOFS(classname), F_LSTRING},
+  {"origin", FOFS(s.origin), F_VECTOR},
+  {"model", FOFS(model), F_LSTRING},
+  {"model2", FOFS(model2), F_LSTRING},
+  {"spawnflags", FOFS(spawnflags), F_INT},
+  {"speed", FOFS(speed), F_FLOAT},
+  {"closespeed", FOFS(closespeed), F_FLOAT}, //----(SA)	added
+  {"target", FOFS(target), F_LSTRING},
+  {"targetname", FOFS(targetname), F_LSTRING},
+  {"message", FOFS(message), F_LSTRING},
+  {"popup", FOFS(message), F_LSTRING}, // (SA) mutually exclusive from 'message', but makes the ent
+                                       // more logical for the level designer
+  {"book", FOFS(message), F_LSTRING}, // (SA) mutually exclusive from 'message', but makes the ent
+                                       // more logical for the level designer
+  {"team", FOFS(team), F_LSTRING},
+  {"wait", FOFS(wait), F_FLOAT},
+  {"random", FOFS(random), F_FLOAT},
+  {"count", FOFS(count), F_INT},
+  {"health", FOFS(health), F_INT},
+  {"light", 0, F_IGNORE},
+  {"dmg", FOFS(damage), F_INT},
+  {"angles", FOFS(s.angles), F_VECTOR},
+  {"angle", FOFS(s.angles), F_ANGLEHACK},
+  // JOSEPH 9-27-99
+  {"duration", FOFS(duration), F_FLOAT},
+  {"rotate", FOFS(rotate), F_VECTOR},
+  // END JOSEPH
+  {"degrees", FOFS(angle), F_FLOAT},
+  {"time", FOFS(speed), F_FLOAT},
 
-    //----(SA) additional ai field
-    {"skin", FOFS(aiSkin), F_LSTRING},
+  //----(SA) additional ai field
+  {"skin", FOFS(aiSkin), F_LSTRING},
 
-    //----(SA) done
+  //----(SA) done
 
-    // (SA) dlight lightstyles (made all these unique variables for testing)
-    {"_color", FOFS(dl_color),
-     F_VECTOR}, // color of the light	(the underscore is inserted by the color
-                // picker in QER)
-    {"color", FOFS(dl_color), F_VECTOR}, // color of the light
-    {"stylestring", FOFS(dl_stylestring),
-     F_LSTRING}, // user defined stylestring "fffndlsfaaaaaa" for example
-    // done
+  // (SA) dlight lightstyles (made all these unique variables for testing)
+  {"_color", FOFS(dl_color), F_VECTOR}, // color of the light	(the underscore is inserted by the color
+                                                    // picker in QER)
+  {"color", FOFS(dl_color), F_VECTOR}, // color of the light
+  {"stylestring", FOFS(dl_stylestring), F_LSTRING}, // user defined stylestring "fffndlsfaaaaaa" for example
+  // done
 
-    //----(SA)
-    {"shader", FOFS(dl_shader),
-     F_LSTRING}, // shader to use for a target_effect or dlight
+  //----(SA)
+  {"shader", FOFS(dl_shader), F_LSTRING}, // shader to use for a target_effect or dlight
 
-    // (SA) for target_unlock
-    {"key", FOFS(key), F_INT},
-    // done
+  // (SA) for target_unlock
+  {"key", FOFS(key), F_INT},
+  // done
 
-    // Rafael - mg42
-    {"harc", FOFS(harc), F_FLOAT},
-    {"varc", FOFS(varc), F_FLOAT},
-    // done.
+  // Rafael - mg42
+  {"harc", FOFS(harc), F_FLOAT},
+  {"varc", FOFS(varc), F_FLOAT},
+  // done.
 
-    // Rafael - sniper
-    {"delay", FOFS(delay), F_FLOAT},
-    {"radius", FOFS(radius), F_INT},
+  // Rafael - sniper
+  {"delay", FOFS(delay), F_FLOAT},
+  {"radius", FOFS(radius), F_INT},
 
-    // Ridah, for reloading savegames at correct mission spot
-    {"missionlevel", FOFS(missionLevel), F_INT},
+  // Ridah, for reloading savegames at correct mission spot
+  {"missionlevel", FOFS(missionLevel), F_INT},
 
-    // Rafel
-    {"start_size", FOFS(start_size), F_INT},
-    {"end_size", FOFS(end_size), F_INT},
+  // Rafel
+  {"start_size", FOFS(start_size), F_INT},
+  {"end_size", FOFS(end_size), F_INT},
 
-    {"shard", FOFS(count), F_INT},
+  {"shard", FOFS(count), F_INT},
 
-    // Rafael
-    {"spawnitem", FOFS(spawnitem), F_LSTRING},
+  // Rafael
+  {"spawnitem", FOFS(spawnitem), F_LSTRING},
 
-    {"track", FOFS(track), F_LSTRING},
+  {"track", FOFS(track), F_LSTRING},
 
-    {"scriptName", FOFS(scriptName), F_LSTRING},
+  {"scriptName", FOFS(scriptName), F_LSTRING},
 
-    {"shortname", FOFS(message), F_LSTRING},
-    {"constages", FOFS(constages), F_LSTRING},
-    {"desstages", FOFS(desstages), F_LSTRING},
-    {"partofstage", FOFS(partofstage), F_INT},
-    {"override", FOFS(spawnitem), F_LSTRING},
+  {"shortname", FOFS(message), F_LSTRING},
+  {"constages", FOFS(constages), F_LSTRING},
+  {"desstages", FOFS(desstages), F_LSTRING},
+  {"partofstage", FOFS(partofstage), F_INT},
+  {"override", FOFS(spawnitem), F_LSTRING},
 
-    {"damageparent", FOFS(damageparent), F_LSTRING},
+  {"damageparent", FOFS(damageparent), F_LSTRING},
 
-    {"targetShaderName", FOFS(targetShaderName), F_LSTRING},
-    {"targetShaderNewName", FOFS(targetShaderNewName), F_LSTRING},
+  {"targetShaderName", FOFS(targetShaderName), F_LSTRING},
+  {"targetShaderNewName", FOFS(targetShaderNewName), F_LSTRING},
 
-    {"cursorhint", FOFS(s.dmgFlags), F_CURSORHINT},
+  {"cursorhint", FOFS(s.dmgFlags), F_CURSORHINT},
 
-    {"savelimit", FOFS(ftSavelimit), F_LSTRING},
-    {"noghost", FOFS(damage), F_INT},
-    {"teamjumpmode", FOFS(health), F_INT},
-    {"leader_only_message", FOFS(message), F_LSTRING},
+  {"savelimit", FOFS(ftSavelimit), F_LSTRING},
+  {"noghost", FOFS(damage), F_INT},
+  {"teamjumpmode", FOFS(health), F_INT},
+  {"leader_only_message", FOFS(message), F_LSTRING},
 
-    {"chance", FOFS(count), F_INT},
-    {"total", FOFS(count2), F_INT},
+  {"chance", FOFS(count), F_INT},
+  {"total", FOFS(count2), F_INT},
 
-    {nullptr}};
+  {nullptr}
+};
 
 typedef struct {
   const char *name;
@@ -474,265 +466,266 @@ void SP_target_tjlclear(gentity_t *self);
 void SP_target_tjldisplay(gentity_t *self);
 
 spawn_t spawns[] = {
-    // info entities don't do anything at all, but provide positional
-    // information for things controlled by other processes
-    {"info_player_start", SP_info_player_start},
-    {"info_player_checkpoint", SP_info_player_checkpoint},
-    {"info_player_deathmatch", SP_info_player_deathmatch},
-    {"info_player_intermission", SP_info_player_intermission},
-    {"info_null", SP_info_null},
-    {"info_notnull", SP_info_notnull},     // use target_position instead
-    {"info_notnull_big", SP_info_notnull}, // use target_position instead
-    {"info_camp", SP_info_camp},
+  // info entities don't do anything at all, but provide positional
+  // information for things controlled by other processes
+  {"info_player_start",           SP_info_player_start                            },
+  {"info_player_checkpoint",      SP_info_player_checkpoint                       },
+  {"info_player_deathmatch",      SP_info_player_deathmatch                       },
+  {"info_player_intermission",    SP_info_player_intermission                     },
+  {"info_null",                   SP_info_null                                    },
+  {"info_notnull",                SP_info_notnull                                 }, // use target_position instead
+  {"info_notnull_big",            SP_info_notnull                                 }, // use target_position instead
+  {"info_camp",                   SP_info_camp                                    },
 
-    // Gordon: debris test
-    {"func_debris", SP_func_debris},
-    // ===================
+  // Gordon: debris test
+  {"func_debris",                 SP_func_debris                                  },
+  // ===================
 
-    {"func_plat", SP_func_plat},
-    {"func_button", SP_func_button},
-    {"func_explosive", SP_func_explosive},
-    {"func_door", SP_func_door},
-    {"func_static", SP_func_static},
-    {"func_leaky", SP_func_leaky},
-    {"func_rotating", SP_func_rotating},
-    {"func_bobbing", SP_func_bobbing},
-    {"func_pendulum", SP_func_pendulum},
-    {"func_train", SP_func_train},
-    {"func_group", SP_info_null},
-    // JOSEPH 1-26-00
-    {"func_train_rotating", SP_func_train_rotating},
-    {"func_secret", SP_func_secret},
-    // END JOSEPH
-    // Rafael
-    {"func_door_rotating", SP_func_door_rotating},
+  {"func_plat",                   SP_func_plat                                    },
+  {"func_button",                 SP_func_button                                  },
+  {"func_explosive",              SP_func_explosive                               },
+  {"func_door",                   SP_func_door                                    },
+  {"func_static",                 SP_func_static                                  },
+  {"func_leaky",                  SP_func_leaky                                   },
+  {"func_rotating",               SP_func_rotating                                },
+  {"func_bobbing",                SP_func_bobbing                                 },
+  {"func_pendulum",               SP_func_pendulum                                },
+  {"func_train",                  SP_func_train                                   },
+  {"func_group",                  SP_info_null                                    },
+  // JOSEPH 1-26-00
+  {"func_train_rotating",         SP_func_train_rotating                          },
+  {"func_secret",                 SP_func_secret                                  },
+  // END JOSEPH
+  // Rafael
+  {"func_door_rotating",          SP_func_door_rotating                           },
 
-    {"func_timer", SP_func_timer}, // rename trigger_timer?
+  {"func_timer",                  SP_func_timer                                   }, // rename trigger_timer?
 
-    {"func_invisible_user", SP_func_invisible_user},
+  {"func_invisible_user",         SP_func_invisible_user                          },
 
-    {"func_portaltarget", SP_func_portaltarget},
+  {"func_portaltarget",           SP_func_portaltarget                            },
 
-    // Triggers are brush objects that cause an effect when contacted
-    // by a living player, usually involving firing targets.
-    // While almost everything could be done with
-    // a single trigger class and different targets, triggered effects
-    // could not be client side predicted (push and teleport).
-    {"trigger_always", SP_trigger_always},
-    {"trigger_multiple", SP_trigger_multiple},
-    {"trigger_multiple_ext", SP_trigger_multiple_ext},
-    {"trigger_push", SP_trigger_push},
-    {"trigger_teleport", SP_trigger_teleport},
-    {"trigger_hurt", SP_trigger_hurt},
-    {"trigger_savereset", SP_trigger_savereset},
+  // Triggers are brush objects that cause an effect when contacted
+  // by a living player, usually involving firing targets.
+  // While almost everything could be done with
+  // a single trigger class and different targets, triggered effects
+  // could not be client side predicted (push and teleport).
+  {"trigger_always",              SP_trigger_always                               },
+  {"trigger_multiple",            SP_trigger_multiple                             },
+  {"trigger_multiple_ext",        SP_trigger_multiple_ext                         },
+  {"trigger_push",                SP_trigger_push                                 },
+  {"trigger_teleport",            SP_trigger_teleport                             },
+  {"trigger_hurt",                SP_trigger_hurt                                 },
+  {"trigger_savereset",           SP_trigger_savereset                            },
 
-    //---- (SA) Wolf triggers
-    {"trigger_concussive_dust", SP_trigger_concussive_dust}, // JPW NERVE
-    {"trigger_once", SP_trigger_once},
-    //---- done
+  //---- (SA) Wolf triggers
+  {"trigger_concussive_dust",     SP_trigger_concussive_dust                      }, // JPW NERVE
+  {"trigger_once",                SP_trigger_once                                 },
+  //---- done
 
-    // Mad Doc - TDf
-    // I'm going to put trigger_aidoors back in. I'll make sure they only work
-    // in single player
-    {"trigger_aidoor", SP_trigger_aidoor},
-    // START	xkan,	9/17/2002
-    {"trigger_heal", SP_trigger_heal},
-    {"trigger_ammo", SP_trigger_ammo},
-    // END		xkan,	9/17/2002
+  // Mad Doc - TDf
+  // I'm going to put trigger_aidoors back in. I'll make sure they only work
+  // in single player
+  {"trigger_aidoor",              SP_trigger_aidoor                               },
+  // START	xkan,	9/17/2002
+  {"trigger_heal",                SP_trigger_heal                                 },
+  {"trigger_ammo",                SP_trigger_ammo                                 },
+  // END		xkan,	9/17/2002
 
-    // Gordon: 16/12/02: adding the model things to go with the triggers
-    {"misc_cabinet_health", SP_misc_cabinet_health},
-    {"misc_cabinet_supply", SP_misc_cabinet_supply},
-    // end
+  // Gordon: 16/12/02: adding the model things to go with the triggers
+  {"misc_cabinet_health",         SP_misc_cabinet_health                          },
+  {"misc_cabinet_supply",         SP_misc_cabinet_supply                          },
+  // end
 
-    // Rafael
-    //	{"trigger_aidoor", SP_trigger_aidoor},
-    //	{"trigger_deathCheck",SP_trigger_deathCheck},
+  // Rafael
+  //	{"trigger_aidoor", SP_trigger_aidoor},
+  //	{"trigger_deathCheck",SP_trigger_deathCheck},
 
-    // targets perform no action by themselves, but must be triggered
-    // by another entity
-    {"target_give", SP_target_give},
-    {"target_remove_powerups", SP_target_remove_powerups},
-    {"target_delay", SP_target_delay},
-    {"target_speaker", SP_target_speaker},
-    {"target_print", SP_target_print},
-    {"target_laser", SP_target_laser},
-    {"target_score", SP_target_score},
-    {"target_teleporter", SP_target_teleporter},
-    {"target_relay", SP_target_relay},
-    {"target_kill", SP_target_kill},
-    {"target_position", SP_target_position},
-    {"target_location", SP_target_location},
-    {"target_push", SP_target_push},
-    {"target_script_trigger", SP_target_script_trigger},
+  // targets perform no action by themselves, but must be triggered
+  // by another entity
+  {"target_give",                 SP_target_give                                  },
+  {"target_remove_powerups",      SP_target_remove_powerups                       },
+  {"target_delay",                SP_target_delay                                 },
+  {"target_speaker",              SP_target_speaker                               },
+  {"target_print",                SP_target_print                                 },
+  {"target_laser",                SP_target_laser                                 },
+  {"target_score",                SP_target_score                                 },
+  {"target_teleporter",           SP_target_teleporter                            },
+  {"target_relay",                SP_target_relay                                 },
+  {"target_kill",                 SP_target_kill                                  },
+  {"target_position",             SP_target_position                              },
+  {"target_location",             SP_target_location                              },
+  {"target_push",                 SP_target_push                                  },
+  {"target_script_trigger",       SP_target_script_trigger                        },
 
-    //---- (SA) Wolf targets
-    {"target_alarm", SP_target_alarm},
-    {"target_counter", SP_target_counter},
-    {"target_lock", SP_target_lock},
-    {"target_effect", SP_target_effect},
-    {"target_fog", SP_target_fog},
-    {"target_autosave", SP_target_autosave}, //----(SA)	added
-                                             //---- done
+  //---- (SA) Wolf targets
+  {"target_alarm",                SP_target_alarm                                 },
+  {"target_counter",              SP_target_counter                               },
+  {"target_lock",                 SP_target_lock                                  },
+  {"target_effect",               SP_target_effect                                },
+  {"target_fog",                  SP_target_fog                                   },
+  {"target_autosave",             SP_target_autosave                              }, //----(SA)	added
+                                           //---- done
 
-    {"target_rumble", SP_target_rumble},
+  {"target_rumble",               SP_target_rumble                                },
 
-    {"light", SP_light},
+  {"light",                       SP_light                                        },
 
-    {"lightJunior", SP_lightJunior},
+  {"lightJunior",                 SP_lightJunior                                  },
 
-    {"path_corner", SP_path_corner},
-    {"path_corner_2", SP_path_corner_2},
+  {"path_corner",                 SP_path_corner                                  },
+  {"path_corner_2",               SP_path_corner_2                                },
 
-    {"info_train_spline_main", SP_info_train_spline_main},
-    {"info_train_spline_control", SP_path_corner_2},
-    {"info_limbo_camera", SP_info_limbo_camera},
+  {"info_train_spline_main",      SP_info_train_spline_main                       },
+  {"info_train_spline_control",   SP_path_corner_2                                },
+  {"info_limbo_camera",           SP_info_limbo_camera                            },
 
-    {"misc_teleporter_dest", SP_misc_teleporter_dest},
-    {"misc_model", SP_misc_model},
-    {"misc_gamemodel", SP_misc_gamemodel},
-    {"misc_portal_surface", SP_misc_portal_surface},
-    {"misc_portal_camera", SP_misc_portal_camera},
+  {"misc_teleporter_dest",        SP_misc_teleporter_dest                         },
+  {"misc_model",                  SP_misc_model                                   },
+  {"misc_gamemodel",              SP_misc_gamemodel                               },
+  {"misc_portal_surface",         SP_misc_portal_surface                          },
+  {"misc_portal_camera",          SP_misc_portal_camera                           },
 
-    {"misc_commandmap_marker", SP_misc_commandmap_marker},
+  {"misc_commandmap_marker",      SP_misc_commandmap_marker                       },
 
-    {"misc_vis_dummy", SP_misc_vis_dummy},
-    {"misc_vis_dummy_multiple", SP_misc_vis_dummy_multiple},
-    {"misc_light_surface", SP_misc_light_surface},
-    {"misc_grabber_trap", SP_misc_grabber_trap},
+  {"misc_vis_dummy",              SP_misc_vis_dummy                               },
+  {"misc_vis_dummy_multiple",     SP_misc_vis_dummy_multiple                      },
+  {"misc_light_surface",          SP_misc_light_surface                           },
+  {"misc_grabber_trap",           SP_misc_grabber_trap                            },
 
-    {"misc_mg42", SP_mg42},
-    {"misc_aagun", SP_aagun},
+  {"misc_mg42",                   SP_mg42                                         },
+  {"misc_aagun",                  SP_aagun                                        },
 
-    {"misc_flak", SP_misc_flak},
-    {"misc_firetrails", SP_misc_firetrails},
+  {"misc_flak",                   SP_misc_flak                                    },
+  {"misc_firetrails",             SP_misc_firetrails                              },
 
-    {"shooter_rocket", SP_shooter_rocket},
-    {"shooter_grenade", SP_shooter_grenade},
+  {"shooter_rocket",              SP_shooter_rocket                               },
+  {"shooter_grenade",             SP_shooter_grenade                              },
 
-    {"shooter_mortar", SP_shooter_mortar},
-    {"alarm_box", SP_alarm_box},
+  {"shooter_mortar",              SP_shooter_mortar                               },
+  {"alarm_box",                   SP_alarm_box                                    },
 
-    // Gordon: FIXME remove
-    {"team_CTF_redplayer", SP_team_CTF_redplayer},
-    {"team_CTF_blueplayer", SP_team_CTF_blueplayer},
+  // Gordon: FIXME remove
+  {"team_CTF_redplayer",          SP_team_CTF_redplayer                           },
+  {"team_CTF_blueplayer",         SP_team_CTF_blueplayer                          },
 
-    {"team_CTF_redspawn", SP_team_CTF_redspawn},
-    {"team_CTF_bluespawn", SP_team_CTF_bluespawn},
+  {"team_CTF_redspawn",           SP_team_CTF_redspawn                            },
+  {"team_CTF_bluespawn",          SP_team_CTF_bluespawn                           },
 
-    {"team_WOLF_objective", SP_team_WOLF_objective},
+  {"team_WOLF_objective",         SP_team_WOLF_objective                          },
 
-    {"team_WOLF_checkpoint", SP_team_WOLF_checkpoint},
+  {"team_WOLF_checkpoint",        SP_team_WOLF_checkpoint                         },
 
-    {"target_smoke", SP_target_smoke},
+  {"target_smoke",                SP_target_smoke                                 },
 
-    {"misc_spawner", SP_misc_spawner},
+  {"misc_spawner",                SP_misc_spawner                                 },
 
-    {"props_box_32", SP_props_box_32},
-    {"props_box_48", SP_props_box_48},
-    {"props_box_64", SP_props_box_64},
+  {"props_box_32",                SP_props_box_32                                 },
+  {"props_box_48",                SP_props_box_48                                 },
+  {"props_box_64",                SP_props_box_64                                 },
 
-    {"props_smokedust", SP_SmokeDust},
-    {"props_dust", SP_Dust},
-    {"props_sparks", SP_props_sparks},
-    {"props_gunsparks", SP_props_gunsparks},
+  {"props_smokedust",             SP_SmokeDust                                    },
+  {"props_dust",                  SP_Dust                                         },
+  {"props_sparks",                SP_props_sparks                                 },
+  {"props_gunsparks",             SP_props_gunsparks                              },
 
-    {"props_bench", SP_Props_Bench},
-    {"props_radio", SP_Props_Radio},
-    {"props_chair", SP_Props_Chair},
-    {"props_chair_hiback", SP_Props_ChairHiback},
-    {"props_chair_side", SP_Props_ChairSide},
-    {"props_chair_chat", SP_Props_ChairChat},
-    {"props_chair_chatarm", SP_Props_ChairChatArm},
-    {"props_damageinflictor", SP_Props_DamageInflictor},
-    {"props_locker_tall", SP_Props_Locker_Tall},
-    {"props_desklamp", SP_Props_Desklamp},
-    {"props_flamebarrel", SP_Props_Flamebarrel},
-    {"props_crate_64", SP_crate_64},
-    {"props_flippy_table", SP_Props_Flipping_Table},
-    {"props_crate_32", SP_crate_32},
-    {"props_crate_32x64", SP_Props_Crate32x64},
-    {"props_58x112tablew", SP_Props_58x112tablew},
-    {"props_radioSEVEN", SP_Props_RadioSEVEN},
-    {"props_snowGenerator", SP_props_snowGenerator},
-    //	{"props_FireColumn", SP_propsFireColumn},
-    {"props_decoration", SP_props_decoration},
-    {"props_decorBRUSH", SP_props_decorBRUSH},
-    {"props_statue", SP_props_statue},
-    {"props_statueBRUSH", SP_props_statueBRUSH},
-    {"props_skyportal", SP_skyportal},
-    {"props_footlocker", SP_props_footlocker},
-    {"props_flamethrower", SP_props_flamethrower},
-    {"props_decoration_scale", SP_props_decor_Scale},
+  {"props_bench",                 SP_Props_Bench                                  },
+  {"props_radio",                 SP_Props_Radio                                  },
+  {"props_chair",                 SP_Props_Chair                                  },
+  {"props_chair_hiback",          SP_Props_ChairHiback                            },
+  {"props_chair_side",            SP_Props_ChairSide                              },
+  {"props_chair_chat",            SP_Props_ChairChat                              },
+  {"props_chair_chatarm",         SP_Props_ChairChatArm                           },
+  {"props_damageinflictor",       SP_Props_DamageInflictor                        },
+  {"props_locker_tall",           SP_Props_Locker_Tall                            },
+  {"props_desklamp",              SP_Props_Desklamp                               },
+  {"props_flamebarrel",           SP_Props_Flamebarrel                            },
+  {"props_crate_64",              SP_crate_64                                     },
+  {"props_flippy_table",          SP_Props_Flipping_Table                         },
+  {"props_crate_32",              SP_crate_32                                     },
+  {"props_crate_32x64",           SP_Props_Crate32x64                             },
+  {"props_58x112tablew",          SP_Props_58x112tablew                           },
+  {"props_radioSEVEN",            SP_Props_RadioSEVEN                             },
+  {"props_snowGenerator",         SP_props_snowGenerator                          },
+  //	{"props_FireColumn", SP_propsFireColumn},
+  {"props_decoration",            SP_props_decoration                             },
+  {"props_decorBRUSH",            SP_props_decorBRUSH                             },
+  {"props_statue",                SP_props_statue                                 },
+  {"props_statueBRUSH",           SP_props_statueBRUSH                            },
+  {"props_skyportal",             SP_skyportal                                    },
+  {"props_footlocker",            SP_props_footlocker                             },
+  {"props_flamethrower",          SP_props_flamethrower                           },
+  {"props_decoration_scale",      SP_props_decor_Scale                            },
 
-    {"dlight", SP_dlight},
+  {"dlight",                      SP_dlight                                       },
 
-    {"corona", SP_corona},
+  {"corona",                      SP_corona                                       },
 
-    {"trigger_flagonly", SP_trigger_flagonly},
-    {"trigger_flagonly_multiple", SP_trigger_flagonly_multiple},
+  {"trigger_flagonly",            SP_trigger_flagonly                             },
+  {"trigger_flagonly_multiple",   SP_trigger_flagonly_multiple                    },
 
-    {"test_gas", SP_gas},
-    {"trigger_objective_info", SP_trigger_objective_info},
+  {"test_gas",                    SP_gas                                          },
+  {"trigger_objective_info",      SP_trigger_objective_info                       },
 
-    // RF, scripting
-    {"script_model_med", SP_script_model_med},
-    {"script_mover", SP_script_mover},
-    {"script_multiplayer", SP_script_multiplayer},
+  // RF, scripting
+  {"script_model_med",            SP_script_model_med                             },
+  {"script_mover",                SP_script_mover                                 },
+  {"script_multiplayer",          SP_script_multiplayer                           },
 
-    {"func_constructible", SP_func_constructible},
-    {"func_brushmodel", SP_func_brushmodel},
-    {"misc_beam", SP_misc_beam},
-    {"misc_constructiblemarker", SP_misc_constructiblemarker},
-    {"target_explosion", SP_target_explosion},
-    {"misc_landmine", SP_misc_landmine},
-    {"target_setident", SP_target_set_ident},
-    {"target_activate", SP_target_activate},
+  {"func_constructible",          SP_func_constructible                           },
+  {"func_brushmodel",             SP_func_brushmodel                              },
+  {"misc_beam",                   SP_misc_beam                                    },
+  {"misc_constructiblemarker",    SP_misc_constructiblemarker                     },
+  {"target_explosion",            SP_target_explosion                             },
+  {"misc_landmine",               SP_misc_landmine                                },
+  {"target_setident",             SP_target_set_ident                             },
+  {"target_activate",             SP_target_activate                              },
 
-    // deprecated, kept for compatibility, uses target_print code
-    {"target_printname", SP_target_printname},
-    /*{"etjump_target_relay",	SP_target_fireonce },*/ // Changed for RC1 -
-                                                        // Feen
-    {"etjump2_target_relay", SP_target_fireonce},
-    {"etjump203_target_relay", SP_target_fireonce},
-    {"func_fakebrush", SP_func_fakebrush},
-    {"target_savereset", SP_target_savereset},
-    {"weapon_portalgun", ETJump::Portalgun::spawn}, // Feen: PGM
-    {"target_increase_ident", SP_target_increase_ident},
-    {"target_save", SP_target_save},
-    {"target_remove_portals", SP_target_remove_portals},
-    {"target_portal_relay", SP_target_portal_relay},
-    {"target_ftrelay", SP_target_ftrelay},
-    {"target_savelimit_set", SP_target_savelimit_set},
-    {"target_savelimit_inc", SP_target_savelimit_inc},
-    {"target_decay", SP_target_decay},
-    {"target_starttimer", ETJump::TargetStartTimer::spawn},
-    {"trigger_starttimer", ETJump::TriggerStartTimer::spawn},
-    {"trigger_starttimer_ext", ETJump::TriggerStartTimerExt::spawn},
-    {"target_stoptimer", ETJump::TargetStopTimer::spawn},
-    {"trigger_stoptimer", ETJump::TriggerStopTimer::spawn},
-    {"trigger_stoptimer_ext", ETJump::TriggerStopTimerExt::spawn},
-    {"target_checkpoint", ETJump::TargetCheckpoint::spawn},
-    {"trigger_checkpoint", ETJump::TriggerCheckpoint::spawn},
-    {"trigger_checkpoint_ext", ETJump::TriggerCheckpointExt::spawn},
-    {"target_interrupt_timerun", SP_target_interrupt_timerun},
-    {"target_activate_if_velocity", SP_target_activate_if_velocity},
-    {"target_scale_velocity", SP_target_scale_velocity},
-    {"trigger_tracker", ETJump::ProgressionTrackers::triggerTrackerSpawn},
-    {"target_tracker", ETJump::ProgressionTrackers::targetTrackerSpawn},
-    {"target_set_health", SP_target_set_health},
-    {"target_deathrun_start", SP_target_deathrun_start},
-    {"target_deathrun_checkpoint", SP_target_deathrun_checkpoint},
-    {"target_displaytjl", SP_target_tjldisplay},
-    {"target_cleartjl", SP_target_tjlclear},
-    {"target_init", ETJump::TargetInit::spawn},
-    {"func_missilepad", ETJump::Missilepad::spawn},
-    {"trigger_teleport_client", ETJump::TriggerTeleportClient::spawn},
-    {"target_ft_setrules", ETJump::TargetFtSetRules::spawn},
-    {"target_spawn_relay", ETJump::TargetSpawnRelay::spawn},
-    {"target_random", ETJump::TargetRandom::spawn},
-    {"func_static_client", ETJump::FuncStaticClient::spawn},
-    {nullptr, nullptr},
+  // deprecated, kept for compatibility, uses target_print code
+  {"target_printname",            SP_target_printname                             },
+  /*{"etjump_target_relay",	SP_target_fireonce },*/  // Changed for RC1 -
+                                                    // Feen
+  {"etjump2_target_relay",        SP_target_fireonce                              },
+  {"etjump203_target_relay",      SP_target_fireonce                              },
+  {"func_fakebrush",              SP_func_fakebrush                               },
+  {"target_savereset",            SP_target_savereset                             },
+  {"weapon_portalgun",            ETJump::Portalgun::spawn                        }, // Feen: PGM
+  {"target_increase_ident",       SP_target_increase_ident                        },
+  {"target_save",                 SP_target_save                                  },
+  {"target_remove_portals",       SP_target_remove_portals                        },
+  {"target_portal_relay",         SP_target_portal_relay                          },
+  {"target_ftrelay",              SP_target_ftrelay                               },
+  {"target_savelimit_set",        SP_target_savelimit_set                         },
+  {"target_savelimit_inc",        SP_target_savelimit_inc                         },
+  {"target_decay",                SP_target_decay                                 },
+  {"target_starttimer",           ETJump::TargetStartTimer::spawn                 },
+  {"trigger_starttimer",          ETJump::TriggerStartTimer::spawn                },
+  {"trigger_starttimer_ext",      ETJump::TriggerStartTimerExt::spawn             },
+  {"target_stoptimer",            ETJump::TargetStopTimer::spawn                  },
+  {"trigger_stoptimer",           ETJump::TriggerStopTimer::spawn                 },
+  {"trigger_stoptimer_ext",       ETJump::TriggerStopTimerExt::spawn              },
+  {"target_checkpoint",           ETJump::TargetCheckpoint::spawn                 },
+  {"trigger_checkpoint",          ETJump::TriggerCheckpoint::spawn                },
+  {"trigger_checkpoint_ext",      ETJump::TriggerCheckpointExt::spawn             },
+  {"target_interrupt_timerun",    SP_target_interrupt_timerun                     },
+  {"target_activate_if_velocity", SP_target_activate_if_velocity                  },
+  {"target_scale_velocity",       SP_target_scale_velocity                        },
+  {"trigger_tracker",             ETJump::ProgressionTrackers::triggerTrackerSpawn},
+  {"target_tracker",              ETJump::ProgressionTrackers::targetTrackerSpawn },
+  {"target_set_health",           SP_target_set_health                            },
+  {"target_deathrun_start",       SP_target_deathrun_start                        },
+  {"target_deathrun_checkpoint",  SP_target_deathrun_checkpoint                   },
+  {"target_displaytjl",           SP_target_tjldisplay                            },
+  {"target_cleartjl",             SP_target_tjlclear                              },
+  {"target_init",                 ETJump::TargetInit::spawn                       },
+  {"func_missilepad",             ETJump::Missilepad::spawn                       },
+  {"trigger_teleport_client",     ETJump::TriggerTeleportClient::spawn            },
+  {"target_ft_setrules",          ETJump::TargetFtSetRules::spawn                 },
+  {"target_spawn_relay",          ETJump::TargetSpawnRelay::spawn                 },
+  {"target_random",               ETJump::TargetRandom::spawn                     },
+  {"func_static_client",          ETJump::FuncStaticClient::spawn                 },
+  {"target_wskey_overrides",      ETJump::TargetWSKeyOverrides::spawn             },
+  {nullptr,                       nullptr                                         },
 };
 
 /*
@@ -852,14 +845,13 @@ void G_ParseField(const char *key, const char *value, gentity_t *ent) {
           *reinterpret_cast<float *>(b + f->ofs) = Q_atof(value);
           break;
         case F_ANGLEHACK:
-          v = Q_atof(value);
+          v                                        = Q_atof(value);
           reinterpret_cast<float *>(b + f->ofs)[0] = 0;
           reinterpret_cast<float *>(b + f->ofs)[1] = v;
           reinterpret_cast<float *>(b + f->ofs)[2] = 0;
           break;
         case F_CURSORHINT:
-          ETJump::EntityUtilities::setCursorhintFromString(
-              *reinterpret_cast<int *>(b + f->ofs), value);
+          ETJump::EntityUtilities::setCursorhintFromString(*reinterpret_cast<int *>(b + f->ofs), value);
           break;
         case F_IGNORE:
         default:
@@ -931,6 +923,7 @@ void G_SpawnGEntityFromSpawnVars(void) {
   // RF, try and move it into the bot entities if possible
   //	BotCheckBotGameEntity( ent );
 }
+
 /*
 ====================
 G_AddSpawnVarToken
@@ -972,7 +965,7 @@ static bool G_ParseSpawnVars() {
   char keyname[MAX_TOKEN_CHARS];
   char com_token[MAX_TOKEN_CHARS];
 
-  level.numSpawnVars = 0;
+  level.numSpawnVars     = 0;
   level.numSpawnVarChars = 0;
 
   // parse the opening brace
@@ -1005,8 +998,7 @@ static bool G_ParseSpawnVars() {
     }
 
     if (level.numSpawnVars == MAX_SPAWN_VARS) {
-      G_Error("%s: MAX_SPAWN_VARS (%i) reached, too many keys in an entity",
-              __func__, MAX_SPAWN_VARS);
+      G_Error("%s: MAX_SPAWN_VARS (%i) reached, too many keys in an entity", __func__, MAX_SPAWN_VARS);
     }
 
     level.spawnVars[level.numSpawnVars][0] = G_AddSpawnVarToken(keyname);
@@ -1068,11 +1060,10 @@ static void SP_worldspawn() {
   trap_SetConfigstring(CS_MOTD, g_motd.string); // message of the day
 
   G_SpawnString("spawnflags", "0", &s);
-  g_entities[ENTITYNUM_WORLD].spawnflags = Q_atoi(s);
-  g_entities[ENTITYNUM_WORLD].r.worldflags =
-      g_entities[ENTITYNUM_WORLD].spawnflags;
+  g_entities[ENTITYNUM_WORLD].spawnflags   = Q_atoi(s);
+  g_entities[ENTITYNUM_WORLD].r.worldflags = g_entities[ENTITYNUM_WORLD].spawnflags;
 
-  g_entities[ENTITYNUM_WORLD].s.number = ENTITYNUM_WORLD;
+  g_entities[ENTITYNUM_WORLD].s.number  = ENTITYNUM_WORLD;
   g_entities[ENTITYNUM_WORLD].classname = "worldspawn";
 
   // see if we want a warmup time
@@ -1097,8 +1088,11 @@ Parses textual entity definitions out of an entstring and spawns gentities.
 void G_SpawnEntitiesFromString(void) {
   // allow calls to G_Spawn*()
   G_Printf("Enable spawning!\n");
-  level.spawning = qtrue;
+  level.spawning     = qtrue;
   level.numSpawnVars = 0;
+
+  // filled by G_ParseSpawnVars
+  ETJump::EntityUtilities::clearParsedEntities();
 
   // the worldspawn is not an actual entity, but it still
   // has a "spawn" function to perform any global setup

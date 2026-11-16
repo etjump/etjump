@@ -24,18 +24,19 @@
 
 #pragma once
 
-#include <vector>
 #include <array>
 #include <unordered_map>
+#include <vector>
 
-#include "g_local.h"
 #include "etj_progression_tracker_parser.h"
+#include "g_local.h"
 
 namespace ETJump {
 class ProgressionTrackers {
 public:
   static const char *ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET;
   static const int ProgressionTrackerValueNotSet = -1;
+
   struct ProgressionTrackerKeys {
     char *equal;
     char *notEqualAny;
@@ -56,9 +57,8 @@ public:
   static void triggerTrackerSpawn(gentity_t *self);
 
   static ProgressionTrackerKeys ParseTrackerKeys();
-  static void printTrackerChanges(
-      const gentity_t *activator,
-      const std::array<int32_t, MAX_PROGRESSION_TRACKERS> &oldValues);
+  static void printTrackerChanges(const gentity_t *activator,
+                                  const std::array<int32_t, MAX_PROGRESSION_TRACKERS> &oldValues);
 
   struct ProgressionTracker {
     ProgressionTracker() {
@@ -78,6 +78,7 @@ public:
       std::fill_n(increment, MAX_PROGRESSION_TRACKERS, 0);
       std::fill_n(incrementIf, MAX_PROGRESSION_TRACKERS, 0);
     }
+
     int equal[MAX_PROGRESSION_TRACKERS]{};
     int notEqualAny[MAX_PROGRESSION_TRACKERS]{};
     int notEqualAll[MAX_PROGRESSION_TRACKERS]{};
@@ -95,13 +96,10 @@ public:
 
   ProgressionTrackers();
   ~ProgressionTrackers();
-  void printParserErrors(const std::vector<std::string> &errors,
-                         const std::string &text);
-  std::vector<ProgressionTrackerParser::IndexValuePair>
-  parseKey(const std::string &key);
-  void
-  updateTracker(std::vector<ProgressionTrackerParser::IndexValuePair> pairs,
-                int tracker[MAX_PROGRESSION_TRACKERS]);
+  void printParserErrors(const std::vector<std::string> &errors, const std::string &text);
+  std::vector<ProgressionTrackerParser::IndexValuePair> parseKey(const std::string &key);
+  void updateTracker(std::vector<ProgressionTrackerParser::IndexValuePair> pairs,
+                     int tracker[MAX_PROGRESSION_TRACKERS]);
   int registerTracker(ProgressionTrackerKeys keys);
   void useTargetTracker(gentity_t *ent, gentity_t *other, gentity_t *activator);
   void useTriggerTracker(gentity_t *ent, gentity_t *activator);
@@ -110,11 +108,9 @@ public:
   void restoreClientProgression(const gentity_t *ent);
 
 private:
-  void useTracker(gentity_t *ent, gentity_t *activator,
-                  const ProgressionTracker &tracker);
+  void useTracker(gentity_t *ent, gentity_t *activator, const ProgressionTracker &tracker);
 
   std::vector<ProgressionTracker> _progressionTrackers;
-  std::unordered_map<std::string, std::array<int32_t, MAX_PROGRESSION_TRACKERS>>
-      savedProgression;
+  std::unordered_map<std::string, std::array<int32_t, MAX_PROGRESSION_TRACKERS>> savedProgression;
 };
 } // namespace ETJump

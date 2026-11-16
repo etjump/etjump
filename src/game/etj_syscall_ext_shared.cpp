@@ -50,8 +50,7 @@ void SyscallExt::setupExtensions() {
 #endif
 }
 
-void SyscallExt::setupExtensionTrap(char *value, const std::string &name,
-                                    int &trap) {
+void SyscallExt::setupExtensionTrap(char *value, const std::string &name, int &trap) {
   if (trap_GetValue(value, MAX_CVAR_VALUE_STRING, name.c_str())) {
     trap = Q_atoi(value);
   }

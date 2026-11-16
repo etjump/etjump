@@ -26,8 +26,8 @@
 
 #include <vector>
 
-#include "etj_irenderable.h"
 #include "etj_cvar_parser.h"
+#include "etj_irenderable.h"
 
 namespace ETJump {
 class CvarUpdateHandler;
@@ -61,14 +61,17 @@ public:
     qhandle_t release;
   };
 
-  KeySetDrawer(const std::vector<KeyShader> &keyShaders,
-               const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  KeySetDrawer(const std::vector<KeyShader> &keyShaders, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~KeySetDrawer() override;
 
   void render() const override;
+
   // FIXME: this should to be refactored, see etj_cvar_master_drawer.cpp/h,
   //  this whole system with keysets is more complex than it needs to be
-  bool beforeRender() override { return true; }
+  bool beforeRender() override {
+    return true;
+  }
+
   static std::string keyNameToString(KeyNames keyName);
 
 protected:
@@ -104,10 +107,8 @@ protected:
   static int isKeyPressed(KeyNames key);
 
   template <int Cols>
-  static Point2d calcGridPosition(const float cellSizeX, const float cellSizeY,
-                                  const int cellIndex) {
-    return {cellSizeX * (cellIndex % Cols),
-            cellSizeY * static_cast<int>(cellIndex / Cols)};
+  static Point2d calcGridPosition(const float cellSizeX, const float cellSizeY, const int cellIndex) {
+    return {cellSizeX * (cellIndex % Cols), cellSizeY * static_cast<int>(cellIndex / Cols)};
   }
 };
 } // namespace ETJump

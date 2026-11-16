@@ -24,15 +24,15 @@
 
 #pragma once
 
-#include "etj_irenderable.h"
 #include "etj_chs_data.h"
+#include "etj_irenderable.h"
+
 #include "../../assets/ui/menudef.h"
 
 namespace ETJump {
 class CHS : public IRenderable {
 public:
-  CHS(const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
-      const std::shared_ptr<CHSDataHandler> &dataHandler);
+  CHS(const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler, const std::shared_ptr<CHSData> &dataHandler);
   ~CHS() override;
 
   bool beforeRender() override;
@@ -53,15 +53,10 @@ private:
   void setAlpha(const vmCvar_t *cvar);
   bool infoUsesExtraTrace(const vmCvar_t *cvar);
 
-  static void setupListCHS(CHSHUD &chs, float x, float y, bool rightAlign,
-                           bool hideLabels);
+  static void setupListCHS(CHSHUD &chs, float x, float y, bool rightAlign, bool hideLabels);
 
-  void drawCHSCrosshair(
-      const CHSHUD &hud,
-      const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &cvars) const;
-  void drawCHSList(
-      const CHSHUD &hud,
-      const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &cvars) const;
+  void drawCHSCrosshair(const CHSHUD &hud, const std::array<CHSData::CHSCvar, MAX_CHS_INFO> &cvars) const;
+  void drawCHSList(const CHSHUD &hud, const std::array<CHSData::CHSCvar, MAX_CHS_INFO> &cvars) const;
 
   CHSHUD chs1{};
   CHSHUD chs2{};
@@ -82,18 +77,20 @@ private:
   // 7    x    3
   //   6     4
   //      5
-  static constexpr std::array<CHS1PosInfo, MAX_CHS_INFO> CHS1Positions = {{
-      {0, -20, ITEM_ALIGN_CENTER},
-      {10, -10, ITEM_ALIGN_LEFT},
-      {20, 0, ITEM_ALIGN_LEFT},
-      {10, 10, ITEM_ALIGN_LEFT},
-      {0, 20, ITEM_ALIGN_CENTER},
-      {-10, 10, ITEM_ALIGN_RIGHT},
-      {-20, 0, ITEM_ALIGN_RIGHT},
-      {-10, -10, ITEM_ALIGN_RIGHT},
-  }};
+  static constexpr std::array<CHS1PosInfo, MAX_CHS_INFO> CHS1Positions = {
+    {
+     {0, -20, ITEM_ALIGN_CENTER},
+     {10, -10, ITEM_ALIGN_LEFT},
+     {20, 0, ITEM_ALIGN_LEFT},
+     {10, 10, ITEM_ALIGN_LEFT},
+     {0, 20, ITEM_ALIGN_CENTER},
+     {-10, 10, ITEM_ALIGN_RIGHT},
+     {-20, 0, ITEM_ALIGN_RIGHT},
+     {-10, -10, ITEM_ALIGN_RIGHT},
+     }
+  };
 
   std::shared_ptr<CvarUpdateHandler> cvarUpdateHandler;
-  std::shared_ptr<CHSDataHandler> data;
+  std::shared_ptr<CHSData> data;
 };
 } // namespace ETJump

@@ -7,9 +7,11 @@
 **********************************************************************/
 
 #include "etj_demo_queue.h"
-#include "ui_local.h"
 #include "etj_local.h"
 #include "etj_utilities.h"
+#include "ui_local.h"
+
+#include "../game/etj_fatal_error_shared.h"
 
 uiStatic_t uis;
 qboolean m_entersound; // after a frame, so caching won't disrupt the sound
@@ -34,6 +36,7 @@ void QDECL Com_DPrintf(const char *fmt, ...) {
 
   Com_Printf("%s", msg);
 }
+
 // jpw
 
 [[noreturn]] void QDECL Com_Error(int level, const char *error, ...) {
@@ -44,7 +47,8 @@ void QDECL Com_DPrintf(const char *fmt, ...) {
   Q_vsnprintf(text, sizeof(text), error, argptr);
   va_end(argptr);
 
-  trap_Error(va("%s", text));
+  // unwinds the stack up to vmMain, which then calls trap_Error
+  ETJump::FatalErrorBoundary::throwFatal(text);
 }
 
 void QDECL Com_Printf(const char *msg, ...) {
@@ -132,7 +136,9 @@ UI_ClearScores
 */
 void UI_ClearScores() {}
 
-static void UI_Cache_f() { Display_CacheAll(); }
+static void UI_Cache_f() {
+  Display_CacheAll();
+}
 
 /*
 =======================
@@ -147,9 +153,9 @@ UI_ConsoleCommand
 =================
 */
 qboolean UI_ConsoleCommand(const int realTime) {
-  const char *cmd = UI_Argv(0);
+  const char *cmd       = UI_Argv(0);
   uiInfo.uiDC.frameTime = realTime - uiInfo.uiDC.realTime;
-  uiInfo.uiDC.realTime = realTime;
+  uiInfo.uiDC.realTime  = realTime;
 
   if (Q_stricmp(cmd, "ui_test") == 0) {
     UI_ShowPostGame(qtrue);
@@ -277,8 +283,7 @@ void UI_AdjustFrom640(float *x, float *y, float *w, float *h) {
   *h *= uiInfo.uiDC.yscale;
 }
 
-void UI_DrawNamedPic(float x, float y, float width, float height,
-                     const char *picname) {
+void UI_DrawNamedPic(float x, float y, float width, float height, const char *picname) {
   qhandle_t hShader;
 
   hShader = trap_R_RegisterShaderNoMip(picname);
@@ -294,7 +299,7 @@ void UI_DrawHandlePic(float x, float y, float w, float h, qhandle_t hShader) {
 
   if (w < 0) // flip about vertical
   {
-    w = -w;
+    w  = -w;
     s0 = 1;
     s1 = 0;
   } else {
@@ -304,7 +309,7 @@ void UI_DrawHandlePic(float x, float y, float w, float h, qhandle_t hShader) {
 
   if (h < 0) // flip about horizontal
   {
-    h = -h;
+    h  = -h;
     t0 = 1;
     t1 = 0;
   } else {
@@ -323,9 +328,7 @@ UI_DrawRotatedPic
 Coordinates are 640*480 virtual values
 =================
 */
-void UI_DrawRotatedPic(float x, float y, float width, float height,
-                       qhandle_t hShader, float angle) {
-
+void UI_DrawRotatedPic(float x, float y, float width, float height, qhandle_t hShader, float angle) {
   UI_AdjustFrom640(&x, &y, &width, &height);
 
   trap_R_DrawRotatedPic(x, y, width, height, 0, 0, 1, 1, hShader, angle);
@@ -338,13 +341,11 @@ UI_FillRect
 Coordinates are 640*480 virtual values
 =================
 */
-void UI_FillRect(float x, float y, float width, float height,
-                 const float *color) {
+void UI_FillRect(float x, float y, float width, float height, const float *color) {
   trap_R_SetColor(color);
 
   UI_AdjustFrom640(&x, &y, &width, &height);
-  trap_R_DrawStretchPic(x, y, width, height, 0, 0, 0, 0,
-                        uiInfo.uiDC.whiteShader);
+  trap_R_DrawStretchPic(x, y, width, height, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
 
   trap_R_SetColor(NULL);
 }
@@ -352,16 +353,15 @@ void UI_FillRect(float x, float y, float width, float height,
 void UI_DrawSides(float x, float y, float w, float h) {
   UI_AdjustFrom640(&x, &y, &w, &h);
   trap_R_DrawStretchPic(x, y, 1, h, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
-  trap_R_DrawStretchPic(x + w - 1, y, 1, h, 0, 0, 0, 0,
-                        uiInfo.uiDC.whiteShader);
+  trap_R_DrawStretchPic(x + w - 1, y, 1, h, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
 }
 
 void UI_DrawTopBottom(float x, float y, float w, float h) {
   UI_AdjustFrom640(&x, &y, &w, &h);
   trap_R_DrawStretchPic(x, y, w, 1, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
-  trap_R_DrawStretchPic(x, y + h - 1, w, 1, 0, 0, 0, 0,
-                        uiInfo.uiDC.whiteShader);
+  trap_R_DrawStretchPic(x, y + h - 1, w, 1, 0, 0, 0, 0, uiInfo.uiDC.whiteShader);
 }
+
 /*
 ================
 UI_DrawRect
@@ -369,8 +369,7 @@ UI_DrawRect
 Coordinates are 640*480 virtual values
 =================
 */
-void UI_DrawRect(float x, float y, float width, float height,
-                 const float *color) {
+void UI_DrawRect(float x, float y, float width, float height, const float *color) {
   trap_R_SetColor(color);
 
   UI_DrawTopBottom(x, y, width, height);
@@ -379,22 +378,23 @@ void UI_DrawRect(float x, float y, float width, float height,
   trap_R_SetColor(NULL);
 }
 
-void UI_SetColor(const float *rgba) { trap_R_SetColor(rgba); }
+void UI_SetColor(const float *rgba) {
+  trap_R_SetColor(rgba);
+}
 
-void UI_UpdateScreen(void) { trap_UpdateScreen(); }
+void UI_UpdateScreen(void) {
+  trap_UpdateScreen();
+}
 
 void UI_DrawTextBox(int x, int y, int width, int lines) {
-  UI_FillRect(x + BIGCHAR_WIDTH / 2, y + BIGCHAR_HEIGHT / 2,
-              (width + 1) * BIGCHAR_WIDTH, (lines + 1) * BIGCHAR_HEIGHT,
+  UI_FillRect(x + BIGCHAR_WIDTH / 2, y + BIGCHAR_HEIGHT / 2, (width + 1) * BIGCHAR_WIDTH, (lines + 1) * BIGCHAR_HEIGHT,
               colorBlack);
-  UI_DrawRect(x + BIGCHAR_WIDTH / 2, y + BIGCHAR_HEIGHT / 2,
-              (width + 1) * BIGCHAR_WIDTH, (lines + 1) * BIGCHAR_HEIGHT,
+  UI_DrawRect(x + BIGCHAR_WIDTH / 2, y + BIGCHAR_HEIGHT / 2, (width + 1) * BIGCHAR_WIDTH, (lines + 1) * BIGCHAR_HEIGHT,
               colorWhite);
 }
 
 qboolean UI_CursorInRect(int x, int y, int width, int height) {
-  if (uiInfo.uiDC.cursor.virtX < x || uiInfo.uiDC.cursor.virtY < y ||
-      uiInfo.uiDC.cursor.virtX > x + width ||
+  if (uiInfo.uiDC.cursor.virtX < x || uiInfo.uiDC.cursor.virtY < y || uiInfo.uiDC.cursor.virtX > x + width ||
       uiInfo.uiDC.cursor.virtY > y + height) {
     return qfalse;
   }

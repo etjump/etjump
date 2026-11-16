@@ -23,20 +23,21 @@
  */
 
 #include "etj_file.h"
+
 #include "etj_filesystem.h"
 
 #if defined(GAMEDLL)
+  #include "etj_string_utilities.h"
   #include "g_local.h"
-  #include "etj_string_utilities.h"
 #elif defined(CGAMEDLL)
-  #include "../cgame/cg_local.h"
   #include "etj_string_utilities.h"
+
+  #include "../cgame/cg_local.h"
 #elif defined(UIDLL)
   #include "../ui/ui_local.h"
 #endif
 
-File::File(std::string filename, const Mode mode)
-    : file(std::move(filename)), handle(INVALID_FILE_HANDLE), mode(mode) {
+File::File(std::string filename, const Mode mode) : file(std::move(filename)), handle(INVALID_FILE_HANDLE), mode(mode) {
   fsMode_t fsMode{};
 
   switch (mode) {
@@ -53,8 +54,7 @@ File::File(std::string filename, const Mode mode)
       fsMode = FS_APPEND_SYNC;
       break;
     default:
-      Com_Error(ERR_FATAL, "%s: bad mode %i for file '%s'\n", __func__,
-                static_cast<int>(mode),
+      Com_Error(ERR_FATAL, "%s: bad mode %i for file '%s'\n", __func__, static_cast<int>(mode),
                 FileSystem::Path::getPath(file).c_str());
   }
 
@@ -80,13 +80,11 @@ File::~File() {
 
 std::vector<char> File::read(const int bytes) const {
   if (mode != Mode::Read) {
-    throw FileIOException(
-        "Cannot read from a file when mode is not Mode::Read.");
+    throw FileIOException("Cannot read from a file when mode is not Mode::Read.");
   }
 
-  const int readBytes =
-      bytes == READ_ALL_BYTES ? length : std::max(bytes, length);
-  auto buffer = std::vector<char>(readBytes);
+  const int readBytes = bytes == READ_ALL_BYTES ? length : std::min(bytes, length);
+  auto buffer         = std::vector<char>(readBytes);
 
   trap_FS_Read(buffer.data(), readBytes, handle);
   return buffer;
@@ -94,7 +92,7 @@ std::vector<char> File::read(const int bytes) const {
 
 std::string File::readString(const int32_t bytes, const bool normalize) const {
   auto contents = read(bytes);
-  auto s = std::string(contents.cbegin(), contents.cend());
+  auto s        = std::string(contents.cbegin(), contents.cend());
 
   if (normalize) {
     StringUtils::replaceAll(s, "\r\n", "\n");
@@ -122,9 +120,8 @@ void File::write(const char *data, int len) const {
   const auto bytesWritten = trap_FS_Write(data, len, handle);
 
   if (bytesWritten != len) {
-    throw FileIOException(StringUtils::format(
-        "Write to file '%s' failed. Wrote %d out of %d bytes.",
-        FileSystem::Path::getPath(file), bytesWritten, len));
+    throw FileIOException(StringUtils::format("Write to file '%s' failed. Wrote %d out of %d bytes.",
+                                              FileSystem::Path::getPath(file), bytesWritten, len));
   }
 #endif
 }

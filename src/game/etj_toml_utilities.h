@@ -32,9 +32,7 @@
 
 class TOMLUtils {
 public:
-  template <typename T>
-  static bool readFile(const std::string &file, T &table,
-                       std::string *err = nullptr) {
+  template <typename T> static bool readFile(const std::string &file, T &table, std::string *err = nullptr) {
     const auto filePath = FileSystem::Path::getPath(file);
 
     try {
@@ -47,24 +45,21 @@ public:
       }
     } catch (const toml::syntax_error &e) {
       if (err) {
-        *err = StringUtils::format("Failed to parse TOML file '%s':\n%s", file,
-                                   e.what());
+        *err = StringUtils::format("Failed to parse TOML file '%s':\n %s", file, e.what());
         StringUtils::escapeColorCodes(*err, '7');
       }
 
       return false;
     } catch (const toml::type_error &e) {
       if (err) {
-        *err = StringUtils::format("Failed to parse TOML file '%s':\n%s", file,
-                                   e.what());
+        *err = StringUtils::format("Failed to parse TOML file '%s':\n %s", file, e.what());
         StringUtils::escapeColorCodes(*err, '7');
       }
 
       return false;
     } catch (toml::file_io_error &e) {
       if (err) {
-        *err = StringUtils::format("Failed to open file '%s' for reading:\n%s",
-                                   file, e.what());
+        *err = StringUtils::format("Failed to open file '%s' for reading:\n%s", file, e.what());
       }
 
       return false;
@@ -73,9 +68,7 @@ public:
     return true;
   }
 
-  template <typename T>
-  static bool writeFile(const std::string &file, const T &table,
-                        std::string *err = nullptr) {
+  template <typename T> static bool writeFile(const std::string &file, const T &table, std::string *err = nullptr) {
     if (file.empty()) {
       if (err) {
         *err = "Failed to write TOML file: empty filename";

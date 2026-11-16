@@ -23,7 +23,6 @@
  */
 
 #include "etj_console_variables.h"
-
 #include "g_local.h"
 
 std::string ETJump::ConsoleVariables::getCvarString(const std::string &name) {

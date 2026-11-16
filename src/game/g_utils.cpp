@@ -7,10 +7,10 @@
 
 #include <unordered_map>
 
-#include "g_local.h"
 #include "etj_printer.h"
 #include "etj_shader_config_handler.h"
 #include "etj_string_utilities.h"
+#include "g_local.h"
 
 /*
 =========================================================================
@@ -20,15 +20,14 @@ model / sound configstring indexes
 =========================================================================
 */
 
-static const std::unordered_map<int, std::pair<std::string, std::string>>
-    csStrings = {
-        {CS_MODELS, {"CS_MODELS", "MAX_MODELS"}},
-        {CS_SOUNDS, {"CS_SOUNDS", "MAX_SOUNDS"}},
-        {CS_SKINS, {"CS_SKINS", "MAX_CS_SKINS"}},
-        {CS_CHARACTERS, {"CS_CHARACTERS", "MAX_CHARACTERS"}},
-        {CS_DLIGHTS, {"CS_DLIGHTS", "MAX_DLIGHT_CONFIGSTRINGS"}},
-        {CS_TAGCONNECTS, {"CS_TAGCONNECTS", "MAX_TAGCONNECTS"}},
-        {CS_STRINGS, {"CS_STRINGS", "MAX_CS_STRINGS"}},
+static const std::unordered_map<int, std::pair<std::string, std::string>> csStrings = {
+  {CS_MODELS,      {"CS_MODELS", "MAX_MODELS"}               },
+  {CS_SOUNDS,      {"CS_SOUNDS", "MAX_SOUNDS"}               },
+  {CS_SKINS,       {"CS_SKINS", "MAX_CS_SKINS"}              },
+  {CS_CHARACTERS,  {"CS_CHARACTERS", "MAX_CHARACTERS"}       },
+  {CS_DLIGHTS,     {"CS_DLIGHTS", "MAX_DLIGHT_CONFIGSTRINGS"}},
+  {CS_TAGCONNECTS, {"CS_TAGCONNECTS", "MAX_TAGCONNECTS"}     },
+  {CS_STRINGS,     {"CS_STRINGS", "MAX_CS_STRINGS"}          },
 };
 
 /*
@@ -37,8 +36,7 @@ G_FindConfigstringIndex
 
 ================
 */
-int G_FindConfigstringIndex(const char *name, int start, int max,
-                            qboolean create) {
+int G_FindConfigstringIndex(const char *name, int start, int max, qboolean create) {
   int i;
   char s[MAX_STRING_CHARS];
 
@@ -66,8 +64,7 @@ int G_FindConfigstringIndex(const char *name, int start, int max,
 
     if (it != csStrings.end()) {
       err =
-          StringUtils::format("%s: overflow on index %s (%s = %i)\n", __func__,
-                              it->second.first, it->second.second, max);
+        StringUtils::format("%s: overflow on index %s (%s = %i)\n", __func__, it->second.first, it->second.second, max);
     } else {
       err = StringUtils::format("%s: overflow on index %i\n", __func__, start);
     }
@@ -151,8 +148,7 @@ gentity_t *G_Find(gentity_t *from, const size_t fieldofs, const char *match) {
       continue;
     }
 
-    const char *s =
-        *reinterpret_cast<char **>(reinterpret_cast<byte *>(from) + fieldofs);
+    const char *s = *reinterpret_cast<char **>(reinterpret_cast<byte *>(from) + fieldofs);
 
     if (!s) {
       continue;
@@ -181,8 +177,7 @@ gentity_t *G_FindInt(gentity_t *from, const size_t fieldofs, const int match) {
       continue;
     }
 
-    const int i =
-        *reinterpret_cast<int *>(reinterpret_cast<byte *>(from) + fieldofs);
+    const int i = *reinterpret_cast<int *>(reinterpret_cast<byte *>(from) + fieldofs);
 
     if (i == match) {
       return from;
@@ -193,8 +188,7 @@ gentity_t *G_FindInt(gentity_t *from, const size_t fieldofs, const int match) {
 }
 
 // like G_Find, but searches for a float
-gentity_t *G_FindFloat(gentity_t *from, const size_t fieldofs,
-                       const float match) {
+gentity_t *G_FindFloat(gentity_t *from, const size_t fieldofs, const float match) {
   const gentity_t *max = &g_entities[level.num_entities];
 
   if (!from) {
@@ -208,8 +202,7 @@ gentity_t *G_FindFloat(gentity_t *from, const size_t fieldofs,
       continue;
     }
 
-    const float f =
-        *reinterpret_cast<float *>(reinterpret_cast<byte *>(from) + fieldofs);
+    const float f = *reinterpret_cast<float *>(reinterpret_cast<byte *>(from) + fieldofs);
 
     if (f == match) {
       return from;
@@ -220,8 +213,7 @@ gentity_t *G_FindFloat(gentity_t *from, const size_t fieldofs,
 }
 
 // like G_Find, but searches for a vec3_t
-gentity_t *G_FindVec(gentity_t *from, const size_t fieldofs,
-                     const vec3_t match) {
+gentity_t *G_FindVec(gentity_t *from, const size_t fieldofs, const vec3_t match) {
   const gentity_t *max = &g_entities[level.num_entities];
 
   if (!from) {
@@ -236,12 +228,9 @@ gentity_t *G_FindVec(gentity_t *from, const size_t fieldofs,
     }
 
     vec3_t v;
-    v[0] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) +
-                                      fieldofs + 0);
-    v[1] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) +
-                                      fieldofs + 4);
-    v[2] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) +
-                                      fieldofs + 8);
+    v[0] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) + fieldofs + 0);
+    v[1] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) + fieldofs + 4);
+    v[2] = *reinterpret_cast<vec_t *>(reinterpret_cast<byte *>(from) + fieldofs + 8);
 
     if (VectorCompare(v, match)) {
       return from;
@@ -258,7 +247,7 @@ G_FindByTargetname
 */
 gentity_t *G_FindByTargetname(gentity_t *from, const char *match) {
   gentity_t *max = &g_entities[level.num_entities];
-  int hash = BG_StringHashValue(match);
+  int hash       = BG_StringHashValue(match);
 
   if (!from) {
     from = g_entities;
@@ -281,8 +270,7 @@ gentity_t *G_FindByTargetname(gentity_t *from, const char *match) {
 
 // digibob: this version should be used for loops, saves the constant hash
 // building
-gentity_t *G_FindByTargetnameFast(gentity_t *from, const char *match,
-                                  int hash) {
+gentity_t *G_FindByTargetnameFast(gentity_t *from, const char *match, int hash) {
   gentity_t *max = &g_entities[level.num_entities];
 
   if (!from) {
@@ -303,6 +291,7 @@ gentity_t *G_FindByTargetnameFast(gentity_t *from, const char *match,
 
   return NULL;
 }
+
 /*
 =============
 G_PickTarget
@@ -313,7 +302,7 @@ Selects a random entity from among the targets
 inline constexpr int MAXCHOICES = 32;
 
 gentity_t *G_PickTarget(char *targetname) {
-  gentity_t *ent = NULL;
+  gentity_t *ent  = NULL;
   int num_choices = 0;
   gentity_t *choice[MAXCHOICES];
 
@@ -347,8 +336,7 @@ qboolean G_AllowTeamsAllowed(gentity_t *ent, gentity_t *activator) {
       int checkTeam = activator->client->sess.sessionTeam;
 
       if (!(ent->allowteams & checkTeam)) {
-        if ((ent->allowteams & ALLOW_DISGUISED_CVOPS) &&
-            activator->client->ps.powerups[PW_OPS_DISGUISED]) {
+        if ((ent->allowteams & ALLOW_DISGUISED_CVOPS) && activator->client->ps.powerups[PW_OPS_DISGUISED]) {
           if (checkTeam == TEAM_AXIS) {
             checkTeam = TEAM_ALLIES;
           } else if (checkTeam == TEAM_ALLIES) {
@@ -374,7 +362,6 @@ Added to allow more checking on what uses what
 =============
 */
 void G_UseEntity(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-
   // check for allowteams
   if (!G_AllowTeamsAllowed(ent, activator)) {
     return;
@@ -403,8 +390,7 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator) {
   }
 
   if (ent->targetShaderName && ent->targetShaderNewName) {
-    ETJump::shaderConfigHandler->addShaderRemap(ent->targetShaderName,
-                                                ent->targetShaderNewName);
+    ETJump::shaderConfigHandler->addShaderRemap(ent->targetShaderName, ent->targetShaderNewName);
     ETJump::shaderConfigHandler->updateShaderState();
   }
 
@@ -413,8 +399,8 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator) {
   }
 
   const bool entIsFuncStatic = Q_stricmp(ent->classname, "func_static") == 0;
-  t = nullptr;
-  const auto hash = static_cast<int>(BG_StringHashValue(ent->target));
+  t                          = nullptr;
+  const auto hash            = static_cast<int>(BG_StringHashValue(ent->target));
   while ((t = G_FindByTargetnameFast(t, ent->target, hash)) != nullptr) {
     if (t == ent) {
       G_Printf("WARNING: Entity used itself.\n");
@@ -432,14 +418,12 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator) {
         t->flags |= (ent->flags & FL_SOFTACTIVATE);
 
         if (activator && !entIsFuncStatic &&
-            ((Q_stricmp(t->classname, "func_door") == 0) ||
-             (Q_stricmp(t->classname, "func_door_rotating") == 0))) {
+            ((Q_stricmp(t->classname, "func_door") == 0) || (Q_stricmp(t->classname, "func_door_rotating") == 0))) {
           // check door usage rules before allowing any entity open a door
           G_TryDoor(t, ent, activator); // (door,other,activator)
         } else {
           if (t->reqident && (activator && activator->client)) {
-            const auto clientMapProgression =
-                activator->client->sess.clientMapProgression;
+            const auto clientMapProgression = activator->client->sess.clientMapProgression;
             if (t->spawnflags & 1) {
               if (t->reqident < clientMapProgression) {
                 G_UseEntity(t, ent, activator);
@@ -471,7 +455,7 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator) {
 }
 
 void G_UseTargetedEntities(gentity_t *ent, gentity_t *activator) {
-  int hash = 0;
+  int hash     = 0;
   gentity_t *t = NULL;
   if (!ent) {
     return;
@@ -508,9 +492,9 @@ instead of an orientation.
 ===============
 */
 void G_SetMovedir(vec3_t angles, vec3_t movedir) {
-  static vec3_t VEC_UP = {0, -1, 0};
-  static vec3_t MOVEDIR_UP = {0, 0, 1};
-  static vec3_t VEC_DOWN = {0, -2, 0};
+  static vec3_t VEC_UP       = {0, -1, 0};
+  static vec3_t MOVEDIR_UP   = {0, 0, 1};
+  static vec3_t VEC_DOWN     = {0, -2, 0};
   static vec3_t MOVEDIR_DOWN = {0, 0, -1};
 
   if (VectorCompare(angles, VEC_UP)) {
@@ -524,14 +508,14 @@ void G_SetMovedir(vec3_t angles, vec3_t movedir) {
 }
 
 void G_InitGentity(gentity_t *e) {
-  e->inuse = qtrue;
-  e->classname = "noclass";
-  e->s.number = ClientNum(e);
+  e->inuse      = qtrue;
+  e->classname  = "noclass";
+  e->s.number   = ClientNum(e);
   e->r.ownerNum = ENTITYNUM_NONE;
   e->aiInactive = 0xffffffff;
-  e->nextthink = 0;
+  e->nextthink  = 0;
   memset(e->goalPriority, 0, sizeof(e->goalPriority));
-  e->free = nullptr;
+  e->free    = nullptr;
   e->s.solid = 0;
 
   // RF, init scripting
@@ -575,8 +559,7 @@ gentity_t *G_Spawn(void) {
       // the first couple seconds of server time can
       // involve a lot of freeing and allocating, so
       // relax the replacement policy
-      if (!force && e->freetime > level.startTime + 2000 &&
-          level.time - e->freetime < 1000) {
+      if (!force && e->freetime > level.startTime + 2000 && level.time - e->freetime < 1000) {
         continue;
       }
 
@@ -599,8 +582,8 @@ gentity_t *G_Spawn(void) {
   level.num_entities++;
 
   // let the server system know that there are more entities
-  trap_LocateGameData(level.gentities, level.num_entities, sizeof(gentity_t),
-                      &level.clients[0].ps, sizeof(level.clients[0]));
+  trap_LocateGameData(level.gentities, level.num_entities, sizeof(gentity_t), &level.clients[0].ps,
+                      sizeof(level.clients[0]));
 
   G_InitGentity(e);
   return e;
@@ -629,9 +612,9 @@ void G_FreeEntity(gentity_t *ed) {
   spawnCount = ed->spawnCount;
 
   memset(ed, 0, sizeof(*ed));
-  ed->classname = "freed";
-  ed->freetime = level.time;
-  ed->inuse = qfalse;
+  ed->classname  = "freed";
+  ed->freetime   = level.time;
+  ed->inuse      = qfalse;
   ed->spawnCount = spawnCount;
 }
 
@@ -649,12 +632,12 @@ gentity_t *G_TempEntity(vec3_t origin, int event) {
   gentity_t *e;
   vec3_t snapped;
 
-  e = G_Spawn();
+  e          = G_Spawn();
   e->s.eType = ET_EVENTS + event;
 
-  e->classname = "tempEntity";
-  e->eventTime = level.time;
-  e->r.eventTime = level.time;
+  e->classname      = "tempEntity";
+  e->eventTime      = level.time;
+  e->r.eventTime    = level.time;
   e->freeAfterEvent = qtrue;
 
   VectorCopy(origin, snapped);
@@ -670,14 +653,14 @@ gentity_t *G_TempEntity(vec3_t origin, int event) {
 gentity_t *G_PopupMessage(popupMessageType_t type) {
   gentity_t *e;
 
-  e = G_Spawn();
-  e->s.eType = ET_EVENTS + EV_POPUPMESSAGE;
-  e->classname = "messageent";
-  e->eventTime = level.time;
-  e->r.eventTime = level.time;
+  e                 = G_Spawn();
+  e->s.eType        = ET_EVENTS + EV_POPUPMESSAGE;
+  e->classname      = "messageent";
+  e->eventTime      = level.time;
+  e->r.eventTime    = level.time;
   e->freeAfterEvent = qtrue;
-  e->r.svFlags = SVF_BROADCAST;
-  e->s.effect1Time = type;
+  e->r.svFlags      = SVF_BROADCAST;
+  e->s.effect1Time  = type;
 
   // find cluster for PVS
   trap_LinkEntity(e);
@@ -722,8 +705,7 @@ void G_KillBox(gentity_t *ent) {
     }
 
     // nail it
-    G_Damage(hit, ent, ent, NULL, NULL, 100000, DAMAGE_NO_PROTECTION,
-             MOD_TELEFRAG);
+    G_Damage(hit, ent, ent, NULL, NULL, 100000, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
   }
 }
 
@@ -764,11 +746,8 @@ void G_AddEvent(gentity_t *ent, int event, int eventParm) {
   if (ent->client) {
     // NERVE - SMF - commented in - externalEvents not being
     // handled properly in Wolf right now
-    ent->client->ps.events[ent->client->ps.eventSequence & (MAX_EVENTS - 1)] =
-        event;
-    ent->client->ps
-        .eventParms[ent->client->ps.eventSequence & (MAX_EVENTS - 1)] =
-        eventParm;
+    ent->client->ps.events[ent->client->ps.eventSequence & (MAX_EVENTS - 1)]     = event;
+    ent->client->ps.eventParms[ent->client->ps.eventSequence & (MAX_EVENTS - 1)] = eventParm;
     ent->client->ps.eventSequence++;
     // -NERVE - SMF
 
@@ -782,7 +761,7 @@ void G_AddEvent(gentity_t *ent, int event, int eventParm) {
   } else {
     // NERVE - SMF - commented in - externalEvents not being
     // handled properly in Wolf right now
-    ent->s.events[ent->s.eventSequence & (MAX_EVENTS - 1)] = event;
+    ent->s.events[ent->s.eventSequence & (MAX_EVENTS - 1)]     = event;
     ent->s.eventParms[ent->s.eventSequence & (MAX_EVENTS - 1)] = eventParm;
     ent->s.eventSequence++;
     // -NERVE - SMF
@@ -794,7 +773,7 @@ void G_AddEvent(gentity_t *ent, int event, int eventParm) {
     //		ent->s.eventParm = eventParm;
     // -NERVE - SMF
   }
-  ent->eventTime = level.time;
+  ent->eventTime   = level.time;
   ent->r.eventTime = level.time;
 }
 
@@ -808,7 +787,7 @@ G_Sound
 void G_Sound(gentity_t *ent, int soundIndex) {
   gentity_t *te;
 
-  te = G_TempEntity(ent->r.currentOrigin, EV_GENERAL_SOUND);
+  te              = G_TempEntity(ent->r.currentOrigin, EV_GENERAL_SOUND);
   te->s.eventParm = soundIndex;
 }
 
@@ -834,8 +813,8 @@ Sets the pos trajectory for a fixed position
 */
 void G_SetOrigin(gentity_t *ent, vec3_t origin) {
   VectorCopy(origin, ent->s.pos.trBase);
-  ent->s.pos.trType = TR_STATIONARY;
-  ent->s.pos.trTime = 0;
+  ent->s.pos.trType     = TR_STATIONARY;
+  ent->s.pos.trTime     = 0;
   ent->s.pos.trDuration = 0;
   VectorClear(ent->s.pos.trDelta);
 
@@ -852,10 +831,9 @@ G_SetAngle
 ==============
 */
 void G_SetAngle(gentity_t *ent, vec3_t angle) {
-
   VectorCopy(angle, ent->s.apos.trBase);
-  ent->s.apos.trType = TR_STATIONARY;
-  ent->s.apos.trTime = 0;
+  ent->s.apos.trType     = TR_STATIONARY;
+  ent->s.apos.trTime     = 0;
   ent->s.apos.trDuration = 0;
   VectorClear(ent->s.apos.trDelta);
 
@@ -899,17 +877,16 @@ void G_ProcessTagConnect(gentity_t *ent, qboolean clearAngles) {
   if (!ent->tagParent) {
     G_Error("G_ProcessTagConnect: NULL ent->tagParent\n");
   }
-  G_FindConfigstringIndex(
-      va("%i %i %s", ent->s.number, ent->tagParent->s.number, ent->tagName),
-      CS_TAGCONNECTS, MAX_TAGCONNECTS, qtrue);
+  G_FindConfigstringIndex(va("%i %i %s", ent->s.number, ent->tagParent->s.number, ent->tagName), CS_TAGCONNECTS,
+                          MAX_TAGCONNECTS, qtrue);
   ent->s.eFlags |= EF_TAGCONNECT;
 
   if (ent->client) {
     ent->client->ps.eFlags |= EF_TAGCONNECT;
     ent->client->ps.eFlags &= ~EF_PRONE_MOVING;
     ent->client->ps.eFlags &= ~EF_PRONE;
-    ent->s.eFlags &= ~EF_PRONE_MOVING;
-    ent->s.eFlags &= ~EF_PRONE;
+    ent->s.eFlags          &= ~EF_PRONE_MOVING;
+    ent->s.eFlags          &= ~EF_PRONE;
   }
 
   if (clearAngles) {
@@ -917,9 +894,9 @@ void G_ProcessTagConnect(gentity_t *ent, qboolean clearAngles) {
     // tag direction
     VectorClear(ent->s.angles);
     VectorCopy(ent->s.angles, ent->s.apos.trBase);
-    ent->s.apos.trTime = level.time;
+    ent->s.apos.trTime     = level.time;
     ent->s.apos.trDuration = 0;
-    ent->s.apos.trType = TR_STATIONARY;
+    ent->s.apos.trType     = TR_STATIONARY;
     VectorClear(ent->s.apos.trDelta);
     VectorClear(ent->r.currentAngles);
   }
@@ -972,22 +949,21 @@ G_SetEntState
 */
 void G_SetEntState(gentity_t *ent, entState_t state) {
   if (ent->entstate == state) {
-    G_DPrintf("entity %i already in desired state [%i]\n", ent->s.number,
-              state);
+    G_DPrintf("entity %i already in desired state [%i]\n", ent->s.number, state);
     return;
   }
 
   switch (state) {
     case STATE_DEFAULT:
       if (ent->entstate == STATE_UNDERCONSTRUCTION) {
-        ent->clipmask = ent->realClipmask;
+        ent->clipmask   = ent->realClipmask;
         ent->r.contents = ent->realContents;
         if (!ent->realNonSolidBModel) {
           ent->s.eFlags &= ~EF_NONSOLID_BMODEL;
         }
       }
 
-      ent->entstate = STATE_DEFAULT;
+      ent->entstate   = STATE_DEFAULT;
       ent->s.powerups = STATE_DEFAULT;
 
       if (ent->s.eType == ET_WOLF_OBJECTIVE) {
@@ -1008,8 +984,7 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
         int entityList[MAX_GENTITIES];
         gentity_t *check, *block;
 
-        listedEntities = trap_EntitiesInBox(ent->r.absmin, ent->r.absmax,
-                                            entityList, MAX_GENTITIES);
+        listedEntities = trap_EntitiesInBox(ent->r.absmin, ent->r.absmax, entityList, MAX_GENTITIES);
 
         for (e = 0; e < listedEntities; e++) {
           check = &g_entities[entityList[e]];
@@ -1017,8 +992,8 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
           // ignore everything but
           // items, players and missiles
           // (grenades too)
-          if (check->s.eType != ET_MISSILE && check->s.eType != ET_ITEM &&
-              check->s.eType != ET_PLAYER && !check->physicsObject) {
+          if (check->s.eType != ET_MISSILE && check->s.eType != ET_ITEM && check->s.eType != ET_PLAYER &&
+              !check->physicsObject) {
             continue;
           }
 
@@ -1039,10 +1014,8 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
           if (check->client || check->s.eType == ET_CORPSE) {
             // gibs anything
             // player like
-            G_Damage(check, ent, ent, NULL, NULL, 9999, DAMAGE_NO_PROTECTION,
-                     MOD_CRUSH_CONSTRUCTIONDEATH_NOATTACKER);
-          } else if (check->s.eType == ET_ITEM &&
-                     check->item->giType == IT_TEAM) {
+            G_Damage(check, ent, ent, NULL, NULL, 9999, DAMAGE_NO_PROTECTION, MOD_CRUSH_CONSTRUCTIONDEATH_NOATTACKER);
+          } else if (check->s.eType == ET_ITEM && check->item->giType == IT_TEAM) {
             // see if it's a
             // critical entity,
             // one that we can't
@@ -1053,17 +1026,14 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
             // remove the
             // landmine from
             // both teamlists
-            if (check->s.eType == ET_MISSILE &&
-                check->methodOfDeath == MOD_LANDMINE) {
+            if (check->s.eType == ET_MISSILE && check->methodOfDeath == MOD_LANDMINE) {
               mapEntityData_t *mEnt;
 
-              if ((mEnt = G_FindMapEntityData(&mapEntityData[0],
-                                              check - g_entities)) != NULL) {
+              if ((mEnt = G_FindMapEntityData(&mapEntityData[0], check - g_entities)) != NULL) {
                 G_FreeMapEntityData(&mapEntityData[0], mEnt);
               }
 
-              if ((mEnt = G_FindMapEntityData(&mapEntityData[1],
-                                              check - g_entities)) != NULL) {
+              if ((mEnt = G_FindMapEntityData(&mapEntityData[1], check - g_entities)) != NULL) {
                 G_FreeMapEntityData(&mapEntityData[1], mEnt);
               }
             }
@@ -1078,8 +1048,8 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
 
       break;
     case STATE_UNDERCONSTRUCTION:
-      ent->entstate = STATE_UNDERCONSTRUCTION;
-      ent->s.powerups = STATE_UNDERCONSTRUCTION;
+      ent->entstate     = STATE_UNDERCONSTRUCTION;
+      ent->s.powerups   = STATE_UNDERCONSTRUCTION;
       ent->realClipmask = ent->clipmask;
       if (ent->s.eType != ET_CONSTRUCTIBLE) // don't make nonsolid as we
                                             // want to make them
@@ -1106,12 +1076,10 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
       if (ent->s.eType == ET_COMMANDMAP_MARKER) {
         mapEntityData_t *mEnt;
 
-        if ((mEnt = G_FindMapEntityData(&mapEntityData[0], ent - g_entities)) !=
-            NULL) {
+        if ((mEnt = G_FindMapEntityData(&mapEntityData[0], ent - g_entities)) != NULL) {
           G_FreeMapEntityData(&mapEntityData[0], mEnt);
         }
-        if ((mEnt = G_FindMapEntityData(&mapEntityData[1], ent - g_entities)) !=
-            NULL) {
+        if ((mEnt = G_FindMapEntityData(&mapEntityData[1], ent - g_entities)) != NULL) {
           G_FreeMapEntityData(&mapEntityData[1], mEnt);
         }
       }
@@ -1120,14 +1088,14 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
       break;
     case STATE_INVISIBLE:
       if (ent->entstate == STATE_UNDERCONSTRUCTION) {
-        ent->clipmask = ent->realClipmask;
+        ent->clipmask   = ent->realClipmask;
         ent->r.contents = ent->realContents;
         if (!ent->realNonSolidBModel) {
           ent->s.eFlags &= ~EF_NONSOLID_BMODEL;
         }
       }
 
-      ent->entstate = STATE_INVISIBLE;
+      ent->entstate   = STATE_INVISIBLE;
       ent->s.powerups = STATE_INVISIBLE;
 
       if (!Q_stricmp(ent->classname, "misc_mg42")) {
@@ -1143,12 +1111,10 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
       if (ent->s.eType == ET_COMMANDMAP_MARKER) {
         mapEntityData_t *mEnt;
 
-        if ((mEnt = G_FindMapEntityData(&mapEntityData[0], ent - g_entities)) !=
-            NULL) {
+        if ((mEnt = G_FindMapEntityData(&mapEntityData[0], ent - g_entities)) != NULL) {
           G_FreeMapEntityData(&mapEntityData[0], mEnt);
         }
-        if ((mEnt = G_FindMapEntityData(&mapEntityData[1], ent - g_entities)) !=
-            NULL) {
+        if ((mEnt = G_FindMapEntityData(&mapEntityData[1], ent - g_entities)) != NULL) {
           G_FreeMapEntityData(&mapEntityData[1], mEnt);
         }
       }
@@ -1163,24 +1129,18 @@ void G_PrintClientSpammyCenterPrint(int entityNum, const char *text) {
     return;
   }
 
-  if (level.time - g_entities[entityNum].client->lastSpammyCentrePrintTime <
-      1000) {
+  if (level.time - g_entities[entityNum].client->lastSpammyCentrePrintTime < 1000) {
     return;
   }
 
-  Printer::centerPriority(entityNum, text, 1, false);
+  Printer::centerPriorityNoLog(entityNum, 1, text);
   g_entities[entityNum].client->lastSpammyCentrePrintTime = level.time;
 }
 
 team_t G_GetTeamFromEntity(gentity_t *ent) {
   switch (ent->s.eType) {
     case ET_PLAYER:
-      if (ent->client) {
-        return (ent->client->sess.sessionTeam);
-      } else {
-        return (TEAM_FREE);
-      }
-      break;
+      return ent->client ? ent->client->sess.sessionTeam : TEAM_FREE;
     case ET_MISSILE:
     case ET_GENERAL:
       switch (ent->methodOfDeath) {
@@ -1207,7 +1167,6 @@ team_t G_GetTeamFromEntity(gentity_t *ent) {
       break;
     case ET_CONSTRUCTIBLE:
       return static_cast<team_t>(ent->s.teamNum);
-      break;
     case ET_MG42_BARREL: // zinx - fix for #470
       return G_GetTeamFromEntity(&g_entities[ent->r.ownerNum]);
 
@@ -1246,7 +1205,7 @@ gentity_t *BotFindEntityForName(char *name) {
 }
 
 gentity_t *G_FindMissile(gentity_t *start, weapon_t weap) {
-  int i = start ? (start - g_entities) + 1 : 0;
+  int i          = start ? (start - g_entities) + 1 : 0;
   gentity_t *ent = &g_entities[i];
 
   for (; i < level.num_entities; i++, ent++) {
@@ -1465,7 +1424,7 @@ int FindClientByName(char *name) {
 
 const char *ClientIPAddr(const gentity_t *ent) {
   char userinfo[MAX_INFO_STRING] = "\0";
-  char *ip = NULL;
+  char *ip                       = NULL;
 
   if (strlen(ent->client->sess.ip) == 0) {
     trap_GetUserinfo(ClientNum(ent), userinfo, sizeof(userinfo));
@@ -1476,10 +1435,9 @@ const char *ClientIPAddr(const gentity_t *ent) {
   return ent->client->sess.ip;
 }
 
-gentity_t *ETJump::soundEvent(vec3_t origin, entity_event_t eventType,
-                              int soundIndex) {
+gentity_t *ETJump::soundEvent(vec3_t origin, entity_event_t eventType, int soundIndex) {
   gentity_t *te;
-  te = G_TempEntity(origin, eventType);
+  te              = G_TempEntity(origin, eventType);
   te->s.eventParm = soundIndex;
   return te;
 }

@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
+#include "etj_accel_color_v2.h"
+
 #include <algorithm>
 
-#include "etj_accel_color_v2.h"
 #include "etj_pmove_utils_v2.h"
 
 #include "../ui/ui_shared.h"
@@ -32,8 +33,7 @@
 namespace ETJump {
 inline constexpr int32_t ACCEL_COLOR_SMOOTHING_TIME = 250;
 
-void AccelColorV2::popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds,
-                                      int time) {
+void AccelColorV2::popOldStoredSpeeds(std::list<StoredSpeed> &storedSpeeds, int time) {
   while (!storedSpeeds.empty()) {
     const auto &front = storedSpeeds.front();
 
@@ -52,37 +52,45 @@ float AccelColorV2::calcAvgAccel(const std::list<StoredSpeed> &storedSpeeds) {
   }
 
   float totalSpeedDelta = 0;
-  auto it = storedSpeeds.begin();
+  auto it               = storedSpeeds.begin();
 
   for (auto prevIter = it++; it != storedSpeeds.end(); prevIter = it++) {
     totalSpeedDelta += it->speed - prevIter->speed;
   }
 
-  const auto timeDeltaMs =
-      static_cast<float>(storedSpeeds.back().time - storedSpeeds.front().time);
+  const auto timeDeltaMs = static_cast<float>(storedSpeeds.back().time - storedSpeeds.front().time);
 
   return totalSpeedDelta / (timeDeltaMs / 1000.f);
 }
 
-bool AccelColorV2::lowSpeedOnGround(const float speed,
-                                    const int32_t groundEntityNum) {
+void AccelColorV2::normalizeAccelVec(vec2_t accelVec, int32_t elapsedMs, int32_t pmoveMsec) {
+  // velocity deltas between two samples normally span a single physics frame,
+  // but if the client's FPS dips below 125, the interval might be
+  // 2 or more physics frames, inflating the raw delta - rescale back
+  // to single frame accel, so values stay correct at low FPS
+  // this is a rather naive linear scaling, and may be incorrect at
+  // consistent low framerates, but it helps with the most common case
+  // reasonably well ('com_maxFPS 125' and slight framerate dip)
+  const float scale  = static_cast<float>(pmoveMsec) / std::max(static_cast<float>(elapsedMs), 1.0f);
+  accelVec[0]       *= scale;
+  accelVec[1]       *= scale;
+}
+
+bool AccelColorV2::lowSpeedOnGround(const float speed, const int32_t groundEntityNum) {
   return speed <= MAX_GROUNDSTRAFE && groundEntityNum != ENTITYNUM_NONE;
 }
 
-void AccelColorV2::calcAdvancedAccelColor(
-    const pmove_t &pm, const pml_t &pml, const vec3_t accelVec,
-    const float wishspeed, const vec2_t wishvel, const float velAngle,
-    const float optAngle, float accel, vec4_t outColor) {
-  const bool forwards = PmoveUtilsV2::strafingForwards(pm, wishspeed, wishvel);
+void AccelColorV2::calcAdvancedAccelColor(const pmove_t &pm, const pml_t &pml, const vec2_t accelVec,
+                                          const float wishspeed, const vec2_t wishvel, const float velAngle,
+                                          const float optAngle, float accel, vec4_t outColor) {
+  const bool forwards    = PmoveUtilsV2::strafingForwards(pm, wishspeed, wishvel);
   const bool rightStrafe = PmoveUtilsV2::rightStrafe(forwards, pm.cmd);
 
   // get the optimal angles on both sides of the velocity vector
-  float optAngleAbsolute =
-      rightStrafe ? velAngle - optAngle : velAngle + optAngle;
-  optAngleAbsolute = AngleNormalizePI(optAngleAbsolute);
-  float altOptAngleAbsolute =
-      rightStrafe ? velAngle + optAngle : velAngle - optAngle;
-  altOptAngleAbsolute = AngleNormalizePI(altOptAngleAbsolute);
+  float optAngleAbsolute    = rightStrafe ? velAngle - optAngle : velAngle + optAngle;
+  optAngleAbsolute          = AngleNormalizePI(optAngleAbsolute);
+  float altOptAngleAbsolute = rightStrafe ? velAngle + optAngle : velAngle - optAngle;
+  altOptAngleAbsolute       = AngleNormalizePI(altOptAngleAbsolute);
 
   float optAccelX = std::round(accel * std::cos(optAngleAbsolute));
   float optAccelY = std::round(accel * std::sin(optAngleAbsolute));
@@ -92,16 +100,13 @@ void AccelColorV2::calcAdvancedAccelColor(
 
   // we're on a slope, recalculate optimal acceleration
   // TODO: verify if this actually works correctly? I have no idea
-  if (pml.groundPlane && (pml.groundTrace.plane.normal[0] != 0 ||
-                          pml.groundTrace.plane.normal[1] != 0)) {
-    const float gAccel = -std::round(static_cast<float>(pm.ps->gravity) *
-                                     PmoveUtilsV2::PM_FRAMETIME);
-    vec3_t optAccel = {optAccelX, optAccelY, gAccel};
+  if (pml.groundPlane && (pml.groundTrace.plane.normal[0] != 0 || pml.groundTrace.plane.normal[1] != 0)) {
+    const float gAccel = -std::round(static_cast<float>(pm.ps->gravity) * PmoveUtilsV2::PM_FRAMETIME);
+    vec3_t optAccel    = {optAccelX, optAccelY, gAccel};
     vec3_t altOptAccel = {altOptAccelX, altOptAccelY, gAccel};
 
     PM_ClipVelocity(optAccel, pml.groundTrace.plane.normal, optAccel, OVERCLIP);
-    PM_ClipVelocity(altOptAccel, pml.groundTrace.plane.normal, altOptAccel,
-                    OVERCLIP);
+    PM_ClipVelocity(altOptAccel, pml.groundTrace.plane.normal, altOptAccel, OVERCLIP);
 
     optAccelX = std::round(optAccel[0]);
     optAccelY = std::round(optAccel[1]);
@@ -111,11 +116,11 @@ void AccelColorV2::calcAdvancedAccelColor(
   }
 
   // find the max acceleration possible between opt and alt opt angles
-  const float velX = pm.ps->velocity[0];
-  const float velY = pm.ps->velocity[1];
+  const float velX     = pm.ps->velocity[0];
+  const float velY     = pm.ps->velocity[1];
   const bool isMovingX = std::abs(velX) > std::abs(velY);
-  float maxAccelX = 0.0f;
-  float maxAccelY = 0.0f;
+  float maxAccelX      = 0.0f;
+  float maxAccelY      = 0.0f;
 
   if (isMovingX) {
     if (std::abs(optAccelX) >= std::abs(altOptAccelX)) {
@@ -137,29 +142,21 @@ void AccelColorV2::calcAdvancedAccelColor(
 
   // generate color based on the average normalized acceleration,
   // interpolating between red and green
-  float frac = 0.0f;
+  float frac     = 0.0f;
   float absDiffX = 0.0f;
   float absDiffY = 0.0f;
 
   if (isMovingX) {
-    if ((maxAccelX > 0 && accelVec[0] >= 0) ||
-        (maxAccelX < 0 && accelVec[0] <= 0)) {
-      absDiffX =
-          std::abs(maxAccelX) - (std::abs(accelVec[0] + maxAccelX) / 2.0f);
-      absDiffY =
-          std::abs(accelVec[1]) -
-          std::abs(std::max(std::abs(optAccelY), std::abs(altOptAccelY)));
+    if ((maxAccelX > 0 && accelVec[0] >= 0) || (maxAccelX < 0 && accelVec[0] <= 0)) {
+      absDiffX = std::abs(maxAccelX) - (std::abs(accelVec[0] + maxAccelX) / 2.0f);
+      absDiffY = std::abs(accelVec[1]) - std::abs(std::max(std::abs(optAccelY), std::abs(altOptAccelY)));
 
       frac = std::clamp(1.0f - absDiffX - absDiffY, 0.0f, 1.0f);
     }
   } else {
-    if ((maxAccelY > 0 && accelVec[1] >= 0) ||
-        (maxAccelY < 0 && accelVec[1] <= 0)) {
-      absDiffY =
-          std::abs(maxAccelY) - (std::abs(accelVec[1] + maxAccelY) / 2.0f);
-      absDiffX =
-          std::abs(accelVec[0]) -
-          std::abs(std::max(std::abs(optAccelX), std::abs(altOptAccelX)));
+    if ((maxAccelY > 0 && accelVec[1] >= 0) || (maxAccelY < 0 && accelVec[1] <= 0)) {
+      absDiffY = std::abs(maxAccelY) - (std::abs(accelVec[1] + maxAccelY) / 2.0f);
+      absDiffX = std::abs(accelVec[0]) - std::abs(std::max(std::abs(optAccelX), std::abs(altOptAccelX)));
 
       frac = std::clamp(1.0f - absDiffY - absDiffX, 0.0f, 1.0f);
     }
@@ -170,8 +167,8 @@ void AccelColorV2::calcAdvancedAccelColor(
   // we want a solid color all the time, no dark tints
   if (outColor[0] != 0.0f && outColor[1] != 0.0f) { // if we have a mix of R & G
     const size_t maxColorIndex = outColor[0] > outColor[1] ? 0 : 1;
-    constexpr float maxShade = 1.0f; // min value to show per color
-    const float coef = maxShade / outColor[maxColorIndex];
+    constexpr float maxShade   = 1.0f; // min value to show per color
+    const float coef           = maxShade / outColor[maxColorIndex];
 
     VectorScale(outColor, coef, outColor);
   }

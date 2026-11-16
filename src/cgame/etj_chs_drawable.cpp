@@ -26,9 +26,10 @@
  * Crosshair stats HUD inspired by DeFRaG one.
  */
 
+#include "etj_chs_drawable.h"
+
 #include <algorithm>
 
-#include "etj_chs_drawable.h"
 #include "cg_local.h"
 #include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
@@ -39,9 +40,8 @@ inline constexpr float CHSCHAR_SIZEX = 0.2f;
 inline constexpr float CHSCHAR_SIZEY = 0.2f;
 
 namespace ETJump {
-CHS::CHS(const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
-         const std::shared_ptr<CHSDataHandler> &dataHandler)
-    : cvarUpdateHandler(cvarUpdateHandler), data(dataHandler) {
+CHS::CHS(const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler, const std::shared_ptr<CHSData> &dataHandler)
+  : cvarUpdateHandler(cvarUpdateHandler), data(dataHandler) {
   setupListeners();
 
   setColor(&etj_CHSColor);
@@ -50,10 +50,8 @@ CHS::CHS(const std::shared_ptr<CvarUpdateHandler> &cvarUpdateHandler,
   // chs 1 does not currently have any positional adjustments,
   // so we can just set it up here
   chs1.x = SCREEN_CENTER_X - 1;
-  chs1.y = SCREEN_CENTER_Y - 1 +
-           (static_cast<float>(CG_Text_Height_Ext("0", CHSCHAR_SIZEY, 0,
-                                                  &cgs.media.limboFont1)) /
-            2);
+  chs1.y =
+    SCREEN_CENTER_Y - 1 + (static_cast<float>(CG_Text_Height_Ext("0", CHSCHAR_SIZEY, 0, &cgs.media.limboFont1)) / 2);
 }
 
 CHS::~CHS() {
@@ -62,12 +60,14 @@ CHS::~CHS() {
 }
 
 void CHS::setupListeners() {
-  cvarUpdateHandler->subscribe(
-      &etj_CHSColor, [this](const vmCvar_t *cvar) { setColor(cvar); });
+  cvarUpdateHandler->subscribe(&etj_CHSColor, [this](const vmCvar_t *cvar) {
+    setColor(cvar);
+  });
 
   // TODO: remove this cvar and just use 'etj_CHSColor' for alpha as well
-  cvarUpdateHandler->subscribe(
-      &etj_CHSAlpha, [this](const vmCvar_t *cvar) { setAlpha(cvar); });
+  cvarUpdateHandler->subscribe(&etj_CHSAlpha, [this](const vmCvar_t *cvar) {
+    setAlpha(cvar);
+  });
 }
 
 void CHS::setColor(const vmCvar_t *cvar) {
@@ -78,8 +78,7 @@ void CHS::setAlpha(const vmCvar_t *cvar) {
   color[3] = std::clamp(cvar->value, 0.0f, 1.0f);
 }
 
-void CHS::setupListCHS(CHSHUD &chs, float x, float y, const bool rightAlign,
-                       const bool hideLabels) {
+void CHS::setupListCHS(CHSHUD &chs, float x, float y, const bool rightAlign, const bool hideLabels) {
   const float offsetX = ETJump_AdjustPosition(x);
 
   chs.y = SCREEN_CENTER_Y + 40 + y;
@@ -87,10 +86,10 @@ void CHS::setupListCHS(CHSHUD &chs, float x, float y, const bool rightAlign,
   // just reusing item alignment constants, the values don't really matter
   if (rightAlign) {
     chs.align = ITEM_ALIGN_RIGHT;
-    chs.x = SCREEN_WIDTH - 30 + offsetX;
+    chs.x     = SCREEN_WIDTH - 30 + offsetX;
   } else {
     chs.align = ITEM_ALIGN_LEFT;
-    chs.x = 30 + offsetX;
+    chs.x     = 30 + offsetX;
   }
 
   chs.hideLabels = hideLabels;
@@ -102,17 +101,14 @@ bool CHS::beforeRender() {
   }
 
   if (etj_drawCHS2.integer) {
-    setupListCHS(chs2, etj_CHS2PosX.value, etj_CHS2PosY.value,
-                 etj_drawCHS2.integer == 2, etj_CHS2HideLabels.integer);
+    setupListCHS(chs2, etj_CHS2PosX.value, etj_CHS2PosY.value, etj_drawCHS2.integer == 2, etj_CHS2HideLabels.integer);
   }
 
   if (etj_drawCHS3.integer) {
-    setupListCHS(chs3, etj_CHS3PosX.value, etj_CHS3PosY.value,
-                 etj_drawCHS3.integer == 2, etj_CHS3HideLabels.integer);
+    setupListCHS(chs3, etj_CHS3PosX.value, etj_CHS3PosY.value, etj_drawCHS3.integer == 2, etj_CHS3HideLabels.integer);
   }
 
-  textStyle =
-      etj_CHSShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
+  textStyle = etj_CHSShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
 
   return true;
 }
@@ -131,44 +127,34 @@ void CHS::render() const {
   }
 }
 
-void CHS::drawCHSCrosshair(
-    const CHSHUD &hud,
-    const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &cvars) const {
+void CHS::drawCHSCrosshair(const CHSHUD &hud, const std::array<CHSData::CHSCvar, MAX_CHS_INFO> &cvars) const {
   for (size_t i = 0; i < cvars.size(); i++) {
     if (!cvars[i].valid) {
       continue;
     }
 
-    const auto &pos = CHS1Positions[i];
+    const auto &pos        = CHS1Positions[i];
     const std::string text = data->getStat(cvars[i].cvar);
-    const float distScale =
-        std::clamp(etj_CHS1DistanceScale.value, 0.25f, 10.0f);
+    const float distScale  = std::clamp(etj_CHS1DistanceScale.value, 0.25f, 10.0f);
 
     switch (pos.align) {
       case ITEM_ALIGN_LEFT:
-        CG_Text_Paint_Ext(hud.x + (pos.offsetX * distScale),
-                          hud.y + (pos.offsetY * distScale), CHSCHAR_SIZEX,
-                          CHSCHAR_SIZEY, color, text, 0, 0, textStyle,
-                          &cgs.media.limboFont1);
+        CG_Text_Paint_Ext(hud.x + (pos.offsetX * distScale), hud.y + (pos.offsetY * distScale), CHSCHAR_SIZEX,
+                          CHSCHAR_SIZEY, color, text, 0, 0, textStyle, &cgs.media.limboFont1);
         break;
       case ITEM_ALIGN_RIGHT:
-        CG_Text_Paint_RightAligned_Ext(
-            hud.x + (pos.offsetX * distScale),
-            hud.y + (pos.offsetY * distScale), CHSCHAR_SIZEX, CHSCHAR_SIZEY,
-            color, text, 0, 0, textStyle, &cgs.media.limboFont1);
+        CG_Text_Paint_RightAligned_Ext(hud.x + (pos.offsetX * distScale), hud.y + (pos.offsetY * distScale),
+                                       CHSCHAR_SIZEX, CHSCHAR_SIZEY, color, text, 0, 0, textStyle,
+                                       &cgs.media.limboFont1);
         break;
       default:
-        CG_Text_Paint_Centred_Ext(hud.x + (pos.offsetX * distScale),
-                                  hud.y + (pos.offsetY * distScale),
-                                  CHSCHAR_SIZEX, CHSCHAR_SIZEY, color, text, 0,
-                                  0, textStyle, &cgs.media.limboFont1);
+        CG_Text_Paint_Centred_Ext(hud.x + (pos.offsetX * distScale), hud.y + (pos.offsetY * distScale), CHSCHAR_SIZEX,
+                                  CHSCHAR_SIZEY, color, text, 0, 0, textStyle, &cgs.media.limboFont1);
     }
   }
 }
 
-void CHS::drawCHSList(
-    const CHSHUD &hud,
-    const std::array<CHSDataHandler::CHSCvar, MAX_CHS_INFO> &cvars) const {
+void CHS::drawCHSList(const CHSHUD &hud, const std::array<CHSData::CHSCvar, MAX_CHS_INFO> &cvars) const {
   for (size_t i = 0; i < cvars.size(); i++) {
     if (!cvars[i].valid) {
       continue;
@@ -183,12 +169,10 @@ void CHS::drawCHSList(
     text += data->getStat(cvars[i].cvar);
 
     if (hud.align == ITEM_ALIGN_RIGHT) {
-      CG_Text_Paint_RightAligned_Ext(
-          hud.x, hud.y + (static_cast<float>(i) * 10), CHSCHAR_SIZEX,
-          CHSCHAR_SIZEY, color, text, 0, 0, textStyle, &cgs.media.limboFont1);
+      CG_Text_Paint_RightAligned_Ext(hud.x, hud.y + (static_cast<float>(i) * 10), CHSCHAR_SIZEX, CHSCHAR_SIZEY, color,
+                                     text, 0, 0, textStyle, &cgs.media.limboFont1);
     } else {
-      CG_Text_Paint_Ext(hud.x, hud.y + (static_cast<float>(i) * 10),
-                        CHSCHAR_SIZEX, CHSCHAR_SIZEY, color, text, 0, 0,
+      CG_Text_Paint_Ext(hud.x, hud.y + (static_cast<float>(i) * 10), CHSCHAR_SIZEX, CHSCHAR_SIZEY, color, text, 0, 0,
                         textStyle, &cgs.media.limboFont1);
     }
   }

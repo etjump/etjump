@@ -22,25 +22,24 @@
  * SOFTWARE.
  */
 
-#include <fstream>
+#include "etj_custom_map_votes.h"
+
 #include <algorithm>
+#include <fstream>
 #include <set>
 
-#include "etj_custom_map_votes.h"
+#include "etj_filesystem.h"
+#include "etj_json_utilities.h"
 #include "etj_map_statistics.h"
+#include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "utilities.hpp"
-#include "etj_printer.h"
-#include "etj_json_utilities.h"
-#include "etj_filesystem.h"
 
 namespace ETJump {
-CustomMapVotes::CustomMapVotes(const std::shared_ptr<MapStatistics> &mapStats,
-                               std::unique_ptr<Log> log)
-    : _mapStats(mapStats), logger(std::move(log)) {}
+CustomMapVotes::CustomMapVotes(const std::shared_ptr<MapStatistics> &mapStats, std::unique_ptr<Log> log)
+  : _mapStats(mapStats), logger(std::move(log)) {}
 
-CustomMapVotes::TypeInfo
-CustomMapVotes::getTypeInfo(std::string const &type) const {
+CustomMapVotes::TypeInfo CustomMapVotes::getTypeInfo(std::string const &type) const {
   for (const auto &customMapVote : customMapVotes_) {
     if (customMapVote.type == type) {
       return {true, customMapVote.callvoteText};
@@ -85,22 +84,18 @@ void CustomMapVotes::loadCustomvotes(const bool init) {
     customMapVotes_.emplace_back();
     const size_t curr = customMapVotes_.size() - 1;
 
-    if (!JsonUtils::parseValue(customMapVotes_[curr].type, list["name"],
-                               &errors, "name")) {
+    if (!JsonUtils::parseValue(customMapVotes_[curr].type, list["name"], &errors, "name")) {
       parsingFailed(errors);
       return;
     }
 
     if (!isValidVoteString(customMapVotes_[curr].type)) {
-      logger->error(
-          "Failed to parse custom vote - name '%s' contains invalid characters",
-          customMapVotes_[curr].type);
+      logger->error("Failed to parse custom vote - name '%s' contains invalid characters", customMapVotes_[curr].type);
       customMapVotes_.pop_back();
       continue;
     }
 
-    customMapVotes_[curr].type =
-        StringUtils::sanitize(customMapVotes_[curr].type, true);
+    customMapVotes_[curr].type = StringUtils::sanitize(customMapVotes_[curr].type, true);
 
     if (customMapVotes_[curr].type.empty()) {
       customMapVotes_.pop_back();
@@ -108,15 +103,12 @@ void CustomMapVotes::loadCustomvotes(const bool init) {
       continue;
     }
 
-    if (!JsonUtils::parseValue(customMapVotes_[curr].callvoteText,
-                               list["callvote_text"], &errors,
-                               "callvote_text")) {
+    if (!JsonUtils::parseValue(customMapVotes_[curr].callvoteText, list["callvote_text"], &errors, "callvote_text")) {
       parsingFailed(errors);
       return;
     }
 
-    customMapVotes_[curr].callvoteText =
-        StringUtils::sanitize(customMapVotes_[curr].callvoteText);
+    customMapVotes_[curr].callvoteText = StringUtils::sanitize(customMapVotes_[curr].callvoteText);
 
     if (customMapVotes_[curr].callvoteText.empty()) {
       customMapVotes_.pop_back();
@@ -139,11 +131,10 @@ void CustomMapVotes::loadCustomvotes(const bool init) {
 
       mapName = StringUtils::sanitize(mapName, true);
 
-      if (std::binary_search(_currentMapsOnServer->begin(),
-                             _currentMapsOnServer->end(), mapName)) {
-        uniqueMapsOnServer.insert(mapName);
+      if (std::binary_search(_currentMapsOnServer->begin(), _currentMapsOnServer->end(), mapName)) {
+        uniqueMapsOnServer.insert(std::move(mapName));
       } else {
-        uniqueMapsOther.insert(mapName);
+        uniqueMapsOther.insert(std::move(mapName));
       }
     }
 
@@ -161,8 +152,7 @@ void CustomMapVotes::loadCustomvotes(const bool init) {
     Printer::commandAll("forceCustomvoteRefresh");
   }
 
-  logger->info("Succesfully loaded %i custom votes from '%s'",
-               static_cast<int>(customMapVotes_.size()), filename);
+  logger->info("Succesfully loaded %i custom votes from '%s'", static_cast<int>(customMapVotes_.size()), filename);
 }
 
 std::vector<std::string> CustomMapVotes::getCustomVoteTypes() const {
@@ -179,7 +169,7 @@ std::vector<std::string> CustomMapVotes::getCustomVoteTypes() const {
 void CustomMapVotes::generateVotesFile() {
   Arguments argv = GetArgs();
 
-  const bool overwrite = argv->size() > 1 && argv->at(1) == "-f";
+  const bool overwrite       = argv->size() > 1 && argv->at(1) == "-f";
   const std::string filename = g_customMapVotesFile.string;
 
   if (argv->size() == 1 || !overwrite) {
@@ -192,16 +182,15 @@ void CustomMapVotes::generateVotesFile() {
   }
 
   if (overwrite) {
-    G_Printf("Overwriting custom map vote file '%s' with a default one.\n",
-             filename.c_str());
+    G_Printf("Overwriting custom map vote file '%s' with a default one.\n", filename.c_str());
   }
 
   Json::Value root = Json::arrayValue;
   Json::Value vote;
 
-  vote["name"] = "originals";
+  vote["name"]          = "originals";
   vote["callvote_text"] = "Original 6 Maps";
-  vote["maps"] = Json::arrayValue;
+  vote["maps"]          = Json::arrayValue;
   vote["maps"].append("oasis");
   vote["maps"].append("fueldump");
   vote["maps"].append("radar");
@@ -211,9 +200,9 @@ void CustomMapVotes::generateVotesFile() {
 
   root.append(vote);
 
-  vote["name"] = "just_oasis";
+  vote["name"]          = "just_oasis";
   vote["callvote_text"] = "Just oasis";
-  vote["maps"] = Json::arrayValue;
+  vote["maps"]          = Json::arrayValue;
   vote["maps"].append("oasis");
 
   root.append(vote);
@@ -227,8 +216,7 @@ void CustomMapVotes::generateVotesFile() {
   loadCustomvotes(false);
 }
 
-void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
-                                       const std::string &fullName,
+void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name, const std::string &fullName,
                                        const std::string &maps) {
   const std::string &customVotesFile = g_customMapVotesFile.string;
   Json::Value root;
@@ -242,29 +230,27 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
         if (sanitizedName == lists.type) {
           Printer::chat(clientNum, "^3add-customvote: ^7operation failed, "
                                    "check console for more information.");
-          Printer::console(clientNum, StringUtils::format(
-                                          "^3add-customvote: ^7a list with the "
-                                          "name ^3'%s' ^7already exists.\n",
-                                          sanitizedName));
+          Printer::console(clientNum,
+                           "^3add-customvote: ^7a list with the name ^3'%s' "
+                           "^7already exists.\n",
+                           sanitizedName);
           return;
         }
       }
     } else {
       Printer::chat(clientNum, "^3add-customvote: ^7operation failed, check "
                                "console for more information.");
-      Printer::console(clientNum,
-                       StringUtils::format("^3add-customvote: ^7couldn't open "
-                                           "the file ^3'%s' ^7for reading:\n",
-                                           customVotesFile));
+      Printer::console(clientNum, "^3add-customvote: ^7couldn't open the file ^3'%s' ^7for reading:\n",
+                       customVotesFile);
       Printer::console(clientNum, errors + '\n');
       return;
     }
   }
 
   Json::Value vote;
-  vote["name"] = sanitizedName;
+  vote["name"]          = sanitizedName;
   vote["callvote_text"] = StringUtils::sanitize(fullName);
-  vote["maps"] = Json::arrayValue;
+  vote["maps"]          = Json::arrayValue;
 
   const auto mapList = StringUtils::split(maps, " ");
 
@@ -277,33 +263,24 @@ void CustomMapVotes::addCustomvoteList(int clientNum, const std::string &name,
   if (!JsonUtils::writeFile(customVotesFile, root, &errors)) {
     Printer::chat(clientNum, "^3add-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::console(clientNum,
-                     StringUtils::format("^3add-customvote: ^7couldn't open "
-                                         "the file ^3'%s' ^7for writing:\n",
-                                         customVotesFile));
+    Printer::console(clientNum, "^3add-customvote: ^7couldn't open the file ^3'%s' ^7for writing:\n", customVotesFile);
     Printer::console(clientNum, errors + '\n');
     return;
   }
 
   loadCustomvotes(false);
-  Printer::chat(clientNum,
-                StringUtils::format("^3add-customvote: ^7successfully added a "
-                                    "new custom vote list ^3'%s'",
-                                    sanitizedName));
+  Printer::chat(clientNum, "^3add-customvote: ^7successfully added a new custom vote list ^3'%s'", sanitizedName);
 }
 
-void CustomMapVotes::deleteCustomvoteList(int clientNum,
-                                          const std::string &name) {
+void CustomMapVotes::deleteCustomvoteList(int clientNum, const std::string &name) {
   const std::string &customVotesFile = g_customMapVotesFile.string;
   Json::Value root;
 
   if (!JsonUtils::readFile(customVotesFile, root, &errors)) {
     Printer::chat(clientNum, "^3delete-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::console(clientNum,
-                     StringUtils::format("^3delete-customvote: ^7couldn't open "
-                                         "the file ^3'%s' ^7for reading.\n",
-                                         customVotesFile));
+    Printer::console(clientNum, "^3delete-customvote: ^7couldn't open the file ^3'%s' ^7for reading.\n",
+                     customVotesFile);
     Printer::console(clientNum, errors + '\n');
     return;
   }
@@ -320,36 +297,25 @@ void CustomMapVotes::deleteCustomvoteList(int clientNum,
   }
 
   if (!found) {
-    Printer::chat(clientNum,
-                  StringUtils::format("^3delete-customvote: ^7a list with the "
-                                      "name ^3'%s' ^7was not found.\n",
-                                      name));
+    Printer::chat(clientNum, "^3delete-customvote: ^7a list with the name ^3'%s' ^7was not found.\n", name);
     return;
   }
 
   if (!JsonUtils::writeFile(customVotesFile, root, &errors)) {
     Printer::chat(clientNum, "^3delete-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::console(clientNum,
-                     StringUtils::format("^3delete-customvote: ^7couldn't open "
-                                         "the file ^3'%s' ^7for writing.\n",
-                                         customVotesFile));
+    Printer::console(clientNum, "^3delete-customvote: ^7couldn't open the file ^3'%s' ^7for writing.\n",
+                     customVotesFile);
     Printer::console(clientNum, errors + '\n');
     return;
   }
 
   loadCustomvotes(false);
-  Printer::chat(
-      clientNum,
-      StringUtils::format(
-          "^3delete-customvote: ^7successfully deleted custom vote list ^3'%s'",
-          name));
+  Printer::chat(clientNum, "^3delete-customvote: ^7successfully deleted custom vote list ^3'%s'", name);
 }
 
-void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
-                                        const std::string &name,
-                                        const std::string &fullName,
-                                        const std::string &addMaps,
+void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list, const std::string &name,
+                                        const std::string &fullName, const std::string &addMaps,
                                         const std::string &removeMaps) {
   const std::string &customVotesFile = g_customMapVotesFile.string;
   Json::Value root;
@@ -357,16 +323,13 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
   if (!JsonUtils::readFile(customVotesFile, root, &errors)) {
     Printer::chat(clientNum, "^3edit-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::console(clientNum,
-                     StringUtils::format("^3edit-customvote: ^7couldn't open "
-                                         "the file ^3'%s' ^7for reading.\n",
-                                         customVotesFile));
+    Printer::console(clientNum, "^3edit-customvote: ^7couldn't open the file ^3'%s' ^7for reading.\n", customVotesFile);
     Printer::console(clientNum, errors + '\n');
     return;
   }
 
-  const std::string sanitizedList = StringUtils::sanitize(list, true);
-  const std::string sanitizedName = StringUtils::sanitize(name, true);
+  const std::string sanitizedList  = StringUtils::sanitize(list, true);
+  const std::string sanitizedName  = StringUtils::sanitize(name, true);
   const std::string sanitizedFName = StringUtils::sanitize(fullName);
 
   bool found = false;
@@ -401,8 +364,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
 
       if (!sanitizedFName.empty()) {
         for (const auto &key : object) {
-          if (!JsonUtils::parseValue(temp, object["callvote_text"], &errors,
-                                     "callvote_text")) {
+          if (!JsonUtils::parseValue(temp, object["callvote_text"], &errors, "callvote_text")) {
             parsingFailed(errors);
             return;
           }
@@ -426,8 +388,7 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
 
         for (const auto &map : mapList) {
           for (Json::ArrayIndex i = 0; i < object["maps"].size(); i++) {
-            if (!JsonUtils::parseValue(temp, object["maps"][i], &errors,
-                                       "maps")) {
+            if (!JsonUtils::parseValue(temp, object["maps"][i], &errors, "maps")) {
               parsingFailed(errors);
               return;
             }
@@ -447,30 +408,20 @@ void CustomMapVotes::editCustomvoteList(int clientNum, const std::string &list,
   }
 
   if (!found) {
-    Printer::chat(clientNum,
-                  StringUtils::format("^3edit-customvote: ^7a list with the "
-                                      "name ^3'%s' ^7was not found.\n",
-                                      sanitizedList));
+    Printer::chat(clientNum, "^3edit-customvote: ^7a list with the name ^3'%s' ^7was not found.\n", sanitizedList);
     return;
   }
 
   if (!JsonUtils::writeFile(customVotesFile, root, &errors)) {
     Printer::chat(clientNum, "^3edit-customvote: ^7operation failed, check "
                              "console for more information.");
-    Printer::console(clientNum,
-                     StringUtils::format("^3edit-customvote: ^7couldn't open "
-                                         "the file ^3'%s' ^7for writing.\n",
-                                         customVotesFile));
+    Printer::console(clientNum, "^3edit-customvote: ^7couldn't open the file ^3'%s' ^7for writing.\n", customVotesFile);
     Printer::console(clientNum, errors + '\n');
     return;
   }
 
   loadCustomvotes(false);
-  Printer::chat(
-      clientNum,
-      StringUtils::format(
-          "^3edit-customvote: ^7successfully edited custom vote list ^3'%s'",
-          sanitizedList));
+  Printer::chat(clientNum, "^3edit-customvote: ^7successfully edited custom vote list ^3'%s'", sanitizedList);
 }
 
 std::string CustomMapVotes::listInfo(const std::string &type) {
@@ -478,28 +429,28 @@ std::string CustomMapVotes::listInfo(const std::string &type) {
 
   for (const auto &customMapVote : customMapVotes_) {
     if (customMapVote.type == type) {
-      buffer += StringUtils::format("^7Maps on the list ^3%s:\n\n", type);
-      auto numMapsOnServer = customMapVote.mapsOnServer.size();
+      buffer               += StringUtils::format("^7Maps on the list ^3%s:\n\n", type);
+      auto numMapsOnServer  = customMapVote.mapsOnServer.size();
 
       int count = 0;
       for (const auto &mapOnServer : customMapVote.mapsOnServer) {
         buffer += StringUtils::format("^7%-30s", mapOnServer);
 
         ++count;
-        if (count % 3 == 0 || count == numMapsOnServer) {
+        if (count % 3 == 0 || count == static_cast<int>(numMapsOnServer)) {
           buffer += "\n";
         }
       }
 
       if (!customMapVote.otherMaps.empty()) {
-        buffer += "\n^7Maps included on the list, but missing on server:\n\n";
-        count = 0;
-        auto numMapsNotOnServer = customMapVote.otherMaps.size();
+        buffer                  += "\n^7Maps included on the list, but missing on server:\n\n";
+        count                    = 0;
+        auto numMapsNotOnServer  = customMapVote.otherMaps.size();
         for (const auto &mapNotOnServer : customMapVote.otherMaps) {
           buffer += StringUtils::format("^9%-30s", mapNotOnServer);
 
           ++count;
-          if (count % 3 == 0 || count == numMapsNotOnServer) {
+          if (count % 3 == 0 || count == static_cast<int>(numMapsNotOnServer)) {
             buffer += "\n";
           }
         }
@@ -510,8 +461,7 @@ std::string CustomMapVotes::listInfo(const std::string &type) {
   return buffer;
 }
 
-std::vector<std::string>
-CustomMapVotes::getMapsOnList(const std::string &name) {
+std::vector<std::string> CustomMapVotes::getMapsOnList(const std::string &name) {
   std::vector<std::string> mapList{};
 
   for (const auto &list : customMapVotes_) {
@@ -529,7 +479,7 @@ size_t CustomMapVotes::getNumVotelists() const {
 }
 
 CustomMapVotes::MapType *CustomMapVotes::getVotelistByIndex(const int index) {
-  if (index < 0 || index >= customMapVotes_.size()) {
+  if (index < 0 || index >= static_cast<int>(customMapVotes_.size())) {
     return nullptr;
   }
 
@@ -545,8 +495,7 @@ std::string CustomMapVotes::randomMap(std::string const &type) {
     static constexpr int MAX_TRIES = 15;
     std::random_device rd;
     std::mt19937 re(rd());
-    std::uniform_int_distribution<int> ui(
-        0, static_cast<int>(list.mapsOnServer.size() - 1));
+    std::uniform_int_distribution<int> ui(0, static_cast<int>(list.mapsOnServer.size() - 1));
 
     // try to select a valid random map
     for (int tries = 0; tries < MAX_TRIES; tries++) {

@@ -23,10 +23,11 @@
  */
 
 #include "etj_consolecommands.h"
+
+#include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_demo_compatibility.h"
 #include "etj_local.h"
-#include "cg_local.h"
 #include "etj_utilities.h"
 
 #include "../game/etj_string_utilities.h"
@@ -38,11 +39,17 @@ static void ftSaveLimitSet() {
   trap_SendConsoleCommand(va("fireteam rules savelimit %i\n", Q_atoi(buffer)));
 }
 
-static void forceMaplistRefresh() { cg.maplistRequested = false; }
+static void forceMaplistRefresh() {
+  cg.maplistRequested = false;
+}
 
-static void forceCustomvoteRefresh() { resetCustomvoteInfo(); }
+static void forceCustomvoteRefresh() {
+  resetCustomvoteInfo();
+}
 
-static void uiRequestCustomvotes() { cg.customvoteInfoRequested = true; }
+static void uiRequestCustomvotes() {
+  cg.customvoteInfoRequested = true;
+}
 
 static void uiChatMenuOpen(const Arguments &args) {
   if (args.empty()) {
@@ -59,8 +66,8 @@ static void printMapCustomizationInfo() {
     return;
   }
 
-  const std::string cs = CG_ConfigString(CS_ETJUMP_MAPINFO);
-  const std::string mapscriptHash = Info_ValueForKey(cs.c_str(), "msh");
+  const std::string cs             = CG_ConfigString(CS_ETJUMP_MAPINFO);
+  const std::string mapscriptHash  = Info_ValueForKey(cs.c_str(), "msh");
   const std::string entityFileHash = Info_ValueForKey(cs.c_str(), "efh");
 
   if (mapscriptHash.empty() || entityFileHash.empty()) {
@@ -70,8 +77,7 @@ static void printMapCustomizationInfo() {
   }
 
   if (mapscriptHash == "-" && entityFileHash == "-") {
-    CG_Printf(
-        "No custom mapscript or entity file loaded for the current map.\n");
+    CG_Printf("No custom mapscript or entity file loaded for the current map.\n");
     return;
   }
 
@@ -79,8 +85,7 @@ static void printMapCustomizationInfo() {
             "with line endings normalized to ^3LF^7.\nIf you're computing the "
             "hashes using external tools for comparison, ensure the files are "
             "saved with ^3LF ^7line endings.\n",
-            "Custom mapscript hash:", mapscriptHash.c_str(),
-            "Entity file hash:", entityFileHash.c_str());
+            "Custom mapscript hash:", mapscriptHash.c_str(), "Entity file hash:", entityFileHash.c_str());
 }
 
 /*
@@ -96,10 +101,8 @@ static void demoQueue(const Arguments &args) {
     return;
   }
 
-  if (StringUtils::iEqual(args[0], "next") ||
-      StringUtils::iEqual(args[0], "previous") ||
-      StringUtils::iEqual(args[0], "restart") ||
-      StringUtils::iEqual(args[0], "goto")) {
+  if (StringUtils::iEqual(args[0], "next") || StringUtils::iEqual(args[0], "previous") ||
+      StringUtils::iEqual(args[0], "restart") || StringUtils::iEqual(args[0], "goto")) {
     trap_SendConsoleCommand("uiDemoQueueManualSkip 1\n");
   }
 }
@@ -117,9 +120,7 @@ static bool fireteam(const Arguments &args) {
   }
 
   if (args.size() == 1) {
-    const int32_t sec = etj_fireteamCountdownLength.integer > 0
-                            ? etj_fireteamCountdownLength.integer
-                            : 3;
+    const int32_t sec = etj_fireteamCountdownLength.integer > 0 ? etj_fireteamCountdownLength.integer : 3;
     trap_SendClientCommand(va("fireteam countdown %i", sec));
   } else {
     trap_SendClientCommand(va("fireteam countdown %i", Q_atoi(args[1])));
@@ -137,8 +138,7 @@ static bool fireteam(const Arguments &args) {
  * so that they are handled by UI or qagame.
  * Returns true if the command should be forwarded.
  */
-bool forwardedConsoleCommand(const std::string_view cmd,
-                             const Arguments &args) {
+bool forwardedConsoleCommand(const std::string_view cmd, const Arguments &args) {
   if (StringUtils::iEqual(cmd, "demoQueue")) {
     // this should always return true, regardless if we actually modify
     // anything, as we always want UI to also handle this command
@@ -153,19 +153,14 @@ bool forwardedConsoleCommand(const std::string_view cmd,
   return true;
 }
 
-std::optional<CommandParser::Command>
-getOptCommand(const std::string &commandPrefix,
-              const CommandParser::CommandDefinition &def,
-              const std::vector<std::string> &args) {
+std::optional<CommandParser::Command> getOptCommand(const std::string &commandPrefix,
+                                                    const CommandParser::CommandDefinition &def,
+                                                    const std::vector<std::string> &args) {
   auto cmd = CommandParser(def, args).parse();
 
   if (cmd.helpRequested) {
-    CG_AddToTeamChat(
-        StringUtils::format("^3%s: ^7check console for help.", commandPrefix)
-            .c_str(),
-        TEAM_SPECTATOR);
-    const auto splits =
-        StringUtils::wrapWords(def.help(), '\n', MAX_STRING_CHARS - 1);
+    CG_AddToTeamChat(StringUtils::format("^3%s: ^7check console for help.", commandPrefix).c_str(), TEAM_SPECTATOR);
+    const auto splits = StringUtils::wrapWords(def.help(), '\n', MAX_STRING_CHARS - 1);
 
     for (const auto &s : splits) {
       CG_Printf("%s", s.c_str());
@@ -176,11 +171,8 @@ getOptCommand(const std::string &commandPrefix,
 
   if (!cmd.errors.empty()) {
     CG_AddToTeamChat(
-        StringUtils::format(
-            "^3%s: ^7operation failed. Check console for more information.",
-            commandPrefix)
-            .c_str(),
-        TEAM_SPECTATOR);
+      StringUtils::format("^3%s: ^7operation failed. Check console for more information.", commandPrefix).c_str(),
+      TEAM_SPECTATOR);
     CG_Printf("%s\n", cmd.getErrorMessage().c_str());
     return std::nullopt;
   }
@@ -190,25 +182,42 @@ getOptCommand(const std::string &commandPrefix,
 
 void registerCommands() {
   cgame.core.consoleCommands->subscribe(
-      "ftSaveLimitSet", [](const auto &) { ftSaveLimitSet(); }, false);
+    "ftSaveLimitSet",
+    [](const auto &) {
+      ftSaveLimitSet();
+    },
+    false);
 
   cgame.core.consoleCommands->subscribe(
-      "forceMaplistRefresh", [](const auto &) { forceMaplistRefresh(); },
-      false);
+    "forceMaplistRefresh",
+    [](const auto &) {
+      forceMaplistRefresh();
+    },
+    false);
 
   cgame.core.consoleCommands->subscribe(
-      "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); },
-      false);
+    "forceCustomvoteRefresh",
+    [](const auto &) {
+      forceCustomvoteRefresh();
+    },
+    false);
 
   cgame.core.consoleCommands->subscribe(
-      "uiRequestCustomvotes", [](const auto &) { uiRequestCustomvotes(); },
-      false);
+    "uiRequestCustomvotes",
+    [](const auto &) {
+      uiRequestCustomvotes();
+    },
+    false);
 
   cgame.core.consoleCommands->subscribe(
-      "uiChatMenuOpen", [](const auto &args) { uiChatMenuOpen(args); }, false);
+    "uiChatMenuOpen",
+    [](const auto &args) {
+      uiChatMenuOpen(args);
+    },
+    false);
 
-  cgame.core.consoleCommands->subscribe(
-      "printMapCustomizationInfo",
-      [](const auto &) { printMapCustomizationInfo(); });
+  cgame.core.consoleCommands->subscribe("printMapCustomizationInfo", [](const auto &) {
+    printMapCustomizationInfo();
+  });
 }
 } // namespace ETJump::ConsoleCommands

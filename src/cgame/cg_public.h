@@ -1,16 +1,16 @@
 #pragma once
 
-#include "../game/q_shared.h"
 #include "../game/etj_syscalls.h"
+#include "../game/q_shared.h"
 
 // allow a lot of command backups for very fast systems
 // multiple commands may be combined into a single packet, so this
 // needs to be larger than PACKET_BACKUP
 inline constexpr int CMD_BACKUP = 64;
-inline constexpr int CMD_MASK = CMD_BACKUP - 1;
+inline constexpr int CMD_MASK   = CMD_BACKUP - 1;
 
 inline constexpr int CMD_BACKUP_EXT = 128;
-inline constexpr int CMD_MASK_EXT = CMD_BACKUP_EXT - 1;
+inline constexpr int CMD_MASK_EXT   = CMD_BACKUP_EXT - 1;
 
 inline constexpr int MAX_ENTITIES_IN_SNAPSHOT = 512;
 
@@ -27,10 +27,9 @@ typedef struct {
 
   byte areamask[MAX_MAP_AREA_BYTES]; // portalarea visibility bits
 
-  playerState_t
-      ps; // complete information about the current player at this time
+  playerState_t ps; // complete information about the current player at this time
 
-  int numEntities; // all of the entities that need to be presented
+  int numEntities;                                  // all of the entities that need to be presented
   entityState_t entities[MAX_ENTITIES_IN_SNAPSHOT]; // at the time of
                                                     // this snapshot
 
@@ -40,13 +39,13 @@ typedef struct {
 } snapshot_t;
 
 typedef enum cgameEvent_e {
-  CGAME_EVENT_NONE = 0,
-  CGAME_EVENT_GAMEVIEW = 1,
+  CGAME_EVENT_NONE          = 0,
+  CGAME_EVENT_GAMEVIEW      = 1,
   CGAME_EVENT_SPEAKEREDITOR = 2,
   // unused, was CGAME_EVENT_CAMPAIGNBREIFING
-  CGAME_EVENT_DEMO = 4, // OSP
-  CGAME_EVENT_FIRETEAMMSG = 5,
-  CGAME_EVENT_RTV = 6,
+  CGAME_EVENT_DEMO           = 4, // OSP
+  CGAME_EVENT_FIRETEAMMSG    = 5,
+  CGAME_EVENT_RTV            = 6,
   CGAME_EVENT_CUSTOM_COMMAND = 7,
 } cgameEvent_t;
 

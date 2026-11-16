@@ -34,19 +34,19 @@ class SyscallExt {
 public:
 #ifdef CGAMEDLL
   const char *flashWindowETLegacy = "trap_SysFlashWindow_Legacy";
-  const char *cmdBackupExt = "trap_CmdBackup_Ext_Legacy";
-  const char *commandComplete = "trap_CommandComplete_Legacy";
+  const char *cmdBackupExt        = "trap_CmdBackup_Ext_Legacy";
+  const char *commandComplete     = "trap_CommandComplete_Legacy";
 
   std::unordered_map<const char *, int> cgameExtensions = {
-      {flashWindowETLegacy, 0},
-      {cmdBackupExt, 0},
-      {commandComplete, 0},
+    {flashWindowETLegacy, 0},
+    {cmdBackupExt,        0},
+    {commandComplete,     0},
   };
 
   // defined by SDL2
   enum class FlashWindowState {
-    SDL_FLASH_CANCEL = 0,
-    SDL_FLASH_BRIEFLY = 1,
+    SDL_FLASH_CANCEL        = 0,
+    SDL_FLASH_BRIEFLY       = 1,
     SDL_FLASH_UNTIL_FOCUSED = 2,
   };
 
@@ -65,8 +65,7 @@ public:
   void setupExtensions();
 
 private:
-  static void setupExtensionTrap(char *value, const std::string &name,
-                                 int &trap);
+  static void setupExtensionTrap(char *value, const std::string &name, int &trap);
 
   // the entry point cvar into the extension system in engine
   const char *entryPointCvar = "//trap_GetValue";

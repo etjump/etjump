@@ -38,8 +38,9 @@
 #pragma once
 
 #include <string>
-#include "g_local.h"
+
 #include "etj_log.h"
+#include "g_local.h"
 
 namespace ETJump {
 class Motd {

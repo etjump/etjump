@@ -24,10 +24,10 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
 #include <array>
 #include <functional>
+#include <string>
+#include <vector>
 
 namespace ETJump {
 class DemoQueue {

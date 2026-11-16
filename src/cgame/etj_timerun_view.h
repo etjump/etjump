@@ -25,17 +25,17 @@
 #pragma once
 
 #include <string>
+
+#include "etj_cvar_parser.h"
 #include "etj_drawable.h"
 #include "etj_timerun.h"
-#include "etj_cvar_parser.h"
 
 namespace ETJump {
 class CvarUpdateHandler;
 
 class TimerunView : public Drawable {
 public:
-  TimerunView(const std::shared_ptr<Timerun> &timerun,
-              const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  TimerunView(const std::shared_ptr<Timerun> &timerun, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~TimerunView() override;
 
   void draw() override;
@@ -53,31 +53,28 @@ private:
 
   static int getTransitionRange(int previousTime);
 
-  void pastRecordAnimation(vec4_t *color, const char *text, int timerTime,
-                           int record);
+  void pastRecordAnimation(vec4_t *color, const char *text, int timerTime, int record);
 
-  static float getTimerAlpha(bool running, bool autoHide, int fadeStart,
-                             int duration);
+  static float getTimerAlpha(bool running, bool autoHide, int fadeStart, int duration);
 
   void setRuntimerSize(const vmCvar_t &cvar);
   void setCheckpointSize(const vmCvar_t &cvar);
   void setCheckpointPopupSize(const vmCvar_t &cvar);
-  void drawCheckpoints(float x, float y, int timeVar,
-                       const Timerun::PlayerTimerunInformation &run);
+  void drawCheckpoints(float x, float y, int timeVar, const Timerun::PlayerTimerunInformation &run);
 
-  static int32_t
-  getCheckpointComparisonTime(int currentTime, int currentCPIndex,
-                              const Timerun::PlayerTimerunInformation &run);
-  static int32_t
-  getRelativeCheckpointTimer(int currentTime, int comparisonTime,
-                             int currentCPIndex,
-                             const Timerun::PlayerTimerunInformation &run);
+  static int32_t getCheckpointComparisonTime(int currentTime, int currentCPIndex,
+                                             const Timerun::PlayerTimerunInformation &run);
+  static int32_t getRelativeCheckpointTimer(int currentTime, int comparisonTime, int currentCPIndex,
+                                            const Timerun::PlayerTimerunInformation &run);
+
+  static bool isGoldSplit(int32_t currentCPIndex, const Timerun::PlayerTimerunInformation &run);
 
   vec4_t inactiveTimerColor{};
 
-  vec4_t colorDefault = {1.0f, 1.0f, 1.0f, 1.0f};
-  vec4_t colorSuccess = {0.627f, 0.941f, 0.349f, 1.0f};
-  vec4_t colorFail = {0.976f, 0.262f, 0.262f, 1.0f};
+  static constexpr vec4_t COLOR_DEFAULT = {1.0f, 1.0f, 1.0f, 1.0f};
+  static constexpr vec4_t COLOR_SUCCESS = {0.627f, 0.941f, 0.349f, 1.0f};
+  static constexpr vec4_t COLOR_FAIL    = {0.976f, 0.262f, 0.262f, 1.0f};
+  static constexpr vec4_t COLOR_GOLD    = {1.0f, 0.867f, 0.263f, 1.0f};
 
   fontInfo_t *font;
   bool autoHide;

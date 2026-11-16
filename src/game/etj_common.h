@@ -23,8 +23,8 @@
  */
 
 #pragma once
-#include <string>
 #include <functional>
+#include <string>
 
 namespace ETJump {
 int subscribeToRunFrame(std::function<void(int)> callback);

@@ -45,14 +45,13 @@ void TargetSpawnRelay::use(gentity_t *self, gentity_t *activator) {
   // if scriptname is set, call the 'activate' script trigger
   if (self->scriptName) {
     const team_t team = activator->client->sess.sessionTeam;
-    self->activator = activator;
+    self->activator   = activator;
 
     // send team to script too to support 'activate axis/allies'
     // this simplifies usage for mappers so they don't have to create
     // separate entities to fire individual script triggers for either team
     if (team == TEAM_AXIS || team == TEAM_ALLIES) {
-      G_Script_ScriptEvent(self, "activate",
-                           team == TEAM_AXIS ? "axis" : "allies");
+      G_Script_ScriptEvent(self, "activate", team == TEAM_AXIS ? "axis" : "allies");
     } else {
       G_Script_ScriptEvent(self, "activate", nullptr);
     }
@@ -99,14 +98,13 @@ void TargetSpawnRelay::validateSpawnRelayEntities() {
       continue;
     }
 
-    if (level.spawnRelayEntities.axisRelay ||
-        level.spawnRelayEntities.alliesRelay ||
+    if (level.spawnRelayEntities.axisRelay || level.spawnRelayEntities.alliesRelay ||
         level.spawnRelayEntities.spectatorRelay) {
       G_Error(err, __func__, "global");
     }
 
-    level.spawnRelayEntities.axisRelay = entity.ent;
-    level.spawnRelayEntities.alliesRelay = entity.ent;
+    level.spawnRelayEntities.axisRelay      = entity.ent;
+    level.spawnRelayEntities.alliesRelay    = entity.ent;
     level.spawnRelayEntities.spectatorRelay = entity.ent;
   }
 
@@ -140,14 +138,13 @@ void TargetSpawnRelay::validateSpawnRelayEntities() {
   }
 
   // save the bytes :)
-  spawnRelayEntities.erase(spawnRelayEntities.begin(),
-                           spawnRelayEntities.end());
+  spawnRelayEntities.erase(spawnRelayEntities.begin(), spawnRelayEntities.end());
 }
 
 void TargetSpawnRelay::invalidateSpawnRelayPointers(const gentity_t *ent) {
   if (!ent->team) {
-    level.spawnRelayEntities.alliesRelay = nullptr;
-    level.spawnRelayEntities.axisRelay = nullptr;
+    level.spawnRelayEntities.alliesRelay    = nullptr;
+    level.spawnRelayEntities.axisRelay      = nullptr;
     level.spawnRelayEntities.spectatorRelay = nullptr;
   } else {
     const auto teams = StringUtils::split(ent->team, ",");

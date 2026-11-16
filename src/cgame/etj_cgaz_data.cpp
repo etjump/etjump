@@ -23,6 +23,7 @@
  */
 
 #include "etj_cgaz_data.h"
+
 #include "cg_local.h"
 #include "etj_pmove_utils_v2.h"
 
@@ -33,8 +34,8 @@ CGazData::CGazData() {
 }
 
 void CGazData::runFrame() {
-  s.ps = cg.predictedPlayerState;
-  s.pm.ps = &s.ps;
+  s.ps       = cg.predictedPlayerState;
+  s.pm.ps    = &s.ps;
   s.pm.pmext = &s.pmext;
   PmoveUtilsV2::setupPmove(s.pm);
 
@@ -52,29 +53,28 @@ void CGazData::runFrame() {
   }
 }
 
-const CGazData::State &CGazData::getState() const { return s; }
+const CGazData::State &CGazData::getState() const {
+  return s;
+}
 
-void CGazData::updateState(const float wishspeed, const float accel,
-                           const float slickGravity) {
+void CGazData::updateState(const float wishspeed, const float accel, const float slickGravity) {
   assert(slickGravity >= 0);
-  assert(slickGravity == 0 || s.pml.groundTrace.surfaceFlags & SURF_SLICK ||
-         s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK);
+  assert(slickGravity == 0 || s.pml.groundTrace.surfaceFlags & SURF_SLICK || s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK);
 
-  s.gSquared = std::pow(slickGravity, 2.0f);
-  s.vSquared = VectorLengthSquared2(s.pml.previous_velocity);
+  s.gSquared  = std::pow(slickGravity, 2.0f);
+  s.vSquared  = VectorLengthSquared2(s.pml.previous_velocity);
   s.vfSquared = VectorLengthSquared2(s.pm.ps->velocity);
   s.wishspeed = wishspeed;
 
-  s.a = accel * wishspeed * PmoveUtilsV2::PM_FRAMETIME;
+  s.a        = accel * wishspeed * PmoveUtilsV2::PM_FRAMETIME;
   s.aSquared = std::pow(s.a, 2.0f);
 
-  if (!(etj_CGazTrueness.integer &
-        static_cast<int32_t>(CGazTrueness::GROUND)) ||
+  if (!(etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::GROUND)) ||
       s.vSquared - s.vfSquared >= (2 * s.a * s.wishspeed) - s.aSquared) {
     s.vSquared = s.vfSquared;
   }
 
-  s.v = std::sqrt(s.vSquared);
+  s.v  = std::sqrt(s.vSquared);
   s.vf = std::sqrt(s.vfSquared);
 
   // this is meant for default speed - if it breaks then,
@@ -85,8 +85,7 @@ void CGazData::updateState(const float wishspeed, const float accel,
 }
 
 void CGazData::walkMove() {
-  if (s.pm.waterlevel > 2 &&
-      DotProduct(s.pml.forward, s.pml.groundTrace.plane.normal) > 0) {
+  if (s.pm.waterlevel > 2 && DotProduct(s.pml.forward, s.pml.groundTrace.plane.normal) > 0) {
     return;
   }
 
@@ -99,8 +98,7 @@ void CGazData::walkMove() {
       airMove();
     }
 
-    if (!isLerpFrame &&
-        !(s.pm.cmd.serverTime - s.pm.pmext->jumpTime < JUMP_DELAY_TIME)) {
+    if (!isLerpFrame && !(s.pm.cmd.serverTime - s.pm.pmext->jumpTime < JUMP_DELAY_TIME)) {
       s.pm.pmext->sprintTime -= 2500;
 
       if (s.pm.pmext->sprintTime < 0) {
@@ -121,13 +119,12 @@ void CGazData::walkMove() {
 
   friction();
 
-  const float scale = PmoveUtilsV2::cmdScale(
-      s.pm, s.pm.cmd,
-      etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
+  const float scale =
+    PmoveUtilsV2::cmdScale(s.pm, s.pm.cmd, etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;
-  s.pml.right[2] = 0;
+  s.pml.right[2]   = 0;
 
   // FIXME: no slopes :(
   // project the forward and right directions onto the ground plane
@@ -150,10 +147,8 @@ void CGazData::walkMove() {
     }
   } else if (s.pm.ps->pm_flags & PMF_DUCKED) {
     // clamp the speed lower if ducking
-    if (wishspeed >
-        static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale) {
-      wishspeed =
-          static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale;
+    if (wishspeed > static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale) {
+      wishspeed = static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale;
     }
   }
 
@@ -174,8 +169,7 @@ void CGazData::walkMove() {
 
   // when a player gets hit, they temporarily lose
   // full control, which allows them to be moved a bit
-  if ((s.pml.groundTrace.surfaceFlags & SURF_SLICK) ||
-      s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK) {
+  if ((s.pml.groundTrace.surfaceFlags & SURF_SLICK) || s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK) {
     accelerate(wishspeed, pm_airaccelerate, true);
   } else {
     accelerate(wishspeed, pm_accelerate, false);
@@ -185,13 +179,12 @@ void CGazData::walkMove() {
 void CGazData::airMove() {
   friction();
 
-  const float scale = PmoveUtilsV2::cmdScale(
-      s.pm, s.pm.cmd,
-      etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
+  const float scale =
+    PmoveUtilsV2::cmdScale(s.pm, s.pm.cmd, etj_CGazTrueness.integer & static_cast<int32_t>(CGazTrueness::UPMOVE));
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;
-  s.pml.right[2] = 0;
+  s.pml.right[2]   = 0;
   VectorNormalize(s.pml.forward);
   VectorNormalize(s.pml.right);
 
@@ -211,8 +204,7 @@ void CGazData::airMove() {
 }
 
 void CGazData::friction() const {
-  const float speed = s.pml.walking ? VectorLength2(s.pm.ps->velocity)
-                                    : VectorLength(s.pm.ps->velocity);
+  const float speed = s.pml.walking ? VectorLength2(s.pm.ps->velocity) : VectorLength(s.pm.ps->velocity);
 
   if (speed == 0) {
     return;
@@ -220,8 +212,7 @@ void CGazData::friction() const {
 
   // rain - #179 don't do this for PM_SPECTATOR/PM_NOCLIP, we always
   // want them to stop
-  if (speed < 1 && s.pm.ps->pm_type != PM_SPECTATOR &&
-      s.pm.ps->pm_type != PM_NOCLIP) {
+  if (speed < 1 && s.pm.ps->pm_type != PM_SPECTATOR && s.pm.ps->pm_type != PM_NOCLIP) {
     s.pm.ps->velocity[0] = 0;
     s.pm.ps->velocity[1] = 0; // allow sinking underwater
     // FIXME: still have z friction underwater?
@@ -235,8 +226,8 @@ void CGazData::friction() const {
     if (s.pml.walking && !(s.pml.groundTrace.surfaceFlags & SURF_SLICK)) {
       // if getting knocked back, no friction
       if (!(s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK)) {
-        const float control = speed < pm_stopspeed ? pm_stopspeed : speed;
-        drop += control * pm_friction * PmoveUtilsV2::PM_FRAMETIME;
+        const float control  = speed < pm_stopspeed ? pm_stopspeed : speed;
+        drop                += control * pm_friction * PmoveUtilsV2::PM_FRAMETIME;
       }
     }
   }
@@ -244,11 +235,9 @@ void CGazData::friction() const {
   // apply water friction even if just wading
   if (s.pm.waterlevel) {
     if (s.pm.watertype == CONTENTS_SLIME) {
-      drop += speed * pm_slagfriction * static_cast<float>(s.pm.waterlevel) *
-              PmoveUtilsV2::PM_FRAMETIME;
+      drop += speed * pm_slagfriction * static_cast<float>(s.pm.waterlevel) * PmoveUtilsV2::PM_FRAMETIME;
     } else {
-      drop += speed * pm_waterfriction * static_cast<float>(s.pm.waterlevel) *
-              PmoveUtilsV2::PM_FRAMETIME;
+      drop += speed * pm_waterfriction * static_cast<float>(s.pm.waterlevel) * PmoveUtilsV2::PM_FRAMETIME;
     }
   }
 
@@ -278,11 +267,8 @@ void CGazData::friction() const {
   VectorScale(s.pm.ps->velocity, newspeed, s.pm.ps->velocity);
 }
 
-void CGazData::accelerate(const float wishspeed, const float accel,
-                          const bool slick) {
-  const float slickGravity =
-      slick ? static_cast<float>(s.pm.ps->gravity) * PmoveUtilsV2::PM_FRAMETIME
-            : 0;
+void CGazData::accelerate(const float wishspeed, const float accel, const bool slick) {
+  const float slickGravity = slick ? static_cast<float>(s.pm.ps->gravity) * PmoveUtilsV2::PM_FRAMETIME : 0;
 
   updateState(wishspeed, accel, slickGravity);
 }

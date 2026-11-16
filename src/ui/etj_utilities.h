@@ -53,13 +53,11 @@ void drawLevelshotPreview(const rectDef_t &rect);
 
 // draws map name in 'vote -> map -> details' menu
 // TODO: this should be somewhere else, after 'ui_shared.cpp' is cleaned up
-void drawMapname(rectDef_t &rect, float scale, vec4_t color, float text_x,
-                 int textStyle, int align);
+void drawMapname(rectDef_t &rect, float scale, vec4_t color, float text_x, int textStyle, int align);
 
 // formats the current changelog to a given window width, preserving indentation
 // NOTE: this does not handle color codes, there's no reason we ever
 // should have color codes in the changelog
-std::vector<std::string>
-fitChangelogLinesToWidth(std::vector<std::string> &lines, int maxW, float scale,
-                         fontInfo_t *font);
+std::vector<std::string> fitChangelogLinesToWidth(std::vector<std::string> &lines, int maxW, float scale,
+                                                  fontInfo_t *font);
 } // namespace ETJump::Utilities

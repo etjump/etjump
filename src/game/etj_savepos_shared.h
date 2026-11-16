@@ -26,8 +26,8 @@
 
 #include <vector>
 
-#include "q_shared.h"
 #include "bg_public.h"
+#include "q_shared.h"
 
 namespace ETJump {
 class SavePosData {

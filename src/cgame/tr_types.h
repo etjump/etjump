@@ -1,6 +1,8 @@
 #ifndef __TR_TYPES_H
 #define __TR_TYPES_H
 
+#include "../game/q_shared.h"
+
 // renderer limit for a scene
 inline constexpr int MAX_CORONAS = 32;
 // renderer limit for a scene
@@ -34,7 +36,7 @@ inline constexpr int RF_WRAP_FRAMES = 0x000080;
 // (looked at/training identification/etc)
 inline constexpr int RF_HILIGHT = 0x000100;
 // eyes in 'blink' state
-inline constexpr int RF_BLINK = 0x000200;
+inline constexpr int RF_BLINK      = 0x000200;
 inline constexpr int RF_FORCENOLOD = 0x000400;
 
 // refdef flags
@@ -42,11 +44,11 @@ inline constexpr int RF_FORCENOLOD = 0x000400;
 // used for player configuration screen
 inline constexpr int RDF_NOWORLDMODEL = 1;
 // teleportation effect (unused in ET)
-inline constexpr int RDF_HYPERSPACE = 4;
+inline constexpr int RDF_HYPERSPACE   = 4;
 inline constexpr int RDF_SKYBOXPORTAL = 8;
 // so the renderer knows to use underwater fog when the player is underwater
-inline constexpr int RDF_UNDERWATER = 1 << 4;
-inline constexpr int RDF_DRAWINGSKY = 1 << 5;
+inline constexpr int RDF_UNDERWATER  = 1 << 4;
+inline constexpr int RDF_DRAWINGSKY  = 1 << 5;
 inline constexpr int RDF_SNOOPERVIEW = 1 << 6;
 
 typedef struct {
@@ -208,7 +210,7 @@ typedef struct {
 
 //----(SA)	end
 
-inline constexpr int MAX_RENDER_STRINGS = 8;
+inline constexpr int MAX_RENDER_STRINGS       = 8;
 inline constexpr int MAX_RENDER_STRING_LENGTH = 32;
 
 typedef struct {
@@ -234,7 +236,11 @@ typedef struct {
 
 } refdef_t;
 
-typedef enum { STEREO_CENTER, STEREO_LEFT, STEREO_RIGHT } stereoFrame_t;
+typedef enum {
+  STEREO_CENTER,
+  STEREO_LEFT,
+  STEREO_RIGHT
+} stereoFrame_t;
 
 /*
 ** glconfig_t
@@ -243,7 +249,11 @@ typedef enum { STEREO_CENTER, STEREO_LEFT, STEREO_RIGHT } stereoFrame_t;
 ** being run right now.  These are constant once the OpenGL
 ** subsystem is initialized.
 */
-typedef enum { TC_NONE, TC_S3TC, TC_EXT_COMP_S3TC } textureCompression_t;
+typedef enum {
+  TC_NONE,
+  TC_S3TC,
+  TC_EXT_COMP_S3TC
+} textureCompression_t;
 
 typedef enum {
   GLDRV_ICD,        // driver is integrated with window system
@@ -314,7 +324,7 @@ typedef struct {
 // =========================================
 // Gordon, these MUST NOT exceed the values for
 // SHADER_MAX_VERTEXES/SHADER_MAX_INDEXES
-inline constexpr int MAX_PB_VERTS = 1025;
+inline constexpr int MAX_PB_VERTS    = 1025;
 inline constexpr int MAX_PB_INDICIES = MAX_PB_VERTS * 6;
 
 typedef struct polyBuffer_s {
@@ -328,6 +338,7 @@ typedef struct polyBuffer_s {
 
   qhandle_t shader;
 } polyBuffer_t;
+
 // =========================================
 
 #endif // __TR_TYPES_H

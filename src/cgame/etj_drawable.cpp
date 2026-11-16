@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
-#include <vector>
-#include <algorithm>
 #include "etj_drawable.h"
+
+#include <algorithm>
+#include <vector>
 
 static std::vector<Drawable *> _drawables;
 
@@ -45,4 +46,6 @@ void ETJump_DrawDrawables() {
   }
 }
 
-void ETJump_ClearDrawables() { _drawables.clear(); }
+void ETJump_ClearDrawables() {
+  _drawables.clear();
+}

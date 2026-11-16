@@ -7,13 +7,14 @@
 //===========================================================================
 
 #include "etj_entity_utilities.h"
-#include "../game/g_local.h"
-#include "../game/q_shared.h"
 #include "etj_printer.h"
+#include "etj_progression_tracker.h"
 #include "etj_shader_config_handler.h"
 #include "etj_string_utilities.h"
-#include "etj_progression_tracker.h"
 #include "etj_target_spawn_relay.h"
+
+#include "../game/g_local.h"
+#include "../game/q_shared.h"
 
 /*
 Contains the code to handle the various commands available with an event script.
@@ -32,7 +33,7 @@ qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params) {
   qboolean solid = qtrue;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
     G_Error("G_Scripting: setmodelfrombrushmodel must have an "
             "targetname\n");
@@ -56,9 +57,9 @@ qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params) {
       trap_SetBrushModel(ent, va("*%i", level.brushModelInfo[i].model));
 
       if (!solid) {
-        ent->s.eFlags |= EF_NONSOLID_BMODEL;
-        ent->clipmask = 0;
-        ent->r.contents = 0;
+        ent->s.eFlags   |= EF_NONSOLID_BMODEL;
+        ent->clipmask    = 0;
+        ent->r.contents  = 0;
 
         trap_LinkEntity(ent);
       }
@@ -67,8 +68,7 @@ qboolean G_ScriptAction_SetModelFromBrushmodel(gentity_t *ent, char *params) {
     }
   }
 
-  G_Error("G_Scripting: setmodelfrombrushmodel target not found %s\n",
-          modelname);
+  G_Error("G_Scripting: setmodelfrombrushmodel target not found %s\n", modelname);
 
   return qtrue;
 }
@@ -79,7 +79,7 @@ qboolean G_ScriptAction_SetPosition(gentity_t *ent, char *params) {
   gentity_t *target;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
     G_Error("G_Scripting: setposition must have an targetname\n");
   }
@@ -127,9 +127,8 @@ qboolean G_ScriptAction_SetAutoSpawn(gentity_t *ent, char *params) {
   if (!token[0]) {
     G_Error("G_Scripting: setautospawn must have a target team\n");
   }
-  team = static_cast<team_t>(Q_atoi(token));
-  pTeamAutoSpawn =
-      team == 0 ? &(level.axisAutoSpawn) : &(level.alliesAutoSpawn);
+  team           = static_cast<team_t>(Q_atoi(token));
+  pTeamAutoSpawn = team == 0 ? &(level.axisAutoSpawn) : &(level.alliesAutoSpawn);
 
   tent = G_Find(NULL, FOFS(message), spawnname);
   if (!tent) {
@@ -140,8 +139,7 @@ qboolean G_ScriptAction_SetAutoSpawn(gentity_t *ent, char *params) {
     return qfalse;
   }
 
-  G_Printf("Setting %s autospawn to %s\n", team == 0 ? "Axis" : "Allied",
-           spawnname);
+  G_Printf("Setting %s autospawn to %s\n", team == 0 ? "Axis" : "Allied", spawnname);
 
   *pTeamAutoSpawn = tent->count - CS_MULTI_SPAWNTARGETS;
 
@@ -221,32 +219,29 @@ qboolean G_ScriptAction_FollowPath(gentity_t *ent, char *params) {
     return qfalse;
   }
 
-  if (!params || ent->scriptStatus.scriptStackChangeTime <
-                     level.time) // we are waiting for it to reach destination
+  if (!params || ent->scriptStatus.scriptStackChangeTime < level.time) // we are waiting for it to reach destination
   {
     if (ent->s.pos.trTime + ent->s.pos.trDuration <= level.time) // we made it
     {
       ent->scriptStatus.scriptFlags &= ~SCFL_GOING_TO_MARKER;
 
       // set the angles at the destination
-      BG_EvaluateTrajectory(&ent->s.apos,
-                            ent->s.apos.trTime + ent->s.apos.trDuration,
-                            ent->s.angles, qtrue, ent->s.effect2Time);
+      BG_EvaluateTrajectory(&ent->s.apos, ent->s.apos.trTime + ent->s.apos.trDuration, ent->s.angles, qtrue,
+                            ent->s.effect2Time);
       VectorCopy(ent->s.angles, ent->s.apos.trBase);
       VectorCopy(ent->s.angles, ent->r.currentAngles);
-      ent->s.apos.trTime = level.time;
+      ent->s.apos.trTime     = level.time;
       ent->s.apos.trDuration = 0;
-      ent->s.apos.trType = TR_STATIONARY;
+      ent->s.apos.trType     = TR_STATIONARY;
       VectorClear(ent->s.apos.trDelta);
 
       // stop moving
-      BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->s.origin, qfalse,
-                            ent->s.effect2Time);
+      BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->s.origin, qfalse, ent->s.effect2Time);
       VectorCopy(ent->s.origin, ent->s.pos.trBase);
       VectorCopy(ent->s.origin, ent->r.currentOrigin);
-      ent->s.pos.trTime = level.time;
+      ent->s.pos.trTime     = level.time;
       ent->s.pos.trDuration = 0;
-      ent->s.pos.trType = TR_STATIONARY;
+      ent->s.pos.trType     = TR_STATIONARY;
       VectorClear(ent->s.pos.trDelta);
 
       script_linkentity(ent);
@@ -314,8 +309,7 @@ qboolean G_ScriptAction_FollowPath(gentity_t *ent, char *params) {
 
     ent->s.apos.trBase[0] = length;
 
-    ent->s.effect2Time =
-        backward ? -(pSpline - splinePaths + 1) : pSpline - splinePaths + 1;
+    ent->s.effect2Time = backward ? -(pSpline - splinePaths + 1) : pSpline - splinePaths + 1;
 
     VectorClear(ent->s.pos.trDelta);
 
@@ -331,12 +325,10 @@ qboolean G_ScriptAction_FollowPath(gentity_t *ent, char *params) {
       if (ent->s.pos.trDuration % 50) {
         float frac;
 
-        frac = (float)(((ent->s.pos.trDuration / 50) * 50 + 50) -
-                       ent->s.pos.trDuration) /
-               (float)(ent->s.pos.trDuration);
+        frac =
+          (float)(((ent->s.pos.trDuration / 50) * 50 + 50) - ent->s.pos.trDuration) / (float)(ent->s.pos.trDuration);
         if (frac < 1) {
-          ent->s.apos.trDuration = ent->s.pos.trDuration =
-              (ent->s.pos.trDuration / 50) * 50 + 50;
+          ent->s.apos.trDuration = ent->s.pos.trDuration = (ent->s.pos.trDuration / 50) * 50 + 50;
         }
       }
 
@@ -347,10 +339,8 @@ qboolean G_ScriptAction_FollowPath(gentity_t *ent, char *params) {
     }
   }
 
-  BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->r.currentOrigin, qfalse,
-                        ent->s.effect2Time);
-  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue,
-                        ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->r.currentOrigin, qfalse, ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue, ent->s.effect2Time);
   script_linkentity(ent);
 
   return qfalse;
@@ -405,8 +395,8 @@ qboolean G_ScriptAction_StartAnimation(gentity_t *ent, char *params) {
   const char *pString;
   const char *token;
   qboolean norandom = qfalse;
-  qboolean nolerp = qfalse;
-  qboolean noloop = qfalse;
+  qboolean nolerp   = qfalse;
+  qboolean noloop   = qfalse;
 
   pString = params;
 
@@ -474,11 +464,10 @@ qboolean G_ScriptAction_SetSpeed(gentity_t *ent, char *params) {
   const char *pString;
   int i;
   const char *token;
-  qboolean gravity = qfalse;
+  qboolean gravity    = qfalse;
   qboolean lowgravity = qfalse;
 
-  BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->r.currentOrigin, qtrue,
-                        ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->r.currentOrigin, qtrue, ent->s.effect2Time);
   VectorCopy(ent->r.currentOrigin, ent->s.pos.trBase);
 
   pString = params;
@@ -521,8 +510,7 @@ qboolean G_ScriptAction_SetRotation(gentity_t *ent, char *params) {
   int i;
   const char *token;
 
-  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue,
-                        ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue, ent->s.effect2Time);
   VectorCopy(ent->r.currentAngles, ent->s.apos.trBase);
 
   ent->s.apos.trType = TR_LINEAR;
@@ -546,12 +534,11 @@ qboolean G_ScriptAction_SetRotation(gentity_t *ent, char *params) {
 }
 
 qboolean G_ScriptAction_StopRotation(gentity_t *ent, char *params) {
-  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue,
-                        ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue, ent->s.effect2Time);
   VectorCopy(ent->r.currentAngles, ent->s.apos.trBase);
-  ent->s.apos.trTime = level.time;
+  ent->s.apos.trTime     = level.time;
   ent->s.apos.trDuration = 0;
-  ent->s.apos.trType = TR_STATIONARY;
+  ent->s.apos.trType     = TR_STATIONARY;
   VectorClear(ent->s.apos.trDelta);
 
   return qtrue;
@@ -573,7 +560,7 @@ qboolean G_ScriptAction_FollowSpline(gentity_t *ent, char *params) {
   float speed;
   qboolean wait = qfalse;
   int backward;
-  float length = 0;
+  float length  = 0;
   float roll[2] = {0, 0};
 
   if (params && (ent->scriptStatus.scriptFlags & SCFL_GOING_TO_MARKER)) {
@@ -582,32 +569,29 @@ qboolean G_ScriptAction_FollowSpline(gentity_t *ent, char *params) {
     return qfalse;
   }
 
-  if (!params || ent->scriptStatus.scriptStackChangeTime <
-                     level.time) // we are waiting for it to reach destination
+  if (!params || ent->scriptStatus.scriptStackChangeTime < level.time) // we are waiting for it to reach destination
   {
     if (ent->s.pos.trTime + ent->s.pos.trDuration <= level.time) // we made it
     {
       ent->scriptStatus.scriptFlags &= ~SCFL_GOING_TO_MARKER;
 
       // set the angles at the destination
-      BG_EvaluateTrajectory(&ent->s.apos,
-                            ent->s.apos.trTime + ent->s.apos.trDuration,
-                            ent->s.angles, qtrue, ent->s.effect2Time);
+      BG_EvaluateTrajectory(&ent->s.apos, ent->s.apos.trTime + ent->s.apos.trDuration, ent->s.angles, qtrue,
+                            ent->s.effect2Time);
       VectorCopy(ent->s.angles, ent->s.apos.trBase);
       VectorCopy(ent->s.angles, ent->r.currentAngles);
-      ent->s.apos.trTime = level.time;
+      ent->s.apos.trTime     = level.time;
       ent->s.apos.trDuration = 0;
-      ent->s.apos.trType = TR_STATIONARY;
+      ent->s.apos.trType     = TR_STATIONARY;
       VectorClear(ent->s.apos.trDelta);
 
       // stop moving
-      BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->s.origin, qfalse,
-                            ent->s.effect2Time);
+      BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->s.origin, qfalse, ent->s.effect2Time);
       VectorCopy(ent->s.origin, ent->s.pos.trBase);
       VectorCopy(ent->s.origin, ent->r.currentOrigin);
-      ent->s.pos.trTime = level.time;
+      ent->s.pos.trTime     = level.time;
       ent->s.pos.trDuration = 0;
-      ent->s.pos.trType = TR_STATIONARY;
+      ent->s.pos.trType     = TR_STATIONARY;
       VectorClear(ent->s.pos.trDelta);
 
       script_linkentity(ent);
@@ -751,24 +735,20 @@ qboolean G_ScriptAction_FollowSpline(gentity_t *ent, char *params) {
     ent->s.apos.trBase[1] = roll[0];
     ent->s.apos.trBase[2] = roll[1];
 
-    ent->s.effect2Time =
-        backward ? -(pSpline - splinePaths + 1) : pSpline - splinePaths + 1;
+    ent->s.effect2Time = backward ? -(pSpline - splinePaths + 1) : pSpline - splinePaths + 1;
 
     VectorClear(ent->s.pos.trDelta);
-    ent->s.apos.trDuration = ent->s.pos.trDuration =
-        1000 * (pSpline->length / speed);
+    ent->s.apos.trDuration = ent->s.pos.trDuration = 1000 * (pSpline->length / speed);
 
     if (!wait) {
       // round the duration to the next 50ms
       if (ent->s.pos.trDuration % 50) {
         float frac;
 
-        frac = (float)(((ent->s.pos.trDuration / 50) * 50 + 50) -
-                       ent->s.pos.trDuration) /
-               (float)(ent->s.pos.trDuration);
+        frac =
+          (float)(((ent->s.pos.trDuration / 50) * 50 + 50) - ent->s.pos.trDuration) / (float)(ent->s.pos.trDuration);
         if (frac < 1) {
-          ent->s.apos.trDuration = ent->s.pos.trDuration =
-              (ent->s.pos.trDuration / 50) * 50 + 50;
+          ent->s.apos.trDuration = ent->s.pos.trDuration = (ent->s.pos.trDuration / 50) * 50 + 50;
         }
       }
 
@@ -779,10 +759,8 @@ qboolean G_ScriptAction_FollowSpline(gentity_t *ent, char *params) {
     }
   }
 
-  BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->r.currentOrigin, qfalse,
-                        ent->s.effect2Time);
-  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue,
-                        ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->r.currentOrigin, qfalse, ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue, ent->s.effect2Time);
   script_linkentity(ent);
 
   return qfalse;
@@ -796,28 +774,25 @@ G_ScriptAction_AbortMove
 ===============
 */
 qboolean G_ScriptAction_AbortMove(gentity_t *ent, char *params) {
-
   ent->scriptStatus.scriptFlags &= ~SCFL_GOING_TO_MARKER;
 
   // set the angles at the destination
-  BG_EvaluateTrajectory(&ent->s.apos,
-                        ent->s.apos.trTime + ent->s.apos.trDuration,
-                        ent->s.angles, qtrue, ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.apos, ent->s.apos.trTime + ent->s.apos.trDuration, ent->s.angles, qtrue,
+                        ent->s.effect2Time);
   VectorCopy(ent->s.angles, ent->s.apos.trBase);
   VectorCopy(ent->s.angles, ent->r.currentAngles);
-  ent->s.apos.trTime = level.time;
+  ent->s.apos.trTime     = level.time;
   ent->s.apos.trDuration = 0;
-  ent->s.apos.trType = TR_STATIONARY;
+  ent->s.apos.trType     = TR_STATIONARY;
   VectorClear(ent->s.apos.trDelta);
 
   // stop moving
-  BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->s.origin, qfalse,
-                        ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->s.origin, qfalse, ent->s.effect2Time);
   VectorCopy(ent->s.origin, ent->s.pos.trBase);
   VectorCopy(ent->s.origin, ent->r.currentOrigin);
-  ent->s.pos.trTime = level.time;
+  ent->s.pos.trTime     = level.time;
   ent->s.pos.trDuration = 0;
-  ent->s.pos.trType = TR_STATIONARY;
+  ent->s.pos.trType     = TR_STATIONARY;
   VectorClear(ent->s.pos.trDelta);
 
   script_linkentity(ent);
@@ -878,24 +853,24 @@ qboolean G_ScriptAction_SetChargeTimeFactor(gentity_t *ent, char *params) {
 
   if (!Q_stricmp(playerclass, "soldier")) {
     level.soldierChargeTimeModifier[team] = factor;
-    level.soldierChargeTime[team] = g_soldierChargeTime.integer * factor;
+    level.soldierChargeTime[team]         = g_soldierChargeTime.integer * factor;
   } else if (!Q_stricmp(playerclass, "medic")) {
     level.medicChargeTimeModifier[team] = factor;
-    level.medicChargeTime[team] = g_medicChargeTime.integer * factor;
+    level.medicChargeTime[team]         = g_medicChargeTime.integer * factor;
   } else if (!Q_stricmp(playerclass, "engineer")) {
     level.engineerChargeTimeModifier[team] = factor;
-    level.engineerChargeTime[team] = g_engineerChargeTime.integer * factor;
+    level.engineerChargeTime[team]         = g_engineerChargeTime.integer * factor;
   } else if (!Q_stricmp(playerclass, "fieldops")) {
     level.lieutenantChargeTimeModifier[team] = factor;
-    level.lieutenantChargeTime[team] = g_LTChargeTime.integer * factor;
+    level.lieutenantChargeTime[team]         = g_LTChargeTime.integer * factor;
   } else if (!Q_stricmp(playerclass,
                         "lieutenant")) // FIXME: remove from missionpack
   {
     level.lieutenantChargeTimeModifier[team] = factor;
-    level.lieutenantChargeTime[team] = g_LTChargeTime.integer * factor;
+    level.lieutenantChargeTime[team]         = g_LTChargeTime.integer * factor;
   } else if (!Q_stricmp(playerclass, "covertops")) {
     level.covertopsChargeTimeModifier[team] = factor;
-    level.covertopsChargeTime[team] = g_covertopsChargeTime.integer * factor;
+    level.covertopsChargeTime[team]         = g_covertopsChargeTime.integer * factor;
   }
 
   {
@@ -1060,7 +1035,7 @@ qboolean G_ScriptAction_DisableMessage(gentity_t *ent, char *params) {
   gentity_t *target = NULL;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
     G_Error("G_Scripting: disablemessage must have a targetname\n");
   }
@@ -1083,7 +1058,7 @@ qboolean G_ScriptAction_Kill(gentity_t *ent, char *params) {
   const char *pString, *token;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!*token) {
     G_Error("G_Scripting: kill must have a target\n");
   }
@@ -1143,8 +1118,7 @@ qboolean G_ScriptAction_SetGlobalFog(gentity_t *ent, char *params) {
   depthForOpaque = Q_atof(token);
 
   trap_SetConfigstring(CS_GLOBALFOGVARS,
-                       va("0 %i %f %f %f %f", duration, color[0], color[1],
-                          color[2], depthForOpaque));
+                       va("0 %i %f %f %f %f", duration, color[0], color[1], color[2], depthForOpaque));
 
   return qtrue;
 }
@@ -1179,32 +1153,29 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
     return qfalse;
   }
 
-  if (!params || ent->scriptStatus.scriptStackChangeTime <
-                     level.time) // we are waiting for it to reach destination
+  if (!params || ent->scriptStatus.scriptStackChangeTime < level.time) // we are waiting for it to reach destination
   {
     if (ent->s.pos.trTime + ent->s.pos.trDuration <= level.time) // we made it
     {
       ent->scriptStatus.scriptFlags &= ~SCFL_GOING_TO_MARKER;
 
       // set the angles at the destination
-      BG_EvaluateTrajectory(&ent->s.apos,
-                            ent->s.apos.trTime + ent->s.apos.trDuration,
-                            ent->s.angles, qtrue, ent->s.effect2Time);
+      BG_EvaluateTrajectory(&ent->s.apos, ent->s.apos.trTime + ent->s.apos.trDuration, ent->s.angles, qtrue,
+                            ent->s.effect2Time);
       VectorCopy(ent->s.angles, ent->s.apos.trBase);
       VectorCopy(ent->s.angles, ent->r.currentAngles);
-      ent->s.apos.trTime = level.time;
+      ent->s.apos.trTime     = level.time;
       ent->s.apos.trDuration = 0;
-      ent->s.apos.trType = TR_STATIONARY;
+      ent->s.apos.trType     = TR_STATIONARY;
       VectorClear(ent->s.apos.trDelta);
 
       // stop moving
-      BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->s.origin, qfalse,
-                            ent->s.effect2Time);
+      BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->s.origin, qfalse, ent->s.effect2Time);
       VectorCopy(ent->s.origin, ent->s.pos.trBase);
       VectorCopy(ent->s.origin, ent->r.currentOrigin);
-      ent->s.pos.trTime = level.time;
+      ent->s.pos.trTime     = level.time;
       ent->s.pos.trDuration = 0;
-      ent->s.pos.trType = TR_STATIONARY;
+      ent->s.pos.trType     = TR_STATIONARY;
       VectorClear(ent->s.pos.trDelta);
 
       script_linkentity(ent);
@@ -1216,7 +1187,7 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
     pathCorner_t *pPathCorner;
 
     pString = params;
-    token = COM_ParseExt(&pString, qfalse);
+    token   = COM_ParseExt(&pString, qfalse);
     if (!token[0]) {
       G_Error("G_Scripting: gotomarker must have an "
               "targetname\n");
@@ -1243,7 +1214,7 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
               "speed\n");
     }
 
-    speed = Q_atof(token);
+    speed  = Q_atof(token);
     trType = TR_LINEAR_STOP;
 
     while (token[0]) {
@@ -1262,9 +1233,9 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
           pathCorner_t *pPathCorner2;
           vec3_t vec2 = {0, 0, 0};
 
-          token = COM_ParseExt(&pString, qfalse);
+          token        = COM_ParseExt(&pString, qfalse);
           pPathCorner2 = BG_Find_PathCorner(token);
-          target2 = G_FindByTargetname(NULL, token);
+          target2      = G_FindByTargetname(NULL, token);
           if (pPathCorner2) {
             VectorCopy(pPathCorner2->origin, vec2);
           } else if (target2) {
@@ -1286,12 +1257,11 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
 
     // start the movement
     if (ent->s.eType == ET_MOVER) {
-
       VectorCopy(vec, ent->movedir);
       VectorCopy(ent->r.currentOrigin, ent->pos1);
       VectorAdd(ent->r.currentOrigin, vec, ent->pos2);
       ent->speed = speed * static_cast<float>(g_moverScale.value);
-      dist = VectorDistance(ent->pos1, ent->pos2);
+      dist       = VectorDistance(ent->pos1, ent->pos2);
       // setup the movement with the new parameters
       InitMover(ent);
 
@@ -1305,7 +1275,7 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
                                     // acceleration/decceleration
       {
         ent->s.pos.trDuration = 1000.0 * dist / (speed / 2.0);
-        ent->s.pos.trType = static_cast<trType_t>(trType);
+        ent->s.pos.trType     = static_cast<trType_t>(trType);
       }
       ent->reached = NULL;
 
@@ -1315,8 +1285,10 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
 
         for (i = 0; i < 3; i++) {
           diff[i] = AngleDifference(angles[i], ent->s.angles[i]);
-          while (diff[i] > 180) diff[i] -= 360;
-          while (diff[i] < -180) diff[i] += 360;
+          while (diff[i] > 180)
+            diff[i] -= 360;
+          while (diff[i] < -180)
+            diff[i] += 360;
         }
         VectorCopy(ent->s.angles, ent->s.apos.trBase);
         if (duration) {
@@ -1325,13 +1297,13 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
           VectorClear(ent->s.apos.trDelta);
         }
         ent->s.apos.trDuration = duration;
-        ent->s.apos.trTime = level.time;
-        ent->s.apos.trType = TR_LINEAR_STOP;
+        ent->s.apos.trTime     = level.time;
+        ent->s.apos.trType     = TR_LINEAR_STOP;
         if (trType != TR_LINEAR_STOP) // allow for
                                       // acceleration/decceleration
         {
           ent->s.pos.trDuration = 1000.0 * dist / (speed / 2.0);
-          ent->s.pos.trType = static_cast<trType_t>(trType);
+          ent->s.pos.trType     = static_cast<trType_t>(trType);
         }
       }
 
@@ -1350,8 +1322,10 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
 
         for (i = 0; i < 3; i++) {
           diff[i] = AngleDifference(angles[i], ent->s.angles[i]);
-          while (diff[i] > 180) diff[i] -= 360;
-          while (diff[i] < -180) diff[i] += 360;
+          while (diff[i] > 180)
+            diff[i] -= 360;
+          while (diff[i] < -180)
+            diff[i] += 360;
         }
         VectorCopy(ent->s.angles, ent->s.apos.trBase);
         if (duration) {
@@ -1360,8 +1334,8 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
           VectorClear(ent->s.apos.trDelta);
         }
         ent->s.apos.trDuration = duration;
-        ent->s.apos.trTime = level.time;
-        ent->s.apos.trType = TR_LINEAR_STOP;
+        ent->s.apos.trTime     = level.time;
+        ent->s.apos.trType     = TR_LINEAR_STOP;
       }
     }
 
@@ -1370,12 +1344,10 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
       if (ent->s.pos.trDuration % 50) {
         float frac;
 
-        frac = (float)(((ent->s.pos.trDuration / 50) * 50 + 50) -
-                       ent->s.pos.trDuration) /
-               (float)(ent->s.pos.trDuration);
+        frac =
+          (float)(((ent->s.pos.trDuration / 50) * 50 + 50) - ent->s.pos.trDuration) / (float)(ent->s.pos.trDuration);
         if (frac < 1) {
-          VectorScale(ent->s.pos.trDelta, 1.0 / (1.0 + frac),
-                      ent->s.pos.trDelta);
+          VectorScale(ent->s.pos.trDelta, 1.0 / (1.0 + frac), ent->s.pos.trDelta);
           ent->s.pos.trDuration = (ent->s.pos.trDuration / 50) * 50 + 50;
         }
       }
@@ -1387,10 +1359,8 @@ qboolean G_ScriptAction_GotoMarker(gentity_t *ent, char *params) {
     }
   }
 
-  BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->r.currentOrigin, qfalse,
-                        ent->s.effect2Time);
-  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue,
-                        ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->r.currentOrigin, qfalse, ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue, ent->s.effect2Time);
   script_linkentity(ent);
 
   return qfalse;
@@ -1410,7 +1380,7 @@ qboolean G_ScriptAction_Wait(gentity_t *ent, char *params) {
 
   // get the duration
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!*token) {
     G_Error("G_Scripting: wait must have a duration\n");
   }
@@ -1435,10 +1405,8 @@ qboolean G_ScriptAction_Wait(gentity_t *ent, char *params) {
 
     // get as close as possible to sv_fps 20 intervals for compatibility
     if (sv_fps.integer > 20) {
-      min = min + DEFAULT_SV_FRAMETIME - (min % DEFAULT_SV_FRAMETIME) -
-            level.frameTime;
-      max = max + DEFAULT_SV_FRAMETIME - (max % DEFAULT_SV_FRAMETIME) -
-            level.frameTime;
+      min = min + DEFAULT_SV_FRAMETIME - (min % DEFAULT_SV_FRAMETIME) - level.frameTime;
+      max = max + DEFAULT_SV_FRAMETIME - (max % DEFAULT_SV_FRAMETIME) - level.frameTime;
     }
 
     if (ent->scriptStatus.scriptStackChangeTime + min > level.time) {
@@ -1456,13 +1424,10 @@ qboolean G_ScriptAction_Wait(gentity_t *ent, char *params) {
 
   // get as close as possible to sv_fps 20 intervals for compatibility
   if (sv_fps.integer > 20) {
-    duration = duration + DEFAULT_SV_FRAMETIME -
-               (duration % DEFAULT_SV_FRAMETIME) - level.frameTime;
+    duration = duration + DEFAULT_SV_FRAMETIME - (duration % DEFAULT_SV_FRAMETIME) - level.frameTime;
   }
 
-  return (ent->scriptStatus.scriptStackChangeTime + duration < level.time)
-             ? qtrue
-             : qfalse;
+  return (ent->scriptStatus.scriptStackChangeTime + duration < level.time) ? qtrue : qfalse;
 }
 
 /*
@@ -1483,7 +1448,7 @@ qboolean G_ScriptAction_Trigger(gentity_t *ent, char *params) {
 
   // get the cast name
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   Q_strncpyz(name, token, sizeof(name));
   if (!*name) {
     G_Error("G_Scripting: trigger must have a name and an "
@@ -1505,11 +1470,10 @@ qboolean G_ScriptAction_Trigger(gentity_t *ent, char *params) {
     G_Script_ScriptEvent(trent, "trigger", trigger);
     // if the script changed, return false so we don't muck with
     // it's variables
-    return ((trent != ent) || (oldId == trent->scriptStatus.scriptId)) ? qtrue
-                                                                       : qfalse;
+    return ((trent != ent) || (oldId == trent->scriptStatus.scriptId)) ? qtrue : qfalse;
   } else if (!Q_stricmp(name, "global")) {
     terminate = qfalse;
-    found = qfalse;
+    found     = qfalse;
     // for all entities/bots with this scriptName
     trent = g_entities;
     for (i = 0; i < level.num_entities; i++, trent++) {
@@ -1552,7 +1516,7 @@ qboolean G_ScriptAction_Trigger(gentity_t *ent, char *params) {
     return qtrue; // always true, as players aren't always there
   } else {
     terminate = qfalse;
-    found = qfalse;
+    found     = qfalse;
     // for all entities/bots with this scriptName
     trent = G_Find(NULL, FOFS(scriptName), name);
     while (trent) {
@@ -1598,8 +1562,8 @@ channel.
 qboolean G_ScriptAction_PlaySound(gentity_t *ent, char *params) {
   const char *pString, *token;
   char sound[MAX_QPATH];
-  qboolean looping = qfalse;
-  int volume = 255;
+  qboolean looping   = qfalse;
+  int volume         = 255;
   bool onlyActivator = false;
 
   if (!params) {
@@ -1608,7 +1572,7 @@ qboolean G_ScriptAction_PlaySound(gentity_t *ent, char *params) {
   }
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   Q_strncpyz(sound, token, sizeof(sound));
 
   token = COM_ParseExt(&pString, qfalse);
@@ -1616,7 +1580,7 @@ qboolean G_ScriptAction_PlaySound(gentity_t *ent, char *params) {
     if (!Q_stricmp(token, "looping")) {
       looping = qtrue;
     } else if (!Q_stricmp(token, "volume")) {
-      token = COM_ParseExt(&pString, qfalse);
+      token  = COM_ParseExt(&pString, qfalse);
       volume = Q_atoi(token);
       if (!volume) {
         volume = 255;
@@ -1639,10 +1603,9 @@ qboolean G_ScriptAction_PlaySound(gentity_t *ent, char *params) {
     }
 
     gentity_t *noiseEnt =
-        ETJump::soundEvent(ent->activator->r.currentOrigin,
-                           EV_GENERAL_CLIENT_SOUND_VOLUME, G_SoundIndex(sound));
+      ETJump::soundEvent(ent->activator->r.currentOrigin, EV_GENERAL_CLIENT_SOUND_VOLUME, G_SoundIndex(sound));
     noiseEnt->s.onFireStart = volume >> 1;
-    noiseEnt->s.teamNum = ClientNum(ent->activator);
+    noiseEnt->s.teamNum     = ClientNum(ent->activator);
   } else if (!looping) {
     if (volume == 255) {
       G_AddEvent(ent, EV_GENERAL_SOUND, G_SoundIndex(sound));
@@ -1652,7 +1615,7 @@ qboolean G_ScriptAction_PlaySound(gentity_t *ent, char *params) {
     }
   } else {
     // looping channel
-    ent->s.loopSound = G_SoundIndex(sound);
+    ent->s.loopSound   = G_SoundIndex(sound);
     ent->s.onFireStart = volume >> 1;
   }
 
@@ -1681,7 +1644,7 @@ qboolean G_ScriptAction_FadeAllSounds(gentity_t *ent, char *params) {
   }
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
 
   if (!Q_stricmp(token, "up")) {
     up = qtrue;
@@ -1702,8 +1665,7 @@ qboolean G_ScriptAction_FadeAllSounds(gentity_t *ent, char *params) {
             token);
   }
 
-  trap_SendServerCommand(
-      -1, va("snd_fade %f %d %i", (up) ? 1.0 : 0.0, time, (up) ? 0 : 1));
+  trap_SendServerCommand(-1, va("snd_fade %f %d %i", (up) ? 1.0 : 0.0, time, (up) ? 0 : 1));
 
   return qtrue;
 }
@@ -1721,7 +1683,7 @@ qboolean G_ScriptAction_MusicStart(gentity_t *ent, char *params) {
   int fadeupTime = 0;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
     G_Error("G_Scripting: syntax: mu_start <musicfile> "
             "<fadeuptime>");
@@ -1750,7 +1712,7 @@ qboolean G_ScriptAction_MusicPlay(gentity_t *ent, char *params) {
   int fadeupTime = 0;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
     G_Error("G_Scripting: syntax: mu_play <musicfile> [fadeup "
             "time]");
@@ -1772,7 +1734,7 @@ qboolean G_ScriptAction_MusicStop(gentity_t *ent, char *params) {
   int fadeoutTime = 0;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (token[0]) {
     fadeoutTime = Q_atoi(token);
   }
@@ -1792,7 +1754,7 @@ qboolean G_ScriptAction_MusicQueue(gentity_t *ent, char *params) {
   char cvarName[MAX_QPATH];
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
     G_Error("G_Scripting: syntax: mu_queue <musicfile>");
   }
@@ -1814,7 +1776,7 @@ qboolean G_ScriptAction_MusicFade(gentity_t *ent, char *params) {
   float targetVol = 0.0;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
     G_Error("G_Scripting: syntax: mu_fade <target volume "
             "0.0-1.0> <fadeout time>");
@@ -1852,13 +1814,12 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
   char tokens[2][MAX_QPATH];
   int i;
   // TTimo might be used uninitialized
-  int endtime = 0;
+  int endtime      = 0;
   qboolean looping = qfalse, forever = qfalse;
   int startframe, endframe, idealframe;
   int rate = 20;
 
-  if ((ent->scriptStatus.scriptFlags & SCFL_ANIMATING) &&
-      (ent->scriptStatus.scriptStackChangeTime == level.time)) {
+  if ((ent->scriptStatus.scriptFlags & SCFL_ANIMATING) && (ent->scriptStatus.scriptStackChangeTime == level.time)) {
     // this is a new call, so cancel the previous animation
     ent->scriptStatus.scriptFlags &= ~SCFL_ANIMATING;
   }
@@ -1878,7 +1839,7 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
   }
 
   startframe = Q_atoi(tokens[0]);
-  endframe = Q_atoi(tokens[1]);
+  endframe   = Q_atoi(tokens[1]);
 
   // check for optional parameters
   token = COM_ParseExt(&pString, qfalse);
@@ -1900,8 +1861,8 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
           endtime = 0;
         }
       } else if (!Q_stricmp(token, "forever")) {
-        ent->scriptStatus.animatingParams = params;
-        ent->scriptStatus.scriptFlags |= SCFL_ANIMATING;
+        ent->scriptStatus.animatingParams  = params;
+        ent->scriptStatus.scriptFlags     |= SCFL_ANIMATING;
         // we don't care when it ends, since we are going forever!
         endtime = level.time + 100;
         forever = qtrue;
@@ -1930,20 +1891,16 @@ qboolean G_ScriptAction_PlayAnim(gentity_t *ent, char *params) {
     }
 
     if (!looping) {
-      endtime = ent->scriptStatus.scriptStackChangeTime +
-                ((endframe - startframe) * (1000 / 20));
+      endtime = ent->scriptStatus.scriptStackChangeTime + ((endframe - startframe) * (1000 / 20));
     }
   }
 
-  idealframe = startframe +
-               static_cast<int>(std::floor(
-                   static_cast<float>(level.time -
-                                      ent->scriptStatus.scriptStackChangeTime) /
-                   (1000.0 / static_cast<float>(rate))));
+  idealframe =
+    startframe + static_cast<int>(std::floor(static_cast<float>(level.time - ent->scriptStatus.scriptStackChangeTime) /
+                                             (1000.0 / static_cast<float>(rate))));
 
   if (looping) {
-    ent->s.frame =
-        startframe + (idealframe - startframe) % (endframe - startframe);
+    ent->s.frame = startframe + (idealframe - startframe) % (endframe - startframe);
   } else {
     if (idealframe > endframe) {
       ent->s.frame = endframe;
@@ -1969,7 +1926,7 @@ G_ScriptAction_AlertEntity
 =================
 */
 qboolean G_ScriptAction_AlertEntity(gentity_t *ent, char *params) {
-  gentity_t *alertent = NULL;
+  gentity_t *alertent    = NULL;
   qboolean foundalertent = qfalse;
   int hash;
 
@@ -2040,14 +1997,13 @@ qboolean G_ScriptAction_ToggleSpeaker(gentity_t *ent, char *params) {
   for (i = 0; i < BG_NumScriptSpeakers(); i++) {
     speaker = BG_GetScriptSpeaker(i);
 
-    if (hash != speaker->targetnamehash &&
-        Q_stricmp(params, speaker->targetname)) {
+    if (hash != speaker->targetnamehash && Q_stricmp(params, speaker->targetname)) {
       continue;
     }
 
-    tent = G_TempEntity(speaker->origin, EV_ALERT_SPEAKER);
-    tent->r.svFlags = SVF_BROADCAST;
-    tent->s.otherEntityNum = i;
+    tent                    = G_TempEntity(speaker->origin, EV_ALERT_SPEAKER);
+    tent->r.svFlags         = SVF_BROADCAST;
+    tent->s.otherEntityNum  = i;
     tent->s.otherEntityNum2 = 0;
   }
 
@@ -2077,14 +2033,13 @@ qboolean G_ScriptAction_DisableSpeaker(gentity_t *ent, char *params) {
   for (i = 0; i < BG_NumScriptSpeakers(); i++) {
     speaker = BG_GetScriptSpeaker(i);
 
-    if (hash != speaker->targetnamehash &&
-        Q_stricmp(params, speaker->targetname)) {
+    if (hash != speaker->targetnamehash && Q_stricmp(params, speaker->targetname)) {
       continue;
     }
 
-    tent = G_TempEntity(speaker->origin, EV_ALERT_SPEAKER);
-    tent->r.svFlags = SVF_BROADCAST;
-    tent->s.otherEntityNum = i;
+    tent                    = G_TempEntity(speaker->origin, EV_ALERT_SPEAKER);
+    tent->r.svFlags         = SVF_BROADCAST;
+    tent->s.otherEntityNum  = i;
     tent->s.otherEntityNum2 = 1;
   }
 
@@ -2114,14 +2069,13 @@ qboolean G_ScriptAction_EnableSpeaker(gentity_t *ent, char *params) {
   for (i = 0; i < BG_NumScriptSpeakers(); i++) {
     speaker = BG_GetScriptSpeaker(i);
 
-    if (hash != speaker->targetnamehash &&
-        Q_stricmp(params, speaker->targetname)) {
+    if (hash != speaker->targetnamehash && Q_stricmp(params, speaker->targetname)) {
       continue;
     }
 
-    tent = G_TempEntity(speaker->origin, EV_ALERT_SPEAKER);
-    tent->r.svFlags = SVF_BROADCAST;
-    tent->s.otherEntityNum = i;
+    tent                    = G_TempEntity(speaker->origin, EV_ALERT_SPEAKER);
+    tent->r.svFlags         = SVF_BROADCAST;
+    tent->s.otherEntityNum  = i;
     tent->s.otherEntityNum2 = 2;
   }
 
@@ -2171,8 +2125,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
 
   bufferIndex = Q_atoi(token);
   if (bufferIndex >= MAX_SCRIPT_ACCUM_BUFFERS) {
-    G_Error("G_Scripting: accum buffer is outside range (0 - %i)\n",
-            MAX_SCRIPT_ACCUM_BUFFERS);
+    G_Error("G_Scripting: accum buffer is outside range (0 - %i)\n", MAX_SCRIPT_ACCUM_BUFFERS);
   }
 
   token = COM_ParseExt(&pString, qfalse);
@@ -2196,8 +2149,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
 
     if (ent->scriptAccumBuffer[bufferIndex] < Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "abort_if_greater_than")) {
     if (!token[0]) {
@@ -2206,19 +2158,16 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
 
     if (ent->scriptAccumBuffer[bufferIndex] > Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
-  } else if (!Q_stricmp(lastToken, "abort_if_not_equal") ||
-             !Q_stricmp(lastToken, "abort_if_not_equals")) {
+  } else if (!Q_stricmp(lastToken, "abort_if_not_equal") || !Q_stricmp(lastToken, "abort_if_not_equals")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
 
     if (ent->scriptAccumBuffer[bufferIndex] != Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "abort_if_equal")) {
     if (!token[0]) {
@@ -2227,8 +2176,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
 
     if (ent->scriptAccumBuffer[bufferIndex] == Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "bitset")) {
     if (!token[0]) {
@@ -2249,8 +2197,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
 
     if (ent->scriptAccumBuffer[bufferIndex] & (1 << Q_atoi(token))) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "abort_if_not_bitset")) {
     if (!token[0]) {
@@ -2259,8 +2206,7 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
 
     if (!(ent->scriptAccumBuffer[bufferIndex] & (1 << Q_atoi(token)))) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "set")) {
     if (!token[0]) {
@@ -2293,20 +2239,18 @@ qboolean G_ScriptAction_Accum(gentity_t *ent, char *params) {
       Q_strncpyz(lastToken, token, sizeof(lastToken));
 
       if (!*lastToken) {
-        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
-                params);
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n", params);
       }
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(name, token, sizeof(name));
 
       if (!*name) {
-        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
-                params);
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n", params);
       }
 
       terminate = qfalse;
-      found = qfalse;
+      found     = qfalse;
       // for all entities/bots with this scriptName
       trent = G_Find(nullptr, FOFS(scriptName), lastToken);
 
@@ -2393,8 +2337,7 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
 
   bufferIndex = Q_atoi(token);
   if (bufferIndex >= MAX_SCRIPT_ACCUM_BUFFERS) {
-    G_Error("G_Scripting: accum buffer is outside range (0 - %i)\n",
-            MAX_SCRIPT_ACCUM_BUFFERS);
+    G_Error("G_Scripting: accum buffer is outside range (0 - %i)\n", MAX_SCRIPT_ACCUM_BUFFERS);
   }
 
   token = COM_ParseExt(&pString, qfalse);
@@ -2418,8 +2361,7 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
 
     if (level.globalAccumBuffer[bufferIndex] < Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "abort_if_greater_than")) {
     if (!token[0]) {
@@ -2428,19 +2370,16 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
 
     if (level.globalAccumBuffer[bufferIndex] > Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
-  } else if (!Q_stricmp(lastToken, "abort_if_not_equal") ||
-             !Q_stricmp(lastToken, "abort_if_not_equals")) {
+  } else if (!Q_stricmp(lastToken, "abort_if_not_equal") || !Q_stricmp(lastToken, "abort_if_not_equals")) {
     if (!token[0]) {
       G_Error("Scripting: accum %s requires a parameter\n", lastToken);
     }
 
     if (level.globalAccumBuffer[bufferIndex] != Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "abort_if_equal")) {
     if (!token[0]) {
@@ -2449,8 +2388,7 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
 
     if (level.globalAccumBuffer[bufferIndex] == Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "bitset")) {
     if (!token[0]) {
@@ -2471,8 +2409,7 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
 
     if (level.globalAccumBuffer[bufferIndex] & (1 << Q_atoi(token))) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "abort_if_not_bitset")) {
     if (!token[0]) {
@@ -2480,8 +2417,7 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
     }
     if (!(level.globalAccumBuffer[bufferIndex] & (1 << Q_atoi(token)))) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "set")) {
     if (!token[0]) {
@@ -2514,20 +2450,18 @@ qboolean G_ScriptAction_GlobalAccum(gentity_t *ent, char *params) {
       Q_strncpyz(lastToken, token, sizeof(lastToken));
 
       if (!*lastToken) {
-        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
-                params);
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n", params);
       }
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(name, token, sizeof(name));
 
       if (!*name) {
-        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
-                params);
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n", params);
       }
 
       terminate = qfalse;
-      found = qfalse;
+      found     = qfalse;
       // for all entities/bots with this scriptName
       trent = G_Find(nullptr, FOFS(scriptName), lastToken);
       while (trent) {
@@ -2580,7 +2514,6 @@ G_ScriptAction_Print
 =================
 */
 qboolean G_ScriptAction_Print(gentity_t *ent, char *params) {
-
   // Default to printing whole string
   const char *printThis = params;
 
@@ -2671,8 +2604,10 @@ qboolean G_ScriptAction_FaceAngles(gentity_t *ent, char *params) {
 
     for (i = 0; i < 3; i++) {
       diff[i] = AngleDifference(angles[i], ent->s.angles[i]);
-      while (diff[i] > 180) diff[i] -= 360;
-      while (diff[i] < -180) diff[i] += 360;
+      while (diff[i] > 180)
+        diff[i] -= 360;
+      while (diff[i] < -180)
+        diff[i] += 360;
     }
 
     VectorCopy(ent->s.angles, ent->s.apos.trBase);
@@ -2682,11 +2617,11 @@ qboolean G_ScriptAction_FaceAngles(gentity_t *ent, char *params) {
       VectorClear(ent->s.apos.trDelta);
     }
     ent->s.apos.trDuration = duration;
-    ent->s.apos.trTime = level.time;
-    ent->s.apos.trType = TR_LINEAR_STOP;
+    ent->s.apos.trTime     = level.time;
+    ent->s.apos.trType     = TR_LINEAR_STOP;
 
     if (trType != TR_LINEAR_STOP) // accel / deccel logic
-    { // calc the speed from duration and start/end delta
+    {                             // calc the speed from duration and start/end delta
       for (i = 0; i < 3; i++) {
         ent->s.apos.trDelta[i] = 2.0 * 1000.0 * diff[i] / (float)duration;
       }
@@ -2695,14 +2630,13 @@ qboolean G_ScriptAction_FaceAngles(gentity_t *ent, char *params) {
 
   } else if (ent->s.apos.trTime + ent->s.apos.trDuration <= level.time) {
     // finished turning
-    BG_EvaluateTrajectory(&ent->s.apos,
-                          ent->s.apos.trTime + ent->s.apos.trDuration,
-                          ent->s.angles, qtrue, ent->s.effect2Time);
+    BG_EvaluateTrajectory(&ent->s.apos, ent->s.apos.trTime + ent->s.apos.trDuration, ent->s.angles, qtrue,
+                          ent->s.effect2Time);
     VectorCopy(ent->s.angles, ent->s.apos.trBase);
     VectorCopy(ent->s.angles, ent->r.currentAngles);
-    ent->s.apos.trTime = level.time;
+    ent->s.apos.trTime     = level.time;
     ent->s.apos.trDuration = 0;
-    ent->s.apos.trType = TR_STATIONARY;
+    ent->s.apos.trType     = TR_STATIONARY;
     VectorClear(ent->s.apos.trDelta);
 
     script_linkentity(ent);
@@ -2710,8 +2644,7 @@ qboolean G_ScriptAction_FaceAngles(gentity_t *ent, char *params) {
     return qtrue;
   }
 
-  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue,
-                        ent->s.effect2Time);
+  BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->r.currentAngles, qtrue, ent->s.effect2Time);
   script_linkentity(ent);
 
   return qfalse;
@@ -2747,7 +2680,7 @@ qboolean G_ScriptAction_TagConnect(gentity_t *ent, char *params) {
   gentity_t *parent;
 
   pString = params;
-  token = COM_Parse(&pString);
+  token   = COM_Parse(&pString);
   if (!token[0]) {
     G_Error("G_ScriptAction_TagConnect: syntax: attachtotag "
             "<targetname> "
@@ -2781,9 +2714,9 @@ qboolean G_ScriptAction_TagConnect(gentity_t *ent, char *params) {
   // direction
   VectorClear(ent->s.angles);
   VectorCopy(ent->s.angles, ent->s.apos.trBase);
-  ent->s.apos.trTime = level.time;
+  ent->s.apos.trTime     = level.time;
   ent->s.apos.trDuration = 0;
-  ent->s.apos.trType = TR_STATIONARY;
+  ent->s.apos.trType     = TR_STATIONARY;
   VectorClear(ent->s.apos.trDelta);
 
   return qtrue;
@@ -2803,23 +2736,21 @@ qboolean G_ScriptAction_Halt(gentity_t *ent, char *params) {
     ent->scriptStatus.scriptFlags &= ~SCFL_GOING_TO_MARKER;
 
     // stop the angles
-    BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->s.angles, qtrue,
-                          ent->s.effect2Time);
+    BG_EvaluateTrajectory(&ent->s.apos, level.time, ent->s.angles, qtrue, ent->s.effect2Time);
     VectorCopy(ent->s.angles, ent->s.apos.trBase);
     VectorCopy(ent->s.angles, ent->r.currentAngles);
-    ent->s.apos.trTime = level.time;
+    ent->s.apos.trTime     = level.time;
     ent->s.apos.trDuration = 0;
-    ent->s.apos.trType = TR_STATIONARY;
+    ent->s.apos.trType     = TR_STATIONARY;
     VectorClear(ent->s.apos.trDelta);
 
     // stop moving
-    BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->s.origin, qfalse,
-                          ent->s.effect2Time);
+    BG_EvaluateTrajectory(&ent->s.pos, level.time, ent->s.origin, qfalse, ent->s.effect2Time);
     VectorCopy(ent->s.origin, ent->s.pos.trBase);
     VectorCopy(ent->s.origin, ent->r.currentOrigin);
-    ent->s.pos.trTime = level.time;
+    ent->s.pos.trTime     = level.time;
     ent->s.pos.trDuration = 0;
-    ent->s.pos.trType = TR_STATIONARY;
+    ent->s.pos.trType     = TR_STATIONARY;
     VectorClear(ent->s.pos.trDelta);
 
     script_linkentity(ent);
@@ -2876,15 +2807,14 @@ qboolean G_ScriptAction_AxisRespawntime(gentity_t *ent, char *params) {
   const char *pString, *token;
 
   pString = params;
-  token = COM_Parse(&pString);
+  token   = COM_Parse(&pString);
   if (!token[0]) {
     G_Error("G_ScriptAction_AxisRespawntime: time parameter "
             "required\n");
   }
 
   if (g_userAxisRespawnTime.integer) {
-    trap_Cvar_Set("g_redlimbotime",
-                  va("%i", g_userAxisRespawnTime.integer * 1000));
+    trap_Cvar_Set("g_redlimbotime", va("%i", g_userAxisRespawnTime.integer * 1000));
   } else {
     trap_Cvar_Set("g_redlimbotime", va("%s000", token));
   }
@@ -2903,15 +2833,14 @@ qboolean G_ScriptAction_AlliedRespawntime(gentity_t *ent, char *params) {
   const char *pString, *token;
 
   pString = params;
-  token = COM_Parse(&pString);
+  token   = COM_Parse(&pString);
   if (!token[0]) {
     G_Error("G_ScriptAction_AlliedRespawntime: time parameter "
             "required\n");
   }
 
   if (g_userAlliedRespawnTime.integer) {
-    trap_Cvar_Set("g_bluelimbotime",
-                  va("%i", g_userAlliedRespawnTime.integer * 1000));
+    trap_Cvar_Set("g_bluelimbotime", va("%i", g_userAlliedRespawnTime.integer * 1000));
   } else {
     trap_Cvar_Set("g_bluelimbotime", va("%s000", token));
   }
@@ -2933,7 +2862,7 @@ qboolean G_ScriptAction_NumberofObjectives(gentity_t *ent, char *params) {
   int num;
 
   pString = params;
-  token = COM_Parse(&pString);
+  token   = COM_Parse(&pString);
   if (!token[0]) {
     G_Error("G_ScriptAction_NumberofObjectives: number "
             "parameter required\n");
@@ -3015,7 +2944,7 @@ qboolean G_ScriptAction_ObjectiveStatus(gentity_t *ent, char *params) {
   int num;
 
   pString = params;
-  token = COM_Parse(&pString);
+  token   = COM_Parse(&pString);
   if (!token[0]) {
     G_Error("G_ScriptAction_ObjectiveImage: number parameter "
             "required\n");
@@ -3087,7 +3016,7 @@ qboolean G_ScriptAction_VoiceAnnounce(gentity_t *ent, char *params) {
   }
 
   pString = params;
-  token = COM_Parse(&pString);
+  token   = COM_Parse(&pString);
   if (!token[0]) {
     G_Error("G_ScriptAction_VoiceAnnounce: team parameter "
             "required\n");
@@ -3110,8 +3039,7 @@ qboolean G_ScriptAction_VoiceAnnounce(gentity_t *ent, char *params) {
             "message\n");
   }
 
-  G_SendSystemMessage(static_cast<sysMsg_t>(sysmsg),
-                      !num ? TEAM_AXIS : TEAM_ALLIES);
+  G_SendSystemMessage(static_cast<sysMsg_t>(sysmsg), !num ? TEAM_AXIS : TEAM_ALLIES);
 
   return qtrue;
 }
@@ -3135,7 +3063,7 @@ qboolean G_ScriptAction_SetWinner(gentity_t *ent, char *params) {
   }
 
   pString = params;
-  token = COM_Parse(&pString);
+  token   = COM_Parse(&pString);
   if (!token[0]) {
     G_Error("G_ScriptAction_SetWinner: number parameter "
             "required\n");
@@ -3176,7 +3104,7 @@ qboolean G_ScriptAction_SetDefendingTeam(gentity_t *ent, char *params) {
   }
 
   pString = params;
-  token = COM_Parse(&pString);
+  token   = COM_Parse(&pString);
   if (!token[0]) {
     G_Error("G_ScriptAction_SetDefendingTeam: number parameter "
             "required\n");
@@ -3322,10 +3250,10 @@ qboolean G_ScriptAction_TeamVoiceAnnounce(gentity_t *ent, char *params) {
             "required\n");
   }
 
-  tent = G_TempEntity(vec3_origin, EV_GLOBAL_TEAM_SOUND);
-  tent->s.teamNum = team;
+  tent              = G_TempEntity(vec3_origin, EV_GLOBAL_TEAM_SOUND);
+  tent->s.teamNum   = team;
   tent->s.eventParm = G_SoundIndex(token);
-  tent->r.svFlags = SVF_BROADCAST;
+  tent->r.svFlags   = SVF_BROADCAST;
 
   return qtrue;
 }
@@ -3385,17 +3313,16 @@ qboolean G_ScriptAction_Announce(gentity_t *ent, char *params) {
   }
 
   pString = params;
-  token = COM_Parse(&pString);
+  token   = COM_Parse(&pString);
   if (!token[0]) {
     G_Error("G_ScriptAction_Announce: statement parameter "
             "required\n");
   }
 
   std::string str = token;
-  auto activator = ent->activator;
+  auto activator  = ent->activator;
   if (activator && activator->client) {
-    const std::string name =
-        StringUtils::format("%s^7", activator->client->pers.netname);
+    const std::string name = StringUtils::format("%s^7", activator->client->pers.netname);
     StringUtils::replaceAll(str, "%s", name);
   }
 
@@ -3447,7 +3374,7 @@ qboolean G_ScriptAction_RemoveEntity(gentity_t *ent, char *params) {
     ETJump::TargetSpawnRelay::invalidateSpawnRelayPointers(ent);
   }
 
-  ent->think = G_FreeEntity;
+  ent->think     = G_FreeEntity;
   ent->nextthink = level.time + FRAMETIME;
 
   return qtrue;
@@ -3465,7 +3392,7 @@ qboolean G_ScriptAction_SetDamagable(gentity_t *ent, char *params) {
   qboolean canDamage;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   Q_strncpyz(name, token, sizeof(name));
   if (!name[0]) {
     G_Error("G_Scripting: setdamagable must have a name and an "
@@ -3486,7 +3413,7 @@ qboolean G_ScriptAction_SetDamagable(gentity_t *ent, char *params) {
   target = G_FindByTargetname(target, name);
   while (target) {
     target->takedamage = canDamage;
-    target = G_FindByTargetname(target, name);
+    target             = G_FindByTargetname(target, name);
   }
 
   return qtrue;
@@ -3509,7 +3436,7 @@ qboolean G_ScriptAction_SetState(gentity_t *ent, char *params) {
 
   // get the cast name
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   Q_strncpyz(name, token, sizeof(name));
   if (!*name) {
     G_Error("G_Scripting: setstate must have a name and an "
@@ -3535,7 +3462,7 @@ qboolean G_ScriptAction_SetState(gentity_t *ent, char *params) {
 
   // look for an entities
   target = &g_entities[MAX_CLIENTS - 1];
-  hash = BG_StringHashValue(name);
+  hash   = BG_StringHashValue(name);
   while (1) {
     target = G_FindByTargetnameFast(target, name, hash);
 
@@ -3574,7 +3501,7 @@ qboolean G_ScriptAction_StartCam(gentity_t *ent, char *params) {
   }
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
     G_Error("G_ScriptAction_StartCam: filename parameter "
             "required\n");
@@ -3589,8 +3516,7 @@ qboolean G_ScriptAction_StartCam(gentity_t *ent, char *params) {
   Cmd_StartCamera_f(ent);
 
   // issue a start camera command to the client
-  trap_SendServerCommand(ent - g_entities,
-                         va("startCam %s %d", camfile, (int)Q_atoi(token)));
+  trap_SendServerCommand(ent - g_entities, va("startCam %s %d", camfile, (int)Q_atoi(token)));
 
   return qtrue;
 }
@@ -3611,7 +3537,7 @@ qboolean G_ScriptAction_SetInitialCamera(gentity_t *ent, char *params) {
   }
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token[0]) {
     G_Error("G_ScriptAction_SetInitialCamera: filename "
             "parameter required\n");
@@ -3627,8 +3553,7 @@ qboolean G_ScriptAction_SetInitialCamera(gentity_t *ent, char *params) {
   //	Cmd_StartCamera_f( ent );
 
   // issue a start camera command to the client
-  trap_SendServerCommand(ent - g_entities, va("SetInitialCamera %s %d", camfile,
-                                              (int)Q_atoi(token)));
+  trap_SendServerCommand(ent - g_entities, va("SetInitialCamera %s %d", camfile, (int)Q_atoi(token)));
 
   return qtrue;
 }
@@ -3641,7 +3566,6 @@ G_ScriptAction_StopCam
 ===================
 */
 qboolean G_ScriptAction_StopCam(gentity_t *ent, char *params) {
-
   if (!ent->client) {
     return qfalse;
   }
@@ -3664,15 +3588,14 @@ qboolean G_ScriptAction_RepairMG42(gentity_t *ent, char *params) {
   char name[MAX_QPATH];
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   Q_strncpyz(name, token, sizeof(name));
   if (!name[0]) {
     G_Error("G_Scripting: repairmg42 must have a target\n");
   }
 
   // look for entities
-  for (target = &g_entities[MAX_CLIENTS - 1]; target;
-       target = G_FindByTargetname(target, name)) {
+  for (target = &g_entities[MAX_CLIENTS - 1]; target; target = G_FindByTargetname(target, name)) {
     if (target->takedamage) {
       continue;
     }
@@ -3684,15 +3607,15 @@ qboolean G_ScriptAction_RepairMG42(gentity_t *ent, char *params) {
     target->s.frame = 0;
 
     if (target->mg42BaseEnt > 0) {
-      g_entities[target->mg42BaseEnt].health = MG42_MULTIPLAYER_HEALTH;
+      g_entities[target->mg42BaseEnt].health     = MG42_MULTIPLAYER_HEALTH;
       g_entities[target->mg42BaseEnt].takedamage = qtrue;
-      target->health = 0;
+      target->health                             = 0;
     } else {
       target->health = MG42_MULTIPLAYER_HEALTH;
     }
 
-    target->takedamage = qtrue;
-    target->s.eFlags &= ~EF_SMOKING;
+    target->takedamage  = qtrue;
+    target->s.eFlags   &= ~EF_SMOKING;
   }
 
   return qtrue;
@@ -3776,8 +3699,7 @@ qboolean G_ScriptAction_PrintAccum(gentity_t *ent, char *params) {
             MAX_SCRIPT_ACCUM_BUFFERS);
   }
 
-  G_Printf("(G_Script) %s: Accum[%i] = %d\n", ent->scriptName, bufferIndex,
-           ent->scriptAccumBuffer[bufferIndex]);
+  G_Printf("(G_Script) %s: Accum[%i] = %d\n", ent->scriptName, bufferIndex, ent->scriptAccumBuffer[bufferIndex]);
 
   return qtrue;
 }
@@ -3813,12 +3735,10 @@ qboolean G_ScriptAction_PrintGlobalAccum(gentity_t *ent, char *params) {
 
   bufferIndex = Q_atoi(token);
   if ((bufferIndex < 0) || (bufferIndex >= MAX_SCRIPT_ACCUM_BUFFERS)) {
-    G_Error("PrintGlobalAccum: buffer is outside range (0 - %i)",
-            MAX_SCRIPT_ACCUM_BUFFERS);
+    G_Error("PrintGlobalAccum: buffer is outside range (0 - %i)", MAX_SCRIPT_ACCUM_BUFFERS);
   }
 
-  G_Printf("(G_Script) GlobalAccum[%i] = %d\n", bufferIndex,
-           level.globalAccumBuffer[bufferIndex]);
+  G_Printf("(G_Script) GlobalAccum[%i] = %d\n", bufferIndex, level.globalAccumBuffer[bufferIndex]);
 
   return qtrue;
 }
@@ -3830,14 +3750,13 @@ qboolean G_ScriptAction_Construct(gentity_t *ent, char *params) {
   gentity_t *constructible;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token) {
     G_Error("G_Scripting: \"construct\" must have a targetname\n");
   }
 
   constructible = G_FindByTargetname(nullptr, token);
-  if (!constructible || !constructible->inuse ||
-      constructible->s.eType != ET_CONSTRUCTIBLE) {
+  if (!constructible || !constructible->inuse || constructible->s.eType != ET_CONSTRUCTIBLE) {
     G_Error("G_Scripting: \"construct\" could not find entity with targetname: "
             "%s\n",
             token);
@@ -3860,7 +3779,7 @@ qboolean G_ScriptAction_ConstructibleClass(gentity_t *ent, char *params) {
   int value;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token) {
     G_Error("G_Scripting: \"constructible_class\" must have a "
             "class value\n");
@@ -3890,13 +3809,12 @@ G_ScriptAction_ConstructibleChargeBarReq
   syntax: constructible_chargebarreq <float:fraction>
 ===================
 */
-qboolean G_ScriptAction_ConstructibleChargeBarReq(gentity_t *ent,
-                                                  char *params) {
+qboolean G_ScriptAction_ConstructibleChargeBarReq(gentity_t *ent, char *params) {
   const char *pString, *token;
   float value;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token) {
     G_Error("G_Scripting: \"constructible_chargebarreq\" must "
             "have a fraction "
@@ -3923,13 +3841,12 @@ G_ScriptAction_ConstructibleConstructXPBonus
   syntax: constructible_constructxpbonus <int:xppoints>
 ===================
 */
-qboolean G_ScriptAction_ConstructibleConstructXPBonus(gentity_t *ent,
-                                                      char *params) {
+qboolean G_ScriptAction_ConstructibleConstructXPBonus(gentity_t *ent, char *params) {
   const char *pString, *token;
   int value;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token) {
     G_Error("G_Scripting: \"constructible_constructxpbonus\" "
             "must have a "
@@ -3956,13 +3873,12 @@ G_ScriptAction_ConstructibleDestructXPBonus
   syntax: constructible_destructxpbonus <int:xppoints>
 ===================
 */
-qboolean G_ScriptAction_ConstructibleDestructXPBonus(gentity_t *ent,
-                                                     char *params) {
+qboolean G_ScriptAction_ConstructibleDestructXPBonus(gentity_t *ent, char *params) {
   const char *pString, *token;
   int value;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token) {
     G_Error("G_Scripting: \"constructible_destructxpbonus\" "
             "must have a "
@@ -3994,7 +3910,7 @@ qboolean G_ScriptAction_ConstructibleHealth(gentity_t *ent, char *params) {
   int value;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token) {
     G_Error("G_Scripting: \"constructible_health\" must have a "
             "health value\n");
@@ -4009,7 +3925,7 @@ qboolean G_ScriptAction_ConstructibleHealth(gentity_t *ent, char *params) {
   }
 
   ent->constructibleStats.health = value;
-  ent->health = ent->constructibleStats.health;
+  ent->health                    = ent->constructibleStats.health;
 
   return qtrue;
 }
@@ -4026,7 +3942,7 @@ qboolean G_ScriptAction_ConstructibleWeaponclass(gentity_t *ent, char *params) {
   int value;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token) {
     G_Error("G_Scripting: \"constructible_weaponclass\" must "
             "have a weapon "
@@ -4059,7 +3975,7 @@ qboolean G_ScriptAction_ConstructibleDuration(gentity_t *ent, char *params) {
   int value;
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
   if (!token) {
     G_Error("G_Scripting: \"constructible_duration\" must have "
             "a duration value\n");
@@ -4110,8 +4026,7 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
   token = COM_ParseExt(&pString, qfalse);
 
   // ETJump: we don't allow these as they can be abused
-  if (!Q_stricmp(lastToken, "inc") ||
-      (!Q_stricmp(lastToken, "set") || (!Q_stricmp(lastToken, "random")))) {
+  if (!Q_stricmp(lastToken, "inc") || (!Q_stricmp(lastToken, "set") || (!Q_stricmp(lastToken, "random")))) {
     if (!token[0]) {
       G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
     }
@@ -4122,8 +4037,7 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
     }
     if (cvarValue < Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "abort_if_greater_than")) {
     if (!token[0]) {
@@ -4131,28 +4045,23 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
     }
     if (cvarValue > Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
-  } else if (!Q_stricmp(lastToken, "abort_if_not_equal") ||
-             !Q_stricmp(lastToken, "abort_if_not_equals")) {
+  } else if (!Q_stricmp(lastToken, "abort_if_not_equal") || !Q_stricmp(lastToken, "abort_if_not_equals")) {
     if (!token[0]) {
       G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
     }
     if (cvarValue != Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
-  } else if (!Q_stricmp(lastToken, "abort_if_equal") ||
-             !Q_stricmp(lastToken, "abort_if_equals")) {
+  } else if (!Q_stricmp(lastToken, "abort_if_equal") || !Q_stricmp(lastToken, "abort_if_equals")) {
     if (!token[0]) {
       G_Error("G_Scripting: cvar %s requires a parameter\n", lastToken);
     }
     if (cvarValue == Q_atoi(token)) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "bitset")) {
     if (!token[0]) {
@@ -4170,8 +4079,7 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
     }
     if (cvarValue & (1 << Q_atoi(token))) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "abort_if_not_bitset")) {
     if (!token[0]) {
@@ -4179,8 +4087,7 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
     }
     if (!(cvarValue & (1 << Q_atoi(token)))) {
       // abort the current script
-      ent->scriptStatus.scriptStackHead =
-          ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+      ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
     }
   } else if (!Q_stricmp(lastToken, "trigger_if_equal")) {
     if (!token[0]) {
@@ -4193,19 +4100,17 @@ qboolean G_ScriptAction_Cvar(gentity_t *ent, char *params) {
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(lastToken, token, sizeof(lastToken));
       if (!*lastToken) {
-        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
-                params);
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n", params);
       }
 
       token = COM_ParseExt(&pString, qfalse);
       Q_strncpyz(name, token, sizeof(name));
       if (!*name) {
-        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n",
-                params);
+        G_Error("G_Scripting: trigger must have a name and an identifier: %s\n", params);
       }
 
       terminate = qfalse;
-      found = qfalse;
+      found     = qfalse;
       // for all entities/bots with this scriptName
       trent = nullptr;
 
@@ -4252,8 +4157,7 @@ G_ScriptAction_AbortIfWarmup
 qboolean G_ScriptAction_AbortIfWarmup(gentity_t *ent, char *params) {
   if (level.warmupTime) {
     // abort the current script
-    ent->scriptStatus.scriptStackHead =
-        ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+    ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
   }
   //
   return qtrue;
@@ -4265,8 +4169,7 @@ G_ScriptAction_AbortIfNotSinglePlayer
 ====================
 */
 qboolean G_ScriptAction_AbortIfNotSinglePlayer(gentity_t *ent, char *params) {
-  ent->scriptStatus.scriptStackHead =
-      ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+  ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
 
   return qtrue;
 }
@@ -4291,30 +4194,23 @@ void G_ModifyTOI(gentity_t *ent) {
 
     if (G_SpawnString("customaxisimage", "", &customimage)) {
       cix = G_ShaderIndex(customimage);
-      G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "cix",
-                             va("%i", cix));
+      G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "cix", va("%i", cix));
     }
 
-    if (G_SpawnString("customalliesimage", "", &customimage) ||
-        G_SpawnString("customalliedimage", "", &customimage)) {
+    if (G_SpawnString("customalliesimage", "", &customimage) || G_SpawnString("customalliedimage", "", &customimage)) {
       cia = G_ShaderIndex(customimage);
-      G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "cia",
-                             va("%i", cia));
+      G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "cia", va("%i", cia));
     }
   }
 
-  G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "e",
-                         va("%i", static_cast<int>(ent - g_entities)));
+  G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "e", va("%i", static_cast<int>(ent - g_entities)));
 
   if (G_SpawnInt("objflags", "0", &objflags)) {
-    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "o",
-                           va("%i", objflags));
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "o", va("%i", objflags));
   }
 
-  G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "s",
-                         va("%i", ent->spawnflags));
-  G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "n",
-                         ent->message ? ent->message : "");
+  G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "s", va("%i", ent->spawnflags));
+  G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "n", ent->message ? ent->message : "");
 
   if (G_SpawnString("score", "0", &scorestring)) {
     ent->accuracy = Q_atof(scorestring);
@@ -4322,25 +4218,18 @@ void G_ModifyTOI(gentity_t *ent) {
 
   trap_SetConfigstring(CS_OID_TRIGGERS + ent->s.teamNum, ent->track);
 
-  if (ent->s.origin[0] != 0.f || ent->s.origin[1] != 0.f ||
-      ent->s.origin[2] != 0.f) {
-    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "x",
-                           va("%i", static_cast<int>(ent->s.origin[0])));
-    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "y",
-                           va("%i", static_cast<int>(ent->s.origin[1])));
-    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "z",
-                           va("%i", static_cast<int>(ent->s.origin[2])));
+  if (ent->s.origin[0] != 0.f || ent->s.origin[1] != 0.f || ent->s.origin[2] != 0.f) {
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "x", va("%i", static_cast<int>(ent->s.origin[0])));
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "y", va("%i", static_cast<int>(ent->s.origin[1])));
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "z", va("%i", static_cast<int>(ent->s.origin[2])));
   } else {
     vec3_t mid;
     VectorAdd(ent->r.absmin, ent->r.absmax, mid);
     VectorScale(mid, 0.5f, mid);
 
-    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "x",
-                           va("%i", static_cast<int>(mid[0])));
-    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "y",
-                           va("%i", static_cast<int>(mid[1])));
-    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "z",
-                           va("%i", static_cast<int>(mid[2])));
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "x", va("%i", static_cast<int>(mid[0])));
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "y", va("%i", static_cast<int>(mid[1])));
+    G_SetConfigStringValue(CS_OID_DATA + ent->s.teamNum, "z", va("%i", static_cast<int>(mid[2])));
   }
 
   if (!ent->target) {
@@ -4350,7 +4239,7 @@ void G_ModifyTOI(gentity_t *ent) {
     // finalize spawning on fourth frame
     // to allow for proper linking with targets
     ent->nextthink = level.time + (3 * FRAMETIME);
-    ent->think = Think_SetupObjectiveInfo;
+    ent->think     = Think_SetupObjectiveInfo;
   }
 }
 
@@ -4375,11 +4264,11 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
   const char *token, *p;
   char key[MAX_TOKEN_CHARS], value[MAX_TOKEN_CHARS];
   bool classchanged = false;
-  bool nospawn = false;
+  bool nospawn      = false;
 
   // rain - reset and fill in the spawnVars info so that spawn
   // functions can use them
-  level.numSpawnVars = 0;
+  level.numSpawnVars     = 0;
   level.numSpawnVarChars = 0;
 
   p = params;
@@ -4402,8 +4291,8 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
     Q_strncpyz(value, token, sizeof(value));
 
     if (g_scriptDebug.integer) {
-      G_Printf("%d : (%s) %s: set [%s] [%s] [%s]\n", level.time,
-               ent->scriptName, GAME_VERSION, ent->scriptName, key, value);
+      G_Printf("%d : (%s) %s: set [%s] [%s] [%s]\n", level.time, ent->scriptName ? ent->scriptName : "n/a",
+               GAME_VERSION, ent->scriptName ? ent->scriptName : "n/a", key, value);
     }
 
     if (!Q_stricmp(key, "classname_nospawn")) {
@@ -4433,8 +4322,7 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
 
     if (!Q_stricmp(key, "targetname")) {
       // need to hash this ent targetname for setstate script targets...
-      ent->targetnamehash =
-          static_cast<int>(BG_StringHashValue(ent->targetname));
+      ent->targetnamehash = static_cast<int>(BG_StringHashValue(ent->targetname));
     }
   }
 
@@ -4448,9 +4336,7 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
       // provide a bit more meaningful error message if someone
       // tries to do this while spawning is disabled
       if (!level.spawning) {
-        G_Error(
-            "%s: 'classname' must be changed inside a 'spawn' script event.\n",
-            __func__);
+        G_Error("%s: 'classname' must be changed inside a 'spawn' script event.\n", __func__);
       }
 
       G_CallSpawn(ent);
@@ -4467,39 +4353,60 @@ qboolean etpro_ScriptAction_SetValues(gentity_t *ent, char *params) {
   return qtrue;
 }
 
-extern field_t fields[];
 void G_SpawnGEntityFromSpawnVars();
 
 namespace ETJump::ScriptActions {
-inline constexpr char setPlayerAutoSpawnUsage[] =
-    "setplayerautospawn <objective description>";
-inline constexpr char setPlayerSpawnUsage[] =
-    "setplayerautospawn <objective description>";
-inline constexpr char damagePlayerUsage[] = "damageplayer <damage>";
-inline constexpr char createUsage[] =
-    R"(create { "key1" "value1" "key2" "value2" .. })";
-inline constexpr char deleteUsage[] =
-    R"(delete { "key1" "value1" "key2" "value2" .. })";
-inline constexpr char useTargetUsage[] = "usetarget <targetname>";
-inline constexpr char wmAnnouncePrivateUsage[] =
-    "wm_announce_private <message>";
-inline constexpr char trackerUsage[] = "tracker [index] <command> <value>";
-inline constexpr char changeSkinUsage[] = "changeskin <skinfile>";
+inline constexpr char setPlayerAutoSpawnUsage[] = "setplayerautospawn <objective description>";
+inline constexpr char setPlayerSpawnUsage[]     = "setplayerautospawn <objective description>";
+inline constexpr char damagePlayerUsage[]       = "damageplayer <damage>";
+inline constexpr char createUsage[]             = R"(create { "key1" "value1" "key2" "value2" .. })";
+inline constexpr char deleteUsage[]             = R"(delete { "key1" "value1" "key2" "value2" .. })";
+inline constexpr char editentityUsage[] = R"(editentity { match { "key1" "value1" .. } set { "key1" "value1" .. } })";
+inline constexpr char useTargetUsage[]  = "usetarget <targetname>";
+inline constexpr char wmAnnouncePrivateUsage[] = "wm_announce_private <message>";
+inline constexpr char trackerUsage[]           = "tracker [index] <command> <value>";
+inline constexpr char changeSkinUsage[]        = "changeskin <skinfile>";
 
-#define FMT_FUNC(x) StringUtils::format("ScriptActions::%s", x).c_str()
+#define FORMAT_FUNC_NAME(x) StringUtils::format("ScriptActions::%s", x).c_str()
 
-enum class ScriptSpawnType {
-  PLAYER_SPAWN = 1,
-  PLAYER_AUTOSPAWN = 2,
+namespace {
+struct EntityMatch {
+  // number of k/v pairs this entity has matched
+  uint8_t numMatched = 0;
+  // the matched k/v pairs, for printing
+  std::vector<std::string> paramsMatched;
 };
 
-static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params,
-                                     ScriptSpawnType type,
+// appends a "key value" pair to 'out', quoting 'value' if it contains spaces
+void appendKeyValue(std::string &out, const std::string_view key, const std::string_view value) {
+  if (!out.empty()) {
+    out += ' ';
+  }
+
+  out += key;
+
+  if (value.find(' ') != std::string::npos) {
+    out += " \"";
+    out += value;
+    out += '"';
+  } else {
+    out += ' ';
+    out += value;
+  }
+}
+
+enum class ScriptSpawnType {
+  PLAYER_SPAWN     = 1,
+  PLAYER_AUTOSPAWN = 2,
+};
+} // namespace
+
+static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params, ScriptSpawnType type,
                                      const std::string_view func) {
   const auto *activator = ent->activator;
 
   if (!activator || !activator->client) {
-    G_Printf(S_COLOR_RED "%s: activator must be a client\n", FMT_FUNC(func));
+    G_Printf(S_COLOR_RED "%s: activator must be a client\n", FORMAT_FUNC_NAME(func));
     return qfalse;
   }
 
@@ -4507,12 +4414,11 @@ static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params,
   const auto *const token = COM_ParseExt(&params, qfalse);
 
   if (!token[0]) {
-    const auto *const usageStr = type == ScriptSpawnType::PLAYER_AUTOSPAWN
-                                     ? setPlayerAutoSpawnUsage
-                                     : setPlayerSpawnUsage;
+    const auto *const usageStr =
+      type == ScriptSpawnType::PLAYER_AUTOSPAWN ? setPlayerAutoSpawnUsage : setPlayerSpawnUsage;
     G_Error("%s: required parameter 'objective description' was not "
             "provided\n\n%s\n",
-            FMT_FUNC(func), usageStr);
+            FORMAT_FUNC_NAME(func), usageStr);
   }
 
   // get objective entity
@@ -4521,8 +4427,7 @@ static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params,
   const auto *targetSpawn = G_Find(nullptr, FOFS(message), spawnname);
 
   if (!targetSpawn) {
-    G_Error("%s: couldn't find a spawnpoint matching name '%s'\n",
-            FMT_FUNC(func), spawnname);
+    G_Error("%s: couldn't find a spawnpoint matching name '%s'\n", FORMAT_FUNC_NAME(func), spawnname);
   }
 
   if (!targetSpawn->count) {
@@ -4530,15 +4435,11 @@ static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params,
   }
 
   if (type == ScriptSpawnType::PLAYER_AUTOSPAWN) {
-    activator->client->sess.autoSpawnObjectiveIndex =
-        (targetSpawn->count - CS_MULTI_SPAWNTARGETS) + 1;
-    G_Printf("Setting auto spawn for %s to %s\n",
-             activator->client->pers.netname, spawnname);
+    activator->client->sess.autoSpawnObjectiveIndex = (targetSpawn->count - CS_MULTI_SPAWNTARGETS) + 1;
+    G_Printf("Setting auto spawn for %s to %s\n", activator->client->pers.netname, spawnname);
   } else {
-    activator->client->sess.spawnObjectiveIndex =
-        (targetSpawn->count - CS_MULTI_SPAWNTARGETS) + 1;
-    G_Printf("Forcing spawn change for %s to %s\n",
-             activator->client->pers.netname, spawnname);
+    activator->client->sess.spawnObjectiveIndex = (targetSpawn->count - CS_MULTI_SPAWNTARGETS) + 1;
+    G_Printf("Forcing spawn change for %s to %s\n", activator->client->pers.netname, spawnname);
   }
 
   // store updates
@@ -4551,8 +4452,7 @@ static qboolean scriptSetPlayerSpawn(gentity_t *ent, const char *params,
  * must be called with a valid client as activator
  */
 qboolean setPlayerAutoSpawn(gentity_t *ent, char *params) {
-  return scriptSetPlayerSpawn(ent, params, ScriptSpawnType::PLAYER_AUTOSPAWN,
-                              __func__);
+  return scriptSetPlayerSpawn(ent, params, ScriptSpawnType::PLAYER_AUTOSPAWN, __func__);
 }
 
 /*
@@ -4560,8 +4460,7 @@ qboolean setPlayerAutoSpawn(gentity_t *ent, char *params) {
  * must be called with a valid client as activator
  */
 qboolean setPlayerSpawn(gentity_t *ent, char *params) {
-  return scriptSetPlayerSpawn(ent, params, ScriptSpawnType::PLAYER_SPAWN,
-                              __func__);
+  return scriptSetPlayerSpawn(ent, params, ScriptSpawnType::PLAYER_SPAWN, __func__);
 }
 
 /*
@@ -4572,8 +4471,7 @@ qboolean damagePlayer(gentity_t *ent, char *params) {
   auto *const activator = ent->activator;
 
   if (!activator || !activator->client) {
-    G_Printf(S_COLOR_RED "%s: activator must be a client\n",
-             FMT_FUNC(__func__));
+    G_Printf(S_COLOR_RED "%s: activator must be a client\n", FORMAT_FUNC_NAME(__func__));
     return qfalse;
   }
 
@@ -4581,14 +4479,12 @@ qboolean damagePlayer(gentity_t *ent, char *params) {
   const auto *const token = COM_ParseExt(&constparams, qfalse);
 
   if (!token[0]) {
-    G_Error("%s: required parameter 'damage' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), damagePlayerUsage);
+    G_Error("%s: required parameter 'damage' was not provided\n\n%s\n", FORMAT_FUNC_NAME(__func__), damagePlayerUsage);
   }
 
   const int32_t damage = Q_atoi(token);
 
-  G_Damage(activator, nullptr, nullptr, nullptr, nullptr, damage,
-           DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+  G_Damage(activator, nullptr, nullptr, nullptr, nullptr, damage, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
   return qtrue;
 }
 
@@ -4600,17 +4496,15 @@ qboolean killPlayer(gentity_t *ent, char *params) {
   auto *const activator = ent->activator;
 
   if (!activator || !activator->client) {
-    G_Printf(S_COLOR_RED "%s: activator must be a client\n",
-             FMT_FUNC(__func__));
+    G_Printf(S_COLOR_RED "%s: activator must be a client\n", FORMAT_FUNC_NAME(__func__));
     return qfalse;
   }
 
-  activator->flags &= ~FL_GODMODE;
+  activator->flags                         &= ~FL_GODMODE;
   activator->client->ps.stats[STAT_HEALTH] = activator->health = 0;
-  activator->client->ps.persistant[PERS_HWEAPON_USE] = 0;
+  activator->client->ps.persistant[PERS_HWEAPON_USE]           = 0;
 
-  player_die(activator, activator, activator,
-             (g_gamestate.integer == GS_PLAYING) ? 100000 : 135, MOD_SUICIDE);
+  player_die(activator, activator, activator, (g_gamestate.integer == GS_PLAYING) ? 100000 : 135, MOD_SUICIDE);
   activator->client->sess.lastKillTime = level.time;
 
   return qtrue;
@@ -4621,11 +4515,11 @@ qboolean killPlayer(gentity_t *ent, char *params) {
  */
 qboolean create(gentity_t *ent, char *params) {
   const char *token = nullptr;
-  const char *p = nullptr;
+  const char *p     = nullptr;
   char key[MAX_TOKEN_CHARS];
 
   // reset and fill in the spawnVars info so that spawn functions can use them
-  level.numSpawnVars = 0;
+  level.numSpawnVars     = 0;
   level.numSpawnVarChars = 0;
 
   p = params;
@@ -4642,14 +4536,13 @@ qboolean create(gentity_t *ent, char *params) {
     token = COM_ParseExt(&p, qfalse);
 
     if (!token[0]) {
-      G_Error("%s: key '%s' has no value\n\n%s\n", FMT_FUNC(__func__), key,
-              createUsage);
+      G_Error("%s: key '%s' has no value\n\n%s\n", FORMAT_FUNC_NAME(__func__), key, createUsage);
     }
 
     // add spawn var so that spawn functions can use them
     if (level.numSpawnVars == MAX_SPAWN_VARS) {
-      G_Error("%s: MAX_SPAWN_VARS (%i) reached, too many keys in an entity",
-              FMT_FUNC(__func__), MAX_SPAWN_VARS);
+      G_Error("%s: MAX_SPAWN_VARS (%i) reached, too many keys in an entity", FORMAT_FUNC_NAME(__func__),
+              MAX_SPAWN_VARS);
     }
 
     level.spawnVars[level.numSpawnVars][0] = G_AddSpawnVarToken(key);
@@ -4675,13 +4568,10 @@ qboolean deleteAction(gentity_t *ent, char *params) {
 
   // params may contain multiple k/v pairs for more precise targeting,
   // each of these values must match the entity before we delete it
-  std::array<std::pair<uint8_t, std::vector<std::string>>, MAX_GENTITIES>
-      pass{};
-  int count = 0; // number of valid k/v pairs in params
+  std::array<EntityMatch, MAX_GENTITIES> matches{};
+  int32_t count = 0; // number of valid k/v pairs in params
 
-  bool parse = true;
-
-  while (parse) {
+  while (true) {
     const char *token = COM_ParseExt(&p, qfalse);
 
     if (!token[0]) {
@@ -4693,171 +4583,28 @@ qboolean deleteAction(gentity_t *ent, char *params) {
     token = COM_ParseExt(&p, qfalse);
 
     if (!token[0]) {
-      G_Error("%s: key '%s' has no value\n\n%s\n", FMT_FUNC(deleteFuncStr), key,
-              deleteUsage);
+      G_Error("%s: key '%s' has no value\n\n%s\n", FORMAT_FUNC_NAME(deleteFuncStr), key, deleteUsage);
     }
 
     Q_strncpyz(value, token, sizeof(value));
 
-    // validate the key
-    int i;
-
-    for (i = 0; fields[i].name; ++i) {
-      if (!Q_stricmp(fields[i].name, key)) {
-        break;
-      }
-    }
-
-    if (!fields[i].name) {
-      G_Error("%s: non-existing key '%s'\n", FMT_FUNC(deleteFuncStr), key);
-    }
-
     // k/v pair parsed successfully, add it to count
     count++;
-    gentity_t *found = nullptr;
 
-    int valueInt{};
-    float valueFloat{};
-    vec3_t valueVec{};
-    std::vector<std::string> args = StringUtils::split(value, " ");
+    const auto result = ETJump::EntityUtilities::findEntitiesByField(key, value, FORMAT_FUNC_NAME(deleteFuncStr));
 
-    const auto invalidArgCount = [&](const int expectedArgs,
-                                     const size_t numArgs) {
-      G_Printf("%s: Invalid number of arguments for ^3'%s'^7, expected ^3%i^7, "
-               "got ^3%i\n",
-               FMT_FUNC(deleteFuncStr), key, expectedArgs,
-               static_cast<int>(numArgs));
+    if (result.stopParsing) {
+      break;
+    }
+
+    if (!result.valid) {
       count--;
-    };
+      continue;
+    }
 
-    const auto invalidArgType = [&](const std::string &expectedType,
-                                    const std::string &type) {
-      G_Printf(
-          "%s: Invalid argument for ^3'%s'^7, expected ^3%s^7, got ^3'%s'\n",
-          FMT_FUNC(deleteFuncStr), key, expectedType.c_str(), type.c_str());
-      count--;
-    };
-
-    switch (fields[i].type) {
-      case F_INT:
-        if (args.size() != 1) {
-          invalidArgCount(1, args.size());
-          break;
-        }
-
-        try {
-          valueInt = std::stoi(value);
-        } catch (const std::logic_error &) {
-          invalidArgType("number", args[0]);
-          break;
-        }
-
-        while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-
-        break;
-      case F_FLOAT:
-        if (args.size() != 1) {
-          invalidArgCount(1, args.size());
-          break;
-        }
-
-        try {
-          valueFloat = std::stof(value);
-        } catch (const std::logic_error &) {
-          invalidArgType("number", args[0]);
-          break;
-        }
-
-        while ((found = G_FindFloat(found, fields[i].ofs, valueFloat)) !=
-               nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-
-        break;
-      case F_LSTRING:
-      case F_GSTRING:
-        while ((found = G_Find(found, fields[i].ofs, value)) != nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-        break;
-
-      case F_VECTOR:
-        if (args.size() != 3) {
-          invalidArgCount(3, args.size());
-          break;
-        }
-
-        int j;
-
-        try {
-          for (j = 0; j < 3; j++) {
-            valueVec[j] = std::stof(args[j]);
-          }
-        } catch (const std::logic_error &) {
-          invalidArgType("number", args[j]);
-          break;
-        }
-
-        while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-
-        break;
-      case F_ANGLEHACK:
-        if (args.size() != 1) {
-          invalidArgCount(1, args.size());
-          break;
-        }
-
-        VectorClear(valueVec);
-
-        try {
-          valueVec[2] = std::stof(args[0]);
-        } catch (const std::logic_error &) {
-          invalidArgType("number", args[0]);
-          break;
-        }
-
-        while ((found = G_FindVec(found, fields[i].ofs, valueVec)) != nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-
-        break;
-      case F_CURSORHINT:
-        if (args.size() != 1) {
-          invalidArgCount(1, args.size());
-          break;
-        }
-
-        // set to end cap initially, so we don't delete all entities
-        // with HINT_NONE if we don't find a match
-        valueInt = HINT_NUM_HINTS;
-        ETJump::EntityUtilities::setCursorhintFromString(valueInt, value);
-
-        while ((found = G_FindInt(found, fields[i].ofs, valueInt)) != nullptr) {
-          pass[found->s.number].first++;
-          pass[found->s.number].second.emplace_back(
-              StringUtils::format(R"(%s "%s")", key, value));
-        }
-
-        break;
-      default:
-        G_Printf(S_COLOR_YELLOW "%s: invalid key '%s'\n",
-                 FMT_FUNC(deleteFuncStr), key);
-        parse = false;
-        break;
+    for (const int entity : result.entities) {
+      matches[entity].numMatched++;
+      matches[entity].paramsMatched.emplace_back(StringUtils::format(R"(%s "%s")", key, value));
     }
   }
 
@@ -4870,11 +4617,11 @@ qboolean deleteAction(gentity_t *ent, char *params) {
 
   // delete all entities that passed the tests
   for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < ENTITYNUM_MAX_NORMAL; i++) {
-    if (pass[i].first == count) {
+    if (matches[i].numMatched == count) {
       numDeleted++;
-      const std::string paramsMatched = StringUtils::join(pass[i].second, ", ");
-      G_Printf("%s: deleted entity %i [^z%s^7], matched params: ^3'%s'\n",
-               __func__, i, g_entities[i].classname, paramsMatched.c_str());
+      const std::string paramsMatched = StringUtils::join(matches[i].paramsMatched, ", ");
+      G_Printf("%s: deleted entity %i [^z%s^7], matched params: ^3'%s'\n", __func__, i, g_entities[i].classname,
+               paramsMatched.c_str());
 
       if (StringUtils::iEqual(g_entities[i].classname, "target_spawn_relay")) {
         ETJump::TargetSpawnRelay::invalidateSpawnRelayPointers(&g_entities[i]);
@@ -4886,8 +4633,7 @@ qboolean deleteAction(gentity_t *ent, char *params) {
 
   // did we actually delete anything?
   if (!numDeleted) {
-    G_Printf("%s: no entities found matching params ^3'%s'\n",
-             FMT_FUNC(deleteFuncStr), params);
+    G_Printf("%s: no entities found matching params ^3'%s'\n", FORMAT_FUNC_NAME(deleteFuncStr), params);
   }
 
   return qtrue;
@@ -4901,24 +4647,22 @@ qboolean useTarget(gentity_t *ent, char *params) {
   if (!ent || !ent->activator) {
     G_Error("%s: activator must be a client, consider using 'alertentity' "
             "instead\n",
-            FMT_FUNC(__func__));
+            FORMAT_FUNC_NAME(__func__));
   }
 
   if (!params || !*params) {
-    G_Error("%s: required parameter 'targetname' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), useTargetUsage);
+    G_Error("%s: required parameter 'targetname' was not provided\n\n%s\n", FORMAT_FUNC_NAME(__func__), useTargetUsage);
   }
 
-  const auto hash = static_cast<int32_t>(BG_StringHashValue(params));
+  const auto hash        = static_cast<int32_t>(BG_StringHashValue(params));
   qboolean foundalertent = qfalse;
-  gentity_t *alertent = nullptr;
+  gentity_t *alertent    = nullptr;
 
   while (true) {
     alertent = G_FindByTargetnameFast(alertent, params, hash);
     if (!alertent) {
       if (!foundalertent) {
-        G_Error("%s: cannot find an entity with targetname '%s'\n",
-                FMT_FUNC(__func__), params);
+        G_Error("%s: cannot find an entity with targetname '%s'\n", FORMAT_FUNC_NAME(__func__), params);
       } else {
         break;
       }
@@ -4927,8 +4671,8 @@ qboolean useTarget(gentity_t *ent, char *params) {
     foundalertent = qtrue;
 
     if (!alertent->use) {
-      G_Error("%s: \"%s\" (classname = %s) doesn't have a \"use\" function\n",
-              FMT_FUNC(__func__), params, alertent->classname);
+      G_Error("%s: \"%s\" (classname = %s) doesn't have a \"use\" function\n", FORMAT_FUNC_NAME(__func__), params,
+              alertent->classname);
     }
 
     G_UseEntity(alertent, nullptr, ent->activator);
@@ -4943,27 +4687,26 @@ qboolean useTarget(gentity_t *ent, char *params) {
  */
 qboolean wmAnnouncePrivate(gentity_t *ent, char *params) {
   const char *pString = nullptr;
-  const char *token = nullptr;
+  const char *token   = nullptr;
 
   const auto *const activator = ent->activator;
 
   if (!activator || !activator->client) {
     // if we don't error out here, script execution hangs in the block where
     // this gets called, so better to error out to avoid any confusion
-    G_Error("%s: activator must be a client\n", FMT_FUNC(__func__));
+    G_Error("%s: activator must be a client\n", FORMAT_FUNC_NAME(__func__));
   }
 
   pString = params;
-  token = COM_Parse(&pString);
+  token   = COM_Parse(&pString);
 
   if (!token[0]) {
-    G_Error("%s: required parameter 'message' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), wmAnnouncePrivateUsage);
+    G_Error("%s: required parameter 'message' was not provided\n\n%s\n", FORMAT_FUNC_NAME(__func__),
+            wmAnnouncePrivateUsage);
   }
 
-  std::string str = token;
-  const std::string name =
-      StringUtils::format("%s^7", activator->client->pers.netname);
+  std::string str        = token;
+  const std::string name = StringUtils::format("%s^7", activator->client->pers.netname);
   StringUtils::replaceAll(str, "%s", name);
 
   Printer::popup(activator, str);
@@ -4981,7 +4724,7 @@ qboolean tracker(gentity_t *ent, char *params) {
   if (!activator || !activator->client) {
     // if we don't error out here, script execution hangs in the block where
     // this gets called, so better to error out to avoid any confusion
-    G_Error("%s: activator must be a client\n", FMT_FUNC(__func__));
+    G_Error("%s: activator must be a client\n", FORMAT_FUNC_NAME(__func__));
   }
 
   auto *const progression = activator->client->pers.progression;
@@ -4994,15 +4737,14 @@ qboolean tracker(gentity_t *ent, char *params) {
   }
 
   const char *pString = nullptr;
-  const char *token = nullptr;
+  const char *token   = nullptr;
   char command[MAX_QPATH]{};
 
   pString = params;
-  token = COM_ParseExt(&pString, qfalse);
+  token   = COM_ParseExt(&pString, qfalse);
 
   if (!token[0]) {
-    G_Error("%s: required parameter 'command' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), trackerUsage);
+    G_Error("%s: required parameter 'command' was not provided\n\n%s\n", FORMAT_FUNC_NAME(__func__), trackerUsage);
   }
 
   int trackerIndex = 0;
@@ -5013,8 +4755,8 @@ qboolean tracker(gentity_t *ent, char *params) {
     trackerIndex = Q_atoi(token) - 1;
 
     if (trackerIndex < 0 || trackerIndex >= MAX_PROGRESSION_TRACKERS) {
-      G_Error("%s: invalid tracker index '%i', valid range is 1 - %i\n",
-              FMT_FUNC(__func__), trackerIndex + 1, MAX_PROGRESSION_TRACKERS);
+      G_Error("%s: invalid tracker index '%i', valid range is 1 - %i\n", FORMAT_FUNC_NAME(__func__), trackerIndex + 1,
+              MAX_PROGRESSION_TRACKERS);
     }
 
     // parse next arg as command instead
@@ -5022,8 +4764,7 @@ qboolean tracker(gentity_t *ent, char *params) {
   }
 
   if (!token[0]) {
-    G_Error("%s: required parameter 'command' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), trackerUsage);
+    G_Error("%s: required parameter 'command' was not provided\n\n%s\n", FORMAT_FUNC_NAME(__func__), trackerUsage);
   }
 
   // TODO: we should validate the parsed command before doing this, so invalid
@@ -5034,11 +4775,10 @@ qboolean tracker(gentity_t *ent, char *params) {
   token = COM_ParseExt(&pString, qfalse);
 
   if (!token[0]) {
-    G_Error("%s: required parameter 'value' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), trackerUsage);
+    G_Error("%s: required parameter 'value' was not provided\n\n%s\n", FORMAT_FUNC_NAME(__func__), trackerUsage);
   }
 
-  const int trackerValue = Q_atoi(token);
+  const int trackerValue  = Q_atoi(token);
   const int clientTracker = progression[trackerIndex];
 
   bool abort = false;
@@ -5049,8 +4789,7 @@ qboolean tracker(gentity_t *ent, char *params) {
     abort = clientTracker < trackerValue;
   } else if (!Q_stricmp(command, "abort_if_greater_than")) {
     abort = clientTracker > trackerValue;
-  } else if (!Q_stricmp(command, "abort_if_not_equal") ||
-             !Q_stricmp(command, "abort_if_not_equals")) {
+  } else if (!Q_stricmp(command, "abort_if_not_equal") || !Q_stricmp(command, "abort_if_not_equals")) {
     abort = clientTracker != trackerValue;
   } else if (!Q_stricmp(command, "abort_if_equal")) {
     abort = clientTracker == trackerValue;
@@ -5065,12 +4804,11 @@ qboolean tracker(gentity_t *ent, char *params) {
   } else if (!Q_stricmp(command, "set")) {
     progression[trackerIndex] = trackerValue;
   } else {
-    G_Error("%s: unknown tracker command '%s'\n", FMT_FUNC(__func__), command);
+    G_Error("%s: unknown tracker command '%s'\n", FORMAT_FUNC_NAME(__func__), command);
   }
 
   if (abort) {
-    ent->scriptStatus.scriptStackHead =
-        ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
+    ent->scriptStatus.scriptStackHead = ent->scriptEvents[ent->scriptStatus.scriptEventIndex].stack.numItems;
   }
 
   if (g_debugTrackers.integer) {
@@ -5085,11 +4823,10 @@ qboolean tracker(gentity_t *ent, char *params) {
  */
 qboolean changeSkin(gentity_t *ent, char *params) {
   const char *pString = params;
-  const char *token = COM_ParseExt(&pString, qfalse);
+  const char *token   = COM_ParseExt(&pString, qfalse);
 
   if (!token[0]) {
-    G_Error("%s: required parameter 'skinfile' was not provided\n\n%s\n",
-            FMT_FUNC(__func__), changeSkinUsage);
+    G_Error("%s: required parameter 'skinfile' was not provided\n\n%s\n", FORMAT_FUNC_NAME(__func__), changeSkinUsage);
   }
 
   // misc_constructiblemarker holds the .skin in ent->s.effect1Time,
@@ -5098,6 +4835,123 @@ qboolean changeSkin(gentity_t *ent, char *params) {
     ent->s.effect1Time = G_SkinIndex(token);
   } else {
     ent->s.modelindex2 = G_SkinIndex(token);
+  }
+
+  return qtrue;
+}
+
+qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
+  const char *p = params;
+  std::string key;
+  std::string value;
+
+  // 'params' is encoded by the parser as two brace-delimited blocks:
+  // { <selector k/v pairs> } { <set k/v pairs> }
+  // the selector pairs target the entities to modify, the set pairs are
+  // applied to every matched entity
+  std::array<EntityMatch, MAX_GENTITIES> matches{};
+  int32_t count = 0; // number of valid selector k/v pairs in the match block
+
+  std::string matchParams; // for error messages
+  std::string setParams;
+
+  const char *token = COM_ParseExt(&p, qfalse);
+
+  if (token[0] != '{') {
+    G_Error("%s: expected a 'match' block\n\n%s\n", FORMAT_FUNC_NAME(__func__), editentityUsage);
+  }
+
+  while (true) {
+    token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0]) {
+      G_Error("%s: unterminated 'match' block\n\n%s\n", FORMAT_FUNC_NAME(__func__), editentityUsage);
+    }
+
+    if (token[0] == '}') {
+      break;
+    }
+
+    key = token;
+
+    token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0] || token[0] == '}') {
+      G_Error("%s: key '%s' has no value\n\n%s\n", FORMAT_FUNC_NAME(__func__), key.c_str(), editentityUsage);
+    }
+
+    value = token;
+
+    // selector pair parsed successfully, add it to count
+    count++;
+
+    const auto result = ETJump::EntityUtilities::findEntitiesByField(key, value, FORMAT_FUNC_NAME(__func__));
+
+    if (result.stopParsing) {
+      G_Error("%s: invalid field in 'match' block\n\n%s\n", FORMAT_FUNC_NAME(__func__), editentityUsage);
+    }
+
+    if (!result.valid) {
+      count--;
+      continue;
+    }
+
+    for (const int entity : result.entities) {
+      matches[entity].numMatched++;
+      matches[entity].paramsMatched.emplace_back(StringUtils::format(R"(%s "%s")", key, value));
+    }
+
+    appendKeyValue(matchParams, key, value);
+  }
+
+  // no selector k/v pairs found?
+  if (!count) {
+    G_Error("%s: no selector k/v pairs in the 'match' block\n\n%s\n", FORMAT_FUNC_NAME(__func__), editentityUsage);
+  }
+
+  token = COM_ParseExt(&p, qfalse);
+
+  if (token[0] != '{') {
+    G_Error("%s: expected a 'set' block\n\n%s\n", FORMAT_FUNC_NAME(__func__), editentityUsage);
+  }
+
+  while (true) {
+    token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0]) {
+      G_Error("%s: unterminated 'set' block\n\n%s\n", FORMAT_FUNC_NAME(__func__), editentityUsage);
+    }
+
+    if (token[0] == '}') {
+      break;
+    }
+
+    key = token;
+
+    token = COM_ParseExt(&p, qfalse);
+
+    if (!token[0] || token[0] == '}') {
+      G_Error("%s: key '%s' has no value\n\n%s\n", FORMAT_FUNC_NAME(__func__), key.c_str(), editentityUsage);
+    }
+
+    value = token;
+
+    appendKeyValue(setParams, key, value);
+  }
+
+  int numChanged = 0;
+
+  // apply the new k/v pairs to all entities that matched every selector pair
+  for (int i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < ENTITYNUM_MAX_NORMAL; i++) {
+    if (matches[i].numMatched == count) {
+      numChanged++;
+      etpro_ScriptAction_SetValues(&g_entities[i], setParams.data());
+    }
+  }
+
+  // did we actually change anything?
+  if (!numChanged) {
+    G_Printf("%s: no entities found matching params ^3'%s'\n", FORMAT_FUNC_NAME(__func__), matchParams.c_str());
   }
 
   return qtrue;

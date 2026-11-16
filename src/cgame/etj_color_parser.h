@@ -24,39 +24,47 @@
 
 #pragma once
 
-#include <unordered_map>
 #include <regex>
+#include <unordered_map>
 
 #include "../game/q_shared.h"
 
 namespace ETJump {
 class ColorParser {
 public:
-  ColorParser() = default;
+  ColorParser()  = default;
   ~ColorParser() = default;
 
   void parseColorString(const std::string &colorString, vec4_t &color);
 
 private:
   void parseNamedColorString(const std::string &token, vec4_t &color);
-  static void parseRGBAValuedColorString(const std::string &colorString,
-                                         vec4_t &color);
-  static void parseHexValuedColorString(const std::string &token,
-                                        vec4_t &color);
+  static void parseRGBAValuedColorString(const std::string &colorString, vec4_t &color);
+  static void parseHexValuedColorString(const std::string &token, vec4_t &color);
   static void normalizeColorIfRequired(vec4_t &v);
 
   std::unordered_map<std::string, const vec4_t *> validColorNames = {
-      {"white", &colorWhite},       {"red", &colorRed},
-      {"green", &colorGreen},       {"blue", &colorBlue},
-      {"yellow", &colorYellow},     {"magenta", &colorMagenta},
-      {"cyan", &colorCyan},         {"orange", &colorOrange},
-      {"mdred", &colorMdRed},       {"mdgreen", &colorMdGreen},
-      {"dkgreen", &colorDkGreen},   {"mdcyan", &colorMdCyan},
-      {"mdyellow", &colorMdYellow}, {"mdorange", &colorMdOrange},
-      {"mdblue", &colorMdBlue},     {"gray", &colorMdGrey},
-      {"grey", &colorMdGrey},       {"ltgrey", &colorLtGrey},
-      {"mdgrey", &colorMdGrey},     {"dkgrey", &colorDkGrey},
-      {"black", &colorBlack},
+    {"white",    &colorWhite   },
+    {"red",      &colorRed     },
+    {"green",    &colorGreen   },
+    {"blue",     &colorBlue    },
+    {"yellow",   &colorYellow  },
+    {"magenta",  &colorMagenta },
+    {"cyan",     &colorCyan    },
+    {"orange",   &colorOrange  },
+    {"mdred",    &colorMdRed   },
+    {"mdgreen",  &colorMdGreen },
+    {"dkgreen",  &colorDkGreen },
+    {"mdcyan",   &colorMdCyan  },
+    {"mdyellow", &colorMdYellow},
+    {"mdorange", &colorMdOrange},
+    {"mdblue",   &colorMdBlue  },
+    {"gray",     &colorMdGrey  },
+    {"grey",     &colorMdGrey  },
+    {"ltgrey",   &colorLtGrey  },
+    {"mdgrey",   &colorMdGrey  },
+    {"dkgrey",   &colorDkGrey  },
+    {"black",    &colorBlack   },
   };
 
   // white, black, etc

@@ -34,14 +34,13 @@ namespace Container {
  */
 template <typename InputContainer, typename UnaryFunction>
 auto map(const InputContainer &container, UnaryFunction &&func) {
-  using InputType = typename InputContainer::value_type;
+  using InputType  = typename InputContainer::value_type;
   using ResultType = std::invoke_result_t<UnaryFunction, InputType>;
 
   std::vector<ResultType> result;
   result.reserve(container.size());
 
-  std::transform(container.begin(), container.end(), std::back_inserter(result),
-                 std::forward<UnaryFunction>(func));
+  std::transform(container.begin(), container.end(), std::back_inserter(result), std::forward<UnaryFunction>(func));
 
   return result;
 }
@@ -51,13 +50,11 @@ auto map(const InputContainer &container, UnaryFunction &&func) {
  * filtering out ones that don't match the provided predicate. Returns a list
  * of filtered items
  */
-template <typename InputContainer, typename Predicate>
-auto filter(const InputContainer &container, Predicate &&pred) {
+template <typename InputContainer, typename Predicate> auto filter(const InputContainer &container, Predicate &&pred) {
   using InputType = typename InputContainer::value_type;
   std::vector<InputType> result;
 
-  std::copy_if(container.begin(), container.end(), std::back_inserter(result),
-               std::forward<Predicate>(pred));
+  std::copy_if(container.begin(), container.end(), std::back_inserter(result), std::forward<Predicate>(pred));
 
   return result;
 }
@@ -65,15 +62,11 @@ auto filter(const InputContainer &container, Predicate &&pred) {
 /**
  * Checks if item is in container
  */
-template <typename Container, typename Element>
-bool isIn(const Container &container, const Element &element) {
-  return std::find(container.begin(), container.end(), element) !=
-         container.end();
+template <typename Container, typename Element> bool isIn(const Container &container, const Element &element) {
+  return std::find(container.begin(), container.end(), element) != container.end();
 }
 
-template <typename TElement>
-std::vector<TElement> skipFirstN(const std::vector<TElement> &input,
-                                 int count) {
+template <typename TElement> std::vector<TElement> skipFirstN(const std::vector<TElement> &input, int count) {
   if (count >= static_cast<int>(input.size())) {
     return std::vector<TElement>(); // Return an empty vector if count is
                                     // greater than or equal to the input size.

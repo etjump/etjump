@@ -27,6 +27,10 @@
 #include <memory>
 #include <vector>
 
+#include "../game/bg_public.h"
+#include "../game/etj_worldspawn_shared.h"
+#include "../game/q_shared.h"
+
 namespace ETJump {
 class ClientCommandsHandler;
 class EntityEventsHandler;
@@ -41,6 +45,14 @@ struct Core {
   std::shared_ptr<PlayerEventsHandler> playerEvents;
   std::unique_ptr<AwaitedCommandHandler> awaitedCommand;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
+};
+
+class DemoCompatibility;
+class AutoDemoRecorder;
+
+struct Demo {
+  std::unique_ptr<DemoCompatibility> compatibility;
+  std::unique_ptr<AutoDemoRecorder> autoDemoRecorder;
 };
 
 #ifdef NEW_AUTH
@@ -66,19 +78,15 @@ struct Platform {
 class ClientRtvHandler;
 class CustomCommandMenu;
 class Timerun;
+class CommandCompletions;
+class PortalPrediction;
 
 struct Systems {
   std::unique_ptr<ClientRtvHandler> rtv;
   std::unique_ptr<CustomCommandMenu> customCommandMenu;
   std::shared_ptr<Timerun> timerun;
-};
-
-class DemoCompatibility;
-class AutoDemoRecorder;
-
-struct Demo {
-  std::unique_ptr<DemoCompatibility> compatibility;
-  std::unique_ptr<AutoDemoRecorder> autoDemoRecorder;
+  std::unique_ptr<CommandCompletions> commandCompletions;
+  std::unique_ptr<PortalPrediction> portalPrediction;
 };
 
 class EventLoop;
@@ -86,7 +94,6 @@ class CvarUnlocker;
 class SavePos;
 class ColorParser;
 class TraceUtils;
-class PmoveUtilsV2;
 
 struct Utils {
   std::unique_ptr<EventLoop> eventLoop;
@@ -94,7 +101,6 @@ struct Utils {
   std::unique_ptr<SavePos> savePos;
   std::unique_ptr<ColorParser> colorParser;
   std::unique_ptr<TraceUtils> trace;
-  std::unique_ptr<PmoveUtilsV2> pmoveV2;
 };
 
 class ConsoleShader;
@@ -115,18 +121,25 @@ struct Visuals {
   std::unique_ptr<TrickjumpLines> trickjumpLines;
 };
 
-class CHSDataHandler;
+class CHSData;
 class CGazData;
 class SnaphudData;
+class UpmoveMeterData;
 class SpectatorInfoData;
+class PmoveUtilsV2;
+
+struct HUDData {
+  std::shared_ptr<CGazData> cgaz;
+  std::shared_ptr<SnaphudData> snaphud;
+  std::shared_ptr<UpmoveMeterData> upmove;
+  std::shared_ptr<CHSData> chs;
+  std::shared_ptr<SpectatorInfoData> spectatorInfo;
+  std::unique_ptr<PmoveUtilsV2> pmoveV2;
+};
+
 class TimerunView;
 
 struct HUD {
-  std::shared_ptr<CHSDataHandler> chsDataHandler;
-  std::shared_ptr<CGazData> cgazDataHandler;
-  std::shared_ptr<SnaphudData> snaphudDataHandler;
-  std::shared_ptr<SpectatorInfoData> spectatorInfoData;
-
   std::vector<std::unique_ptr<IRenderable>> renderables;
   std::unique_ptr<TimerunView> timerunView;
 };
@@ -140,6 +153,28 @@ struct CGameContext {
   Utils utils;
   UI ui;
   Visuals visuals;
+  HUDData hudData;
   HUD hud;
+
+  // communicated by the server
+  std::vector<std::string> serverMapList;
+  // communicated by the server, only the strings needed for callvote commands
+  std::vector<std::string> customVoteLists;
+
+  // communicated by the server, keys that are required
+  // on client side for movement prediction etc
+  SharedWorldspawnKeys sharedWSKeysGlobal;
+  // communicated by the server, active worldspawn key overrides
+  // for the current map
+  std::vector<WorldspawnShared::KeyOverride> wsKeyOverrides;
+  // actual active worldspawn key value, after overrides
+  SharedWorldspawnKeys sharedWSKeys;
+
+  // display state for 'etj_lerpPmove' - interpolated between the last two
+  // physics frames at the current frame rate, used for rendering only
+  // TODO: we might not need the entire playerstate here, this could be a
+  // slimmed down version, to save some memory - maybe explore in the future
+  playerState_t displayPlayerState;
+  bool displayStateValid{};
 };
 } // namespace ETJump

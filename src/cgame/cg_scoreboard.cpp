@@ -1,57 +1,54 @@
 // cg_scoreboard -- draw the scoreboard on top of the game screen
 #include "cg_local.h"
+
 #include "../game/etj_string_utilities.h"
 
-vec4_t clrUiBack = {0.f, 0.f, 0.f, .6f};
+vec4_t clrUiBack     = {0.f, 0.f, 0.f, .6f};
 vec4_t clrUiBackDark = {0.f, 0.f, 0.f, .8f};
-vec4_t clrUiBar = {.16f, .2f, .17f, .8f};
-vec4_t clrUiBorder = {0.f, 0.f, 0.f, 1.f};
+vec4_t clrUiBar      = {.16f, .2f, .17f, .8f};
+vec4_t clrUiBorder   = {0.f, 0.f, 0.f, 1.f};
 
-vec4_t compactUiBack = {0.f, 0.f, 0.f, .5f};
+vec4_t compactUiBack      = {0.f, 0.f, 0.f, .5f};
 vec4_t compactUiBackLight = {0.f, 0.f, 0.f, .25f};
-vec4_t compactUiBorder = {.75f, .75f, .75f, .75f};
+vec4_t compactUiBorder    = {.75f, .75f, .75f, .75f};
 
 // Begin of alt scoreboard 1
 
-inline constexpr float ALT_SCOREBOARD_WIDTH = 600.0f;
+inline constexpr float ALT_SCOREBOARD_WIDTH  = 600.0f;
 inline constexpr float ALT_SCOREBOARD_HEIGHT = 460.0f;
 
 inline constexpr float ALT_SCOREBOARD_HORIZONTAL_DELTA = 20.0f;
-inline constexpr float ALT_SCOREBOARD_VERTICAL_DELTA = 13.0f;
+inline constexpr float ALT_SCOREBOARD_VERTICAL_DELTA   = 13.0f;
 
 inline constexpr float ALT_SCOREBOARD_PLAYER_WIDTH = 105.0f;
-inline constexpr float ALT_SCOREBOARD_INFO_WIDTH = 40.0f;
-inline constexpr float ALT_SCOREBOARD_FPS_WIDTH = 36.0f;
-inline constexpr float ALT_SCOREBOARD_PING_WIDTH = 40.0f;
+inline constexpr float ALT_SCOREBOARD_INFO_WIDTH   = 40.0f;
+inline constexpr float ALT_SCOREBOARD_FPS_WIDTH    = 36.0f;
+inline constexpr float ALT_SCOREBOARD_PING_WIDTH   = 40.0f;
 
 void CG_DrawHeader(float x, float y, float fade) {
-  fontInfo_t *font = &cgs.media.limboFont1;
-  const char *header = NULL;
+  fontInfo_t *font         = &cgs.media.limboFont1;
+  const char *header       = NULL;
   const char *configString = CG_ConfigString(CS_SERVERINFO);
-  vec4_t textColor = {0.6f, 0.6f, 0.6f, 0};
-  textColor[3] = fade;
+  vec4_t textColor         = {0.6f, 0.6f, 0.6f, 0};
+  textColor[3]             = fade;
 
   header = va("^7%s", Info_ValueForKey(configString, "sv_hostname"));
 
   y += ALT_SCOREBOARD_VERTICAL_DELTA;
-  CG_Text_Paint_Ext(SCREEN_CENTER_X -
-                        CG_Text_Width_Ext(header, 0.25f, 0, font) / 2,
-                    y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+  CG_Text_Paint_Ext(SCREEN_CENTER_X - CG_Text_Width_Ext(header, 0.25f, 0, font) / 2, y, 0.25f, 0.25f, textColor, header,
+                    0, 0, 0, font);
 
-  y += ALT_SCOREBOARD_VERTICAL_DELTA;
-  header = cgs.cheats ? va("^7%s%s", cgs.rawmapname, " ^9(cheats)")
-                      : va("^7%s", cgs.rawmapname);
-  CG_Text_Paint_Ext(SCREEN_CENTER_X -
-                        CG_Text_Width_Ext(header, 0.25f, 0, font) / 2,
-                    y, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+  y      += ALT_SCOREBOARD_VERTICAL_DELTA;
+  header  = cgs.cheats ? va("^7%s%s", cgs.rawmapname, " ^9(cheats)") : va("^7%s", cgs.rawmapname);
+  CG_Text_Paint_Ext(SCREEN_CENTER_X - CG_Text_Width_Ext(header, 0.25f, 0, font) / 2, y, 0.25f, 0.25f, textColor, header,
+                    0, 0, 0, font);
 }
 
-static void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score,
-                                            const vec4_t color, float fade) {
+static void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score, const vec4_t color, float fade) {
   clientInfo_t *ci = &cgs.clientinfo[score->client];
   vec4_t textColor;
-  float tempX = x;
-  float offsetX = 0.0f;
+  float tempX      = x;
+  float offsetX    = 0.0f;
   int nameMaxWidth = 12;
   Vector4Copy(color, textColor);
   textColor[3] *= fade;
@@ -59,18 +56,17 @@ static void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score,
   // draw indicators
   if (ci->timerunActive) {
     ETJump::drawPic(tempX, y + 2, 8, 8, cgs.media.stopwatchIcon, textColor);
-    offsetX += 8 + 2;
+    offsetX      += 8 + 2;
     nameMaxWidth -= 1;
   }
   if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
-    ETJump::drawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon,
-                    textColor);
-    offsetX += 8 + 2;
+    ETJump::drawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon, textColor);
+    offsetX      += 8 + 2;
     nameMaxWidth -= 1;
   }
 
-  CG_DrawStringExt(tempX + offsetX, y, ci->name, textColor, qfalse, qfalse,
-                   MINICHAR_WIDTH, MINICHAR_HEIGHT, nameMaxWidth);
+  CG_DrawStringExt(tempX + offsetX, y, ci->name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT,
+                   nameMaxWidth);
   tempX += ALT_SCOREBOARD_PLAYER_WIDTH;
 
   if (ci->team == TEAM_SPECTATOR) {
@@ -81,8 +77,7 @@ static void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score,
     } else {
       CG_DrawMiniString(tempX, y, "^3>", fade);
       tempX += 19;
-      CG_DrawStringExt(tempX, y, cgs.clientinfo[score->followedClient].name,
-                       textColor, qfalse, qfalse, MINICHAR_WIDTH,
+      CG_DrawStringExt(tempX, y, cgs.clientinfo[score->followedClient].name, textColor, qfalse, qfalse, MINICHAR_WIDTH,
                        MINICHAR_HEIGHT, 12);
     }
   } else {
@@ -92,28 +87,27 @@ static void CG_AltScoreboardDrawClientScore(float x, float y, score_t *score,
     CG_DrawMiniString(tempX, y, va("%4i", score->ping), fade);
     tempX += ALT_SCOREBOARD_PING_WIDTH;
 
-    CG_DrawMiniString(tempX, y,
-                      va("%1s%1s %1s", ci->pmoveFixed ? "^2P" : "",
-                         ci->CGaz ? "^8C" : "",
-                         ci->team == TEAM_ALLIES ? "^4B" : "^1R"),
-                      fade);
+    CG_DrawMiniString(
+      tempX, y,
+      va("%1s%1s %1s", ci->pmoveFixed ? "^2P" : "", ci->CGaz ? "^8C" : "", ci->team == TEAM_ALLIES ? "^4B" : "^1R"),
+      fade);
   }
 }
 
 void CG_DrawPlayers(float x, float y, float fade) {
-  float tempX = x;
-  float tempY = y;
+  float tempX      = x;
+  float tempY      = y;
   float specStartX = 0;
-  int i = 0;
+  int i            = 0;
 
-  tempX += ALT_SCOREBOARD_HORIZONTAL_DELTA;
-  tempY += 3 * ALT_SCOREBOARD_VERTICAL_DELTA;
-  specStartX = tempX + 320;
+  tempX      += ALT_SCOREBOARD_HORIZONTAL_DELTA;
+  tempY      += 3 * ALT_SCOREBOARD_VERTICAL_DELTA;
+  specStartX  = tempX + 320;
 
   CG_DrawSmallString(tempX, tempY, "PLAYING", fade);
   tempX = specStartX;
   CG_DrawSmallString(tempX, tempY, "SPECTATING", fade);
-  tempX = x + ALT_SCOREBOARD_HORIZONTAL_DELTA;
+  tempX  = x + ALT_SCOREBOARD_HORIZONTAL_DELTA;
   tempY += ALT_SCOREBOARD_VERTICAL_DELTA + 5;
   CG_DrawMiniString(tempX, tempY, "Player", fade);
   CG_DrawMiniString(specStartX, tempY, "Player", fade);
@@ -136,8 +130,7 @@ void CG_DrawPlayers(float x, float y, float fade) {
       continue;
     }
 
-    CG_AltScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite,
-                                    fade);
+    CG_AltScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
     tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
   }
 
@@ -148,8 +141,7 @@ void CG_DrawPlayers(float x, float y, float fade) {
       continue;
     }
 
-    CG_AltScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite,
-                                    fade);
+    CG_AltScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
     tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
   }
 }
@@ -161,11 +153,10 @@ void CG_DrawAltScoreboard(float fade) {
   vec4_t currentClrUiBorder;
   Vector4Copy(clrUiBack, currentClrUiBack);
   Vector4Copy(clrUiBorder, currentClrUiBorder);
-  currentClrUiBack[3] *= fade;
+  currentClrUiBack[3]   *= fade;
   currentClrUiBorder[3] *= fade;
   CG_FillRect(x, y, 640 - 2 * 20, 480 - 2 * y, currentClrUiBack);
-  CG_DrawRect_FixedBorder(x, y, 640 - 2 * 20, 480 - 2 * y, 1,
-                          currentClrUiBorder);
+  CG_DrawRect_FixedBorder(x, y, 640 - 2 * 20, 480 - 2 * y, 1, currentClrUiBorder);
   y += 10;
   CG_DrawHeader(x, y, fade);
   CG_DrawPlayers(x, y, fade);
@@ -179,72 +170,64 @@ Alt scoreboard 2
 =================
 */
 
-inline constexpr float THIRD_SCOREBOARD_HEADER_HEIGHT = 50.0f;
+inline constexpr float THIRD_SCOREBOARD_HEADER_HEIGHT    = 50.0f;
 inline constexpr float THIRD_SCOREBOARD_SUBHEADER_HEIGHT = 30.0f;
 // TODO: rename pls :D
 inline constexpr float THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT = 20.0f;
-inline constexpr float THIRD_SCOREBOARD_DIVIDER_WIDTH = 4.0f;
-inline constexpr float THIRD_SCOREBOARD_PLAYER_WIDTH = 180.0f;
-inline constexpr float THIRD_SCOREBOARD_FPS_WIDTH = 36.0f;
-inline constexpr float THIRD_SCOREBOARD_PING_WIDTH = 40.0f;
-inline constexpr float THIRD_SCOREBOARD_INFO_WIDTH = 40.0f;
+inline constexpr float THIRD_SCOREBOARD_DIVIDER_WIDTH       = 4.0f;
+inline constexpr float THIRD_SCOREBOARD_PLAYER_WIDTH        = 180.0f;
+inline constexpr float THIRD_SCOREBOARD_FPS_WIDTH           = 36.0f;
+inline constexpr float THIRD_SCOREBOARD_PING_WIDTH          = 40.0f;
+inline constexpr float THIRD_SCOREBOARD_INFO_WIDTH          = 40.0f;
 
 void CG_DrawHeader2(float x, float y, float fade) {
-  fontInfo_t *font = &cgs.media.limboFont2;
-  const char *header = NULL;
-  const char *configString = CG_ConfigString(CS_SERVERINFO);
-  vec4_t textColor = {0.6f, 0.6f, 0.6f, 0};
-  float tempX = x + 20;
-  float tempY = y + (THIRD_SCOREBOARD_HEADER_HEIGHT / 2) + 4;
-  float scoreboardWidth = ALT_SCOREBOARD_WIDTH;
+  fontInfo_t *font          = &cgs.media.limboFont2;
+  const char *header        = NULL;
+  const char *configString  = CG_ConfigString(CS_SERVERINFO);
+  vec4_t textColor          = {0.6f, 0.6f, 0.6f, 0};
+  float tempX               = x + 20;
+  float tempY               = y + (THIRD_SCOREBOARD_HEADER_HEIGHT / 2) + 4;
+  float scoreboardWidth     = ALT_SCOREBOARD_WIDTH;
   float teamScoreboardWidth = scoreboardWidth / 2;
 
   textColor[3] = fade;
 
   // Draw the server hostname
-  std::string ipAddress =
-      StringUtils::format("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
-  header = va("^7%s", Info_ValueForKey(configString, "sv_hostname"));
-  CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0,
-                    font);
-  CG_Text_Paint_Ext(tempX + 1, tempY + 10, 0.15f, 0.15f, textColor, ipAddress,
-                    0, 0, 0, font);
+  std::string ipAddress = StringUtils::format("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
+  header                = va("^7%s", Info_ValueForKey(configString, "sv_hostname"));
+  CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
+  CG_Text_Paint_Ext(tempX + 1, tempY + 10, 0.15f, 0.15f, textColor, ipAddress, 0, 0, 0, font);
 
   // Draw the current map name
   header = va("^7%s", cgs.rawmapname);
-  tempX = x + ALT_SCOREBOARD_WIDTH - 20;
-  CG_Text_Paint_RightAligned_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header,
-                                 0, 0, 0, font);
+  tempX  = x + ALT_SCOREBOARD_WIDTH - 20;
+  CG_Text_Paint_RightAligned_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
   if (cgs.cheats) {
-    CG_Text_Paint_RightAligned_Ext(tempX, tempY + 10, 0.15f, 0.15f, textColor,
-                                   "^9(cheats)", 0, 0, 0, font);
+    CG_Text_Paint_RightAligned_Ext(tempX, tempY + 10, 0.15f, 0.15f, textColor, "^9(cheats)", 0, 0, 0, font);
   }
 
   // Draw the "jumping" text
   header = "^7Jumping";
-  tempX = x + (teamScoreboardWidth / 2) -
-          (CG_Text_Width_Ext(header, 0.25, 0, font) / 2);
-  tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH +
-          (THIRD_SCOREBOARD_SUBHEADER_HEIGHT / 2) + 4;
-  CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0,
-                    font);
+  tempX  = x + (teamScoreboardWidth / 2) - (CG_Text_Width_Ext(header, 0.25, 0, font) / 2);
+  tempY =
+    y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH + (THIRD_SCOREBOARD_SUBHEADER_HEIGHT / 2) + 4;
+  CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
 
   // Draw the "spectating" text
-  header = "^7Spectating";
-  tempX += teamScoreboardWidth;
-  tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH +
-          (THIRD_SCOREBOARD_SUBHEADER_HEIGHT / 2) + 4;
-  CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0,
-                    font);
+  header  = "^7Spectating";
+  tempX  += teamScoreboardWidth;
+  tempY =
+    y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH + (THIRD_SCOREBOARD_SUBHEADER_HEIGHT / 2) + 4;
+  CG_Text_Paint_Ext(tempX, tempY, 0.25f, 0.25f, textColor, header, 0, 0, 0, font);
 
   // Draw the header for the player list
   header = "^7Player";
-  tempX = x + THIRD_SCOREBOARD_DIVIDER_WIDTH;
-  tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT  // Servername
-          + THIRD_SCOREBOARD_DIVIDER_WIDTH    // divider
-          + THIRD_SCOREBOARD_SUBHEADER_HEIGHT // Jumping, spectating
-          + THIRD_SCOREBOARD_DIVIDER_WIDTH    // divider
-          + 4; // Random value to make this be in the middle of the bar
+  tempX  = x + THIRD_SCOREBOARD_DIVIDER_WIDTH;
+  tempY  = y + THIRD_SCOREBOARD_HEADER_HEIGHT  // Servername
+           + THIRD_SCOREBOARD_DIVIDER_WIDTH    // divider
+           + THIRD_SCOREBOARD_SUBHEADER_HEIGHT // Jumping, spectating
+           + THIRD_SCOREBOARD_DIVIDER_WIDTH    // divider
+           + 4;                                // Random value to make this be in the middle of the bar
   CG_DrawMiniString(tempX, tempY, header, fade);
 
   tempX += THIRD_SCOREBOARD_PLAYER_WIDTH;
@@ -260,16 +243,15 @@ void CG_DrawHeader2(float x, float y, float fade) {
           + THIRD_SCOREBOARD_DIVIDER_WIDTH    // divider
           + THIRD_SCOREBOARD_SUBHEADER_HEIGHT // Jumping, spectating
           + THIRD_SCOREBOARD_DIVIDER_WIDTH    // divider
-          + 4; // Random value to make this be in the middle of the bar
+          + 4;                                // Random value to make this be in the middle of the bar
   CG_DrawMiniString(tempX, tempY, "Player", fade);
 }
 
-static void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
-                                              const vec4_t color, float fade) {
+static void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score, const vec4_t color, float fade) {
   clientInfo_t *ci = &cgs.clientinfo[score->client];
   vec4_t textColor;
-  float tempX = x;
-  float offsetX = 0.0f;
+  float tempX      = x;
+  float offsetX    = 0.0f;
   int nameMaxWidth = 22;
   Vector4Copy(color, textColor);
   textColor[3] *= fade;
@@ -281,18 +263,17 @@ static void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
   // draw indicators
   if (ci->timerunActive) {
     ETJump::drawPic(tempX, y + 2, 8, 8, cgs.media.stopwatchIcon, textColor);
-    offsetX += 8 + 2;
+    offsetX      += 8 + 2;
     nameMaxWidth -= 2;
   }
   if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
-    ETJump::drawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon,
-                    textColor);
-    offsetX += 8 + 2;
+    ETJump::drawPic(tempX + offsetX, y + 2, 8, 8, cgs.media.idleIcon, textColor);
+    offsetX      += 8 + 2;
     nameMaxWidth -= 2;
   }
 
-  CG_DrawStringExt(tempX + offsetX, y, ci->name, textColor, qfalse, qfalse,
-                   MINICHAR_WIDTH, MINICHAR_HEIGHT, nameMaxWidth);
+  CG_DrawStringExt(tempX + offsetX, y, ci->name, textColor, qfalse, qfalse, MINICHAR_WIDTH, MINICHAR_HEIGHT,
+                   nameMaxWidth);
   tempX += THIRD_SCOREBOARD_PLAYER_WIDTH - 2;
 
   if (ci->team == TEAM_SPECTATOR) {
@@ -303,8 +284,7 @@ static void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
     } else {
       CG_DrawMiniString(tempX, y, "^3>", fade);
       tempX += 14;
-      CG_DrawStringExt(tempX, y, cgs.clientinfo[score->followedClient].name,
-                       textColor, qfalse, qfalse, MINICHAR_WIDTH,
+      CG_DrawStringExt(tempX, y, cgs.clientinfo[score->followedClient].name, textColor, qfalse, qfalse, MINICHAR_WIDTH,
                        MINICHAR_HEIGHT, 12);
     }
   } else {
@@ -314,23 +294,20 @@ static void CG_ThirdScoreboardDrawClientScore(float x, float y, score_t *score,
     CG_DrawMiniString(tempX, y, va("%4i", score->ping), fade);
     tempX += ALT_SCOREBOARD_PING_WIDTH;
 
-    CG_DrawMiniString(tempX, y,
-                      va("%1s%1s %1s", ci->pmoveFixed ? "^2P" : "",
-                         ci->CGaz ? "^8C" : "",
-                         ci->team == TEAM_ALLIES ? "^4B" : "^1R"),
-                      fade);
+    CG_DrawMiniString(
+      tempX, y,
+      va("%1s%1s %1s", ci->pmoveFixed ? "^2P" : "", ci->CGaz ? "^8C" : "", ci->team == TEAM_ALLIES ? "^4B" : "^1R"),
+      fade);
   }
 }
 
 void CG_DrawPlayers2(float x, float y, float fade) {
-  float tempX = x + THIRD_SCOREBOARD_DIVIDER_WIDTH + 2;
-  float tempY =
-      y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH +
-      THIRD_SCOREBOARD_SUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH +
-      THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH;
-  float specStartX =
-      x + ALT_SCOREBOARD_WIDTH / 2 + THIRD_SCOREBOARD_DIVIDER_WIDTH + 2;
-  int i = 0;
+  float tempX      = x + THIRD_SCOREBOARD_DIVIDER_WIDTH + 2;
+  float tempY      = y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH +
+                     THIRD_SCOREBOARD_SUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH +
+                     THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH;
+  float specStartX = x + ALT_SCOREBOARD_WIDTH / 2 + THIRD_SCOREBOARD_DIVIDER_WIDTH + 2;
+  int i            = 0;
 
   for (i = 0; i < cg.numScores; i++) {
     team_t team = cgs.clientinfo[cg.scores[i].client].team;
@@ -338,33 +315,30 @@ void CG_DrawPlayers2(float x, float y, float fade) {
       continue;
     }
 
-    CG_ThirdScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite,
-                                      fade);
+    CG_ThirdScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
     tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
   }
 
   tempX = specStartX;
-  tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH +
-          THIRD_SCOREBOARD_SUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH +
-          THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH;
+  tempY = y + THIRD_SCOREBOARD_HEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH + THIRD_SCOREBOARD_SUBHEADER_HEIGHT +
+          THIRD_SCOREBOARD_DIVIDER_WIDTH + THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT + THIRD_SCOREBOARD_DIVIDER_WIDTH;
   for (i = 0; i < cg.numScores; i++) {
     if (cgs.clientinfo[cg.scores[i].client].team != TEAM_SPECTATOR) {
       continue;
     }
 
-    CG_ThirdScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite,
-                                      fade);
+    CG_ThirdScoreboardDrawClientScore(tempX, tempY, &cg.scores[i], colorWhite, fade);
     tempY += ALT_SCOREBOARD_VERTICAL_DELTA;
   }
 }
 
 void CG_DrawAltScoreboard2(float fade) {
-  float x = 20 + SCREEN_OFFSET_X;
-  float tempX = x;
-  float y = 10;
-  float tempY = y;
-  float width = ALT_SCOREBOARD_WIDTH;
-  float height = THIRD_SCOREBOARD_HEADER_HEIGHT;
+  float x               = 20 + SCREEN_OFFSET_X;
+  float tempX           = x;
+  float y               = 10;
+  float tempY           = y;
+  float width           = ALT_SCOREBOARD_WIDTH;
+  float height          = THIRD_SCOREBOARD_HEADER_HEIGHT;
   float distanceFromTop = y;
   vec4_t currentClrUiBack;
   vec4_t currentClrUiBackLight;
@@ -372,10 +346,10 @@ void CG_DrawAltScoreboard2(float fade) {
   Vector4Copy(clrUiBack, currentClrUiBack);
   Vector4Copy(clrUiBack, currentClrUiBackLight);
   Vector4Copy(clrUiBorder, currentClrUiBorder);
-  currentClrUiBackLight[3] = 0.3f;
-  currentClrUiBack[3] *= fade;
+  currentClrUiBackLight[3]  = 0.3f;
+  currentClrUiBack[3]      *= fade;
   currentClrUiBackLight[3] *= fade;
-  currentClrUiBorder[3] *= fade;
+  currentClrUiBorder[3]    *= fade;
 
   // Draw server info bar
   CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
@@ -383,9 +357,9 @@ void CG_DrawAltScoreboard2(float fade) {
 
   distanceFromTop += height;
 
-  tempY += THIRD_SCOREBOARD_DIVIDER_WIDTH + height;
-  height = THIRD_SCOREBOARD_SUBHEADER_HEIGHT;
-  width = ALT_SCOREBOARD_WIDTH / 2 - 2;
+  tempY  += THIRD_SCOREBOARD_DIVIDER_WIDTH + height;
+  height  = THIRD_SCOREBOARD_SUBHEADER_HEIGHT;
+  width   = ALT_SCOREBOARD_WIDTH / 2 - 2;
 
   // Draw the jumping header bar
   CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
@@ -398,76 +372,60 @@ void CG_DrawAltScoreboard2(float fade) {
   CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, currentClrUiBorder);
 
   // Go back to start
-  tempX = x;
+  tempX            = x;
   distanceFromTop += height;
 
-  tempY += THIRD_SCOREBOARD_DIVIDER_WIDTH + height;
-  height = ALT_SCOREBOARD_HEIGHT - distanceFromTop;
+  tempY  += THIRD_SCOREBOARD_DIVIDER_WIDTH + height;
+  height  = ALT_SCOREBOARD_HEIGHT - distanceFromTop;
 
   // Draw the jumping bar
   // Draws the left side of the outer box
-  CG_FillRect(tempX, tempY, THIRD_SCOREBOARD_DIVIDER_WIDTH, height,
-              currentClrUiBack);
+  CG_FillRect(tempX, tempY, THIRD_SCOREBOARD_DIVIDER_WIDTH, height, currentClrUiBack);
   // Draws the top side of the outer box
-  CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY,
-              width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2,
+  CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY, width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2,
               THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, currentClrUiBack);
   // Draws the right side of the outer box
-  CG_FillRect(tempX + width - THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY,
-              THIRD_SCOREBOARD_DIVIDER_WIDTH, height, currentClrUiBack);
+  CG_FillRect(tempX + width - THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY, THIRD_SCOREBOARD_DIVIDER_WIDTH, height,
+              currentClrUiBack);
   // Draws the bottom side of the outer box
-  CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH,
-              tempY + height - THIRD_SCOREBOARD_DIVIDER_WIDTH,
-              width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2,
-              THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBack);
+  CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY + height - THIRD_SCOREBOARD_DIVIDER_WIDTH,
+              width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2, THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBack);
   // Draws the outline of the outer box
   CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, currentClrUiBorder);
   // Draws the inner box
   tempX += THIRD_SCOREBOARD_DIVIDER_WIDTH;
   tempY += THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT;
   CG_FillRect(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH,
-              height - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT -
-                  THIRD_SCOREBOARD_DIVIDER_WIDTH,
-              currentClrUiBackLight);
-  CG_DrawRect_FixedBorder(tempX, tempY,
-                          width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH,
-                          height - THIRD_SCOREBOARD_DIVIDER_WIDTH -
-                              THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT,
-                          1, currentClrUiBorder);
+              height - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT - THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBackLight);
+  CG_DrawRect_FixedBorder(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH,
+                          height - THIRD_SCOREBOARD_DIVIDER_WIDTH - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, 1,
+                          currentClrUiBorder);
 
-  tempX = x + width + THIRD_SCOREBOARD_DIVIDER_WIDTH;
+  tempX  = x + width + THIRD_SCOREBOARD_DIVIDER_WIDTH;
   tempY -= THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT;
 
   // Draw the spectating bar
   // Draws the left side of the outer box
-  CG_FillRect(tempX, tempY, THIRD_SCOREBOARD_DIVIDER_WIDTH, height,
-              currentClrUiBack);
+  CG_FillRect(tempX, tempY, THIRD_SCOREBOARD_DIVIDER_WIDTH, height, currentClrUiBack);
   // Draws the top side of the outer box
-  CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY,
-              width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2,
+  CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY, width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2,
               THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, currentClrUiBack);
   // Draws the right side of the outer box
-  CG_FillRect(tempX + width - THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY,
-              THIRD_SCOREBOARD_DIVIDER_WIDTH, height, currentClrUiBack);
+  CG_FillRect(tempX + width - THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY, THIRD_SCOREBOARD_DIVIDER_WIDTH, height,
+              currentClrUiBack);
   // Draws the bottom side of the outer box
-  CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH,
-              tempY + height - THIRD_SCOREBOARD_DIVIDER_WIDTH,
-              width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2,
-              THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBack);
+  CG_FillRect(tempX + THIRD_SCOREBOARD_DIVIDER_WIDTH, tempY + height - THIRD_SCOREBOARD_DIVIDER_WIDTH,
+              width - THIRD_SCOREBOARD_DIVIDER_WIDTH * 2, THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBack);
   // Draws the outline of the outer box
   CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1, currentClrUiBorder);
   // Draws the inner box
   tempX += THIRD_SCOREBOARD_DIVIDER_WIDTH;
   tempY += THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT;
   CG_FillRect(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH,
-              height - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT -
-                  THIRD_SCOREBOARD_DIVIDER_WIDTH,
-              currentClrUiBackLight);
-  CG_DrawRect_FixedBorder(tempX, tempY,
-                          width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH,
-                          height - THIRD_SCOREBOARD_DIVIDER_WIDTH -
-                              THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT,
-                          1, currentClrUiBorder);
+              height - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT - THIRD_SCOREBOARD_DIVIDER_WIDTH, currentClrUiBackLight);
+  CG_DrawRect_FixedBorder(tempX, tempY, width - 2 * THIRD_SCOREBOARD_DIVIDER_WIDTH,
+                          height - THIRD_SCOREBOARD_DIVIDER_WIDTH - THIRD_SCOREBOARD_SUBSUBHEADER_HEIGHT, 1,
+                          currentClrUiBorder);
 
   //    CG_FillRect(tempX, tempY, width, height, currentClrUiBack);
   //    CG_DrawRect_FixedBorder(tempX, tempY, width, height, 1,
@@ -498,10 +456,10 @@ Alt scoreboard 3
 =================
 */
 
-inline constexpr float ALT_SCOREBOARD_3_HEADER_WIDTH = 320.0f;
+inline constexpr float ALT_SCOREBOARD_3_HEADER_WIDTH  = 320.0f;
 inline constexpr float ALT_SCOREBOARD_3_HEADER_HEIGHT = 32.0f;
 
-inline constexpr float ALT_SCOREBOARD_3_ROW_WIDTH = 350.0f;
+inline constexpr float ALT_SCOREBOARD_3_ROW_WIDTH  = 350.0f;
 inline constexpr float ALT_SCOREBOARD_3_ROW_HEIGHT = 14.0f;
 
 inline constexpr float ALT_SCOREBOARD_3_TEXT_XY_PADDING = 5;
@@ -509,33 +467,27 @@ inline constexpr float ALT_SCOREBOARD_3_TEXT_XY_PADDING = 5;
 inline constexpr float ALT_SCOREBOARD_3_DIVIDER = 20;
 
 inline constexpr float ALT_SCOREBOARD_3_PLAYER_WIDTH = 242;
-inline constexpr float ALT_SCOREBOARD_3_FPS_WIDTH = 23;
-inline constexpr float ALT_SCOREBOARD_3_INFO_WIDTH = 52;
-inline constexpr float ALT_SCOREBOARD_3_PING_WIDTH = 23;
+inline constexpr float ALT_SCOREBOARD_3_FPS_WIDTH    = 23;
+inline constexpr float ALT_SCOREBOARD_3_INFO_WIDTH   = 52;
+inline constexpr float ALT_SCOREBOARD_3_PING_WIDTH   = 23;
 
-#define ALT_SCOREBOARD_3_PLAYER_X                                              \
-  (SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f +                       \
-   ALT_SCOREBOARD_3_TEXT_XY_PADDING)
-#define ALT_SCOREBOARD_3_FPS_X                                                 \
-  (ALT_SCOREBOARD_3_PLAYER_X + ALT_SCOREBOARD_3_PLAYER_WIDTH)
-#define ALT_SCOREBOARD_3_INFO_X                                                \
-  (ALT_SCOREBOARD_3_FPS_X + ALT_SCOREBOARD_3_FPS_WIDTH)
-#define ALT_SCOREBOARD_3_PING_X                                                \
-  (ALT_SCOREBOARD_3_INFO_X + ALT_SCOREBOARD_3_INFO_WIDTH)
+#define ALT_SCOREBOARD_3_PLAYER_X                                                          \
+  (SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f + ALT_SCOREBOARD_3_TEXT_XY_PADDING)
+#define ALT_SCOREBOARD_3_FPS_X  (ALT_SCOREBOARD_3_PLAYER_X + ALT_SCOREBOARD_3_PLAYER_WIDTH)
+#define ALT_SCOREBOARD_3_INFO_X (ALT_SCOREBOARD_3_FPS_X + ALT_SCOREBOARD_3_FPS_WIDTH)
+#define ALT_SCOREBOARD_3_PING_X (ALT_SCOREBOARD_3_INFO_X + ALT_SCOREBOARD_3_INFO_WIDTH)
 
-void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor,
-                    fontInfo_t *font) {
-  const char *configString = CG_ConfigString(CS_SERVERINFO);
+void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor, fontInfo_t *font) {
+  const char *configString    = CG_ConfigString(CS_SERVERINFO);
   const int MAX_TOP_ROW_CHARS = 46;
-  float headerTextX = x + ALT_SCOREBOARD_3_TEXT_XY_PADDING;
-  float headerTextY = y;
-  float leftTextX = headerTextX;
-  float rightTextX = SCREEN_WIDTH - leftTextX;
+  float headerTextX           = x + ALT_SCOREBOARD_3_TEXT_XY_PADDING;
+  float headerTextY           = y;
+  float leftTextX             = headerTextX;
+  float rightTextX            = SCREEN_WIDTH - leftTextX;
 
   // Draw server name & map name (top row)
-  std::string hostName = StringUtils::format(
-      "^7%s", Info_ValueForKey(configString, "sv_hostname"));
-  std::string mapName = StringUtils::format("^7%s", cgs.rawmapname);
+  std::string hostName = StringUtils::format("^7%s", Info_ValueForKey(configString, "sv_hostname"));
+  std::string mapName  = StringUtils::format("^7%s", cgs.rawmapname);
   if (cgs.cheats) {
     mapName += " ^9(cheats)";
   }
@@ -548,44 +500,38 @@ void CG_DrawHeader3(float x, float y, float fade, vec4_t textColor,
     hostNameLimit = MAX_TOP_ROW_CHARS - mapName.size();
   }
 
-  float topTextHeight = CG_Text_Height_Ext(hostName, 0.2f, 0, font);
-  float topTextY =
-      headerTextY + topTextHeight + ALT_SCOREBOARD_3_TEXT_XY_PADDING;
+  float topTextHeight  = CG_Text_Height_Ext(hostName, 0.2f, 0, font);
+  float topTextY       = headerTextY + topTextHeight + ALT_SCOREBOARD_3_TEXT_XY_PADDING;
   float mapNameOffsetX = CG_Text_Width_Ext(mapName, 0.2f, 0, font);
 
-  CG_Text_Paint_Ext(leftTextX, topTextY, 0.2f, 0.2f, textColor, hostName, 0,
-                    hostNameLimit, ITEM_TEXTSTYLE_SHADOWED, font);
-  CG_Text_Paint_Ext(rightTextX - mapNameOffsetX, topTextY, 0.2f, 0.2f,
-                    textColor, mapName, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Ext(leftTextX, topTextY, 0.2f, 0.2f, textColor, hostName, 0, hostNameLimit, ITEM_TEXTSTYLE_SHADOWED,
+                    font);
+  CG_Text_Paint_Ext(rightTextX - mapNameOffsetX, topTextY, 0.2f, 0.2f, textColor, mapName, 0, 0,
+                    ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Server IP and mod version (bottom row)
 
-  std::string ipAddress =
-      StringUtils::format("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
+  std::string ipAddress  = StringUtils::format("^7%s", cg.ipAddr[0] ? cg.ipAddr : "localhost");
   std::string modVersion = StringUtils::format("^7%s", GAME_TAG);
-  float bottomTextY = headerTextY + ALT_SCOREBOARD_3_HEADER_HEIGHT -
-                      ALT_SCOREBOARD_3_TEXT_XY_PADDING;
-  auto modVersionOffsetX =
-      static_cast<float>(CG_Text_Width_Ext(modVersion, 0.15f, 0, font));
+  float bottomTextY      = headerTextY + ALT_SCOREBOARD_3_HEADER_HEIGHT - ALT_SCOREBOARD_3_TEXT_XY_PADDING;
+  auto modVersionOffsetX = static_cast<float>(CG_Text_Width_Ext(modVersion, 0.15f, 0, font));
 
-  CG_Text_Paint_Ext(leftTextX, bottomTextY, 0.15f, 0.15f, textColor, ipAddress,
-                    0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
-  CG_Text_Paint_Ext(rightTextX - modVersionOffsetX, bottomTextY, 0.15f, 0.15f,
-                    textColor, modVersion, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Ext(leftTextX, bottomTextY, 0.15f, 0.15f, textColor, ipAddress, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Ext(rightTextX - modVersionOffsetX, bottomTextY, 0.15f, 0.15f, textColor, modVersion, 0, 0,
+                    ITEM_TEXTSTYLE_SHADOWED, font);
 }
 
-void CG_DrawScoreboardRows3(float x, float y, int j, score_t *score,
-                            float fade) {
+void CG_DrawScoreboardRows3(float x, float y, int j, score_t *score, float fade) {
   vec4_t currentCompactUiBack;
   vec4_t currentCompactUiBackLight;
   vec4_t currentCompactUiBorder;
   Vector4Copy(compactUiBack, currentCompactUiBack);
   Vector4Copy(compactUiBack, currentCompactUiBackLight);
   Vector4Copy(compactUiBorder, currentCompactUiBorder);
-  currentCompactUiBackLight[3] = 0.25f;
-  currentCompactUiBack[3] *= fade;
+  currentCompactUiBackLight[3]  = 0.25f;
+  currentCompactUiBack[3]      *= fade;
   currentCompactUiBackLight[3] *= fade;
-  currentCompactUiBorder[3] *= fade;
+  currentCompactUiBorder[3]    *= fade;
 
   // Highlight yourself or followed client
   if (score->client == cg.snap->ps.clientNum) {
@@ -600,28 +546,24 @@ void CG_DrawScoreboardRows3(float x, float y, int j, score_t *score,
   so the amount of rows to draw is inaccurate. */
 
   if (j % 2 == 0) {
-    CG_FillRect(x, y + ALT_SCOREBOARD_3_ROW_HEIGHT, ALT_SCOREBOARD_3_ROW_WIDTH,
-                ALT_SCOREBOARD_3_ROW_HEIGHT, currentCompactUiBackLight);
+    CG_FillRect(x, y + ALT_SCOREBOARD_3_ROW_HEIGHT, ALT_SCOREBOARD_3_ROW_WIDTH, ALT_SCOREBOARD_3_ROW_HEIGHT,
+                currentCompactUiBackLight);
   } else {
-    CG_FillRect(x, y + ALT_SCOREBOARD_3_ROW_HEIGHT, ALT_SCOREBOARD_3_ROW_WIDTH,
-                ALT_SCOREBOARD_3_ROW_HEIGHT, currentCompactUiBack);
+    CG_FillRect(x, y + ALT_SCOREBOARD_3_ROW_HEIGHT, ALT_SCOREBOARD_3_ROW_WIDTH, ALT_SCOREBOARD_3_ROW_HEIGHT,
+                currentCompactUiBack);
   }
 }
 
-void CG_DrawPlayerHeader3(float x, float y, int playerCount, float fade,
-                          vec4_t textColor, fontInfo_t *font) {
+void CG_DrawPlayerHeader3(float x, float y, int playerCount, float fade, vec4_t textColor, fontInfo_t *font) {
   std::string playerHeader = StringUtils::format("^7Players (%d)", playerCount);
-  auto textHeight =
-      static_cast<float>(CG_Text_Height_Ext(playerHeader, 0.2f, 0, font));
-  float playerHeaderY = y + (ALT_SCOREBOARD_3_DIVIDER + textHeight) / 2;
+  auto textHeight          = static_cast<float>(CG_Text_Height_Ext(playerHeader, 0.2f, 0, font));
+  float playerHeaderY      = y + (ALT_SCOREBOARD_3_DIVIDER + textHeight) / 2;
 
-  CG_Text_Paint_Centred_Ext(x, playerHeaderY, 0.2f, 0.2f, textColor,
-                            playerHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Centred_Ext(x, playerHeaderY, 0.2f, 0.2f, textColor, playerHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 }
 
-void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX,
-                         float pingCenterX, score_t *score, vec4_t textColor,
-                         fontInfo_t *font) {
+void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX, float pingCenterX, score_t *score,
+                         vec4_t textColor, fontInfo_t *font) {
   clientInfo_t *ci = &cgs.clientinfo[score->client];
 
   // Draw indicator if player is idle
@@ -631,88 +573,73 @@ void CG_AddPlayerToList3(float x, float y, float fpsCenterX, float infoX,
   }
 
   // Draw player
-  CG_Text_Paint_Ext(x, y, 0.15f, 0.15f, textColor, ci->name, 0, 0,
-                    ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Ext(x, y, 0.15f, 0.15f, textColor, ci->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Draw FPS
   std::string maxFPS = StringUtils::format("%i", ci->maxFPS);
-  CG_Text_Paint_Centred_Ext(fpsCenterX, y, 0.15f, 0.15f, textColor, maxFPS, 0,
-                            0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Centred_Ext(fpsCenterX, y, 0.15f, 0.15f, textColor, maxFPS, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Draw client info
-  const char *clientInfoPmove = ci->pmoveFixed ? "^2P" : "";
-  const char *clientInfoCGaz = ci->CGaz ? "^8C" : "";
-  const char *clientInfoSnapHUD = ci->snaphud ? "^5V" : "";
-  const char *clientInfoHideMe = ci->hideMe ? "^bH" : "";
+  const char *clientInfoPmove    = ci->pmoveFixed ? "^2P" : "";
+  const char *clientInfoCGaz     = ci->CGaz ? "^8C" : "";
+  const char *clientInfoSnapHUD  = ci->snaphud ? "^5V" : "";
+  const char *clientInfoHideMe   = ci->hideMe ? "^bH" : "";
   const char *clientInfoSpecLock = ci->specLocked ? "^9S" : "";
-  const char *clientInfoTimerun = ci->timerunActive ? "^3T" : "";
-  const char *clientInfoTeam = ci->team == TEAM_ALLIES ? "^4B" : "^1R";
+  const char *clientInfoTimerun  = ci->timerunActive ? "^3T" : "";
+  const char *clientInfoTeam     = ci->team == TEAM_ALLIES ? "^4B" : "^1R";
 
-  CG_Text_Paint_Centred_Ext(infoX + 5, y, 0.15f, 0.15f, textColor,
-                            clientInfoPmove, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+  CG_Text_Paint_Centred_Ext(infoX + 5, y, 0.15f, 0.15f, textColor, clientInfoPmove, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
                             font);
-  CG_Text_Paint_Centred_Ext(infoX + 12, y, 0.15f, 0.15f, textColor,
-                            clientInfoCGaz, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+  CG_Text_Paint_Centred_Ext(infoX + 12, y, 0.15f, 0.15f, textColor, clientInfoCGaz, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
                             font);
-  CG_Text_Paint_Centred_Ext(infoX + 19, y, 0.15f, 0.15f, textColor,
-                            clientInfoSnapHUD, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+  CG_Text_Paint_Centred_Ext(infoX + 19, y, 0.15f, 0.15f, textColor, clientInfoSnapHUD, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
                             font);
-  CG_Text_Paint_Centred_Ext(infoX + 26, y, 0.15f, 0.15f, textColor,
-                            clientInfoHideMe, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+  CG_Text_Paint_Centred_Ext(infoX + 26, y, 0.15f, 0.15f, textColor, clientInfoHideMe, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
                             font);
-  CG_Text_Paint_Centred_Ext(infoX + 33, y, 0.15f, 0.15f, textColor,
-                            clientInfoSpecLock, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+  CG_Text_Paint_Centred_Ext(infoX + 33, y, 0.15f, 0.15f, textColor, clientInfoSpecLock, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
                             font);
-  CG_Text_Paint_Centred_Ext(infoX + 40, y, 0.15f, 0.15f, textColor,
-                            clientInfoTimerun, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+  CG_Text_Paint_Centred_Ext(infoX + 40, y, 0.15f, 0.15f, textColor, clientInfoTimerun, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
                             font);
-  CG_Text_Paint_Centred_Ext(infoX + 47, y, 0.15f, 0.15f, textColor,
-                            clientInfoTeam, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+  CG_Text_Paint_Centred_Ext(infoX + 47, y, 0.15f, 0.15f, textColor, clientInfoTeam, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
                             font);
 
   // Draw client ping
   std::string ping = StringUtils::format("%i", score->ping);
-  CG_Text_Paint_Centred_Ext(pingCenterX, y, 0.15f, 0.15f, textColor, ping, 0, 0,
-                            ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Centred_Ext(pingCenterX, y, 0.15f, 0.15f, textColor, ping, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 }
 
-void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor,
-                        fontInfo_t *font) {
+void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor, fontInfo_t *font) {
   // Draw info text for player list
 
   // Player
   std::string playerHeader = "^7Player";
-  auto textHeight = static_cast<float>(
-      CG_Text_Height_Ext(playerHeader, 0.15f, 0,
-                         font)); // reusing this for everything
-  float playerCenterY = y + (ALT_SCOREBOARD_3_ROW_HEIGHT + textHeight) / 2;
+  auto textHeight          = static_cast<float>(CG_Text_Height_Ext(playerHeader, 0.15f, 0,
+                                                                   font)); // reusing this for everything
+  float playerCenterY      = y + (ALT_SCOREBOARD_3_ROW_HEIGHT + textHeight) / 2;
 
   float playerX = ALT_SCOREBOARD_3_PLAYER_X;
-  CG_Text_Paint_Ext(playerX, playerCenterY, 0.15f, 0.15f, textColor,
-                    playerHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Ext(playerX, playerCenterY, 0.15f, 0.15f, textColor, playerHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
   // FPS
   std::string fpsHeader = "^7FPS";
-  float fpsCenterX = ALT_SCOREBOARD_3_FPS_X + ALT_SCOREBOARD_3_FPS_WIDTH * 0.5f;
+  float fpsCenterX      = ALT_SCOREBOARD_3_FPS_X + ALT_SCOREBOARD_3_FPS_WIDTH * 0.5f;
 
-  CG_Text_Paint_Centred_Ext(fpsCenterX, playerCenterY, 0.15f, 0.15f, textColor,
-                            fpsHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Centred_Ext(fpsCenterX, playerCenterY, 0.15f, 0.15f, textColor, fpsHeader, 0, 0,
+                            ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Info
   std::string infoHeader = "^7Info";
-  float infoCenterX =
-      ALT_SCOREBOARD_3_INFO_X + ALT_SCOREBOARD_3_INFO_WIDTH * 0.5f;
+  float infoCenterX      = ALT_SCOREBOARD_3_INFO_X + ALT_SCOREBOARD_3_INFO_WIDTH * 0.5f;
 
-  CG_Text_Paint_Centred_Ext(infoCenterX, playerCenterY, 0.15f, 0.15f, textColor,
-                            infoHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Centred_Ext(infoCenterX, playerCenterY, 0.15f, 0.15f, textColor, infoHeader, 0, 0,
+                            ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Ping
   std::string pingHeader = "^7Ping";
-  float pingCenterX =
-      ALT_SCOREBOARD_3_PING_X + ALT_SCOREBOARD_3_PING_WIDTH * 0.5f;
+  float pingCenterX      = ALT_SCOREBOARD_3_PING_X + ALT_SCOREBOARD_3_PING_WIDTH * 0.5f;
 
-  CG_Text_Paint_Centred_Ext(pingCenterX, playerCenterY, 0.15f, 0.15f, textColor,
-                            pingHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Centred_Ext(pingCenterX, playerCenterY, 0.15f, 0.15f, textColor, pingHeader, 0, 0,
+                            ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Get number of players and draw names + fill boxes
   for (int i = 0, j = 0; i < cg.numScores; i++) {
@@ -724,42 +651,35 @@ void CG_DrawPlayerList3(float x, float y, float fade, vec4_t textColor,
     CG_DrawScoreboardRows3(x, y, j++, &cg.scores[i], fade);
     y += ALT_SCOREBOARD_3_ROW_HEIGHT;
 
-    CG_AddPlayerToList3(playerX, playerCenterY + ALT_SCOREBOARD_3_ROW_HEIGHT,
-                        fpsCenterX, ALT_SCOREBOARD_3_INFO_X, pingCenterX,
-                        &cg.scores[i], textColor, font);
+    CG_AddPlayerToList3(playerX, playerCenterY + ALT_SCOREBOARD_3_ROW_HEIGHT, fpsCenterX, ALT_SCOREBOARD_3_INFO_X,
+                        pingCenterX, &cg.scores[i], textColor, font);
     playerCenterY += ALT_SCOREBOARD_3_ROW_HEIGHT;
   }
 }
 
-void CG_DrawSpectatorHeader3(float x, float y, int spectatorCount, float fade,
-                             vec4_t textColor, fontInfo_t *font) {
-  std::string playerHeader =
-      StringUtils::format("^7Spectators (%d)", spectatorCount);
-  auto textHeight =
-      static_cast<float>(CG_Text_Height_Ext(playerHeader, 0.2f, 0, font));
-  float spectatorHeaderY = y + (ALT_SCOREBOARD_3_DIVIDER + textHeight) / 2;
+void CG_DrawSpectatorHeader3(float x, float y, int spectatorCount, float fade, vec4_t textColor, fontInfo_t *font) {
+  std::string playerHeader = StringUtils::format("^7Spectators (%d)", spectatorCount);
+  auto textHeight          = static_cast<float>(CG_Text_Height_Ext(playerHeader, 0.2f, 0, font));
+  float spectatorHeaderY   = y + (ALT_SCOREBOARD_3_DIVIDER + textHeight) / 2;
 
-  CG_Text_Paint_Centred_Ext(x, spectatorHeaderY, 0.2f, 0.2f, textColor,
-                            playerHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Centred_Ext(x, spectatorHeaderY, 0.2f, 0.2f, textColor, playerHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                            font);
 }
 
-void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
-                            vec4_t textColor, fontInfo_t *font) {
-  clientInfo_t *ci = &cgs.clientinfo[score->client];
-  std::string connecting = "^3CONNECTING";
-  std::string spectator = "^3SPECTATOR";
+void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score, vec4_t textColor, fontInfo_t *font) {
+  clientInfo_t *ci           = &cgs.clientinfo[score->client];
+  std::string connecting     = "^3CONNECTING";
+  std::string spectator      = "^3SPECTATOR";
   std::string followingArrow = "^3>";
   std::string followedClient = cgs.clientinfo[score->followedClient].name;
-  std::string ping = StringUtils::format("%i", score->ping);
-  float playerX = ALT_SCOREBOARD_3_PLAYER_X;
-  float rightTextX = ALT_SCOREBOARD_3_PING_X - ALT_SCOREBOARD_3_TEXT_XY_PADDING;
-  auto followingArrowHalfW = static_cast<float>(CG_Text_Width_Ext(
-                                 followingArrow.c_str(), 0.15f, 0, font)) *
-                             0.5f;
-  bool following = ci->clientNum != score->followedClient;
-  bool idle = etj_drawScoreboardInactivity.integer && ci->clientIsInactive;
-  int playerLimit = 0;
-  int followedLimit = 0;
+  std::string ping           = StringUtils::format("%i", score->ping);
+  float playerX              = ALT_SCOREBOARD_3_PLAYER_X;
+  float rightTextX           = ALT_SCOREBOARD_3_PING_X - ALT_SCOREBOARD_3_TEXT_XY_PADDING;
+  auto followingArrowHalfW   = static_cast<float>(CG_Text_Width_Ext(followingArrow.c_str(), 0.15f, 0, font)) * 0.5f;
+  bool following             = ci->clientNum != score->followedClient;
+  bool idle                  = etj_drawScoreboardInactivity.integer && ci->clientIsInactive;
+  int playerLimit            = 0;
+  int followedLimit          = 0;
 
   // Draw indicator if player is idle
   if (idle) {
@@ -770,68 +690,56 @@ void CG_AddSpectatorToList3(float x, float y, float pingCenterX, score_t *score,
   // calculate limits for player name and followed client drawing
   if (following) {
     float playerW =
-        (playerX - (idle ? 20.f : 0.f) + ALT_SCOREBOARD_3_TEXT_XY_PADDING +
-         followingArrowHalfW + SCREEN_CENTER_X) -
-        SCREEN_CENTER_X;
-    const float followedW = (ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f) -
-                            (ALT_SCOREBOARD_3_TEXT_XY_PADDING * 3) -
+      (playerX - (idle ? 20.f : 0.f) + ALT_SCOREBOARD_3_TEXT_XY_PADDING + followingArrowHalfW + SCREEN_CENTER_X) -
+      SCREEN_CENTER_X;
+    const float followedW = (ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f) - (ALT_SCOREBOARD_3_TEXT_XY_PADDING * 3) -
                             ALT_SCOREBOARD_3_PING_WIDTH - followingArrowHalfW;
 
-    playerLimit = ETJump::MaxCharsForWidth(ci->name, 0.15f, playerW, font);
-    followedLimit = ETJump::MaxCharsForWidth(followedClient.c_str(), 0.15f,
-                                             followedW, font);
+    playerLimit   = ETJump::MaxCharsForWidth(ci->name, 0.15f, playerW, font);
+    followedLimit = ETJump::MaxCharsForWidth(followedClient.c_str(), 0.15f, followedW, font);
   }
 
   // Draw player
-  CG_Text_Paint_Ext(playerX, y, 0.15f, 0.15f, textColor, ci->name, 0,
-                    playerLimit, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Ext(playerX, y, 0.15f, 0.15f, textColor, ci->name, 0, playerLimit, ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Draw connecting text, followed client or spectator text
   if (score->ping == -1) {
-    CG_Text_Paint_RightAligned_Ext(rightTextX, y, 0.15f, 0.15f, textColor,
-                                   connecting, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+    CG_Text_Paint_RightAligned_Ext(rightTextX, y, 0.15f, 0.15f, textColor, connecting, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
                                    font);
   } else if (following) {
-    CG_Text_Paint_Centred_Ext(SCREEN_CENTER_X, y, 0.15f, 0.15f, textColor,
-                              followingArrow, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
-                              font);
-    CG_Text_Paint_RightAligned_Ext(rightTextX, y, 0.15f, 0.15f, textColor,
-                                   followedClient, 0, followedLimit,
+    CG_Text_Paint_Centred_Ext(SCREEN_CENTER_X, y, 0.15f, 0.15f, textColor, followingArrow, 0, 0,
+                              ITEM_TEXTSTYLE_SHADOWED, font);
+    CG_Text_Paint_RightAligned_Ext(rightTextX, y, 0.15f, 0.15f, textColor, followedClient, 0, followedLimit,
                                    ITEM_TEXTSTYLE_SHADOWED, font);
   } else {
-    CG_Text_Paint_RightAligned_Ext(rightTextX, y, 0.15f, 0.15f, textColor,
-                                   spectator, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+    CG_Text_Paint_RightAligned_Ext(rightTextX, y, 0.15f, 0.15f, textColor, spectator, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
                                    font);
   }
 
   // Draw ping
-  CG_Text_Paint_Centred_Ext(pingCenterX, y, 0.15f, 0.15f, textColor, ping, 0, 0,
-                            ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Centred_Ext(pingCenterX, y, 0.15f, 0.15f, textColor, ping, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 }
 
-void CG_DrawSpectatorList3(float x, float y, float fade, vec4_t textColor,
-                           fontInfo_t *font) {
+void CG_DrawSpectatorList3(float x, float y, float fade, vec4_t textColor, fontInfo_t *font) {
   int i, j;
 
   // Draw info text for spectator list
 
   // Player
   std::string playerHeader = "^7Player";
-  float textHeight = CG_Text_Height_Ext(playerHeader, 0.15f, 0, font);
-  float playerCenterY = y + (ALT_SCOREBOARD_3_ROW_HEIGHT + textHeight) / 2;
+  float textHeight         = CG_Text_Height_Ext(playerHeader, 0.15f, 0, font);
+  float playerCenterY      = y + (ALT_SCOREBOARD_3_ROW_HEIGHT + textHeight) / 2;
 
   float playerX = ALT_SCOREBOARD_3_PLAYER_X;
-  CG_Text_Paint_Ext(playerX, playerCenterY, 0.15f, 0.15f, textColor,
-                    playerHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Ext(playerX, playerCenterY, 0.15f, 0.15f, textColor, playerHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Ping
   std::string pingHeader = "^7Ping";
-  float pingX = playerX + ALT_SCOREBOARD_3_PLAYER_WIDTH +
-                ALT_SCOREBOARD_3_FPS_WIDTH + ALT_SCOREBOARD_3_INFO_WIDTH;
+  float pingX = playerX + ALT_SCOREBOARD_3_PLAYER_WIDTH + ALT_SCOREBOARD_3_FPS_WIDTH + ALT_SCOREBOARD_3_INFO_WIDTH;
   float pingCenterX = pingX + ALT_SCOREBOARD_3_PING_WIDTH * 0.5f;
 
-  CG_Text_Paint_Centred_Ext(pingCenterX, playerCenterY, 0.15f, 0.15f, textColor,
-                            pingHeader, 0, 0, ITEM_TEXTSTYLE_SHADOWED, font);
+  CG_Text_Paint_Centred_Ext(pingCenterX, playerCenterY, 0.15f, 0.15f, textColor, pingHeader, 0, 0,
+                            ITEM_TEXTSTYLE_SHADOWED, font);
 
   // Get number of spectators and draw names + fill boxes
   for (i = 0, j = 0; i < cg.numScores; i++) {
@@ -842,8 +750,8 @@ void CG_DrawSpectatorList3(float x, float y, float fade, vec4_t textColor,
     CG_DrawScoreboardRows3(x, y, j++, &cg.scores[i], fade);
     y += ALT_SCOREBOARD_3_ROW_HEIGHT;
 
-    CG_AddSpectatorToList3(playerX, playerCenterY + ALT_SCOREBOARD_3_ROW_HEIGHT,
-                           pingCenterX, &cg.scores[i], textColor, font);
+    CG_AddSpectatorToList3(playerX, playerCenterY + ALT_SCOREBOARD_3_ROW_HEIGHT, pingCenterX, &cg.scores[i], textColor,
+                           font);
     playerCenterY += ALT_SCOREBOARD_3_ROW_HEIGHT;
   }
 }
@@ -851,26 +759,24 @@ void CG_DrawSpectatorList3(float x, float y, float fade, vec4_t textColor,
 void CG_DrawAltScoreboard3(float fade) {
   fontInfo_t *font = &cgs.media.limboFont1;
   vec4_t textColor = {1.0f, 1.0f, 1.0f, 0};
-  textColor[3] = fade;
+  textColor[3]     = fade;
   vec4_t currentCompactUiBack;
   vec4_t currentCompactUiBackLight;
   vec4_t currentCompactUiBorder;
   Vector4Copy(compactUiBack, currentCompactUiBack);
   Vector4Copy(compactUiBack, currentCompactUiBackLight);
   Vector4Copy(compactUiBorder, currentCompactUiBorder);
-  currentCompactUiBackLight[3] = 0.25f;
-  currentCompactUiBack[3] *= fade;
+  currentCompactUiBackLight[3]  = 0.25f;
+  currentCompactUiBack[3]      *= fade;
   currentCompactUiBackLight[3] *= fade;
-  currentCompactUiBorder[3] *= fade;
-  float baseHeight = ALT_SCOREBOARD_3_HEADER_HEIGHT +
-                     (ALT_SCOREBOARD_3_DIVIDER * 2) +
-                     (ALT_SCOREBOARD_3_ROW_HEIGHT * 2);
-  float currentHeight =
-      baseHeight + (ALT_SCOREBOARD_3_ROW_HEIGHT * cg.numScores);
-  float baseY = SCREEN_CENTER_Y - currentHeight / 2;
+  currentCompactUiBorder[3]    *= fade;
+  float baseHeight =
+    ALT_SCOREBOARD_3_HEADER_HEIGHT + (ALT_SCOREBOARD_3_DIVIDER * 2) + (ALT_SCOREBOARD_3_ROW_HEIGHT * 2);
+  float currentHeight = baseHeight + (ALT_SCOREBOARD_3_ROW_HEIGHT * cg.numScores);
+  float baseY         = SCREEN_CENTER_Y - currentHeight / 2;
   int i;
   int spectatorCount = 0;
-  int playerCount = 0;
+  int playerCount    = 0;
 
   // Add each client to either playerCount or spectatorCount for size
   // adjustments
@@ -893,10 +799,8 @@ void CG_DrawAltScoreboard3(float fade) {
   float headerX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_HEADER_WIDTH * 0.5f;
   float headerY = baseY;
 
-  CG_FillRect(headerX, headerY, ALT_SCOREBOARD_3_HEADER_WIDTH,
-              ALT_SCOREBOARD_3_HEADER_HEIGHT, currentCompactUiBack);
-  CG_DrawRect_FixedBorder(headerX, headerY, ALT_SCOREBOARD_3_HEADER_WIDTH,
-                          ALT_SCOREBOARD_3_HEADER_HEIGHT, 1,
+  CG_FillRect(headerX, headerY, ALT_SCOREBOARD_3_HEADER_WIDTH, ALT_SCOREBOARD_3_HEADER_HEIGHT, currentCompactUiBack);
+  CG_DrawRect_FixedBorder(headerX, headerY, ALT_SCOREBOARD_3_HEADER_WIDTH, ALT_SCOREBOARD_3_HEADER_HEIGHT, 1,
                           currentCompactUiBorder);
   CG_DrawHeader3(headerX, headerY, fade, textColor, font);
 
@@ -904,49 +808,41 @@ void CG_DrawAltScoreboard3(float fade) {
   float playerHeaderX = SCREEN_CENTER_X;
   float playerHeaderY = headerY + ALT_SCOREBOARD_3_HEADER_HEIGHT;
 
-  CG_DrawPlayerHeader3(playerHeaderX, playerHeaderY, playerCount, fade,
-                       textColor, font);
+  CG_DrawPlayerHeader3(playerHeaderX, playerHeaderY, playerCount, fade, textColor, font);
 
   // Draw player list
-  float playerListX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f;
-  float playerListY = playerHeaderY + ALT_SCOREBOARD_3_DIVIDER;
-  float playerListHeight =
-      ALT_SCOREBOARD_3_ROW_HEIGHT + playerCount * ALT_SCOREBOARD_3_ROW_HEIGHT;
+  float playerListX      = SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f;
+  float playerListY      = playerHeaderY + ALT_SCOREBOARD_3_DIVIDER;
+  float playerListHeight = ALT_SCOREBOARD_3_ROW_HEIGHT + playerCount * ALT_SCOREBOARD_3_ROW_HEIGHT;
 
-  CG_FillRect(playerListX, playerListY, ALT_SCOREBOARD_3_ROW_WIDTH,
-              ALT_SCOREBOARD_3_ROW_HEIGHT, currentCompactUiBack);
-  CG_DrawRect_FixedBorder(playerListX, playerListY, ALT_SCOREBOARD_3_ROW_WIDTH,
-                          ALT_SCOREBOARD_3_ROW_HEIGHT, 1,
+  CG_FillRect(playerListX, playerListY, ALT_SCOREBOARD_3_ROW_WIDTH, ALT_SCOREBOARD_3_ROW_HEIGHT, currentCompactUiBack);
+  CG_DrawRect_FixedBorder(playerListX, playerListY, ALT_SCOREBOARD_3_ROW_WIDTH, ALT_SCOREBOARD_3_ROW_HEIGHT, 1,
                           currentCompactUiBorder);
 
   CG_DrawPlayerList3(playerListX, playerListY, fade, textColor, font);
 
-  CG_DrawRect_FixedBorder(playerListX, playerListY, ALT_SCOREBOARD_3_ROW_WIDTH,
-                          playerListHeight, 1, currentCompactUiBorder);
+  CG_DrawRect_FixedBorder(playerListX, playerListY, ALT_SCOREBOARD_3_ROW_WIDTH, playerListHeight, 1,
+                          currentCompactUiBorder);
 
   // Draw spectator list header
   float spectatorHeaderX = SCREEN_CENTER_X;
   float spectatorHeaderY = playerListY + playerListHeight;
 
-  CG_DrawSpectatorHeader3(spectatorHeaderX, spectatorHeaderY, spectatorCount,
-                          fade, textColor, font);
+  CG_DrawSpectatorHeader3(spectatorHeaderX, spectatorHeaderY, spectatorCount, fade, textColor, font);
 
   // Draw spectator list
-  float spectatorListX = SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f;
-  float spectatorListY = spectatorHeaderY + ALT_SCOREBOARD_3_DIVIDER;
-  float spectatorListHeight = ALT_SCOREBOARD_3_ROW_HEIGHT +
-                              spectatorCount * ALT_SCOREBOARD_3_ROW_HEIGHT;
+  float spectatorListX      = SCREEN_CENTER_X - ALT_SCOREBOARD_3_ROW_WIDTH * 0.5f;
+  float spectatorListY      = spectatorHeaderY + ALT_SCOREBOARD_3_DIVIDER;
+  float spectatorListHeight = ALT_SCOREBOARD_3_ROW_HEIGHT + spectatorCount * ALT_SCOREBOARD_3_ROW_HEIGHT;
 
-  CG_FillRect(spectatorListX, spectatorListY, ALT_SCOREBOARD_3_ROW_WIDTH,
-              ALT_SCOREBOARD_3_ROW_HEIGHT, currentCompactUiBack);
-  CG_DrawRect_FixedBorder(
-      spectatorListX, spectatorListY, ALT_SCOREBOARD_3_ROW_WIDTH,
-      ALT_SCOREBOARD_3_ROW_HEIGHT, 1, currentCompactUiBorder);
+  CG_FillRect(spectatorListX, spectatorListY, ALT_SCOREBOARD_3_ROW_WIDTH, ALT_SCOREBOARD_3_ROW_HEIGHT,
+              currentCompactUiBack);
+  CG_DrawRect_FixedBorder(spectatorListX, spectatorListY, ALT_SCOREBOARD_3_ROW_WIDTH, ALT_SCOREBOARD_3_ROW_HEIGHT, 1,
+                          currentCompactUiBorder);
 
   CG_DrawSpectatorList3(spectatorListX, spectatorListY, fade, textColor, font);
 
-  CG_DrawRect_FixedBorder(spectatorListX, spectatorListY,
-                          ALT_SCOREBOARD_3_ROW_WIDTH, spectatorListHeight, 1,
+  CG_DrawRect_FixedBorder(spectatorListX, spectatorListY, ALT_SCOREBOARD_3_ROW_WIDTH, spectatorListHeight, 1,
                           currentCompactUiBorder);
 }
 
@@ -957,15 +853,15 @@ WM_DrawObjectives
 */
 
 namespace INFO {
-static const int TOTAL_WIDTH = 280;
-static const int PLAYER_WIDTH = 0.54 * TOTAL_WIDTH;
-static const int FPS_WIDTH = 0.09 * TOTAL_WIDTH;
-static const int PMOVE_WIDTH = 0.14 * TOTAL_WIDTH;
-static const int CGAZ_WIDTH = 0.12 * TOTAL_WIDTH;
+static const int TOTAL_WIDTH   = 280;
+static const int PLAYER_WIDTH  = 0.54 * TOTAL_WIDTH;
+static const int FPS_WIDTH     = 0.09 * TOTAL_WIDTH;
+static const int PMOVE_WIDTH   = 0.14 * TOTAL_WIDTH;
+static const int CGAZ_WIDTH    = 0.12 * TOTAL_WIDTH;
 static const int LATENCY_WIDTH = 0.11 * TOTAL_WIDTH;
-static const int TEAM_HEIGHT = 20;
-static const int LINE_HEIGHT = 16;
-static const int MAX_LINES = 22;
+static const int TEAM_HEIGHT   = 20;
+static const int LINE_HEIGHT   = 16;
+static const int MAX_LINES     = 22;
 } // namespace INFO
 
 int WM_DrawObjectives(int x, int y, int width, float fade) {
@@ -978,8 +874,8 @@ int WM_DrawObjectives(int x, int y, int width, float fade) {
   Vector4Copy(clrUiBar, currentClrUiBar);
   Vector4Copy(clrUiBack, currentClrUiBack);
   Vector4Copy(clrUiBorder, currentClrUiBorder);
-  currentClrUiBar[3] *= fade;
-  currentClrUiBack[3] *= fade;
+  currentClrUiBar[3]    *= fade;
+  currentClrUiBack[3]   *= fade;
   currentClrUiBorder[3] *= fade;
 
   VectorCopy(colorMdGreen, color1);
@@ -996,16 +892,14 @@ int WM_DrawObjectives(int x, int y, int width, float fade) {
   CG_Text_Paint_Ext(x + 5, y + 17, 0.25f, 0.25f, color1, s, 0, 0, 0, font);
 
   // ETJump: map name on the center
-  s = cgs.cheats ? va("^7%s%s", cgs.rawmapname, " ^9(cheats)") : cgs.rawmapname;
+  s         = cgs.cheats ? va("^7%s%s", cgs.rawmapname, " ^9(cheats)") : cgs.rawmapname;
   textWidth = CG_Text_Width_Ext(s, 0.25f, 0, font);
-  CG_Text_Paint_Ext(x + width / 2 - textWidth / 2, y + 17, 0.25f, 0.25f, color2,
-                    s, 0, 0, 0, font);
+  CG_Text_Paint_Ext(x + width / 2 - textWidth / 2, y + 17, 0.25f, 0.25f, color2, s, 0, 0, 0, font);
 
   // ETJump: ETJump website link
-  s = GAME_URL;
+  s         = GAME_URL;
   textWidth = CG_Text_Width_Ext(s, 0.25f, 0, font);
-  CG_Text_Paint_Ext(x + width - 5 - textWidth, y + 17, 0.25f, 0.25f, color1, s,
-                    0, 0, 0, font);
+  CG_Text_Paint_Ext(x + width - 5 - textWidth, y + 17, 0.25f, 0.25f, color1, s, 0, 0, 0, font);
 
   return y + height;
 }
@@ -1028,7 +922,7 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade) {
   {
     const char *s;
     int textWidth;
-    float offsetX = 0.0f;
+    float offsetX    = 0.0f;
     int nameMaxWidth = 18;
     // DHM - Nerve
     Vector4Set(hcolor, 1, 1, 1, fade);
@@ -1039,23 +933,15 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade) {
       playerType = ci->cls;
 
       if (playerType == PC_MEDIC) {
-        ETJump::drawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_FIRST_AID],
-                        hcolor);
+        ETJump::drawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_FIRST_AID], hcolor);
       } else if (playerType == PC_ENGINEER) {
-        ETJump::drawPic(x + 4, y + 2, 12, 12,
-                        cgs.media.skillPics[SK_EXPLOSIVES_AND_CONSTRUCTION],
-                        hcolor);
+        ETJump::drawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_EXPLOSIVES_AND_CONSTRUCTION], hcolor);
       } else if (playerType == PC_FIELDOPS) {
-        ETJump::drawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_SIGNALS],
-                        hcolor);
+        ETJump::drawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_SIGNALS], hcolor);
       } else if (playerType == PC_COVERTOPS) {
-        ETJump::drawPic(
-            x + 4, y + 2, 12, 12,
-            cgs.media.skillPics[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS],
-            hcolor);
+        ETJump::drawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_MILITARY_INTELLIGENCE_AND_SCOPED_WEAPONS], hcolor);
       } else {
-        ETJump::drawPic(x + 4, y + 2, 12, 12,
-                        cgs.media.skillPics[SK_HEAVY_WEAPONS], hcolor);
+        ETJump::drawPic(x + 4, y + 2, 12, 12, cgs.media.skillPics[SK_HEAVY_WEAPONS], hcolor);
       }
 
       offsetX = 12 + 2;
@@ -1063,21 +949,18 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade) {
 
     // draw indicators
     if (ci->timerunActive) {
-      ETJump::drawPic(x + 4 + offsetX, y + 2, 12, 12, cgs.media.stopwatchIcon,
-                      hcolor);
-      offsetX += 12 + 2;
+      ETJump::drawPic(x + 4 + offsetX, y + 2, 12, 12, cgs.media.stopwatchIcon, hcolor);
+      offsetX      += 12 + 2;
       nameMaxWidth -= 2;
     }
     if (etj_drawScoreboardInactivity.integer && ci->clientIsInactive) {
-      ETJump::drawPic(x + 4 + offsetX, y + 2, 11, 11, cgs.media.idleIcon,
-                      hcolor);
-      offsetX += 11 + 2;
+      ETJump::drawPic(x + 4 + offsetX, y + 2, 11, 11, cgs.media.idleIcon, hcolor);
+      offsetX      += 11 + 2;
       nameMaxWidth -= 2;
     }
 
     if (ci->team == TEAM_SPECTATOR) {
-      ETJump::DrawString(x + 4 + offsetX, y + 12, 0.23f, 0.25f, hcolor, qfalse,
-                         ci->name, nameMaxWidth, 0);
+      ETJump::DrawString(x + 4 + offsetX, y + 12, 0.23f, 0.25f, hcolor, qfalse, ci->name, nameMaxWidth, 0);
       x += INFO::PLAYER_WIDTH;
 
       if (score->ping == -1) {
@@ -1088,62 +971,54 @@ static void WM_DrawClientScore(int x, int y, score_t *score, float fade) {
         ETJump::DrawSmallString(x + 13, y + 12, s, fade);
       } else {
         s = va("%s%s", "^3> ^7", cgs.clientinfo[score->followedClient].name);
-        ETJump::DrawString(x - 12, y + 12, 0.23f, 0.25f, hcolor, qfalse, s, 14,
-                           0);
+        ETJump::DrawString(x - 12, y + 12, 0.23f, 0.25f, hcolor, qfalse, s, 14, 0);
       }
 
       x += INFO::FPS_WIDTH + INFO::PMOVE_WIDTH + INFO::CGAZ_WIDTH;
 
-      s = va("%i", score->ping);
+      s         = va("%i", score->ping);
       textWidth = ETJump::DrawStringWidth(s, 0.23f);
-      ETJump::DrawSmallString(x + INFO::LATENCY_WIDTH / 2 - textWidth / 2 - 1,
-                              y + 12, s, fade);
+      ETJump::DrawSmallString(x + INFO::LATENCY_WIDTH / 2 - textWidth / 2 - 1, y + 12, s, fade);
     } else {
-      ETJump::DrawString(x + 4 + offsetX, y + 12, 0.23f, 0.25f, hcolor, qfalse,
-                         ci->name, nameMaxWidth, 0);
+      ETJump::DrawString(x + 4 + offsetX, y + 12, 0.23f, 0.25f, hcolor, qfalse, ci->name, nameMaxWidth, 0);
       x += INFO::PLAYER_WIDTH;
 
-      s = va("%i", ci->maxFPS);
+      s         = va("%i", ci->maxFPS);
       textWidth = ETJump::DrawStringWidth(s, 0.23f);
-      ETJump::DrawSmallString(x + INFO::FPS_WIDTH / 2 - textWidth / 2 - 1,
-                              y + 12, s, fade);
+      ETJump::DrawSmallString(x + INFO::FPS_WIDTH / 2 - textWidth / 2 - 1, y + 12, s, fade);
       x += INFO::FPS_WIDTH;
 
-      s = va("%i", ci->pmoveFixed);
+      s         = va("%i", ci->pmoveFixed);
       textWidth = ETJump::DrawStringWidth(s, 0.23f);
-      ETJump::DrawSmallString(x + INFO::PMOVE_WIDTH / 2 - textWidth / 2 - 1,
-                              y + 12, s, fade);
+      ETJump::DrawSmallString(x + INFO::PMOVE_WIDTH / 2 - textWidth / 2 - 1, y + 12, s, fade);
       x += INFO::PMOVE_WIDTH;
 
-      s = va("%s", ci->CGaz ? "Yes" : "No");
+      s         = va("%s", ci->CGaz ? "Yes" : "No");
       textWidth = ETJump::DrawStringWidth(s, 0.23f);
-      ETJump::DrawSmallString(x + INFO::CGAZ_WIDTH / 2 - textWidth / 2 - 1,
-                              y + 12, s, fade);
+      ETJump::DrawSmallString(x + INFO::CGAZ_WIDTH / 2 - textWidth / 2 - 1, y + 12, s, fade);
       x += INFO::CGAZ_WIDTH;
 
-      s = va("%i", score->ping);
+      s         = va("%i", score->ping);
       textWidth = ETJump::DrawStringWidth(s, 0.23f);
-      ETJump::DrawSmallString(x + INFO::LATENCY_WIDTH / 2 - textWidth / 2 - 1,
-                              y + 12, s, fade);
+      ETJump::DrawSmallString(x + INFO::LATENCY_WIDTH / 2 - textWidth / 2 - 1, y + 12, s, fade);
     }
   }
 }
 
-static int WM_TeamScoreboard(int x, int y, team_t team, float fade,
-                             int maxrows) {
+static int WM_TeamScoreboard(int x, int y, team_t team, float fade, int maxrows) {
   vec4_t hcolor;
   int width;
-  vec4_t tclr = {0.6f, 0.6f, 0.6f, fade};
+  vec4_t tclr   = {0.6f, 0.6f, 0.6f, fade};
   auto boldFont = &cgs.media.limboFont1;
   int textWidth, tempy;
   const char *text;
-  vec4_t borderColor = {0.0f, 0.0f, 0.0f, 0.6f * fade};
+  vec4_t borderColor  = {0.0f, 0.0f, 0.0f, 0.6f * fade};
   vec4_t borderColor2 = {0.0f, 0.0f, 0.0f, fade};
   vec4_t currentClrUiBar, currentClrUiBack;
   Vector4Copy(clrUiBack, currentClrUiBack);
   Vector4Copy(clrUiBar, currentClrUiBar);
   currentClrUiBack[3] *= fade;
-  currentClrUiBar[3] *= fade;
+  currentClrUiBar[3]  *= fade;
 
   width = INFO::TOTAL_WIDTH;
 
@@ -1165,16 +1040,13 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade,
     CG_DrawRect_FixedBorder(x, y, width, INFO::TEAM_HEIGHT, 1, hcolor);
 
     if (team == TEAM_AXIS) {
-      text = va("%s (%d %s)", "AXIS", cg.teamPlayers[team],
-                cg.teamPlayers[team] == 1 ? "PLAYER" : "PLAYERS");
+      text = va("%s (%d %s)", "AXIS", cg.teamPlayers[team], cg.teamPlayers[team] == 1 ? "PLAYER" : "PLAYERS");
     } else {
-      text = va("%s (%d %s)", "ALLIES", cg.teamPlayers[team],
-                cg.teamPlayers[team] == 1 ? "PLAYER" : "PLAYERS");
+      text = va("%s (%d %s)", "ALLIES", cg.teamPlayers[team], cg.teamPlayers[team] == 1 ? "PLAYER" : "PLAYERS");
     }
 
     textWidth = CG_Text_Width_Ext(text, 0.22f, 0, boldFont);
-    CG_Text_Paint_Ext(x + width / 2 - textWidth / 2, y + 14, 0.22f, 0.22f, tclr,
-                      text, 0, 0, 0, boldFont);
+    CG_Text_Paint_Ext(x + width / 2 - textWidth / 2, y + 14, 0.22f, 0.22f, tclr, text, 0, 0, 0, boldFont);
 
     y += INFO::TEAM_HEIGHT;
   }
@@ -1247,6 +1119,7 @@ static int WM_TeamScoreboard(int x, int y, team_t team, float fade,
 
   return tempy;
 }
+
 // -NERVE - SMF
 
 /*
@@ -1267,8 +1140,7 @@ qboolean CG_DrawScoreboard(void) {
 
   // don't draw scoreboard during death while warmup up
   // OSP - also for pesky scoreboards in demos
-  if ((cg.demoPlayback && cg.snap->ps.pm_type != PM_INTERMISSION) &&
-      !cg.showScores) {
+  if ((cg.demoPlayback && cg.snap->ps.pm_type != PM_INTERMISSION) && !cg.showScores) {
     return qfalse;
   }
 
@@ -1311,8 +1183,7 @@ qboolean CG_DrawScoreboard(void) {
 
   y = WM_DrawObjectives(x, y, INFO::TOTAL_WIDTH * 2 + 40, fade);
   WM_TeamScoreboard(x, y + 5, TEAM_AXIS, fade, INFO::MAX_LINES);
-  WM_TeamScoreboard(x + INFO::TOTAL_WIDTH + 40, y + 5, TEAM_ALLIES, fade,
-                    INFO::MAX_LINES);
+  WM_TeamScoreboard(x + INFO::TOTAL_WIDTH + 40, y + 5, TEAM_ALLIES, fade, INFO::MAX_LINES);
 
   return qtrue;
 }

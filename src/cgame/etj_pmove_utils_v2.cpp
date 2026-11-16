@@ -23,38 +23,76 @@
  */
 
 #include "etj_pmove_utils_v2.h"
+
 #include "cg_local.h"
+#include "etj_chs_data.h"
 #include "etj_cvar_update_handler.h"
 
 namespace ETJump {
-PmoveUtilsV2::PmoveUtilsV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : cvarUpdate(cvarUpdate) {
+PmoveUtilsV2::PmoveUtilsV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate) : cvarUpdate(cvarUpdate) {
   initCvars();
   setupCallbacks();
   setPmoveStatus();
 }
 
 PmoveUtilsV2::~PmoveUtilsV2() {
-  for (const auto &cvar : cvars) {
+  for (const auto &cvar : hudCvars) {
+    cvarUpdate->unsubscribe(cvar);
+  }
+
+  for (const auto &cvar : chsCvars) {
     cvarUpdate->unsubscribe(cvar);
   }
 }
 
 void PmoveUtilsV2::initCvars() {
-  cvars.emplace_back(&etj_drawSpeed2);
-  cvars.emplace_back(&etj_drawAccel);
-  cvars.emplace_back(&etj_drawStrafeQuality);
-  cvars.emplace_back(&etj_drawUpmoveMeter);
+  hudCvars.emplace_back(&etj_drawSpeed2);
+  hudCvars.emplace_back(&etj_drawAccel);
+  hudCvars.emplace_back(&etj_drawStrafeQuality);
+  hudCvars.emplace_back(&etj_drawUpmoveMeter);
+  hudCvars.emplace_back(&etj_drawJumpSpeeds);
+  hudCvars.emplace_back(&etj_drawYaw);
+
+  chsCvars.emplace_back(&etj_drawCHS1);
+
+  for (const auto &[cvar, valid] : CHSData::CHS1Cvars) {
+    chsCvars.emplace_back(cvar);
+  }
+
+  chsCvars.emplace_back(&etj_drawCHS2);
+
+  for (const auto &[cvar, valid] : CHSData::CHS2Cvars) {
+    chsCvars.emplace_back(cvar);
+  }
+
+  chsCvars.emplace_back(&etj_drawCHS3);
+
+  for (const auto &[cvar, valid] : CHSData::CHS3Cvars) {
+    chsCvars.emplace_back(cvar);
+  }
 }
 
 void PmoveUtilsV2::setupCallbacks() {
-  for (const auto &cvar : cvars) {
-    cvarUpdate->subscribe(cvar, [this](const vmCvar_t *) { setPmoveStatus(); });
+  for (const auto &cvar : hudCvars) {
+    cvarUpdate->subscribe(cvar, [this](const vmCvar_t *) {
+      setPmoveStatus();
+    });
+  }
+
+  for (const auto &cvar : chsCvars) {
+    cvarUpdate->subscribe(cvar, [this](const vmCvar_t *) {
+      setPmoveStatus();
+    });
   }
 }
 
 void PmoveUtilsV2::setPmoveStatus() {
-  for (const auto &cvar : cvars) {
+  if (cgame.hudData.chs->needPmove()) {
+    doPmove = true;
+    return;
+  }
+
+  for (const auto &cvar : hudCvars) {
     if (cvar->integer != 0) {
       doPmove = true;
       return;
@@ -67,18 +105,28 @@ void PmoveUtilsV2::setPmoveStatus() {
 void PmoveUtilsV2::setupPmove(pmove_t &pm) {
   assert(pm.ps && pm.pmext);
 
-  pm.trace = CG_TraceCapsule;
-  pm.tracemask = pm.ps->pm_type == PM_DEAD ? MASK_PLAYERSOLID & ~CONTENTS_BODY
-                                           : MASK_PLAYERSOLID;
+  pm.trace         = CG_TraceCapsule;
+  pm.tracemask     = pm.ps->pm_type == PM_DEAD ? MASK_PLAYERSOLID & ~CONTENTS_BODY : MASK_PLAYERSOLID;
   pm.pointcontents = CG_PointContents;
-  pm.skill = cgs.clientinfo[pm.ps->clientNum].skill;
-  pm.shared = cgs.shared;
-  pm.pmove_msec = cgs.pmove_msec;
+  pm.skill         = cgs.clientinfo[pm.ps->clientNum].skill;
+  pm.pmove_msec    = cgs.pmove_msec;
 
   // NOTE: incorrect in spec/demo playback, 'sprintTime' is local
-  pm.pmext->sprintTime = cg.pmext.sprintTime;
+  pm.pmext->sprintTime   = cg.pmext.sprintTime;
   pm.pmext->jumpDelayBug = cg.jumpDelayBug;
-  pm.pmext->autoSprint = cg.pmext.autoSprint;
+  pm.pmext->autoSprint   = cg.pmext.autoSprint;
+  pm.pmext->sharedWSKeys = cgame.sharedWSKeys;
+
+  // On the first few frames after a map changes/restarts, we have a brief
+  // window during which we run the client side pmove code, before the server
+  // has run a client think for us. During this time, the client side
+  // playerstate is partially incomplete, as the server is the authority
+  // for certain fields. For our use case here, 'speed' and 'gravity'
+  // are such fields, so set them up manually during this period.
+  if (pm.ps->speed == 0 && pm.ps->gravity == 0) {
+    pm.ps->speed   = G_SPEED;
+    pm.ps->gravity = G_GRAVITY;
+  }
 }
 
 void PmoveUtilsV2::setupUserCmd(const int8_t scale, pmove_t &pm) {
@@ -88,28 +136,27 @@ void PmoveUtilsV2::setupUserCmd(const int8_t scale, pmove_t &pm) {
     return;
   }
 
-  pm.cmd.forwardmove = static_cast<signed char>(
-      scale * (!!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD) -
-               !!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD)));
-  pm.cmd.rightmove = static_cast<signed char>(
-      scale * (!!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) -
-               !!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT)));
+  pm.cmd.forwardmove = static_cast<signed char>(scale * (!!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_FORWARD) -
+                                                         !!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_BACKWARD)));
+  pm.cmd.rightmove   = static_cast<signed char>(
+    scale * (!!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_RIGHT) - !!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_LEFT)));
   pm.cmd.upmove = static_cast<signed char>(
-      scale * (!!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP) -
-               !!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN)));
+    scale * (!!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_UP) - !!(pm.ps->stats[STAT_USERCMD_MOVE] & UMOVE_DOWN)));
 
   // store buttons too, so we get correct scale when sprint is held
-  pm.cmd.buttons = pm.ps->stats[STAT_USERCMD_BUTTONS] >> 8;
+  pm.cmd.buttons  = pm.ps->stats[STAT_USERCMD_BUTTONS] >> 8;
   pm.cmd.wbuttons = pm.ps->stats[STAT_USERCMD_BUTTONS] & 0xff;
 
   pm.cmd.serverTime = cg.snap->serverTime;
 }
 
-bool PmoveUtilsV2::check() const { return doPmove; }
+bool PmoveUtilsV2::check() const {
+  return doPmove;
+}
 
 void PmoveUtilsV2::runFrame() {
-  s.ps = cg.predictedPlayerState;
-  s.pm.ps = &s.ps;
+  s.ps       = cg.predictedPlayerState;
+  s.pm.ps    = &s.ps;
   s.pm.pmext = &s.pmext;
   setupPmove(s.pm);
 
@@ -130,13 +177,15 @@ void PmoveUtilsV2::runFrame() {
   setWaterLevel(s.pm);
 }
 
-const PmoveUtilsV2::State &PmoveUtilsV2::getState() const { return s; }
+const PmoveUtilsV2::State &PmoveUtilsV2::getState() const {
+  return s;
+}
 
 void PmoveUtilsV2::updateState(const float wishspeed, const float accel) {
   s.vfSquared = VectorLengthSquared2(s.pm.ps->velocity);
   s.wishspeed = wishspeed;
 
-  s.a = accel * wishspeed * PM_FRAMETIME;
+  s.a  = accel * wishspeed * PM_FRAMETIME;
   s.vf = std::sqrt(s.vfSquared);
 
   // this is meant for default speed - if it breaks then,
@@ -146,15 +195,12 @@ void PmoveUtilsV2::updateState(const float wishspeed, const float accel) {
   s.velAngle = std::atan2(s.pm.ps->velocity[1], s.pm.ps->velocity[0]);
 
   const float num = s.wishspeed - s.a;
-  s.optAngle = num >= s.vf ? 0 : std::acos(num / s.vf);
+  s.optAngle      = num >= s.vf ? 0 : std::acos(num / s.vf);
 }
 
-PmoveUtilsV2::PmoveSingleResult
-PmoveUtilsV2::pmoveSingle(pmove_t &pm, pml_t &pml,
-                          const EnumBitset<PmoveDefaultInput> &defaultInput) {
-  const int8_t scale = pm.ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_WALKING << 8
-                           ? CMDSCALE_WALK
-                           : CMDSCALE_DEFAULT;
+PmoveUtilsV2::PmoveSingleResult PmoveUtilsV2::pmoveSingle(pmove_t &pm, pml_t &pml,
+                                                          const EnumBitset<PmoveDefaultInput> &defaultInput) {
+  const int8_t scale = pm.ps->stats[STAT_USERCMD_BUTTONS] & BUTTON_WALKING << 8 ? CMDSCALE_WALK : CMDSCALE_DEFAULT;
 
   setupUserCmd(scale, pm);
 
@@ -162,8 +208,7 @@ PmoveUtilsV2::pmoveSingle(pmove_t &pm, pml_t &pml,
   // 'usercmd_t', it is already accounted for it the stats that pmove
   // saves to the playerstate, so we don't care about it here
   // if we're in spec/demo playback
-  if (!cg.demoPlayback && pm.ps->clientNum == cg.clientNum &&
-      pm.pmext->autoSprint) {
+  if (!cg.demoPlayback && pm.ps->clientNum == cg.clientNum && pm.pmext->autoSprint) {
     pm.cmd.buttons ^= BUTTON_SPRINT;
   }
 
@@ -188,12 +233,11 @@ PmoveUtilsV2::pmoveSingle(pmove_t &pm, pml_t &pml,
     pm.cmd.upmove = CMDSCALE_DEFAULT;
   }
 
-  if (pm.ps->pm_type >= PM_DEAD ||
-      pm.ps->pm_flags & (PMF_LIMBO | PMF_TIME_LOCKPLAYER) ||
+  if (pm.ps->pm_type >= PM_DEAD || pm.ps->pm_flags & (PMF_LIMBO | PMF_TIME_LOCKPLAYER) ||
       BG_PlayerMounted(pm.ps->eFlags)) {
     pm.cmd.forwardmove = 0;
-    pm.cmd.rightmove = 0;
-    pm.cmd.upmove = 0;
+    pm.cmd.rightmove   = 0;
+    pm.cmd.upmove      = 0;
   }
 
   // set default key combination if there's no user input
@@ -235,13 +279,13 @@ PmoveUtilsV2::pmoveSingle(pmove_t &pm, pml_t &pml,
 
 void PmoveUtilsV2::setWaterLevel(pmove_t &pm) {
   vec3_t point{};
-  int32_t cont = 0;
+  int32_t cont    = 0;
   int32_t sample1 = 0;
   int32_t sample2 = 0;
 
   // get waterlevel, accounting for ducking
   pm.waterlevel = 0;
-  pm.watertype = 0;
+  pm.watertype  = 0;
 
   // Ridah, modified this
   point[0] = pm.ps->origin[0];
@@ -254,13 +298,12 @@ void PmoveUtilsV2::setWaterLevel(pmove_t &pm) {
     return;
   }
 
-  sample2 = static_cast<int32_t>(static_cast<float>(pm.ps->viewheight) -
-                                 pm.ps->mins[2]);
+  sample2 = static_cast<int32_t>(static_cast<float>(pm.ps->viewheight) - pm.ps->mins[2]);
   sample1 = sample2 / 2;
 
-  pm.watertype = cont;
+  pm.watertype  = cont;
   pm.waterlevel = 1;
-  point[2] = pm.ps->origin[2] + pm.ps->mins[2] + static_cast<float>(sample1);
+  point[2]      = pm.ps->origin[2] + pm.ps->mins[2] + static_cast<float>(sample1);
 
   cont = pm.pointcontents(point, pm.ps->clientNum);
 
@@ -269,7 +312,7 @@ void PmoveUtilsV2::setWaterLevel(pmove_t &pm) {
   }
 
   pm.waterlevel = 2;
-  point[2] = pm.ps->origin[2] + pm.ps->mins[2] + static_cast<float>(sample2);
+  point[2]      = pm.ps->origin[2] + pm.ps->mins[2] + static_cast<float>(sample2);
 
   cont = pm.pointcontents(point, pm.ps->clientNum);
 
@@ -279,8 +322,7 @@ void PmoveUtilsV2::setWaterLevel(pmove_t &pm) {
 }
 
 void PmoveUtilsV2::walkMove() {
-  if (s.pm.waterlevel > 2 &&
-      DotProduct(s.pml.forward, s.pml.groundTrace.plane.normal) > 0) {
+  if (s.pm.waterlevel > 2 && DotProduct(s.pml.forward, s.pml.groundTrace.plane.normal) > 0) {
     return;
   }
 
@@ -293,8 +335,7 @@ void PmoveUtilsV2::walkMove() {
       airMove();
     }
 
-    if (!isLerpFrame &&
-        !(s.pm.cmd.serverTime - s.pm.pmext->jumpTime < JUMP_DELAY_TIME)) {
+    if (!isLerpFrame && !(s.pm.cmd.serverTime - s.pm.pmext->jumpTime < JUMP_DELAY_TIME)) {
       s.pm.pmext->sprintTime -= 2500;
 
       if (s.pm.pmext->sprintTime < 0) {
@@ -317,7 +358,7 @@ void PmoveUtilsV2::walkMove() {
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;
-  s.pml.right[2] = 0;
+  s.pml.right[2]   = 0;
 
   // FIXME: no slopes :(
   // project the forward and right directions onto the ground plane
@@ -340,10 +381,8 @@ void PmoveUtilsV2::walkMove() {
     }
   } else if (s.pm.ps->pm_flags & PMF_DUCKED) {
     // clamp the speed lower if ducking
-    if (wishspeed >
-        static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale) {
-      wishspeed =
-          static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale;
+    if (wishspeed > static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale) {
+      wishspeed = static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale;
     }
   }
 
@@ -364,8 +403,7 @@ void PmoveUtilsV2::walkMove() {
 
   // when a player gets hit, they temporarily lose
   // full control, which allows them to be moved a bit
-  if ((s.pml.groundTrace.surfaceFlags & SURF_SLICK) ||
-      s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK) {
+  if ((s.pml.groundTrace.surfaceFlags & SURF_SLICK) || s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK) {
     accelerate(wishspeed, pm_airaccelerate);
   } else {
     accelerate(wishspeed, pm_accelerate);
@@ -377,7 +415,7 @@ void PmoveUtilsV2::airMove() {
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;
-  s.pml.right[2] = 0;
+  s.pml.right[2]   = 0;
   VectorNormalize(s.pml.forward);
   VectorNormalize(s.pml.right);
 
@@ -429,11 +467,9 @@ bool PmoveUtilsV2::canProne(const pmove_t &pm) {
 
 bool PmoveUtilsV2::checkProne(pmove_t &pm) {
   trace_t trace{};
-  pm.trace(&trace, pm.ps->origin, pm.ps->mins, pm.ps->maxs, pm.ps->origin,
-           pm.ps->clientNum, CONTENTS_NOPRONE);
+  pm.trace(&trace, pm.ps->origin, pm.ps->mins, pm.ps->maxs, pm.ps->origin, pm.ps->clientNum, CONTENTS_NOPRONE);
 
-  if (!cgs.cheats && (pm.shared & BG_LEVEL_NO_PRONE) ? trace.fraction == 1.0f
-                                                     : trace.fraction != 1.0f) {
+  if (!cgs.cheats && !WorldspawnShared::areaAllowsAction(pm.pmext->sharedWSKeys.noProne, trace)) {
     pm.ps->eFlags &= ~EF_PRONE;
     pm.ps->eFlags &= ~EF_PRONE_MOVING;
     return false;
@@ -444,8 +480,7 @@ bool PmoveUtilsV2::checkProne(pmove_t &pm) {
       return false;
     }
 
-    if (((pm.ps->pm_flags & PMF_DUCKED && pm.cmd.doubleTap == DT_FORWARD) ||
-         (pm.cmd.wbuttons & WBUTTON_PRONE)) &&
+    if (((pm.ps->pm_flags & PMF_DUCKED && pm.cmd.doubleTap == DT_FORWARD) || (pm.cmd.wbuttons & WBUTTON_PRONE)) &&
         pm.cmd.serverTime - pm.pmext->proneTime > PRONE_DELAY_TIME) {
       pm.mins[0] = pm.ps->mins[0];
       pm.mins[1] = pm.ps->mins[1];
@@ -462,19 +497,17 @@ bool PmoveUtilsV2::checkProne(pmove_t &pm) {
 
       if (!trace.startsolid && !trace.allsolid) {
         // go prone
-        pm.ps->pm_flags |= PMF_DUCKED; // crouched as well
-        pm.ps->eFlags |= EF_PRONE;
-        pm.pmext->proneTime = pm.cmd.serverTime; // timestamp 'go prone'
-        pm.pmext->proneGroundTime = pm.cmd.serverTime;
+        pm.ps->pm_flags           |= PMF_DUCKED; // crouched as well
+        pm.ps->eFlags             |= EF_PRONE;
+        pm.pmext->proneTime        = pm.cmd.serverTime; // timestamp 'go prone'
+        pm.pmext->proneGroundTime  = pm.cmd.serverTime;
       }
     }
   }
 
   if (pm.ps->eFlags & EF_PRONE) {
-    if (pm.waterlevel > 1 || pm.ps->pm_type == PM_DEAD ||
-        pm.ps->eFlags & EF_MOUNTEDTANK ||
-        ((pm.cmd.doubleTap == DT_BACK || pm.cmd.upmove > 10 ||
-          pm.cmd.wbuttons & WBUTTON_PRONE) &&
+    if (pm.waterlevel > 1 || pm.ps->pm_type == PM_DEAD || pm.ps->eFlags & EF_MOUNTEDTANK ||
+        ((pm.cmd.doubleTap == DT_BACK || pm.cmd.upmove > 10 || pm.cmd.wbuttons & WBUTTON_PRONE) &&
          pm.cmd.serverTime - pm.pmext->proneTime > PRONE_DELAY_TIME)) {
       // see if we have the space to stop prone
       pm.mins[0] = pm.ps->mins[0];
@@ -495,22 +528,21 @@ bool PmoveUtilsV2::checkProne(pmove_t &pm) {
         pm.ps->pm_flags |= PMF_DUCKED;
 
         // stop prone
-        pm.ps->eFlags &= ~EF_PRONE;
-        pm.ps->eFlags &= ~EF_PRONE_MOVING;
-        pm.pmext->proneTime = pm.cmd.serverTime; // timestamp 'stop prone'
+        pm.ps->eFlags       &= ~EF_PRONE;
+        pm.ps->eFlags       &= ~EF_PRONE_MOVING;
+        pm.pmext->proneTime  = pm.cmd.serverTime; // timestamp 'stop prone'
 
         // don't jump for a bit
         pm.pmext->jumpTime = pm.cmd.serverTime - PRONE_JUMP_DELAY_TIME;
-        pm.ps->jumpTime = pm.cmd.serverTime - PRONE_JUMP_DELAY_TIME;
+        pm.ps->jumpTime    = pm.cmd.serverTime - PRONE_JUMP_DELAY_TIME;
       }
     }
   }
 
   if (pm.ps->eFlags & EF_PRONE) {
     // See if we are moving
-    const float spd = VectorLength(pm.ps->velocity);
-    const bool userinput =
-        std::abs(pm.cmd.forwardmove) + abs(pm.cmd.rightmove) > 10;
+    const float spd      = VectorLength(pm.ps->velocity);
+    const bool userinput = std::abs(pm.cmd.forwardmove) + abs(pm.cmd.rightmove) > 10;
 
     if (userinput && spd > 40.f && !(pm.ps->eFlags & EF_PRONE_MOVING)) {
       pm.ps->eFlags |= EF_PRONE_MOVING;
@@ -526,7 +558,7 @@ bool PmoveUtilsV2::checkProne(pmove_t &pm) {
 
     pm.mins[2] = pm.ps->mins[2];
 
-    pm.maxs[2] = pm.ps->maxs[2] - pm.ps->standViewHeight - PRONE_VIEWHEIGHT;
+    pm.maxs[2]        = pm.ps->maxs[2] - pm.ps->standViewHeight - PRONE_VIEWHEIGHT;
     pm.ps->viewheight = PRONE_VIEWHEIGHT;
 
     return true;
@@ -547,13 +579,12 @@ void PmoveUtilsV2::checkDuck(pmove_t &pm) {
 
   if (pm.ps->pm_type == PM_DEAD) {
     // NOTE: must set death bounding box in game code
-    pm.maxs[2] = pm.ps->maxs[2];
+    pm.maxs[2]        = pm.ps->maxs[2];
     pm.ps->viewheight = static_cast<int32_t>(pm.ps->deadViewHeight);
     return;
   }
 
-  if ((pm.cmd.upmove < 0 && !(pm.ps->eFlags & EF_MOUNTEDTANK) &&
-       !(pm.ps->pm_flags & PMF_LADDER)) ||
+  if ((pm.cmd.upmove < 0 && !(pm.ps->eFlags & EF_MOUNTEDTANK) && !(pm.ps->pm_flags & PMF_LADDER)) ||
       pm.ps->weapon == WP_MORTAR_SET) {
     // duck
     pm.ps->pm_flags |= PMF_DUCKED;
@@ -572,10 +603,10 @@ void PmoveUtilsV2::checkDuck(pmove_t &pm) {
   }
 
   if (pm.ps->pm_flags & PMF_DUCKED) {
-    pm.maxs[2] = pm.ps->crouchMaxZ;
+    pm.maxs[2]        = pm.ps->crouchMaxZ;
     pm.ps->viewheight = static_cast<int32_t>(pm.ps->crouchViewHeight);
   } else {
-    pm.maxs[2] = pm.ps->maxs[2];
+    pm.maxs[2]        = pm.ps->maxs[2];
     pm.ps->viewheight = static_cast<int32_t>(pm.ps->standViewHeight);
   }
 }
@@ -601,7 +632,7 @@ void PmoveUtilsV2::groundTrace(pmove_t &pm, pml_t &pml) {
   traceAllLegs(trace, &pm.pmext->proneLegsOffset, pm.ps->origin, point, pm);
   pml.groundTrace = trace;
 
-  if (pm.shared & BG_LEVEL_NO_WALLBUG) {
+  if (pm.pmext->sharedWSKeys.noWallbug) {
     if (trace.allsolid && pm.ps->pm_type != PM_NOCLIP) {
       VectorClear(pm.ps->velocity);
     }
@@ -621,11 +652,10 @@ void PmoveUtilsV2::groundTrace(pmove_t &pm, pml_t &pml) {
   }
 
   // check if getting thrown off the ground
-  if (pm.ps->velocity[2] > 0 &&
-      DotProduct(pm.ps->velocity, trace.plane.normal) > 10) {
+  if (pm.ps->velocity[2] > 0 && DotProduct(pm.ps->velocity, trace.plane.normal) > 10) {
     pm.ps->groundEntityNum = ENTITYNUM_NONE;
-    pml.groundPlane = qfalse;
-    pml.walking = qfalse;
+    pml.groundPlane        = qfalse;
+    pml.walking            = qfalse;
     return;
   }
 
@@ -633,18 +663,18 @@ void PmoveUtilsV2::groundTrace(pmove_t &pm, pml_t &pml) {
   if (trace.plane.normal[2] < MIN_WALK_NORMAL) {
     // FIXME: if they can't slide down the slope, let them walk (sharp crevices)
     pm.ps->groundEntityNum = ENTITYNUM_NONE;
-    pml.groundPlane = qtrue;
-    pml.walking = qfalse;
+    pml.groundPlane        = qtrue;
+    pml.walking            = qfalse;
     return;
   }
 
   pml.groundPlane = qtrue;
-  pml.walking = qtrue;
+  pml.walking     = qtrue;
 
   // hitting solid ground will end a waterjump
   if (pm.ps->pm_flags & PMF_TIME_WATERJUMP) {
     pm.ps->pm_flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_LAND);
-    pm.ps->pm_time = 0;
+    pm.ps->pm_time   = 0;
   }
 
   if (pm.ps->groundEntityNum == ENTITYNUM_NONE) {
@@ -671,29 +701,25 @@ void PmoveUtilsV2::groundTraceMissed(pmove_t &pm, pml_t &pml) {
   }
 
   pml.groundPlane = qfalse;
-  pml.walking = qfalse;
+  pml.walking     = qfalse;
 }
 
-void PmoveUtilsV2::traceAll(trace_t &trace, vec3_t start, vec3_t end,
-                            const pmove_t &pm) {
+void PmoveUtilsV2::traceAll(trace_t &trace, vec3_t start, vec3_t end, const pmove_t &pm) {
   traceAllLegs(trace, nullptr, start, end, pm);
 }
 
 /* Traces all player bboxes -- body and legs */
-void PmoveUtilsV2::traceAllLegs(trace_t &trace, float *legsOffset, vec3_t start,
-                                vec3_t end, const pmove_t &pm) {
-  pm.trace(&trace, start, pm.mins, pm.maxs, end, pm.ps->clientNum,
-           pm.tracemask);
+void PmoveUtilsV2::traceAllLegs(trace_t &trace, float *legsOffset, vec3_t start, vec3_t end, const pmove_t &pm) {
+  pm.trace(&trace, start, pm.mins, pm.maxs, end, pm.ps->clientNum, pm.tracemask);
 
   /* legs */
   if (pm.ps->eFlags & EF_PRONE) {
     trace_t legtrace;
 
-    PM_TraceLegs(&legtrace, legsOffset, start, end, &trace, pm.ps->viewangles,
-                 pm.trace, pm.ps->clientNum, pm.tracemask);
+    PM_TraceLegs(&legtrace, legsOffset, start, end, &trace, pm.ps->viewangles, pm.trace, pm.ps->clientNum,
+                 pm.tracemask);
 
-    if (legtrace.fraction < trace.fraction || legtrace.startsolid ||
-        legtrace.allsolid) {
+    if (legtrace.fraction < trace.fraction || legtrace.startsolid || legtrace.allsolid) {
       VectorSubtract(end, start, legtrace.endpos);
       VectorMA(start, legtrace.fraction, legtrace.endpos, legtrace.endpos);
       trace = legtrace;
@@ -728,8 +754,8 @@ bool PmoveUtilsV2::correctAllSolid(trace_t &trace, pmove_t &pm, pml_t &pml) {
   }
 
   pm.ps->groundEntityNum = ENTITYNUM_NONE;
-  pml.groundPlane = qfalse;
-  pml.walking = qfalse;
+  pml.groundPlane        = qfalse;
+  pml.walking            = qfalse;
 
   return false;
 }
@@ -747,7 +773,7 @@ void PmoveUtilsV2::checkLadderMove(pmove_t &pm, pml_t &pml) {
     tracedist = TRACE_LADDER_DIST;
   }
 
-  pml.ladder = qfalse;
+  pml.ladder       = qfalse;
   pm.ps->pm_flags &= ~PMF_LADDER; // clear ladder bit
 
   if (pm.ps->pm_type == PM_DEAD) {
@@ -770,8 +796,7 @@ void PmoveUtilsV2::checkLadderMove(pmove_t &pm, pml_t &pml) {
   VectorMA(pm.ps->origin, tracedist, flatforward, spot);
 
   trace_t trace{};
-  pm.trace(&trace, pm.ps->origin, pm.mins, pm.maxs, spot, pm.ps->clientNum,
-           pm.tracemask);
+  pm.trace(&trace, pm.ps->origin, pm.mins, pm.maxs, spot, pm.ps->clientNum, pm.tracemask);
 
   if (trace.fraction < 1 && (trace.surfaceFlags & SURF_LADDER)) {
     pml.ladder = qtrue;
@@ -794,11 +819,10 @@ void PmoveUtilsV2::checkLadderMove(pmove_t &pm, pml_t &pml) {
 
     VectorMA(pm.ps->origin, -tracedist, laddervec, spot);
 
-    pm.trace(&trace, pm.ps->origin, mins, pm.maxs, spot, pm.ps->clientNum,
-             pm.tracemask);
+    pm.trace(&trace, pm.ps->origin, mins, pm.maxs, spot, pm.ps->clientNum, pm.tracemask);
 
     if ((trace.fraction < 1) && (trace.surfaceFlags & SURF_LADDER)) {
-      pml.ladder = qtrue;
+      pml.ladder       = qtrue;
       pm.ps->pm_flags |= PMF_LADDER; // set ladder bit
     } else {
       pml.ladder = qfalse;
@@ -830,15 +854,13 @@ bool PmoveUtilsV2::checkJump(pmove_t &pm, pml_t &pml, const bool isLerpFrame) {
   // between pmove frames ('com_maxFPS > 125'), otherwise the subsequent
   // checks that happen within the same pmove frame have jump delay,
   // and ground friction gets applied while we're in the air
-  if (!isLerpFrame &&
-      pm.cmd.serverTime - pm.pmext->jumpTime < JUMP_DELAY_TIME) {
+  if (!isLerpFrame && pm.cmd.serverTime - pm.pmext->jumpTime < JUMP_DELAY_TIME) {
     if (pm.pmext->proneTime - pm.pmext->jumpTime == PRONE_JUMP_DELAY_TIME) {
       return false;
     }
 
-    if ((pm.shared & BG_LEVEL_NO_JUMPDELAY)
-            ? (pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)
-            : !(pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)) {
+    if (pm.pmext->sharedWSKeys.noJumpDelay ? (pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)
+                                           : !(pml.groundTrace.surfaceFlags & SURF_NOJUMPDELAY)) {
       return false;
     }
   }
@@ -859,20 +881,19 @@ bool PmoveUtilsV2::checkJump(pmove_t &pm, pml_t &pml, const bool isLerpFrame) {
     return false;
   }
 
-  pml.groundPlane = qfalse; // jumping away
-  pml.walking = qfalse;
+  pml.groundPlane  = qfalse; // jumping away
+  pml.walking      = qfalse;
   pm.ps->pm_flags |= PMF_JUMP_HELD;
 
   pm.ps->groundEntityNum = ENTITYNUM_NONE;
-  pm.ps->velocity[2] = JUMP_VELOCITY;
+  pm.ps->velocity[2]     = JUMP_VELOCITY;
 
   return true;
 }
 
 void PmoveUtilsV2::sprint(pmove_t &pm) {
-  if (pm.cmd.buttons & BUTTON_SPRINT &&
-      (pm.cmd.forwardmove || pm.cmd.rightmove) &&
-      !(pm.ps->pm_flags & PMF_DUCKED) && !(pm.ps->eFlags & EF_PRONE)) {
+  if (pm.cmd.buttons & BUTTON_SPRINT && (pm.cmd.forwardmove || pm.cmd.rightmove) && !(pm.ps->pm_flags & PMF_DUCKED) &&
+      !(pm.ps->eFlags & EF_PRONE)) {
     if (pm.ps->powerups[PW_ADRENALINE]) {
       pm.pmext->sprintTime = SPRINTTIME;
     } else if (pm.ps->powerups[PW_NOFATIGUE]) {
@@ -919,8 +940,7 @@ void PmoveUtilsV2::sprint(pmove_t &pm) {
       int32_t rechargebase = 500;
 
       if (pm.skill[SK_BATTLE_SENSE] >= 2) {
-        rechargebase =
-            static_cast<int32_t>(static_cast<float>(rechargebase) * 1.06f);
+        rechargebase = static_cast<int32_t>(static_cast<float>(rechargebase) * 1.06f);
       }
 
       // JPW NERVE adjusted for framerate independence
@@ -939,8 +959,7 @@ void PmoveUtilsV2::sprint(pmove_t &pm) {
   }
 }
 
-void PmoveUtilsV2::updateWishvel(vec2_t wishvel, const pmove_t &pm,
-                                 const pml_t &pml) {
+void PmoveUtilsV2::updateWishvel(vec2_t wishvel, const pmove_t &pm, const pml_t &pml) {
   const float fmove = pm.cmd.forwardmove;
   const float smove = pm.cmd.rightmove;
 
@@ -949,8 +968,7 @@ void PmoveUtilsV2::updateWishvel(vec2_t wishvel, const pmove_t &pm,
   }
 }
 
-float PmoveUtilsV2::cmdScale(const pmove_t &pm, const usercmd_t &cmd,
-                             const bool upmove) {
+float PmoveUtilsV2::cmdScale(const pmove_t &pm, const usercmd_t &cmd, const bool upmove) {
   float total = 0;
   int32_t max = std::abs(cmd.forwardmove);
 
@@ -966,19 +984,17 @@ float PmoveUtilsV2::cmdScale(const pmove_t &pm, const usercmd_t &cmd,
     return 0;
   }
 
-  const auto fmoveSquared =
-      static_cast<float>(cmd.forwardmove * cmd.forwardmove);
+  const auto fmoveSquared = static_cast<float>(cmd.forwardmove * cmd.forwardmove);
   const auto smoveSquared = static_cast<float>(cmd.rightmove * cmd.rightmove);
 
   if (upmove) {
     const auto umoveSquared = static_cast<float>(cmd.upmove * cmd.upmove);
-    total = std::sqrt(fmoveSquared + smoveSquared + umoveSquared);
+    total                   = std::sqrt(fmoveSquared + smoveSquared + umoveSquared);
   } else {
     total = std::sqrt(fmoveSquared + smoveSquared);
   }
 
-  float scale = static_cast<float>(pm.ps->speed) * static_cast<float>(max) /
-                (127.0f * total);
+  float scale = static_cast<float>(pm.ps->speed) * static_cast<float>(max) / (127.0f * total);
 
   if (pm.cmd.buttons & BUTTON_SPRINT && pm.pmext->sprintTime > 50) {
     scale *= pm.ps->sprintSpeedScale;
@@ -998,26 +1014,22 @@ float PmoveUtilsV2::cmdScale(const pmove_t &pm, const usercmd_t &cmd,
   return scale;
 }
 
-bool PmoveUtilsV2::strafingForwards(const pmove_t &pm, const float wishspeed,
-                                    const vec2_t wishvel) {
+bool PmoveUtilsV2::strafingForwards(const pmove_t &pm, const float wishspeed, const vec2_t wishvel) {
   // not strafing if speed is low, or no user input
-  if (VectorLength2(pm.ps->velocity) < wishspeed ||
-      (!pm.cmd.forwardmove && !pm.cmd.rightmove)) {
+  if (VectorLength2(pm.ps->velocity) < wishspeed || (!pm.cmd.forwardmove && !pm.cmd.rightmove)) {
     return false;
   }
 
   // get angle between wishvel and player velocity
   const float wishvelAngle = RAD2DEG(std::atan2(wishvel[1], wishvel[0]));
-  const float velAngle =
-      RAD2DEG(std::atan2(pm.ps->velocity[1], pm.ps->velocity[0]));
-  const float diffAngle = AngleDelta(wishvelAngle, velAngle);
+  const float velAngle     = RAD2DEG(std::atan2(pm.ps->velocity[1], pm.ps->velocity[0]));
+  const float diffAngle    = AngleDelta(wishvelAngle, velAngle);
 
   // return true if 'diffAngle' matches notion of "forwards"
   // fullbeat / halfbeat / invert (holding +moveleft) or
   // fullbeat / halfbeat / invert (holding +moveright) or
   // nobeat
-  if ((pm.cmd.rightmove < 0 && diffAngle >= 0) ||
-      (pm.cmd.rightmove > 0 && diffAngle < 0) ||
+  if ((pm.cmd.rightmove < 0 && diffAngle >= 0) || (pm.cmd.rightmove > 0 && diffAngle < 0) ||
       (pm.cmd.forwardmove != 0 && diffAngle >= 0)) {
     return true;
   }
@@ -1027,28 +1039,26 @@ bool PmoveUtilsV2::strafingForwards(const pmove_t &pm, const float wishspeed,
 
 bool PmoveUtilsV2::rightStrafe(const bool forwards, const usercmd_t &cmd) {
   return (forwards && cmd.rightmove > 0) ||
-         (!forwards &&
-          (cmd.rightmove < 0 || (cmd.forwardmove != 0 && cmd.rightmove == 0)));
+         (!forwards && (cmd.rightmove < 0 || (cmd.forwardmove != 0 && cmd.rightmove == 0)));
 }
 
-bool PmoveUtilsV2::skipUpdate(int32_t &lastUpdateTime,
-                              std::optional<HUDLerpFlags> flag,
-                              const pmove_t &pm) {
+bool PmoveUtilsV2::skipUpdate(int32_t &lastUpdateTime, std::optional<HUDLerpFlags> flag, const pmove_t &pm) {
   // no valid frames yet
-  if (!pm.ps || !cg.nextSnap) {
+  if (!pm.ps || !cg.snap) {
     return true;
   }
 
-  const int32_t frameTime =
-      cg.nextSnap->serverTime - cg.snap->serverTime == pm.pmove_msec
-          ? pm.ps->commandTime
-          : cg.time;
+  // use command time while playing, or if in spec/demo playback,
+  // and snapshot update rate matches 'pmove_msec'
+  const bool useCommandTime = (pm.ps->clientNum == cg.clientNum && !cg.demoPlayback) || snapCadenceMatchesPmove();
 
-  const int now = frameTime - (frameTime % pm.pmove_msec);
+  // otherwise, fall back to 'cg.time'
+  // (less accurate, things might break a bit with unstable fps)
+  const int32_t frameTime = useCommandTime ? pm.ps->commandTime : cg.time;
+  const int now           = frameTime - (frameTime % pm.pmove_msec);
 
   // never skip updates if lerping is requested
-  if (flag.has_value() &&
-      !(etj_HUD_noLerp.integer & static_cast<int>(flag.value()))) {
+  if (flag.has_value() && !(etj_HUD_noLerp.integer & static_cast<int>(flag.value()))) {
     lastUpdateTime = now;
     return false;
   }
@@ -1061,23 +1071,30 @@ bool PmoveUtilsV2::skipUpdate(int32_t &lastUpdateTime,
   return false;
 }
 
+bool PmoveUtilsV2::snapCadenceMatchesPmove() {
+  const int32_t snapTime = cg.snap->serverTime;
+
+  if (snapTime != prevSnapTime) {
+    snapInterval = prevSnapTime && snapTime > prevSnapTime ? snapTime - prevSnapTime : 0;
+    prevSnapTime = snapTime;
+  }
+
+  return snapInterval == cgs.pmove_msec;
+}
+
 bool PmoveUtilsV2::ppsIsAccurate(const pmove_t &pm) {
-  if (!pm.ps || !cg.nextSnap) {
+  if (!pm.ps || !cg.snap) {
     return false;
   }
 
   if (pm.ps->clientNum == cg.clientNum) {
-    return cg.demoPlayback
-               ? cg.nextSnap->serverTime - cg.snap->serverTime == pm.pmove_msec
-               : true;
+    return cg.demoPlayback ? snapCadenceMatchesPmove() : true;
   }
 
   return false;
 }
 
-void PmoveUtilsV2::setDefaultInput(
-    pmove_t &pm, const int8_t scale,
-    const EnumBitset<PmoveDefaultInput> &defaultInput) {
+void PmoveUtilsV2::setDefaultInput(pmove_t &pm, const int8_t scale, const EnumBitset<PmoveDefaultInput> &defaultInput) {
   if (defaultInput & PmoveDefaultInput::FORWARD) {
     pm.cmd.forwardmove = scale;
   }

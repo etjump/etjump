@@ -22,21 +22,22 @@
  * SOFTWARE.
  */
 
+#include "etj_target_init.h"
+
 #include <algorithm>
 #include <array>
 #include <cstring>
 
-#include "g_local.h"
-#include "etj_target_init.h"
 #include "etj_utilities.h"
 
 namespace ETJump {
 static constexpr std::array<weapon_t, 7> allowedWeapons = {
-    WP_NONE,   WP_KNIFE,      WP_MEDKIT, WP_MEDIC_SYRINGE, WP_MEDIC_ADRENALINE,
-    WP_PLIERS, WP_BINOCULARS,
+  WP_NONE, WP_KNIFE, WP_MEDKIT, WP_MEDIC_SYRINGE, WP_MEDIC_ADRENALINE, WP_PLIERS, WP_BINOCULARS,
 };
 
-void TargetInit::spawn(gentity_t *self) { self->use = use; }
+void TargetInit::spawn(gentity_t *self) {
+  self->use = use;
+}
 
 void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
@@ -68,20 +69,15 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
 
     // restore the ammo we spawned with in case we don't have our weapon anymore
     if (!COM_BitCheck(activator->client->ps.weapons, weapon)) {
-      activator->client->ps.ammo[weapon] =
-          activator->client->sess.ammoOnSpawn[weapon];
-      activator->client->ps.ammoclip[weapon] =
-          activator->client->sess.ammoclipOnSpawn[weapon];
+      activator->client->ps.ammo[weapon]     = activator->client->sess.ammoOnSpawn[weapon];
+      activator->client->ps.ammoclip[weapon] = activator->client->sess.ammoclipOnSpawn[weapon];
     }
 
-    memcpy(activator->client->ps.weapons,
-           activator->client->sess.weaponsOnSpawn,
+    memcpy(activator->client->ps.weapons, activator->client->sess.weaponsOnSpawn,
            sizeof(activator->client->sess.weaponsOnSpawn));
 
-    if (keepPortalgun &&
-        !COM_BitCheck(activator->client->ps.weapons, WP_PORTAL_GUN)) {
-      AddWeaponToPlayer(activator->client, static_cast<weapon_t>(WP_PORTAL_GUN),
-                        0, 1, qfalse);
+    if (keepPortalgun && !COM_BitCheck(activator->client->ps.weapons, WP_PORTAL_GUN)) {
+      AddWeaponToPlayer(activator->client, static_cast<weapon_t>(WP_PORTAL_GUN), 0, 1, qfalse);
     }
 
     // remove any disallowed weapons we might have restored if timerun is active
@@ -94,8 +90,7 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
     }
 
     // swap to a valid weapon if our current weapon was removed
-    if (!COM_BitCheck(activator->client->ps.weapons,
-                      activator->client->ps.weapon)) {
+    if (!COM_BitCheck(activator->client->ps.weapons, activator->client->ps.weapon)) {
       Utilities::selectValidWeapon(activator);
     }
   }
@@ -107,7 +102,7 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
     }
 
     COM_BitClear(activator->client->ps.weapons, WP_PORTAL_GUN);
-    activator->client->ps.ammo[WP_PORTAL_GUN] = 0;
+    activator->client->ps.ammo[WP_PORTAL_GUN]     = 0;
     activator->client->ps.ammoclip[WP_PORTAL_GUN] = 0;
   }
 
@@ -121,21 +116,18 @@ void TargetInit::use(gentity_t *self, gentity_t *other, gentity_t *activator) {
   }
 
   if (!(self->spawnflags & static_cast<int>(SpawnFlags::KeepTracker))) {
-    std::memset(activator->client->pers.progression, 0,
-                sizeof(activator->client->pers.progression));
+    std::memset(activator->client->pers.progression, 0, sizeof(activator->client->pers.progression));
   }
 
   if (self->spawnflags & static_cast<int>(SpawnFlags::RemoveStartingWeapons) &&
       !(self->spawnflags & static_cast<int>(SpawnFlags::KeepWeapons))) {
     for (int i = WP_NONE; i < WP_NUM_WEAPONS; i++) {
-      if (std::find(allowedWeapons.cbegin(), allowedWeapons.cend(), i) !=
-          allowedWeapons.cend()) {
+      if (std::find(allowedWeapons.cbegin(), allowedWeapons.cend(), i) != allowedWeapons.cend()) {
         continue;
       }
 
       // skip portal gun if 'KeepPortalgun' is set
-      if (i == WP_PORTAL_GUN &&
-          self->spawnflags & static_cast<int>(SpawnFlags::KeepPortalgun)) {
+      if (i == WP_PORTAL_GUN && self->spawnflags & static_cast<int>(SpawnFlags::KeepPortalgun)) {
         continue;
       }
 

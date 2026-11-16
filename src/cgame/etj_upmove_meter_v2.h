@@ -24,21 +24,20 @@
 
 #pragma once
 
-#include "cg_local.h"
-#include "etj_irenderable.h"
 #include "etj_cvar_parser.h"
+#include "etj_irenderable.h"
 #include "etj_pmove_utils_v2.h"
 
+#include "../ui/ui_shared.h"
+
 namespace ETJump {
+class UpmoveMeterData;
 class CvarUpdateHandler;
-class ClientCommandsHandler;
-class PlayerEventsHandler;
 
 class UpmoveMeterV2 : public IRenderable {
 public:
-  UpmoveMeterV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
-                const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
-                const std::shared_ptr<PlayerEventsHandler> &playerEvents);
+  UpmoveMeterV2(const std::shared_ptr<UpmoveMeterData> &upmoveMeterData,
+                const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~UpmoveMeterV2() override;
 
   bool beforeRender() override;
@@ -47,29 +46,14 @@ public:
 private:
   void startListeners();
   void setTextSize(const vmCvar_t &cvar);
-  void resetUpmoveMeter();
 
-  void updateJumpState();
-  void updateUpmoveMeter();
-
-  [[nodiscard]] bool canSkipDraw() const;
-  [[nodiscard]] bool canSkipUpdate(const PmoveUtilsV2::State &s) const;
-
-  enum class JumpState {
-    AIR_NOJUMP = 0,         // in air, not holding jump
-    AIR_JUMP = 1,           // in air, holding jump
-    GROUND_JUMP = 2,        // on ground, holding jump
-    GROUND_NOJUMP = 3,      // on ground, not holding jump
-    AIR_JUMP_NORELEASE = 4, // in air (post jump), holding jump
-  };
-
-  JumpState jumpState{};
-  JumpState lastJumpState{};
+  static bool canSkipDraw();
 
   struct Graph {
     int32_t preDelay;
     int32_t postDelay;
     int32_t fullDelay;
+    int32_t absMaxDelay;
 
     rectDef_t rect;
     float upHeight;
@@ -83,8 +67,6 @@ private:
   };
 
   Graph graph{};
-  int32_t jumpPreGroundTime{};
-  int32_t groundTouchTime{};
 
   float textX{};
   float textH{};
@@ -93,16 +75,7 @@ private:
   int32_t textStyle{};
   vec4_t colorText{};
 
-  team_t team{};
-  int32_t lastUpdateTime{};
-
-  bool inAir{};
-  bool jumping{};
-
-  const playerState_t *ps = &cg.predictedPlayerState;
-
+  std::shared_ptr<UpmoveMeterData> upmoveMeterData;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
-  std::shared_ptr<ClientCommandsHandler> consoleCommands;
-  std::shared_ptr<PlayerEventsHandler> playerEvents;
 };
 } // namespace ETJump

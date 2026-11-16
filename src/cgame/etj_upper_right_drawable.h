@@ -26,18 +26,18 @@
 
 #include <array>
 
-#include "etj_irenderable.h"
 #include "cg_local.h"
+#include "etj_irenderable.h"
 
 namespace ETJump {
 class UpperRight : public IRenderable {
-  static constexpr float y0 = 152.0f;
+  static constexpr float y0        = 152.0f;
   static constexpr float textScale = 0.19f;
 
-  vec4_t textColor = {0.625f, 0.625f, 0.6f, 1.0f};
+  vec4_t textColor       = {0.625f, 0.625f, 0.6f, 1.0f};
   vec4_t backgroundColor = {0.16f, 0.2f, 0.17f, 0.8f};
-  vec4_t borderColor = {0.5f, 0.5f, 0.5f, 0.5f};
-  int upperRight_x = SCREEN_WIDTH - 6;
+  vec4_t borderColor     = {0.5f, 0.5f, 0.5f, 0.5f};
+  int upperRight_x       = SCREEN_WIDTH - 6;
 
   static constexpr std::size_t FPSFrames = 20;
   std::array<int64_t, FPSFrames> FPSFrameTimes{};

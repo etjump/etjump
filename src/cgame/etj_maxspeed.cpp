@@ -23,6 +23,7 @@
  */
 
 #include "etj_maxspeed.h"
+
 #include "cg_local.h"
 #include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
@@ -30,10 +31,9 @@
 #include "etj_utilities.h"
 
 namespace ETJump {
-DisplayMaxSpeed::DisplayMaxSpeed(
-    const std::shared_ptr<EntityEventsHandler> &entityEvents,
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : entityEvents(entityEvents), cvarUpdate(cvarUpdate) {
+DisplayMaxSpeed::DisplayMaxSpeed(const std::shared_ptr<EntityEventsHandler> &entityEvents,
+                                 const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+  : entityEvents(entityEvents), cvarUpdate(cvarUpdate) {
   parseColor(etj_speedColor.string, color);
   startListeners();
 }
@@ -52,8 +52,8 @@ void DisplayMaxSpeed::startListeners() {
       return;
     }
 
-    displayMaxSpeed = maxSpeed;
-    maxSpeed = 0;
+    displayMaxSpeed    = maxSpeed;
+    maxSpeed           = 0;
     animationStartTime = cg.time;
   });
 
@@ -76,8 +76,8 @@ bool DisplayMaxSpeed::beforeRender() {
     return false;
   }
 
-  auto speed = sqrt(cg.snap->ps.velocity[0] * cg.snap->ps.velocity[0] +
-                    cg.snap->ps.velocity[1] * cg.snap->ps.velocity[1]);
+  auto speed =
+    sqrt(cg.snap->ps.velocity[0] * cg.snap->ps.velocity[0] + cg.snap->ps.velocity[1] * cg.snap->ps.velocity[1]);
 
   if (speed >= maxSpeed) {
     maxSpeed = speed;
@@ -88,14 +88,15 @@ bool DisplayMaxSpeed::beforeRender() {
 
 void DisplayMaxSpeed::render() const {
   vec4_t fadeColor = {1, 1, 1, 1};
-  auto fade = CG_FadeAlpha(animationStartTime, etj_maxSpeedDuration.integer);
+  auto fade        = CG_FadeAlpha(animationStartTime, etj_maxSpeedDuration.integer);
   Vector4Copy(color, fadeColor);
   fadeColor[3] *= fade;
 
-  auto size = 0.1f;
-  size *= etj_speedSize.value;
+  auto size  = 0.1f;
+  size      *= etj_speedSize.value;
 
-  auto str = va("%0.f", displayMaxSpeed);
+  const int32_t precision = std::clamp(etj_maxSpeedPrecision.integer, 0, 6);
+  auto str                = va("%.*f", precision, displayMaxSpeed);
   float w;
   switch (etj_speedAlign.integer) {
     case 1: // left align
@@ -120,8 +121,7 @@ void DisplayMaxSpeed::render() const {
     style = ITEM_TEXTSTYLE_SHADOWED;
   }
 
-  CG_Text_Paint_Ext(x - w, y, size, size, fadeColor, str, 0, 0, style,
-                    &cgs.media.limboFont1);
+  CG_Text_Paint_Ext(x - w, y, size, size, fadeColor, str, 0, 0, style, &cgs.media.limboFont1);
 }
 
 bool DisplayMaxSpeed::canSkipDraw() {

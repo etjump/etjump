@@ -24,29 +24,28 @@
 
 #pragma once
 
+#include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <stdexcept>
-#include <cstdint>
 
 class File {
 public:
   class FileIOException : public std::runtime_error {
   public:
-    explicit FileIOException(const std::string &what)
-        : std::runtime_error(what) {}
+    explicit FileIOException(const std::string &what) : std::runtime_error(what) {}
   };
 
-  static constexpr int FILE_NOT_FOUND = 0;
+  static constexpr int FILE_NOT_FOUND      = 0;
   static constexpr int INVALID_FILE_HANDLE = 0;
-  static constexpr int READ_ALL_BYTES = -1;
+  static constexpr int READ_ALL_BYTES      = -1;
 
   using FileHandle = int32_t;
 
   enum class Mode {
-    Read = 0,
-    Write = 1,
-    Append = 2,
+    Read       = 0,
+    Write      = 1,
+    Append     = 2,
     AppendSync = 3,
   };
 
@@ -58,8 +57,7 @@ public:
   // reads `bytes` bytes from the file.
   // if file length < bytes, reads length bytes
   [[nodiscard]] std::vector<char> read(int bytes = READ_ALL_BYTES) const;
-  [[nodiscard]] std::string readString(int32_t bytes = READ_ALL_BYTES,
-                                       bool normalize = false) const;
+  [[nodiscard]] std::string readString(int32_t bytes = READ_ALL_BYTES, bool normalize = false) const;
 
   // writes all data to the file
   // throws FileIOException if operation fails

@@ -34,35 +34,26 @@ namespace ETJump {
 class KeySetSystem : public IRenderable {
   // key set layout
   std::vector<KeySetDrawer::KeyNames> keyLayout{
-      KeySetDrawer::KeyNames::Sprint, KeySetDrawer::KeyNames::Forward,
-      KeySetDrawer::KeyNames::Jump,   KeySetDrawer::KeyNames::Left,
-      KeySetDrawer::KeyNames::Empty,  KeySetDrawer::KeyNames::Right,
-      KeySetDrawer::KeyNames::Prone,  KeySetDrawer::KeyNames::Backward,
-      KeySetDrawer::KeyNames::Crouch,
+    KeySetDrawer::KeyNames::Sprint, KeySetDrawer::KeyNames::Forward,  KeySetDrawer::KeyNames::Jump,
+    KeySetDrawer::KeyNames::Left,   KeySetDrawer::KeyNames::Empty,    KeySetDrawer::KeyNames::Right,
+    KeySetDrawer::KeyNames::Prone,  KeySetDrawer::KeyNames::Backward, KeySetDrawer::KeyNames::Crouch,
   };
 
   CvarBasedMasterDrawer keySetMasterDrawer;
 
-  std::vector<KeySetDrawer::KeyShader>
-  createKeyPressSet(const std::string &keySetName);
-  static std::map<int, qhandle_t>
-  createKeyBindSet(const std::string &keySetName);
-  static qhandle_t registerKeySetShader(const std::string &keySetName,
-                                        const std::string &keyName);
-  static std::string createKeyPressSetShaderPath(const std::string &keySetName,
-                                                 const std::string &keyName);
+  std::vector<KeySetDrawer::KeyShader> createKeyPressSet(const std::string &keySetName);
+  static std::map<int, qhandle_t> createKeyBindSet(const std::string &keySetName);
+  static qhandle_t registerKeySetShader(const std::string &keySetName, const std::string &keyName);
+  static std::string createKeyPressSetShaderPath(const std::string &keySetName, const std::string &keyName);
   static qhandle_t registerShaderNoMip(const std::string &shaderName);
   [[nodiscard]] bool canSkipDraw() const;
 
 public:
-  KeySetSystem(const vmCvar_t *cvar,
-               const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  KeySetSystem(const vmCvar_t *cvar, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   ~KeySetSystem() override = default;
 
-  void addSet(const std::string &keySetName,
-              const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
-  void addKeyBindSet(const std::string &keySetName,
-                     const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  void addSet(const std::string &keySetName, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
+  void addKeyBindSet(const std::string &keySetName, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate);
   bool beforeRender() override;
   void render() const override;
 };

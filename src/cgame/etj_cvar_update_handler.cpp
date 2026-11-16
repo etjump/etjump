@@ -24,7 +24,9 @@
 
 #include "etj_cvar_update_handler.h"
 
-ETJump::CvarUpdateHandler::CvarUpdateHandler() { callbacks.clear(); }
+ETJump::CvarUpdateHandler::CvarUpdateHandler() {
+  callbacks.clear();
+}
 
 ETJump::CvarUpdateHandler::~CvarUpdateHandler() {}
 
@@ -39,9 +41,8 @@ bool ETJump::CvarUpdateHandler::check(const vmCvar_t *cvar) {
   return false;
 }
 
-bool ETJump::CvarUpdateHandler::subscribe(
-    const vmCvar_t *target,
-    const std::function<void(const vmCvar_t *cvar)> &callback) {
+bool ETJump::CvarUpdateHandler::subscribe(const vmCvar_t *target,
+                                          const std::function<void(const vmCvar_t *cvar)> &callback) {
   callbacks[target->handle].push_back(callback);
   return true;
 }

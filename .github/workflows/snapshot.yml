@@ -1,0 +1,98 @@
+name: ETJump Snapshot
+
+on:
+  schedule:
+    - cron: "0 10 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check
+    # skip check on manual feature branch builds
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-22.04
+    outputs:
+      run_build: ${{ steps.check.outputs.run_build }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for new commits since latest build
+        id: check
+        run: |
+          current_sha=$(git rev-parse HEAD)
+          latest_sha=$(git rev-list -n 1 latest 2>/dev/null || echo "none")
+
+          echo "Current HEAD: $current_sha"
+          echo "Latest tag: $latest_sha"
+
+          if [[ "$current_sha" == "$latest_sha" ]]; then
+            echo "No new commits since latest build."
+            echo "run_build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    name: Build
+    needs: check
+    # skipped 'check' means we still want to build,
+    # since we're running on a feature branch
+    if: ${{ !cancelled() && (needs.check.result == 'skipped' || needs.check.outputs.run_build == 'true') }}
+    uses: ./.github/workflows/build.yml
+
+  package:
+    name: Package
+    needs: build
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    uses: ./.github/workflows/package.yml
+
+  upload:
+    name: Upload
+    needs: [check, package]
+    if: ${{ !cancelled() && needs.package.result == 'success' && github.ref == 'refs/heads/dev' && needs.check.outputs.run_build == 'true' }}
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Download package
+        uses: actions/download-artifact@v8
+        with:
+          name: etjump-package
+          path: ${{ github.workspace }}/build
+
+      - name: Capture previous snapshot commit
+        id: previous
+        run: |
+          prev=$(git rev-list -n 1 latest 2>/dev/null || echo "")
+          echo "sha=$prev" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        run: |
+          if [[ -n "${{ steps.previous.outputs.sha }}" ]]; then
+            git log --format='- %h: %s (%an)' "${{ steps.previous.outputs.sha }}..HEAD" > release_body.md
+          else
+            echo "First snapshot build." > release_body.md
+          fi
+
+      - name: Delete previous snapshot release
+        run: gh release delete latest --cleanup-tag --yes || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Create latest build
+        uses: softprops/action-gh-release@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: latest
+          target_commitish: ${{ github.sha }}
+          name: Latest Build
+          body_path: release_body.md
+          files: ${{ github.workspace }}/build/*.zip
+          fail_on_unmatched_files: true

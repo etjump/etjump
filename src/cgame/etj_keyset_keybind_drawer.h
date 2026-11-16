@@ -31,11 +31,10 @@
 namespace ETJump {
 class KeySetKeyBindDrawer : public KeySetDrawer {
 public:
-  KeySetKeyBindDrawer(const std::vector<KeyShader> &keyShaders,
-                      std::map<int, qhandle_t> controlShaders,
+  KeySetKeyBindDrawer(const std::vector<KeyShader> &keyShaders, std::map<int, qhandle_t> controlShaders,
                       const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-      : KeySetDrawer(keyShaders, cvarUpdate),
-        controlShaders(std::move(controlShaders)) {}
+    : KeySetDrawer(keyShaders, cvarUpdate), controlShaders(std::move(controlShaders)) {}
+
   ~KeySetKeyBindDrawer() override = default;
 
   std::map<int, qhandle_t> controlShaders;

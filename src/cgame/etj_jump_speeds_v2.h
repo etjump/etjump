@@ -30,8 +30,8 @@
 #include "etj_cvar_parser.h"
 #include "etj_irenderable.h"
 
-#include "../game/etj_shared.h"
 #include "../game/bg_public.h"
+#include "../game/etj_shared.h"
 
 namespace ETJump {
 class EntityEventsHandler;
@@ -54,12 +54,12 @@ public:
 private:
   enum class SpeedRelation : uint8_t {
     NEUTRAL = 0,
-    FASTER = 1,
-    SLOWER = 2,
+    FASTER  = 1,
+    SLOWER  = 2,
   };
 
   struct Jump {
-    explicit Jump(int32_t speed) : speed(speed) {
+    explicit Jump(int32_t speed) : speed(speed), upmoveStr("-") {
       this->speedStr = std::to_string(speed);
     }
 
@@ -67,6 +67,7 @@ private:
     // store a string representation as well so we don't need to perform
     // int -> string conversions every frame for all jumps when rendering
     std::string speedStr;
+    std::string upmoveStr;
     SpeedRelation relation{};
   };
 
@@ -76,6 +77,7 @@ private:
   void computeTextOffsets();
 
   void updateJumpSpeeds();
+  void updateCurrentUpmove();
   void setSpeedRelation();
   void setJumpColor(const Jump &jump, vec4_t color) const;
 
@@ -85,8 +87,8 @@ private:
 
   enum class Style {
     HORIZONTAL = 1,
-    NO_LABEL = 2,
-    REVERSED = 4,
+    NO_LABEL   = 2,
+    REVERSED   = 4,
   };
 
   std::deque<Jump> jumpSpeeds;
@@ -104,6 +106,15 @@ private:
   CvarValue::Size size{};
 
   bool resetQueued{};
+  // Because we update jump speeds on the 'EV_JUMP' event, we need to
+  // poll the state of upmove data each frame, and keep updating the
+  // value associated with the current jump, otherwise we'd lose any
+  // post-jump upmove frames. When a new jump is registered, this gets flipped
+  // to 'true', and while it's true, we poll the upmove data each frame,
+  // and update the current upmove value for the tip of the 'jumpSpeeds' deque.
+  // Once the upmove state flips 'jumping' (aka we aren't holding jump anymore)
+  // to 'false', we also flip this to 'false', and stop updating the value.
+  bool pollUpmove{};
 
   vec4_t colorBase{};
   vec4_t colorFaster{};

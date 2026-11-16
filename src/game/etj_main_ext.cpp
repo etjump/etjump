@@ -22,29 +22,30 @@
  * SOFTWARE.
  */
 
-#include "etj_file.h"
-#include "etj_local.h"
-#include "etj_game.h"
-#include "etj_session.h"
+#include "etj_chat_replay.h"
 #include "etj_commands.h"
-#include "etj_levels.h"
-#include "etj_database.h"
+#include "etj_crypto.h"
 #include "etj_custom_map_votes.h"
-#include "etj_utilities.h"
-#include "etj_motd.h"
+#include "etj_database.h"
+#include "etj_fatal_error_shared.h"
+#include "etj_file.h"
+#include "etj_filesystem.h"
+#include "etj_fireteam_countdown.h"
+#include "etj_game.h"
+#include "etj_levels.h"
+#include "etj_local.h"
 #include "etj_map_statistics.h"
-#include "etj_tokens.h"
+#include "etj_motd.h"
+#include "etj_printer.h"
+#include "etj_rtv.h"
+#include "etj_session.h"
 #include "etj_shared.h"
 #include "etj_string_utilities.h"
 #include "etj_timerun_repository.h"
 #include "etj_timerun_v2.h"
-#include "etj_rtv.h"
-#include "etj_chat_replay.h"
-#include "etj_filesystem.h"
-#include "etj_printer.h"
-#include "etj_fireteam_countdown.h"
+#include "etj_tokens.h"
+#include "etj_utilities.h"
 #include "etj_worldspawn.h"
-#include "etj_crypto.h"
 
 #ifdef NEW_AUTH
   #include "etj_session_v2.h"
@@ -61,7 +62,7 @@ namespace ETJump {
  * in some weird, custom variation of a map, for integrity's sake.
  */
 static void computeCustomMapDataHashes() {
-  std::string mapscriptHash = "-";
+  std::string mapscriptHash  = "-";
   std::string entityFileHash = "-";
 
   // we do not care about different line endings here, as we care about the
@@ -74,10 +75,12 @@ static void computeCustomMapDataHashes() {
     return Crypto::sha1(contents);
   };
 
+  // we don't need to care about bundled mapscripts here, as those are
+  // consistent across servers, therefore not considered "custom",
+  // and if server overrides it, this will find the overridden file's hash
   if (g_mapScriptDir.string[0] != '\0') {
     try {
-      mapscriptHash = computeHash(StringUtils::format(
-          "%s/%s.script", g_mapScriptDir.string, level.rawmapname));
+      mapscriptHash = computeHash(StringUtils::format("%s/%s.script", g_mapScriptDir.string, level.rawmapname));
     } catch (const File::FileIOException &) {
       G_Printf("No custom map script loaded, skipping hash calculation\n");
     }
@@ -90,8 +93,7 @@ static void computeCustomMapDataHashes() {
   // to be 2.60b, and 'etVersion' is client only, we can't rely on
   // either here and thus can't detect the mod running on etlded.
   try {
-    entityFileHash =
-        computeHash(StringUtils::format("maps/%s.ent", level.rawmapname));
+    entityFileHash = computeHash(StringUtils::format("maps/%s.ent", level.rawmapname));
   } catch (const File::FileIOException &) {
     G_Printf("No custom entity file found, skipping hash calculation\n");
   }
@@ -116,17 +118,14 @@ void OnClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     ETJump::session->Init(clientNum);
 
     G_DPrintf("Requesting guid from %d\n", clientNum);
-    trap_SendServerCommand(
-        clientNum, ETJump::Constants::Authentication::GUID_REQUEST.c_str());
+    trap_SendServerCommand(clientNum, ETJump::Constants::Authentication::GUID_REQUEST.c_str());
   } else {
     ETJump::session->ReadSessionData(clientNum);
     game.timerunV2->clientConnect(clientNum, ETJump::session->GetId(clientNum));
   }
 
   if (ETJump::session->IsIpBanned(clientNum)) {
-    Printer::logAdminLn(
-        "authentication: Rejected connection from IP banned client " +
-        std::to_string(clientNum));
+    Printer::logAdminLn("authentication: Rejected connection from IP banned client " + std::to_string(clientNum));
     trap_DropClient(clientNum, "You are banned.", 0);
   }
 }
@@ -165,9 +164,8 @@ void WriteSessionData() {
 namespace ETJump {
 bool checkCheatCvars(gclient_s *client, int flags) {
   bool cheatCvarsEnabled = false;
-  const int clientNum = ClientNum(client);
-  std::string message =
-      "^7The following cvars are not allowed on this server:\n\n";
+  const int clientNum    = ClientNum(client);
+  std::string message    = "^7The following cvars are not allowed on this server:\n\n";
 
   if (flags & static_cast<int>(CheatCvarFlags::LookYaw)) {
     message += "^3cl_yawspeed != 0\n"
@@ -182,8 +180,7 @@ bool checkCheatCvars(gclient_s *client, int flags) {
     message += "^3pmove_fixed 0 ^7with:\n"
                "^3com_maxfps ^7outside of ^325-125\n";
 
-    if ((client->pers.maxFPS > 125 || client->pers.maxFPS < 25) &&
-        !client->pers.pmoveFixed) {
+    if ((client->pers.maxFPS > 125 || client->pers.maxFPS < 25) && !client->pers.pmoveFixed) {
       cheatCvarsEnabled = true;
     }
   }
@@ -219,26 +216,22 @@ void RunFrame(int levelTime) {
 }
 
 void OnGameInit() {
-  game.levels = std::make_shared<Levels>();
-  game.commands = std::make_shared<Commands>();
+  game.levels        = std::make_shared<Levels>();
+  game.commands      = std::make_shared<Commands>();
   game.mapStatistics = std::make_shared<ETJump::MapStatistics>();
-  game.customMapVotes = std::make_unique<ETJump::CustomMapVotes>(
-      game.mapStatistics, std::make_unique<ETJump::Log>("customvotes"));
-  game.motd =
-      std::make_unique<ETJump::Motd>(std::make_unique<ETJump::Log>("MOTD"));
-  game.tokens =
-      std::make_unique<ETJump::Tokens>(std::make_unique<ETJump::Log>("tokens"));
-  game.rtv = std::make_shared<ETJump::RockTheVote>();
+  game.customMapVotes =
+    std::make_unique<ETJump::CustomMapVotes>(game.mapStatistics, std::make_unique<ETJump::Log>("customvotes"));
+  game.motd   = std::make_unique<ETJump::Motd>(std::make_unique<ETJump::Log>("MOTD"));
+  game.tokens = std::make_unique<ETJump::Tokens>(std::make_unique<ETJump::Log>("tokens"));
+  game.rtv    = std::make_shared<ETJump::RockTheVote>();
 
-  game.chatReplay = std::make_unique<ETJump::ChatReplay>(
-      std::make_unique<ETJump::Log>("chat-replay"));
+  game.chatReplay = std::make_unique<ETJump::ChatReplay>(std::make_unique<ETJump::Log>("chat-replay"));
 
   game.fireteamCountdown = std::make_unique<ETJump::FireteamCountdown>();
 
   if (strlen(g_levelConfig.string)) {
     if (!game.levels->ReadFromConfig()) {
-      G_LogPrintf("Error while reading admin config: %s\n",
-                  game.levels->ErrorMessage().c_str());
+      G_LogPrintf("Error while reading admin config: %s\n", game.levels->ErrorMessage().c_str());
     } else {
       G_Printf("Successfully loaded levels from "
                "config: %s\n",
@@ -248,8 +241,7 @@ void OnGameInit() {
 
   if (strlen(g_userConfig.string) > 0) {
     if (!ETJump::database->InitDatabase(g_userConfig.string)) {
-      G_LogPrintf("DATABASE ERROR: %s\n",
-                  ETJump::database->GetMessage().c_str());
+      G_LogPrintf("DATABASE ERROR: %s\n", ETJump::database->GetMessage().c_str());
     } else {
       G_LogPrintf("Users loaded successfully from "
                   "database: %s\n",
@@ -260,13 +252,10 @@ void OnGameInit() {
 #ifdef NEW_AUTH
   try {
     game.sessionV2 = std::make_unique<ETJump::SessionV2>(
-        std::make_unique<ETJump::UserRepository>(
-            std::make_unique<ETJump::DatabaseV2>(
-                "usersv2", FileSystem::Path::getPath(g_userDatabaseV2.string)),
-            std::make_unique<ETJump::DatabaseV2>(
-                "usersv1", FileSystem::Path::getPath(g_userConfig.string))),
-        std::make_unique<ETJump::Log>("sessionv2"),
-        std::make_unique<ETJump::SynchronizationContext>());
+      std::make_unique<ETJump::UserRepository>(
+        std::make_unique<ETJump::DatabaseV2>("usersv2", FileSystem::Path::getPath(g_userDatabaseV2.string)),
+        std::make_unique<ETJump::DatabaseV2>("usersv1", FileSystem::Path::getPath(g_userConfig.string))),
+      std::make_unique<ETJump::Log>("sessionv2"), std::make_unique<ETJump::SynchronizationContext>());
   } catch (const std::exception &e) {
     // we really shouldn't let servers run at all if userdb is kaput
     G_Error("Failed to initialize user database: %s\n", e.what());
@@ -274,19 +263,13 @@ void OnGameInit() {
 #endif
 
   game.timerunV2 = std::make_shared<ETJump::TimerunV2>(
-      level.rawmapname,
-      std::make_unique<ETJump::TimerunRepository>(
-          std::make_unique<ETJump::DatabaseV2>(
-              "timerunv2",
-              FileSystem::Path::getPath(g_timeruns2Database.string)),
-          std::make_unique<ETJump::DatabaseV2>(
-              "timerunv1",
-              FileSystem::Path::getPath(g_timerunsDatabase.string))),
-      std::make_unique<ETJump::Log>("timerunv2"),
-      std::make_unique<ETJump::SynchronizationContext>());
+    level.rawmapname,
+    std::make_unique<ETJump::TimerunRepository>(
+      std::make_unique<ETJump::DatabaseV2>("timerunv2", FileSystem::Path::getPath(g_timeruns2Database.string)),
+      std::make_unique<ETJump::DatabaseV2>("timerunv1", FileSystem::Path::getPath(g_timerunsDatabase.string))),
+    std::make_unique<ETJump::Log>("timerunv2"), std::make_unique<ETJump::SynchronizationContext>());
 
-  game.mapStatistics->initialize(std::string(g_mapDatabase.string),
-                                 level.rawmapname);
+  game.mapStatistics->initialize(std::string(g_mapDatabase.string), level.rawmapname);
   game.customMapVotes->loadCustomvotes(true);
   game.motd->initialize();
   game.timerunV2->initialize();
@@ -294,8 +277,7 @@ void OnGameInit() {
   if (g_tokensMode.integer) {
     // Utilities::WriteFile handles the correct path
     // (etjump/...)
-    auto path = std::string(g_tokensPath.string) + "/" +
-                std::string(level.rawmapname) + ".json";
+    auto path = std::string(g_tokensPath.string) + "/" + std::string(level.rawmapname) + ".json";
     game.tokens->loadTokens(path);
   }
 
@@ -306,47 +288,18 @@ void OnGameInit() {
   ETJump::Log::processMessages();
 }
 
-void OnGameShutdown() {
-#ifdef NEW_AUTH
-  game.sessionV2->writeSessionData();
-#else
-  WriteSessionData();
-
-#endif
-  //    ETJump::database->ExecuteQueuedOperations();
-  // these may be null, e.g. when G_Alloc or stack unwinding fails
-  // after engine calls longjmp on errors
-  if (ETJump::database != nullptr) {
-    ETJump::database->CloseDatabase();
-  }
-
-  if (game.mapStatistics != nullptr) {
-    game.mapStatistics->saveChanges();
-  }
-
-  if (game.tokens != nullptr) {
-    ETJump::Tokens::reset();
-  }
-
-  if (game.timerunV2) {
-    game.timerunV2->shutdown();
-  }
-
-  if (game.chatReplay) {
-    game.chatReplay->writeChatsToFile();
-  }
-
-  game.levels = nullptr;
-  game.commands = nullptr;
-  game.customMapVotes = nullptr;
-  game.motd = nullptr;
-  game.mapStatistics = nullptr;
-  game.tokens = nullptr;
-  game.timerunV2 = nullptr;
-  game.rtv = nullptr;
-  game.chatReplay = nullptr;
+static void resetGameSystems() {
+  game.levels            = nullptr;
+  game.commands          = nullptr;
+  game.customMapVotes    = nullptr;
+  game.motd              = nullptr;
+  game.mapStatistics     = nullptr;
+  game.tokens            = nullptr;
+  game.timerunV2         = nullptr;
+  game.rtv               = nullptr;
+  game.chatReplay        = nullptr;
   game.fireteamCountdown = nullptr;
-  game.worldspawn = nullptr;
+  game.worldspawn        = nullptr;
 
 #ifdef NEW_AUTH
   game.sessionV2 = nullptr;
@@ -355,11 +308,56 @@ void OnGameShutdown() {
   ETJump::Log::processMessages();
 }
 
-qboolean OnConnectedClientCommand(gentity_t *ent) {
-  G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent),
-            ConcatArgs(0), ent->client->pers.netname);
+void OnGameShutdown() {
+  // every step runs even if an earlier one fails, e.g. the timerun worker
+  // threads must be stopped, the first error is rethrown afterwards, and the
+  // systems may be null, as the game might not have finished initializing
+  // (a fatal error during GAME_INIT, see GameFailure), or the engine shuts it
+  // down while handling an error of its own raised inside a syscall
+  ETJump::runEachStep(
+    [] {
+#ifdef NEW_AUTH
+      if (game.sessionV2) {
+        game.sessionV2->writeSessionData();
+      }
+#else
+      WriteSessionData();
+#endif
+    },
+    [] {
+      if (ETJump::database != nullptr) {
+        ETJump::database->CloseDatabase();
+      }
+    },
+    [] {
+      if (game.mapStatistics != nullptr) {
+        game.mapStatistics->saveChanges();
+      }
+    },
+    [] {
+      if (game.tokens != nullptr) {
+        ETJump::Tokens::reset();
+      }
+    },
+    [] {
+      if (game.timerunV2) {
+        game.timerunV2->shutdown();
+      }
+    },
+    [] {
+      if (game.chatReplay) {
+        game.chatReplay->writeChatsToFile();
+      }
+    },
+    [] {
+      resetGameSystems();
+    });
+}
 
-  auto argv = GetArgs();
+qboolean OnConnectedClientCommand(gentity_t *ent) {
+  G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
+
+  auto argv    = GetArgs();
   auto command = StringUtils::toLowerCase((*argv)[0]);
 
   if (ent->client->pers.connected != CON_CONNECTED) {
@@ -379,20 +377,16 @@ qboolean OnConnectedClientCommand(gentity_t *ent) {
 
 // Returning qtrue means no other commands will be checked
 qboolean OnClientCommand(gentity_t *ent) {
-  G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent),
-            ConcatArgs(0), ent->client->pers.netname);
+  G_DPrintf("OnClientCommand called for %d (%s): %s\n", ClientNum(ent), ConcatArgs(0), ent->client->pers.netname);
 
-  auto argv = GetArgs();
-  auto command = StringUtils::toLowerCase((*argv)[0]);
+  auto argv           = GetArgs();
+  auto command        = StringUtils::toLowerCase((*argv)[0]);
   const int clientNum = ClientNum(ent);
 
 #ifdef NEW_AUTH
   if (command == ETJump::Constants::Authentication::AUTHENTICATE) {
     if (!game.sessionV2->authenticate(ent)) {
-      trap_DropClient(clientNum,
-                      "Failed to authenticate with the server - malformed "
-                      "authentication response.\n",
-                      0);
+      trap_DropClient(clientNum, "Failed to authenticate with the server - malformed authentication response.\n", 0);
     }
 
     return qtrue;
@@ -400,10 +394,7 @@ qboolean OnClientCommand(gentity_t *ent) {
 
   if (command == ETJump::Constants::Authentication::GUID_MIGRATE) {
     if (!game.sessionV2->migrateGuid(ent)) {
-      trap_DropClient(clientNum,
-                      "Failed to authenticate with the server - malformed GUID "
-                      "migration response.\n",
-                      0);
+      trap_DropClient(clientNum, "Failed to authenticate with the server - malformed GUID migration response.\n", 0);
     }
 
     return qtrue;
@@ -434,7 +425,7 @@ Server console commands
 qboolean OnConsoleCommand() {
   G_DPrintf("OnConsoleCommand called: %s.\n", ConcatArgs(0));
 
-  auto argv = GetArgs();
+  auto argv    = GetArgs();
   auto command = StringUtils::toLowerCase((*argv)[0]);
 
   if (command == "generatemotd") {
@@ -466,7 +457,9 @@ qboolean OnConsoleCommand() {
   return qfalse;
 }
 
-const char *GetRandomMap() { return game.mapStatistics->randomMap(); }
+const char *GetRandomMap() {
+  return game.mapStatistics->randomMap();
+}
 
 std::vector<std::string> getMapsOnList(const std::string &name) {
   return game.customMapVotes->getMapsOnList(name);
@@ -521,8 +514,7 @@ const char *GetRandomMapByType(const char *customType) {
     G_Error("customType is NULL.");
   }
 
-  Q_strncpyz(buf, game.customMapVotes->randomMap(customType).c_str(),
-             sizeof(buf));
+  Q_strncpyz(buf, game.customMapVotes->randomMap(customType).c_str(), sizeof(buf));
   return buf;
 }
 
@@ -533,8 +525,7 @@ const char *CustomMapTypeExists(const char *mapType) {
     G_Error("mapType is NULL.");
   }
 
-  ETJump::CustomMapVotes::TypeInfo info =
-      game.customMapVotes->getTypeInfo(mapType);
+  ETJump::CustomMapVotes::TypeInfo info = game.customMapVotes->getTypeInfo(mapType);
 
   if (info.typeExists) {
     Q_strncpyz(buf, info.callvoteText.c_str(), sizeof(buf));
@@ -544,7 +535,9 @@ const char *CustomMapTypeExists(const char *mapType) {
   return NULL;
 }
 
-void ClientNameChanged(gentity_t *ent) { ETJump::session->NewName(ent); }
+void ClientNameChanged(gentity_t *ent) {
+  ETJump::session->NewName(ent);
+}
 
 std::string GetTeamString(int clientNum) {
   gentity_t *ent = g_entities + clientNum;
@@ -561,15 +554,13 @@ std::string GetTeamString(int clientNum) {
 void LogServerState() {
   time_t t;
   time(&t);
-  std::string state =
-      "Server state at " + TimeStampToString(static_cast<int>(t)) + ":\n";
+  std::string state = "Server state at " + TimeStampToString(static_cast<int>(t)) + ":\n";
 
   for (int i = 0; i < level.numConnectedClients; i++) {
     int clientNum = level.sortedClients[i];
 
-    state +=
-        StringUtils::format("%i %s %s\n", clientNum, GetTeamString(clientNum),
-                            (g_entities + clientNum)->client->pers.netname);
+    state += StringUtils::format("%i %s %s\n", clientNum, GetTeamString(clientNum),
+                                 (g_entities + clientNum)->client->pers.netname);
   }
 
   if (level.numConnectedClients == 0) {

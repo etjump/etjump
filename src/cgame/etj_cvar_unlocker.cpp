@@ -23,20 +23,24 @@
  */
 
 #include "etj_cvar_unlocker.h"
+
 #include "cg_local.h"
 #include "etj_cvar_update_handler.h"
 
 namespace ETJump {
-CvarUnlocker::CvarUnlocker(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
-                           const vmCvar_t *unlocker, std::string target)
-    : unlocker(unlocker), target(std::move(target)), cvarUpdate(cvarUpdate) {
+CvarUnlocker::CvarUnlocker(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate, const vmCvar_t *unlocker,
+                           std::string target)
+  : unlocker(unlocker), target(std::move(target)), cvarUpdate(cvarUpdate) {
   forceCvarSet(unlocker);
 
-  this->cvarUpdate->subscribe(
-      unlocker, [this](const vmCvar_t *cvar) { forceCvarSet(cvar); });
+  this->cvarUpdate->subscribe(unlocker, [this](const vmCvar_t *cvar) {
+    forceCvarSet(cvar);
+  });
 }
 
-CvarUnlocker::~CvarUnlocker() { cvarUpdate->unsubscribe(unlocker); }
+CvarUnlocker::~CvarUnlocker() {
+  cvarUpdate->unsubscribe(unlocker);
+}
 
 void CvarUnlocker::forceCvarSet(const vmCvar_t *cvar) const {
   trap_Cvar_Set(target.c_str(), cvar->string);

@@ -44,7 +44,7 @@ menuDef {
 
     SUBWINDOW(SETTINGS_SUBW_X, SETTINGS_SUBW_Y, SETTINGS_SUBW_W, SETTINGS_SUBW_H, "AUTODEMO")
 
-        MULTI               (SETTINGS_ITEM_POS(1), "Enable autodemo:", 0.2, SETTINGS_ITEM_H, "etj_autoDemo", cvarFloatList { "No" 0 "Timeruns only" 1 "Always" 2 }, "Enable autodemo\netj_autoDemo")
+        MULTI               (SETTINGS_ITEM_POS(1), "Enable autodemo:", 0.2, SETTINGS_ITEM_H, "etj_autoDemo", cvarFloatList { "No" 0 "Timeruns only" 1 "Always" 2 }, "Enable automatic demo recording on respawn/load\netj_autoDemo")
         YESNO               (SETTINGS_ITEM_POS(2), "Save personal bests only:", 0.2, SETTINGS_ITEM_H, "etj_ad_savePBOnly", "Save only demos that beat or tie your personal best times\netj_ad_savePBOnly")
         YESNO               (SETTINGS_ITEM_POS(3), "Stop in spec:", 0.2, SETTINGS_ITEM_H, "etj_ad_stopInSpec", "Automatically stop current autodemo recording when switching to spectators\netj_ad_stopInSpec")
         CVARINTLABEL        (SETTINGS_ITEM_POS(4), "etj_ad_stopDelay", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)

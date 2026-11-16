@@ -24,13 +24,13 @@
 
 #pragma once
 
-#include <string>
 #include <array>
-#include "json/json-forwards.h"
 #include <memory>
-#include "etj_log.h"
+#include <string>
+#include "json/json-forwards.h"
 
-typedef struct TokenInformation_s TokenInformation;
+#include "etj_log.h"
+#include "g_local.h"
 
 namespace ETJump {
 class Tokens {
@@ -38,15 +38,19 @@ public:
   explicit Tokens(std::unique_ptr<Log> log);
   ~Tokens() = default;
 
-  enum Difficulty { Easy, Medium, Hard };
+  enum Difficulty {
+    Easy,
+    Medium,
+    Hard
+  };
 
   // the entity is drawn as 32x32, but this feels more natural with touching
   static constexpr float TOKEN_RADIUS = 8.0f;
 
   struct Token {
     Token()
-        : coordinates{0.0f, 0.0f, 0.0f}, isActive(false), entity(nullptr),
-          data(std::make_unique<TokenInformation>()) {}
+      : coordinates{0.0f, 0.0f, 0.0f}, isActive(false), entity(nullptr), data(std::make_unique<TokenInformation>()) {}
+
     std::array<float, 3> coordinates;
     std::string name;
     bool isActive;
@@ -63,8 +67,8 @@ public:
     bool fromJson(const Json::Value &json);
   };
 
-  std::pair<bool, std::string> createToken(Difficulty difficulty,
-                                           std::array<float, 3> coordinates);
+  std::pair<bool, std::string> createToken(Difficulty difficulty, std::array<float, 3> coordinates);
+
   struct NearestToken {
     int number;
     Token *token;
@@ -73,10 +77,8 @@ public:
   };
 
   static NearestToken findNearestToken(std::array<float, 3> coordinates);
-  std::pair<bool, std::string>
-  moveNearestToken(std::array<float, 3> coordinates);
-  std::pair<bool, std::string>
-  deleteNearestToken(std::array<float, 3> coordinates);
+  std::pair<bool, std::string> moveNearestToken(std::array<float, 3> coordinates);
+  std::pair<bool, std::string> deleteNearestToken(std::array<float, 3> coordinates);
   std::pair<bool, std::string> deleteToken(Difficulty difficulty, int index);
 
   void loadTokens(const std::string &filepath);

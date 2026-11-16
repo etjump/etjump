@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
+#include "etj_snaphud_data.h"
+
 #include <algorithm>
 
-#include "etj_snaphud_data.h"
 #include "cg_local.h"
 
 // wishspeed may be modified by 'target_scale_velocity' up to 3x
@@ -39,8 +40,8 @@ SnaphudData::SnaphudData() {
 }
 
 void SnaphudData::runFrame() {
-  s.ps = cg.predictedPlayerState;
-  s.pm.ps = &s.ps;
+  s.ps       = cg.predictedPlayerState;
+  s.pm.ps    = &s.ps;
   s.pm.pmext = &s.pmext;
   PmoveUtilsV2::setupPmove(s.pm);
 
@@ -58,11 +59,12 @@ void SnaphudData::runFrame() {
   }
 }
 
-const SnaphudData::State &SnaphudData::getState() const { return s; }
+const SnaphudData::State &SnaphudData::getState() const {
+  return s;
+}
 
-bool SnaphudData::inMainAccelZone(const vec2_t wishvel, const float wishspeed,
-                                  const float velAngle, const float optAngle,
-                                  const pmove_t &pm) {
+bool SnaphudData::inMainAccelZone(const vec2_t wishvel, const float wishspeed, const float velAngle,
+                                  const float optAngle, const pmove_t &pm) {
   // snapzones are not yet calculated - this can happen on the first frame
   // of the game if the player holds movement inputs during the loading screen,
   // as snaphud state will not update on the very first frame, since accel is 0
@@ -70,29 +72,25 @@ bool SnaphudData::inMainAccelZone(const vec2_t wishvel, const float wishspeed,
     return false;
   }
 
-  const bool forwards = PmoveUtilsV2::strafingForwards(pm, wishspeed, wishvel);
+  const bool forwards    = PmoveUtilsV2::strafingForwards(pm, wishspeed, wishvel);
   const bool rightStrafe = PmoveUtilsV2::rightStrafe(forwards, s.pm.cmd);
 
   // convert to absolute world space angle so we can compare against snap zones
-  float optAngleAbsolute =
-      rightStrafe ? velAngle - optAngle : velAngle + optAngle;
-  optAngleAbsolute = AngleNormalizePI(optAngleAbsolute);
-  const float yaw = std::atan2(wishvel[1], wishvel[0]);
+  float optAngleAbsolute = rightStrafe ? velAngle - optAngle : velAngle + optAngle;
+  optAngleAbsolute       = AngleNormalizePI(optAngleAbsolute);
+  const float yaw        = std::atan2(wishvel[1], wishvel[0]);
 
-  const auto inCurrentZone = [](const float start, const float end,
-                                const float angle) {
-    return AngleNormalizePI(angle - start) >= 0 &&
-           AngleNormalizePI(angle - start) <= AngleNormalizePI(end - start);
+  const auto inCurrentZone = [](const float start, const float end, const float angle) {
+    return AngleNormalizePI(angle - start) >= 0 && AngleNormalizePI(angle - start) <= AngleNormalizePI(end - start);
   };
 
   for (size_t i = 0; i < s.snapAngles.size() - 1; i++) {
     for (int32_t q = 0; q < 4; q++) {
       const float offset = static_cast<float>(q) * M_PI_2f;
-      const float start = s.snapAngles[i] + offset;
-      const float end = s.snapAngles[i + 1] + offset;
+      const float start  = s.snapAngles[i] + offset;
+      const float end    = s.snapAngles[i + 1] + offset;
 
-      if (inCurrentZone(start, end, optAngleAbsolute) &&
-          inCurrentZone(start, end, yaw)) {
+      if (inCurrentZone(start, end, optAngleAbsolute) && inCurrentZone(start, end, yaw)) {
         // don't normalize these into 0 .. 2 * Pi range, otherwise we fail
         // the comparison at the wraparound point - instead just measure
         // the difference from the zone start, and check the delta
@@ -124,13 +122,11 @@ void SnaphudData::updateState(const float accel) {
 
   std::sort(s.snapAngles.begin(), s.snapAngles.end());
   // we might not have any valid angles on low speeds
-  s.snapAngles.push_back(s.snapAngles.empty() ? M_PI_2f
-                                              : s.snapAngles[0] + M_PI_2f);
+  s.snapAngles.push_back(s.snapAngles.empty() ? M_PI_2f : s.snapAngles[0] + M_PI_2f);
 }
 
 void SnaphudData::walkMove() {
-  if (s.pm.waterlevel > 2 &&
-      DotProduct(s.pml.forward, s.pml.groundTrace.plane.normal) > 0) {
+  if (s.pm.waterlevel > 2 && DotProduct(s.pml.forward, s.pml.groundTrace.plane.normal) > 0) {
     return;
   }
 
@@ -143,8 +139,7 @@ void SnaphudData::walkMove() {
       airMove();
     }
 
-    if (!isLerpFrame &&
-        !(s.pm.cmd.serverTime - s.pm.pmext->jumpTime < JUMP_DELAY_TIME)) {
+    if (!isLerpFrame && !(s.pm.cmd.serverTime - s.pm.pmext->jumpTime < JUMP_DELAY_TIME)) {
       s.pm.pmext->sprintTime -= 2500;
 
       if (s.pm.pmext->sprintTime < 0) {
@@ -163,13 +158,12 @@ void SnaphudData::walkMove() {
     return;
   }
 
-  const float scale = PmoveUtilsV2::cmdScale(
-      s.pm, s.pm.cmd,
-      etj_snapHUDTrueness.integer & static_cast<int32_t>(SnapTrueness::UPMOVE));
+  const float scale =
+    PmoveUtilsV2::cmdScale(s.pm, s.pm.cmd, etj_snapHUDTrueness.integer & static_cast<int32_t>(SnapTrueness::UPMOVE));
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;
-  s.pml.right[2] = 0;
+  s.pml.right[2]   = 0;
 
   // FIXME: no slopes :(
   // project the forward and right directions onto the ground plane
@@ -192,10 +186,8 @@ void SnaphudData::walkMove() {
     }
   } else if (s.pm.ps->pm_flags & PMF_DUCKED) {
     // clamp the speed lower if ducking
-    if (wishspeed >
-        static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale) {
-      wishspeed =
-          static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale;
+    if (wishspeed > static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale) {
+      wishspeed = static_cast<float>(s.pm.ps->speed) * s.pm.ps->crouchSpeedScale;
     }
   }
 
@@ -216,10 +208,8 @@ void SnaphudData::walkMove() {
 
   // when a player gets hit, they temporarily lose
   // full control, which allows them to be moved a bit
-  if (etj_snapHUDTrueness.integer &
-      static_cast<int32_t>(SnapTrueness::GROUND)) {
-    if ((s.pml.groundTrace.surfaceFlags & SURF_SLICK) ||
-        s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK) {
+  if (etj_snapHUDTrueness.integer & static_cast<int32_t>(SnapTrueness::GROUND)) {
+    if ((s.pml.groundTrace.surfaceFlags & SURF_SLICK) || s.pm.ps->pm_flags & PMF_TIME_KNOCKBACK) {
       accelerate(wishspeed, pm_airaccelerate);
     } else {
       accelerate(wishspeed, pm_accelerate);
@@ -230,13 +220,12 @@ void SnaphudData::walkMove() {
 }
 
 void SnaphudData::airMove() {
-  const float scale = PmoveUtilsV2::cmdScale(
-      s.pm, s.pm.cmd,
-      etj_snapHUDTrueness.integer & static_cast<int32_t>(SnapTrueness::UPMOVE));
+  const float scale =
+    PmoveUtilsV2::cmdScale(s.pm, s.pm.cmd, etj_snapHUDTrueness.integer & static_cast<int32_t>(SnapTrueness::UPMOVE));
 
   // project moves down to flat plane
   s.pml.forward[2] = 0;
-  s.pml.right[2] = 0;
+  s.pml.right[2]   = 0;
   VectorNormalize(s.pml.forward);
   VectorNormalize(s.pml.right);
 
@@ -256,8 +245,8 @@ void SnaphudData::airMove() {
 }
 
 void SnaphudData::accelerate(const float wishspeed, const float accel) {
-  const float a =
-      std::min(accel * wishspeed * PmoveUtilsV2::PM_FRAMETIME, MAX_SNAP_ACCEL);
+  const float a = std::min(accel * wishspeed * PmoveUtilsV2::PM_FRAMETIME, MAX_SNAP_ACCEL);
+  s.wishspeed   = wishspeed;
 
   if (s.a != a) {
     updateState(a);

@@ -1,20 +1,28 @@
-#include "ui_local.h"
+#include "etj_keep_alive.h"
 #include "etj_local.h"
+#include "ui_local.h"
+
+#include "../game/etj_fatal_error_shared.h"
 #include "../game/etj_syscall_ext_shared.h"
 
 // this file is only included when building a dll
 // syscalls.asm is included instead when building a qvm
 
-intptr_t(QDECL *vmSyscall)(intptr_t arg,
-                           ...) = (intptr_t(QDECL *)(intptr_t, ...)) - 1;
+intptr_t(QDECL *vmSyscall)(intptr_t arg, ...) = (intptr_t(QDECL *)(intptr_t, ...)) - 1;
 
 #if defined(__MACOS__) && !defined(__GNUC__)
   #pragma export on
 #endif
 
-extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg,
-                                                               ...)) {
+extern "C" FN_PUBLIC void dllEntry(intptr_t(QDECL *syscallptr)(intptr_t arg, ...)) {
   vmSyscall = syscallptr;
+
+  // on Windows, ui stays mapped after an error until the engine is done
+  // handling it, which loads ui again while doing so, possibly more than
+  // once (see ETJump::releaseKeptModules)
+  ETJump::FatalErrorBoundary::initialize(trap_Error, trap_Print, nullptr,
+                                         ETJump::FatalErrorBoundary::KeepAliveRelease::Manual);
+  ETJump::resetKeepAlive();
 }
 
 #if defined(__MACOS__) && !defined(__GNUC__)
@@ -27,7 +35,9 @@ inline int PASSFLOAT(const float &f) noexcept {
   return fi.i;
 }
 
-void trap_Print(const char *string) { SystemCall(UI_PRINT, string); }
+void trap_Print(const char *string) {
+  SystemCall(UI_PRINT, string);
+}
 
 // coverity[+kill]
 [[noreturn]] void trap_Error(const char *string) {
@@ -35,14 +45,17 @@ void trap_Print(const char *string) { SystemCall(UI_PRINT, string); }
   UNREACHABLE
 }
 
-int trap_Milliseconds(void) { return SystemCall(UI_MILLISECONDS); }
+int trap_Milliseconds(void) {
+  return SystemCall(UI_MILLISECONDS);
+}
 
-void trap_Cvar_Register(vmCvar_t *cvar, const char *var_name, const char *value,
-                        int flags) {
+void trap_Cvar_Register(vmCvar_t *cvar, const char *var_name, const char *value, int flags) {
   SystemCall(UI_CVAR_REGISTER, cvar, var_name, value, flags);
 }
 
-void trap_Cvar_Update(vmCvar_t *cvar) { SystemCall(UI_CVAR_UPDATE, cvar); }
+void trap_Cvar_Update(vmCvar_t *cvar) {
+  SystemCall(UI_CVAR_UPDATE, cvar);
+}
 
 void trap_Cvar_Set(const char *var_name, const char *value) {
   SystemCall(UI_CVAR_SET, var_name, value);
@@ -54,13 +67,11 @@ float trap_Cvar_VariableValue(const char *var_name) {
   return fi.f;
 }
 
-void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer,
-                                    int bufsize) {
+void trap_Cvar_VariableStringBuffer(const char *var_name, char *buffer, int bufsize) {
   SystemCall(UI_CVAR_VARIABLESTRINGBUFFER, var_name, buffer, bufsize);
 }
 
-void trap_Cvar_LatchedVariableStringBuffer(const char *var_name, char *buffer,
-                                           int bufsize) {
+void trap_Cvar_LatchedVariableStringBuffer(const char *var_name, char *buffer, int bufsize) {
   SystemCall(UI_CVAR_LATCHEDVARIABLESTRINGBUFFER, var_name, buffer, bufsize);
 }
 
@@ -68,7 +79,9 @@ void trap_Cvar_SetValue(const char *var_name, float value) {
   SystemCall(UI_CVAR_SETVALUE, var_name, PASSFLOAT(value));
 }
 
-void trap_Cvar_Reset(const char *name) { SystemCall(UI_CVAR_RESET, name); }
+void trap_Cvar_Reset(const char *name) {
+  SystemCall(UI_CVAR_RESET, name);
+}
 
 void trap_Cvar_Create(const char *var_name, const char *var_value, int flags) {
   SystemCall(UI_CVAR_CREATE, var_name, var_value, flags);
@@ -78,7 +91,9 @@ void trap_Cvar_InfoStringBuffer(int bit, char *buffer, int bufsize) {
   SystemCall(UI_CVAR_INFOSTRINGBUFFER, bit, buffer, bufsize);
 }
 
-int trap_Argc(void) { return SystemCall(UI_ARGC); }
+int trap_Argc(void) {
+  return SystemCall(UI_ARGC);
+}
 
 void trap_Argv(int n, char *buffer, int bufferLength) {
   SystemCall(UI_ARGV, n, buffer, bufferLength);
@@ -104,10 +119,11 @@ void trap_FS_Write(const void *buffer, int len, fileHandle_t f) {
   SystemCall(UI_FS_WRITE, buffer, len, f);
 }
 
-void trap_FS_FCloseFile(fileHandle_t f) { SystemCall(UI_FS_FCLOSEFILE, f); }
+void trap_FS_FCloseFile(fileHandle_t f) {
+  SystemCall(UI_FS_FCLOSEFILE, f);
+}
 
-int trap_FS_GetFileList(const char *path, const char *extension, char *listbuf,
-                        int bufsize) {
+int trap_FS_GetFileList(const char *path, const char *extension, char *listbuf, int bufsize) {
   return SystemCall(UI_FS_GETFILELIST, path, extension, listbuf, bufsize);
 }
 
@@ -123,8 +139,7 @@ qhandle_t trap_R_RegisterSkin(const char *name) {
   return SystemCall(UI_R_REGISTERSKIN, name);
 }
 
-void trap_R_RegisterFont(const char *fontName, int pointSize,
-                         fontInfo_t *font) {
+void trap_R_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font) {
   SystemCall(UI_R_REGISTERFONT, fontName, pointSize, font);
 }
 
@@ -132,14 +147,15 @@ qhandle_t trap_R_RegisterShaderNoMip(const char *name) {
   return SystemCall(UI_R_REGISTERSHADERNOMIP, name);
 }
 
-void trap_R_ClearScene(void) { SystemCall(UI_R_CLEARSCENE); }
+void trap_R_ClearScene(void) {
+  SystemCall(UI_R_CLEARSCENE);
+}
 
 void trap_R_AddRefEntityToScene(const refEntity_t *re) {
   SystemCall(UI_R_ADDREFENTITYTOSCENE, re);
 }
 
-void trap_R_AddPolyToScene(qhandle_t hShader, int numVerts,
-                           const polyVert_t *verts) {
+void trap_R_AddPolyToScene(qhandle_t hShader, int numVerts, const polyVert_t *verts) {
   SystemCall(UI_R_ADDPOLYTOSCENE, hShader, numVerts, verts);
 }
 
@@ -148,59 +164,55 @@ void trap_R_AddPolyToScene(qhandle_t hShader, int numVerts,
 // r, float g, float b, int overdraw ) { %		SystemCall(
 // UI_R_ADDLIGHTTOSCENE, org, PASSFLOAT(intensity), PASSFLOAT(r), PASSFLOAT(g),
 // PASSFLOAT(b), overdraw ); %	}
-void trap_R_AddLightToScene(const vec3_t org, float radius, float intensity,
-                            float r, float g, float b, qhandle_t hShader,
-                            int flags) {
-  SystemCall(UI_R_ADDLIGHTTOSCENE, org, PASSFLOAT(radius), PASSFLOAT(intensity),
-             PASSFLOAT(r), PASSFLOAT(g), PASSFLOAT(b), hShader, flags);
+void trap_R_AddLightToScene(const vec3_t org, float radius, float intensity, float r, float g, float b,
+                            qhandle_t hShader, int flags) {
+  SystemCall(UI_R_ADDLIGHTTOSCENE, org, PASSFLOAT(radius), PASSFLOAT(intensity), PASSFLOAT(r), PASSFLOAT(g),
+             PASSFLOAT(b), hShader, flags);
 }
 
-void trap_R_AddCoronaToScene(const vec3_t org, float r, float g, float b,
-                             float scale, int id, qboolean visible) {
-  SystemCall(UI_R_ADDCORONATOSCENE, org, PASSFLOAT(r), PASSFLOAT(g),
-             PASSFLOAT(b), PASSFLOAT(scale), id, visible);
+void trap_R_AddCoronaToScene(const vec3_t org, float r, float g, float b, float scale, int id, qboolean visible) {
+  SystemCall(UI_R_ADDCORONATOSCENE, org, PASSFLOAT(r), PASSFLOAT(g), PASSFLOAT(b), PASSFLOAT(scale), id, visible);
 }
 
 void trap_R_RenderScene(const refdef_t *fd) {
   SystemCall(UI_R_RENDERSCENE, fd);
 }
 
-void trap_R_SetColor(const float *rgba) { SystemCall(UI_R_SETCOLOR, rgba); }
+void trap_R_SetColor(const float *rgba) {
+  SystemCall(UI_R_SETCOLOR, rgba);
+}
 
 void trap_R_Add2dPolys(polyVert_t *verts, int numverts, qhandle_t hShader) {
   SystemCall(UI_R_DRAW2DPOLYS, verts, numverts, hShader);
 }
 
-void trap_R_DrawStretchPic(float x, float y, float w, float h, float s1,
-                           float t1, float s2, float t2, qhandle_t hShader) {
-  SystemCall(UI_R_DRAWSTRETCHPIC, PASSFLOAT(x), PASSFLOAT(y), PASSFLOAT(w),
-             PASSFLOAT(h), PASSFLOAT(s1), PASSFLOAT(t1), PASSFLOAT(s2),
-             PASSFLOAT(t2), hShader);
+void trap_R_DrawStretchPic(float x, float y, float w, float h, float s1, float t1, float s2, float t2,
+                           qhandle_t hShader) {
+  SystemCall(UI_R_DRAWSTRETCHPIC, PASSFLOAT(x), PASSFLOAT(y), PASSFLOAT(w), PASSFLOAT(h), PASSFLOAT(s1), PASSFLOAT(t1),
+             PASSFLOAT(s2), PASSFLOAT(t2), hShader);
 }
 
-void trap_R_DrawRotatedPic(float x, float y, float w, float h, float s1,
-                           float t1, float s2, float t2, qhandle_t hShader,
-                           float angle) {
-  SystemCall(UI_R_DRAWROTATEDPIC, PASSFLOAT(x), PASSFLOAT(y), PASSFLOAT(w),
-             PASSFLOAT(h), PASSFLOAT(s1), PASSFLOAT(t1), PASSFLOAT(s2),
-             PASSFLOAT(t2), hShader, PASSFLOAT(angle));
+void trap_R_DrawRotatedPic(float x, float y, float w, float h, float s1, float t1, float s2, float t2,
+                           qhandle_t hShader, float angle) {
+  SystemCall(UI_R_DRAWROTATEDPIC, PASSFLOAT(x), PASSFLOAT(y), PASSFLOAT(w), PASSFLOAT(h), PASSFLOAT(s1), PASSFLOAT(t1),
+             PASSFLOAT(s2), PASSFLOAT(t2), hShader, PASSFLOAT(angle));
 }
 
 void trap_R_ModelBounds(clipHandle_t model, vec3_t mins, vec3_t maxs) {
   SystemCall(UI_R_MODELBOUNDS, model, mins, maxs);
 }
 
-void trap_UpdateScreen(void) { SystemCall(UI_UPDATESCREEN); }
+void trap_UpdateScreen(void) {
+  SystemCall(UI_UPDATESCREEN);
+}
 
-int trap_CM_LerpTag(orientation_t *tag, const refEntity_t *refent,
-                    const char *tagName, int startIndex) {
+int trap_CM_LerpTag(orientation_t *tag, const refEntity_t *refent, const char *tagName, int startIndex) {
   return SystemCall(UI_CM_LERPTAG, tag, refent, tagName,
                     0); // NEFVE - SMF - fixed
 }
 
 void trap_S_StartLocalSound(sfxHandle_t sfx, int channelNum) {
-  SystemCall(UI_S_STARTLOCALSOUND, sfx, channelNum,
-             127 /* Gordon: default volume always for the moment*/);
+  SystemCall(UI_S_STARTLOCALSOUND, sfx, channelNum, 127 /* Gordon: default volume always for the moment*/);
 }
 
 sfxHandle_t trap_S_RegisterSound(const char *sample, qboolean compressed) {
@@ -213,10 +225,9 @@ sfxHandle_t trap_S_RegisterSound(const char *sample, qboolean compressed) {
   return i;
 }
 
-void trap_S_FadeBackgroundTrack(
-    float targetvol, int time,
-    int num) // yes, i know.  fadebackground coming in, fadestreaming going out.
-             // will have to see where functionality leads...
+void trap_S_FadeBackgroundTrack(float targetvol, int time,
+                                int num) // yes, i know.  fadebackground coming in, fadestreaming going out.
+                                         // will have to see where functionality leads...
 {
   SystemCall(UI_S_FADESTREAMINGSOUND, PASSFLOAT(targetvol), time,
              num); // 'num' is '0' if it's music, '1' if it's "all
@@ -256,9 +267,13 @@ void trap_Key_SetOverstrikeMode(qboolean state) {
   SystemCall(UI_KEY_SETOVERSTRIKEMODE, state);
 }
 
-void trap_Key_ClearStates(void) { SystemCall(UI_KEY_CLEARSTATES); }
+void trap_Key_ClearStates(void) {
+  SystemCall(UI_KEY_CLEARSTATES);
+}
 
-int trap_Key_GetCatcher(void) { return SystemCall(UI_KEY_GETCATCHER); }
+int trap_Key_GetCatcher(void) {
+  return SystemCall(UI_KEY_GETCATCHER);
+}
 
 void trap_Key_SetCatcher(int catcher) {
   SystemCall(UI_KEY_SETCATCHER, catcher);
@@ -300,7 +315,9 @@ int trap_LAN_GetPingQueueCount(void) {
   return SystemCall(UI_LAN_GETPINGQUEUECOUNT);
 }
 
-void trap_LAN_ClearPing(int n) { SystemCall(UI_LAN_CLEARPING, n); }
+void trap_LAN_ClearPing(int n) {
+  SystemCall(UI_LAN_CLEARPING, n);
+}
 
 void trap_LAN_GetPing(int n, char *buf, int buflen, int *pingtime) {
   SystemCall(UI_LAN_GETPING, n, buf, buflen, pingtime);
@@ -319,8 +336,7 @@ int trap_LAN_GetServerCount(int source) {
   return SystemCall(UI_LAN_GETSERVERCOUNT, source);
 }
 
-int trap_LAN_CompareServers(int source, int sortKey, int sortDir, int s1,
-                            int s2) {
+int trap_LAN_CompareServers(int source, int sortKey, int sortDir, int s1, int s2) {
   return SystemCall(UI_LAN_COMPARESERVERS, source, sortKey, sortDir, s1, s2);
 }
 
@@ -348,8 +364,7 @@ int trap_LAN_ServerIsVisible(int source, int n) {
   return SystemCall(UI_LAN_SERVERISVISIBLE, source, n);
 }
 
-int trap_LAN_ServerStatus(const char *serverAddress, char *serverStatus,
-                          int maxLen) {
+int trap_LAN_ServerStatus(const char *serverAddress, char *serverStatus, int maxLen) {
   return SystemCall(UI_LAN_SERVERSTATUS, serverAddress, serverStatus, maxLen);
 }
 
@@ -357,31 +372,47 @@ qboolean trap_LAN_ServerIsInFavoriteList(int source, int n) {
   return SystemCall(UI_LAN_SERVERISINFAVORITELIST, source, n) ? qtrue : qfalse;
 }
 
-void trap_LAN_SaveCachedServers() { SystemCall(UI_LAN_SAVECACHEDSERVERS); }
+void trap_LAN_SaveCachedServers() {
+  SystemCall(UI_LAN_SAVECACHEDSERVERS);
+}
 
-void trap_LAN_LoadCachedServers() { SystemCall(UI_LAN_LOADCACHEDSERVERS); }
+void trap_LAN_LoadCachedServers() {
+  SystemCall(UI_LAN_LOADCACHEDSERVERS);
+}
 
 void trap_LAN_MarkServerVisible(int source, int n, qboolean visible) {
   SystemCall(UI_LAN_MARKSERVERVISIBLE, source, n, visible);
 }
 
 // DHM - Nerve :: PunkBuster
-void trap_SetPbClStatus(int status) { SystemCall(UI_SET_PBCLSTATUS, status); }
+void trap_SetPbClStatus(int status) {
+  SystemCall(UI_SET_PBCLSTATUS, status);
+}
+
 // DHM - Nerve
 
 // TTimo: also for Sv
-void trap_SetPbSvStatus(int status) { SystemCall(UI_SET_PBSVSTATUS, status); }
+void trap_SetPbSvStatus(int status) {
+  SystemCall(UI_SET_PBSVSTATUS, status);
+}
 
-void trap_LAN_ResetPings(int n) { SystemCall(UI_LAN_RESETPINGS, n); }
+void trap_LAN_ResetPings(int n) {
+  SystemCall(UI_LAN_RESETPINGS, n);
+}
+
 // -NERVE - SMF
 
-int trap_MemoryRemaining(void) { return SystemCall(UI_MEMORY_REMAINING); }
+int trap_MemoryRemaining(void) {
+  return SystemCall(UI_MEMORY_REMAINING);
+}
 
 void trap_GetCDKey(char *buf, int buflen) {
   SystemCall(UI_GET_CDKEY, buf, buflen);
 }
 
-void trap_SetCDKey(char *buf) { SystemCall(UI_SET_CDKEY, buf); }
+void trap_SetCDKey(char *buf) {
+  SystemCall(UI_SET_CDKEY, buf);
+}
 
 int trap_PC_AddGlobalDefine(const char *define) {
   return SystemCall(UI_PC_ADD_GLOBAL_DEFINE, define);
@@ -411,21 +442,22 @@ int trap_PC_UnReadToken(int handle) {
   return SystemCall(UI_PC_UNREAD_TOKEN, handle);
 }
 
-void trap_S_StopBackgroundTrack(void) { SystemCall(UI_S_STOPBACKGROUNDTRACK); }
+void trap_S_StopBackgroundTrack(void) {
+  SystemCall(UI_S_STOPBACKGROUNDTRACK);
+}
 
-void trap_S_StartBackgroundTrack(const char *intro, const char *loop,
-                                 int fadeupTime) {
+void trap_S_StartBackgroundTrack(const char *intro, const char *loop, int fadeupTime) {
   SystemCall(UI_S_STARTBACKGROUNDTRACK, intro, loop, fadeupTime);
 }
 
-int trap_RealTime(qtime_t *qtime) { return SystemCall(UI_REAL_TIME, qtime); }
+int trap_RealTime(qtime_t *qtime) {
+  return SystemCall(UI_REAL_TIME, qtime);
+}
 
 // this returns a handle.  arg0 is the name in the format "idlogo.roq", set arg1
 // to NULL, alteredstates to qfalse (do not alter gamestate)
-int trap_CIN_PlayCinematic(const char *arg0, int xpos, int ypos, int width,
-                           int height, int bits) {
-  return SystemCall(UI_CIN_PLAYCINEMATIC, arg0, xpos, ypos, width, height,
-                    bits);
+int trap_CIN_PlayCinematic(const char *arg0, int xpos, int ypos, int width, int height, int bits) {
+  return SystemCall(UI_CIN_PLAYCINEMATIC, arg0, xpos, ypos, width, height, bits);
 }
 
 // stops playing the cinematic and ends it.  should always return FMV_EOF
@@ -450,8 +482,7 @@ void trap_CIN_SetExtents(int handle, int x, int y, int w, int h) {
   SystemCall(UI_CIN_SETEXTENTS, handle, x, y, w, h);
 }
 
-void trap_R_RemapShader(const char *oldShader, const char *newShader,
-                        const char *timeOffset) {
+void trap_R_RemapShader(const char *oldShader, const char *newShader, const char *timeOffset) {
   SystemCall(UI_R_REMAP_SHADER, oldShader, newShader, timeOffset);
 }
 
@@ -465,12 +496,19 @@ qboolean trap_GetLimboString(int index, char *buf) {
 }
 
 // DHM - Nerve
-void trap_CheckAutoUpdate(void) { SystemCall(UI_CHECKAUTOUPDATE); }
+void trap_CheckAutoUpdate(void) {
+  SystemCall(UI_CHECKAUTOUPDATE);
+}
 
-void trap_GetAutoUpdate(void) { SystemCall(UI_GET_AUTOUPDATE); }
+void trap_GetAutoUpdate(void) {
+  SystemCall(UI_GET_AUTOUPDATE);
+}
+
 // DHM - Nerve
 
-void trap_openURL(const char *s) { SystemCall(UI_OPENURL, s); }
+void trap_openURL(const char *s) {
+  SystemCall(UI_OPENURL, s);
+}
 
 void trap_GetHunkData(int *hunkused, int *hunkexpected) {
   SystemCall(UI_GETHUNKDATA, hunkused, hunkexpected);

@@ -67,6 +67,8 @@ menuDef {
         MULTI               (SETTINGS_ITEM_POS(7), "Accel-based color:", 0.2, SETTINGS_ITEM_H, "etj_speedColorUsesAccel", cvarFloatList { "Off" 0 "Simple" 1 "Advanced" 2 }, "Color ETJump speed meter based on accel/decel\nNote: advanced coloring is disabled while spectating\nand on demo playback if acceleration cannot be reliably measured\n(demo was recorded without sv_fps/snaps 125)\netj_speedColorUsesAccel")
         YESNO               (SETTINGS_ITEM_POS(8), "Speed meter shadow:", 0.2, SETTINGS_ITEM_H, "etj_speedShadow", "Draw shadow on ETJump speed meter\netj_speedShadow")
         MULTI               (SETTINGS_ITEM_POS(9), "Speed meter align:", 0.2, SETTINGS_ITEM_H, "etj_speedAlign", cvarFloatList { "Center" 0 "Left" 1 "Right" 2 }, "Sets alignment of ETJump speed meter\netj_speedAlign")
+        CVARINTLABEL        (SETTINGS_ITEM_POS(10), "etj_speedPrecision", 0.2, ITEM_ALIGN_RIGHT, $evalfloat(SLIDER_LABEL_X), SETTINGS_ITEM_H)
+        SLIDER              (SETTINGS_ITEM_POS(10), "Speed precision:", 0.2, SETTINGS_ITEM_H, etj_speedPrecision 0 0 6 1, "Number of decimals to display on ETJump speed meter\netj_speedPrecision")
 
     LOWERBUTTON(1, "BACK", close MENU_NAME; open etjump)
     LOWERBUTTON(2, "WRITE CONFIG", clearfocus; uiScript uiPreviousMenu MENU_NAME; open etjump_settings_popup_writeconfig)

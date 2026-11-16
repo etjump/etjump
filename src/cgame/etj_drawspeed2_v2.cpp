@@ -23,6 +23,7 @@
  */
 
 #include "etj_drawspeed2_v2.h"
+
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_color_parser.h"
@@ -34,10 +35,9 @@ namespace ETJump {
 inline constexpr float SPEED_SIZE_MIN = 0.1f;
 inline constexpr float SPEED_SIZE_MAX = 10.0f;
 
-DrawSpeed2::DrawSpeed2(
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
-    : cvarUpdate(cvarUpdate), consoleCommands(consoleCommands) {
+DrawSpeed2::DrawSpeed2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+                       const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+  : cvarUpdate(cvarUpdate), consoleCommands(consoleCommands) {
   parseColor(etj_speedColor.string);
   setAccelColorStyle(etj_speedColorUsesAccel);
   setSize(etj_speedSize);
@@ -62,19 +62,19 @@ void DrawSpeed2::startListeners() {
     parseColor(etj_speedColor.string);
   });
 
-  cvarUpdate->subscribe(&etj_speedSize,
-                        [this](const vmCvar_t *cvar) { setSize(*cvar); });
+  cvarUpdate->subscribe(&etj_speedSize, [this](const vmCvar_t *cvar) {
+    setSize(*cvar);
+  });
 
   cvarUpdate->subscribe(&etj_speedColorUsesAccel, [this](const vmCvar_t *cvar) {
     setAccelColorStyle(*cvar);
   });
 
-  consoleCommands->subscribe("resetmaxspeed",
-                             [this](const std::vector<std::string> &) {
-                               maxSpeed = 0;
-                               // FIXME: this is for the regular speed meter
-                               cg.resetmaxspeed = qtrue;
-                             });
+  consoleCommands->subscribe("resetmaxspeed", [this](const std::vector<std::string> &) {
+    maxSpeed = 0;
+    // FIXME: this is for the regular speed meter
+    cg.resetmaxspeed = qtrue;
+  });
 }
 
 void DrawSpeed2::parseColor(const std::string &colorStr) {
@@ -83,15 +83,13 @@ void DrawSpeed2::parseColor(const std::string &colorStr) {
 }
 
 void DrawSpeed2::setSize(const vmCvar_t &cvar) {
-  size = CvarValueParser::parse<CvarValue::Size>(cvar, SPEED_SIZE_MIN,
-                                                 SPEED_SIZE_MAX);
+  size    = CvarValueParser::parse<CvarValue::Size>(cvar, SPEED_SIZE_MIN, SPEED_SIZE_MAX);
   size.x *= 0.1f;
   size.y *= 0.1f;
 }
 
 void DrawSpeed2::setAccelColorStyle(const vmCvar_t &cvar) {
-  accelColorStyle =
-      static_cast<AccelColorV2::Style>(std::clamp(cvar.integer, 0, 2));
+  accelColorStyle = static_cast<AccelColorV2::Style>(std::clamp(cvar.integer, 0, 2));
 
   // re-parse the base color if we're turning off accel-based coloring
   if (accelColorStyle == AccelColorV2::Style::NONE) {
@@ -99,8 +97,7 @@ void DrawSpeed2::setAccelColorStyle(const vmCvar_t &cvar) {
   }
 }
 
-void DrawSpeed2::setupAccelColor(const PmoveUtilsV2::State &s,
-                                 const float speed) {
+void DrawSpeed2::setupAccelColor(const PmoveUtilsV2::State &s, const float speed) {
   if (accelColorStyle == AccelColorV2::Style::NONE) {
     return;
   }
@@ -116,15 +113,13 @@ void DrawSpeed2::setupAccelColor(const PmoveUtilsV2::State &s,
       avgAccel = -avgAccel;
     }
 
-    const float frac =
-        std::min(avgAccel / AccelColorV2::ACCEL_FOR_SOLID_COLOR, 1.0f);
+    const float frac = std::min(avgAccel / AccelColorV2::ACCEL_FOR_SOLID_COLOR, 1.0f);
 
     LerpColor(colorWhite, color, color, frac);
   } else if (accelColorStyle == AccelColorV2::Style::ADVANCED) {
     if (accelVec[0] != 0 || accelVec[1] != 0) {
-      AccelColorV2::calcAdvancedAccelColor(s.pm, s.pml, accelVec, s.wishspeed,
-                                           s.wishvel, s.velAngle, s.optAngle,
-                                           s.a, color);
+      AccelColorV2::calcAdvancedAccelColor(s.pm, s.pml, accelVec, s.wishspeed, s.wishvel, s.velAngle, s.optAngle, s.a,
+                                           color);
     } else {
       Vector4Copy(colorWhite, color);
     }
@@ -134,26 +129,27 @@ void DrawSpeed2::setupAccelColor(const PmoveUtilsV2::State &s,
 }
 
 std::string DrawSpeed2::getSpeedString() const {
+  const int32_t precision = std::clamp(etj_speedPrecision.integer, 0, 6);
+
   switch (static_cast<Style>(etj_drawSpeed2.integer)) {
     case Style::SPEED_MAX:
-      return StringUtils::format("%.0f %.0f", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f %.*f", precision, currentSpeed, precision, maxSpeed);
     case Style::SPEED_MAX_COLOR:
-      return StringUtils::format("%.0f ^z%.0f", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f ^z%.*f", precision, currentSpeed, precision, maxSpeed);
     case Style::SPEED_MAX_PARENTHESIS:
-      return StringUtils::format("%.0f (%.0f)", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f (%.*f)", precision, currentSpeed, precision, maxSpeed);
     case Style::SPEED_MAX_COLOR_PARENTHESIS:
-      return StringUtils::format("%.0f ^z(%.0f)", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f ^z(%.*f)", precision, currentSpeed, precision, maxSpeed);
     case Style::SPEED_MAX_COLOR_BRACKETS:
-      return StringUtils::format("%.0f ^z[%.0f]", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f ^z[%.*f]", precision, currentSpeed, precision, maxSpeed);
     case Style::SPEED_MAX_PIPE:
-      return StringUtils::format("%.0f | %.0f", currentSpeed, maxSpeed);
+      return StringUtils::format("%.*f | %.*f", precision, currentSpeed, precision, maxSpeed);
     case Style::SPEED_TEXT:
-      return StringUtils::format("Speed: %.0f", currentSpeed);
+      return StringUtils::format("Speed: %.*f", precision, currentSpeed);
     case Style::SPEED_TENS:
-      return StringUtils::format("%02i",
-                                 static_cast<int>(currentSpeed) / 10 % 10 * 10);
+      return StringUtils::format("%02i", static_cast<int>(currentSpeed) / 10 % 10 * 10);
     default:
-      return StringUtils::format("%.0f", currentSpeed);
+      return StringUtils::format("%.*f", precision, currentSpeed);
   }
 }
 
@@ -162,34 +158,37 @@ bool DrawSpeed2::beforeRender() {
     return false;
   }
 
-  const PmoveUtilsV2::State &s = cgame.utils.pmoveV2->getState();
+  const PmoveUtilsV2::State &s = cgame.hudData.pmoveV2->getState();
 
   // store the old last update time so we can re-check it for accel coloring
   int32_t oldLastUpdateTime = lastUpdateTime;
 
-  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, HUDLerpFlags::DRAWSPEED2,
-                               s.pm)) {
+  if (cgame.hudData.pmoveV2->skipUpdate(lastUpdateTime, HUDLerpFlags::DRAWSPEED2, s.pm)) {
     return true;
   }
 
   currentSpeed = VectorLength2(s.pm.ps->velocity);
-  maxSpeed = std::max(currentSpeed, maxSpeed);
+  maxSpeed     = std::max(currentSpeed, maxSpeed);
 
   // pps must be accurate in order to use advanced accel coloring
   // TODO: revisit with 'g_synchronousClients'
-  if (!PmoveUtilsV2::ppsIsAccurate(s.pm) &&
-      accelColorStyle == AccelColorV2::Style::ADVANCED) {
+  if (!cgame.hudData.pmoveV2->ppsIsAccurate(s.pm) && accelColorStyle == AccelColorV2::Style::ADVANCED) {
     accelColorStyle = AccelColorV2::Style::SIMPLE;
   }
 
   if (accelColorStyle == AccelColorV2::Style::SIMPLE ||
-      accelColorStyle == AccelColorV2::Style::ADVANCED &&
-          AccelColorV2::lowSpeedOnGround(currentSpeed,
-                                         s.pm.ps->groundEntityNum)) {
+      (accelColorStyle == AccelColorV2::Style::ADVANCED &&
+       AccelColorV2::lowSpeedOnGround(currentSpeed, s.pm.ps->groundEntityNum))) {
     storedSpeeds.push_back({lastUpdateTime, currentSpeed});
     AccelColorV2::popOldStoredSpeeds(storedSpeeds, lastUpdateTime);
   } else if (!storedSpeeds.empty()) {
     storedSpeeds.clear();
+  }
+
+  // reset last speed if 'pm_type' changed (e.g. we exited noclip),
+  // to avoid nonsensical accel deltas
+  if (lastPmType != s.pm.ps->pm_type) {
+    Vector2Copy(s.pm.ps->velocity, lastSpeed);
   }
 
   if (lastPmType != PM_NOCLIP) {
@@ -199,19 +198,30 @@ bool DrawSpeed2::beforeRender() {
       } else {
         parseColor(etj_speedColor.string);
       }
-    } else if (!PmoveUtilsV2::skipUpdate(oldLastUpdateTime, std::nullopt,
-                                         s.pm)) {
-      Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
-      setupAccelColor(s, currentSpeed);
+    } else {
+      // capture the previous real update time before 'skipUpdate' mutates it
+      const int32_t prevRealUpdateTime = oldLastUpdateTime;
+
+      if (!cgame.hudData.pmoveV2->skipUpdate(oldLastUpdateTime, std::nullopt, s.pm)) {
+        // NOTE: only update the speed values used for accel calculations
+        // when we do an update, so accel values stay true without lerping,
+        // even if the speed meter itself is lerped
+        Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
+
+        // rescale to a single physics frame, as a sample interval can span
+        // multiple physics frames if FPS dips below 125
+        AccelColorV2::normalizeAccelVec(accelVec, oldLastUpdateTime - prevRealUpdateTime, s.pm.pmove_msec);
+        Vector2Copy(s.pm.ps->velocity, lastSpeed);
+
+        setupAccelColor(s, currentSpeed);
+      }
     }
   }
 
-  Vector2Copy(s.pm.ps->velocity, lastSpeed);
   lastPmType = static_cast<pmtype_t>(s.pm.ps->pm_type);
 
-  speedStr = getSpeedString();
-  textStyle =
-      etj_speedShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
+  speedStr  = getSpeedString();
+  textStyle = etj_speedShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
 
   x = std::clamp(etj_speedX.value, 0.0f, 640.0f);
   ETJump_AdjustPosition(&x);
@@ -223,16 +233,13 @@ bool DrawSpeed2::beforeRender() {
 void DrawSpeed2::render() const {
   switch (static_cast<Align>(etj_speedAlign.integer)) {
     case Align::LEFT:
-      CG_Text_Paint_Ext(x, y, size.x, size.y, color, speedStr, 0, 0, textStyle,
-                        &cgs.media.limboFont1);
+      CG_Text_Paint_Ext(x, y, size.x, size.y, color, speedStr, 0, 0, textStyle, &cgs.media.limboFont1);
       break;
     case Align::RIGHT:
-      CG_Text_Paint_RightAligned_Ext(x, y, size.x, size.y, color, speedStr, 0,
-                                     0, textStyle, &cgs.media.limboFont1);
+      CG_Text_Paint_RightAligned_Ext(x, y, size.x, size.y, color, speedStr, 0, 0, textStyle, &cgs.media.limboFont1);
       break;
     default:
-      CG_Text_Paint_Centred_Ext(x, y, size.x, size.y, color, speedStr, 0, 0,
-                                textStyle, &cgs.media.limboFont1);
+      CG_Text_Paint_Centred_Ext(x, y, size.x, size.y, color, speedStr, 0, 0, textStyle, &cgs.media.limboFont1);
       break;
   }
 }

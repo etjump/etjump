@@ -22,16 +22,14 @@
  * SOFTWARE.
  */
 
-#include "g_local.h"
-#include "etj_local.h"
-#include "etj_timerun_v2.h"
-#include "etj_printer.h"
-
 #include "etj_savepos_command_handler.h"
 
+#include "etj_local.h"
+#include "etj_printer.h"
+#include "etj_timerun_v2.h"
+
 namespace ETJump {
-void SavePosHandler::execSaveposCommand(gentity_t *ent,
-                                        const std::vector<std::string> &args) {
+void SavePosHandler::execSaveposCommand(gentity_t *ent, const std::vector<std::string> &args) {
   const SavePosData data = SavePosData::deserialize(args);
 
   if (!data.error.empty()) {
@@ -61,13 +59,13 @@ void SavePosHandler::saveposTeleport(gentity_t *ent, const SavePosData &data) {
 
   switch (data.pos.stance) {
     case PlayerStance::Stand:
-      ent->client->ps.eFlags &= ~EF_PRONE;
-      ent->client->ps.eFlags &= ~EF_PRONE_MOVING;
+      ent->client->ps.eFlags   &= ~EF_PRONE;
+      ent->client->ps.eFlags   &= ~EF_PRONE_MOVING;
       ent->client->ps.pm_flags &= ~PMF_DUCKED;
       break;
     case PlayerStance::Crouch:
-      ent->client->ps.eFlags &= ~EF_PRONE;
-      ent->client->ps.eFlags &= ~EF_PRONE_MOVING;
+      ent->client->ps.eFlags   &= ~EF_PRONE;
+      ent->client->ps.eFlags   &= ~EF_PRONE_MOVING;
       ent->client->ps.pm_flags |= PMF_DUCKED;
       break;
     case PlayerStance::Prone:
@@ -81,18 +79,15 @@ void SavePosHandler::saveposTeleport(gentity_t *ent, const SavePosData &data) {
   trap_LinkEntity(ent);
 }
 
-void SavePosHandler::restoreSaveposTimerunState(gentity_t *ent,
-                                                const SavePosData &data) {
+void SavePosHandler::restoreSaveposTimerunState(gentity_t *ent, const SavePosData &data) {
   const int clientNum = ClientNum(ent);
 
   // we can't use the real startTime from the timerun info, as that is set to
   // whatever the server timestamp was at the time the position was saved,
   // so figure out a faked start time based off the current run timer
-  const int startTime =
-      ent->client->ps.commandTime - data.timerunInfo.currentRunTimer;
+  const int startTime = ent->client->ps.commandTime - data.timerunInfo.currentRunTimer;
 
-  game.timerunV2->startSaveposTimer(clientNum, ent->client->pers.netname,
-                                    startTime, data);
+  game.timerunV2->startSaveposTimer(clientNum, ent->client->pers.netname, startTime, data);
 
   int checkpointNum = 0;
 
@@ -104,9 +99,8 @@ void SavePosHandler::restoreSaveposTimerunState(gentity_t *ent,
 
     // these are relative times from the beginning of the run,
     // so we just add them to the adjusted startTime
-    game.timerunV2->checkpoint(
-        data.timerunInfo.runName, clientNum, i,
-        startTime + data.timerunInfo.checkpoints[checkpointNum++]);
+    game.timerunV2->checkpoint(data.timerunInfo.runName, clientNum, i,
+                               startTime + data.timerunInfo.checkpoints[checkpointNum++]);
   }
 }
 } // namespace ETJump

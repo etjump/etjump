@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include "g_local.h"
+
 namespace ETJump {
 class TriggerTeleportClient {
   static void think(gentity_t *self);

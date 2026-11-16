@@ -4,6 +4,7 @@
 
 #include "cg_local.h"
 #include "etj_utilities.h"
+
 #include "../game/etj_string_utilities.h"
 
 /******************************************************************************
@@ -69,8 +70,7 @@ void CG_SortClientFireteam() {
     sortedFireTeamClients[i] = i;
   }
 
-  qsort(sortedFireTeamClients, MAX_CLIENTS, sizeof(sortedFireTeamClients[0]),
-        CG_SortFireTeam);
+  qsort(sortedFireTeamClients, MAX_CLIENTS, sizeof(sortedFireTeamClients[0]), CG_SortFireTeam);
 
   /*	for(i = 0; i < MAX_CLIENTS; i++) {
           CG_Printf( "%i ", sortedFireTeamClients[i] );
@@ -93,7 +93,7 @@ void CG_ParseFireteams() {
 
   for (i = 0; i < MAX_FIRETEAMS; i++) {
     char hexbuffer[11] = "0x00000000";
-    p = CG_ConfigString(CS_FIRETEAMS + i);
+    p                  = CG_ConfigString(CS_FIRETEAMS + i);
 
     j = Q_atoi(Info_ValueForKey(p, "id"));
     if (j == -1) {
@@ -104,16 +104,16 @@ void CG_ParseFireteams() {
       cg.fireTeams[i].ident = j;
     }
 
-    s = Info_ValueForKey(p, "l");
+    s                      = Info_ValueForKey(p, "l");
     cg.fireTeams[i].leader = Q_atoi(s);
 
-    s = Info_ValueForKey(p, "sl");
+    s                         = Info_ValueForKey(p, "sl");
     cg.fireTeams[i].saveLimit = Q_atoi(s);
 
-    s = Info_ValueForKey(p, "ng");
+    s                       = Info_ValueForKey(p, "ng");
     cg.fireTeams[i].noGhost = Q_atoi(s);
 
-    s = Info_ValueForKey(p, "tj");
+    s                            = Info_ValueForKey(p, "tj");
     cg.fireTeams[i].teamJumpMode = Q_atoi(s);
 
     s = Info_ValueForKey(p, "c");
@@ -126,11 +126,10 @@ void CG_ParseFireteams() {
 
     for (j = 0; j < MAX_CLIENTS; j++) {
       if (COM_BitCheck(clnts, j)) {
-        cg.fireTeams[i].joinOrder[j] = qtrue;
+        cg.fireTeams[i].joinOrder[j]   = qtrue;
         cgs.clientinfo[j].fireteamData = &cg.fireTeams[i];
 
-        if (cgs.clientinfo[j].fireteamData->noGhost &&
-            cgs.clientinfo[j].hideMe) {
+        if (cgs.clientinfo[j].fireteamData->noGhost && cgs.clientinfo[j].hideMe) {
           trap_Cvar_Set("etj_hideMe", "0");
         }
       } else {
@@ -173,8 +172,7 @@ clientInfo_t *CG_ClientInfoForPosition(int pos, int max) {
   int i, cnt = 0;
 
   for (i = 0; i < MAX_CLIENTS && cnt < max; i++) {
-    if (cg.clientNum != i && cgs.clientinfo[i].infoValid &&
-        !CG_IsOnFireteam(i) &&
+    if (cg.clientNum != i && cgs.clientinfo[i].infoValid && !CG_IsOnFireteam(i) &&
         cgs.clientinfo[cg.clientNum].team == cgs.clientinfo[i].team) {
       if (cnt == pos) {
         return &cgs.clientinfo[i];
@@ -191,8 +189,7 @@ fireteamData_t *CG_FireTeamForPosition(int pos, int max) {
   int i, cnt = 0;
 
   for (i = 0; i < MAX_FIRETEAMS && cnt < max; i++) {
-    if (cg.fireTeams[i].inuse && cgs.clientinfo[cg.fireTeams[i].leader].team ==
-                                     cgs.clientinfo[cg.clientNum].team) {
+    if (cg.fireTeams[i].inuse && cgs.clientinfo[cg.fireTeams[i].leader].team == cgs.clientinfo[cg.clientNum].team) {
       if (cnt == pos) {
         return &cg.fireTeams[i];
       }
@@ -213,8 +210,7 @@ clientInfo_t *CG_FireTeamPlayerForPosition(int pos, int max) {
   }
 
   for (i = 0; i < MAX_CLIENTS && cnt < max; i++) {
-    if (cgs.clientinfo[i].infoValid &&
-        cgs.clientinfo[cg.clientNum].team == cgs.clientinfo[i].team) {
+    if (cgs.clientinfo[i].infoValid && cgs.clientinfo[cg.clientNum].team == cgs.clientinfo[i].team) {
       if (!(f == CG_IsOnFireteam(i))) {
         continue;
       }
@@ -257,36 +253,35 @@ clientInfo_t *CG_SortedFireTeamPlayerForPosition(int pos, int max) {
 ****/
 
 constexpr float FT_BAR_YSPACING = 2.0f;
-constexpr float FT_BAR_HEIGHT = 10.0f;
-constexpr int FT_WIDTH = 204;
-constexpr int FT_HEADER_HEIGHT = 12;
+constexpr float FT_BAR_HEIGHT   = 10.0f;
+constexpr int FT_WIDTH          = 204;
+constexpr int FT_HEADER_HEIGHT  = 12;
 
 void CG_DrawFireTeamOverlay(rectDef_t *rect) {
   float x = rect->x;
-  float y = rect->y + 1 +
-            etj_fireteamPosY.value; // +1, jitter it into place in 1024 :)
+  float y = rect->y + 1 + etj_fireteamPosY.value; // +1, jitter it into place in 1024 :)
   float h;
   clientInfo_t *ci;
   std::string buffer;
   fireteamData_t *f;
   int i;
-  vec4_t clr1 = {.16f, .2f, .17f, .8f};
-  vec4_t clr2 = {0.f, 0.f, 0.f, .2f};
-  vec4_t clr3 = {0.25f, 0.f, 0.f, 153 / 255.f};
-  vec4_t tclr = {0.6f, 0.6f, 0.6f, 1.0f};
-  vec4_t bgColor = {0.0f, 0.0f, 0.0f, 0.6f};     // window
+  vec4_t clr1        = {.16f, .2f, .17f, .8f};
+  vec4_t clr2        = {0.f, 0.f, 0.f, .2f};
+  vec4_t clr3        = {0.25f, 0.f, 0.f, 153 / 255.f};
+  vec4_t tclr        = {0.6f, 0.6f, 0.6f, 1.0f};
+  vec4_t bgColor     = {0.0f, 0.0f, 0.0f, 0.6f}; // window
   vec4_t borderColor = {0.5f, 0.5f, 0.5f, 0.5f}; // window
 
-  const float fireteamOffsetX = ETJump_AdjustPosition(etj_fireteamPosX.value);
-  x += fireteamOffsetX;
+  const float fireteamOffsetX  = ETJump_AdjustPosition(etj_fireteamPosX.value);
+  x                           += fireteamOffsetX;
 
   const float fireteamAlpha = std::clamp(etj_fireteamAlpha.value, 0.0f, 1.0f);
 
-  clr1[3] *= fireteamAlpha;
-  clr2[3] *= fireteamAlpha;
-  clr3[3] *= fireteamAlpha;
-  tclr[3] *= fireteamAlpha;
-  bgColor[3] *= fireteamAlpha;
+  clr1[3]        *= fireteamAlpha;
+  clr2[3]        *= fireteamAlpha;
+  clr3[3]        *= fireteamAlpha;
+  tclr[3]        *= fireteamAlpha;
+  bgColor[3]     *= fireteamAlpha;
   borderColor[3] *= fireteamAlpha;
   // end ft alpha
 
@@ -296,7 +291,7 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
   }
 
   const bool saveLimit = f->saveLimit != FT_SAVELIMIT_NOT_SET;
-  const bool noGhost = f->noGhost;
+  const bool noGhost   = f->noGhost;
 
   h = FT_HEADER_HEIGHT + 2 + 2;
 
@@ -318,46 +313,37 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
   CG_FillRect(x, y, FT_WIDTH - 4, FT_HEADER_HEIGHT, clr1);
 
   buffer = StringUtils::toUpperCase(
-      StringUtils::format("FT: %s%s", bg_fireteamNames[f->ident],
-                          f->teamJumpMode ? " (TJ MODE)" : ""));
-  CG_Text_Paint_Ext(x + 3, y + FT_BAR_HEIGHT, .19f, .19f, tclr, buffer, 0, 0, 0,
-                    &cgs.media.limboFont1);
+    StringUtils::format("FT: %s%s", bg_fireteamNames[f->ident], f->teamJumpMode ? " (TJ MODE)" : ""));
+  CG_Text_Paint_Ext(x + 3, y + FT_BAR_HEIGHT, .19f, .19f, tclr, buffer, 0, 0, 0, &cgs.media.limboFont1);
 
-  float iconX = rect->x + FT_WIDTH - 4 + fireteamOffsetX;
+  float iconX              = rect->x + FT_WIDTH - 4 + fireteamOffsetX;
   vec4_t friendShaderColor = {1.0f, 1.0f, 1.0f, fireteamAlpha};
-  float saveTextW = 0.0f;
+  float saveTextW          = 0.0f;
 
   if (saveLimit) {
     if (f->saveLimit == 0) {
-      ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8,
-                      cgs.media.saveIcon, tclr);
-      ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8,
-                      cgs.media.friendShader, friendShaderColor);
+      ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.saveIcon, tclr);
+      ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.friendShader, friendShaderColor);
 
     } else {
-      buffer = StringUtils::format("%i", f->saveLimit);
-      saveTextW = static_cast<float>(
-          CG_Text_Width_Ext(buffer, 0.19f, 0, &cgs.media.limboFont1));
-      CG_Text_Paint_RightAligned_Ext(iconX, y + FT_BAR_HEIGHT, .19f, .19f, tclr,
-                                     va("%i", f->saveLimit), 0, 0, 0,
+      buffer    = StringUtils::format("%i", f->saveLimit);
+      saveTextW = static_cast<float>(CG_Text_Width_Ext(buffer, 0.19f, 0, &cgs.media.limboFont1));
+      CG_Text_Paint_RightAligned_Ext(iconX, y + FT_BAR_HEIGHT, .19f, .19f, tclr, va("%i", f->saveLimit), 0, 0, 0,
                                      &cgs.media.limboFont1);
-      ETJump::drawPic(iconX - saveTextW - 12, y + FT_BAR_HEIGHT - 8, 8, 8,
-                      cgs.media.saveIcon, tclr);
+      ETJump::drawPic(iconX - saveTextW - 12, y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.saveIcon, tclr);
     }
 
     iconX -= 8 + 4 + (saveTextW > 0 ? saveTextW + 4 : 0);
   }
 
   if (noGhost) {
-    ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8,
-                    cgs.media.noclipIcon, tclr);
-    ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8,
-                    cgs.media.friendShader, friendShaderColor);
+    ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.noclipIcon, tclr);
+    ETJump::drawPic(iconX - 8, y + FT_BAR_HEIGHT - 8, 8, 8, cgs.media.friendShader, friendShaderColor);
   }
 
   for (i = 0; i < MAX_FIRETEAM_USERS; i++) {
     y += FT_BAR_HEIGHT + FT_BAR_YSPACING;
-    x = rect->x + 2 + fireteamOffsetX;
+    x  = rect->x + 2 + fireteamOffsetX;
 
     ci = CG_SortedFireTeamPlayerForPosition(i, MAX_FIRETEAM_USERS);
     if (!ci) {
@@ -372,19 +358,18 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
 
     x += 4;
 
-    CG_Text_Paint_Ext(
-        x, y + FT_BAR_HEIGHT, .2f, .2f, tclr,
-        ci->team != TEAM_SPECTATOR ? BG_ClassLetterForNumber(ci->cls) : "", 0,
-        0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
+    CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr,
+                      ci->team != TEAM_SPECTATOR ? BG_ClassLetterForNumber(ci->cls) : "", 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                      &cgs.media.limboFont2);
     x += 12;
 
-    CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, ci->name, 0, 25,
-                      ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
+    CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, ci->name, 0, 25, ITEM_TEXTSTYLE_SHADOWED,
+                      &cgs.media.limboFont2);
     x += 176;
 
     if (ci->team == TEAM_SPECTATOR) {
-      CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, "^3S", 0, 0,
-                        ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
+      CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, tclr, "^3S", 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                        &cgs.media.limboFont2);
     } else {
       vec4_t healthColor = {0.6f, 0.6f, 0.6f, 1.0f};
       const char *healthStr;
@@ -401,14 +386,11 @@ void CG_DrawFireTeamOverlay(rectDef_t *rect) {
 
       healthColor[3] *= fireteamAlpha;
 
-      x = rect->x +
-          (FT_WIDTH - 4 -
-           static_cast<float>(
-               CG_Text_Width_Ext(healthStr, .2f, 0, &cgs.media.limboFont2))) +
+      x = rect->x + (FT_WIDTH - 4 - static_cast<float>(CG_Text_Width_Ext(healthStr, .2f, 0, &cgs.media.limboFont2))) +
           fireteamOffsetX;
 
-      CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, healthColor, healthStr,
-                        0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgs.media.limboFont2);
+      CG_Text_Paint_Ext(x, y + FT_BAR_HEIGHT, .2f, .2f, healthColor, healthStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED,
+                        &cgs.media.limboFont2);
     }
   }
 }
@@ -460,8 +442,7 @@ const char *CG_FireteamGetBoxText() {
       return NULL;
     }
 
-    return va("Accept application from %s?",
-              cgs.clientinfo[cgs.applicationClient].name);
+    return va("Accept application from %s?", cgs.clientinfo[cgs.applicationClient].name);
   }
 
   if (cgs.invitationEndTime > cg.time) {
@@ -485,8 +466,7 @@ const char *CG_FireteamGetBoxText() {
       return NULL;
     }
 
-    return va("Accept invitiation from %s?",
-              cgs.clientinfo[cgs.invitationClient].name);
+    return va("Accept invitiation from %s?", cgs.clientinfo[cgs.invitationClient].name);
   }
 
   if (cgs.propositionEndTime > cg.time) {
@@ -512,8 +492,7 @@ const char *CG_FireteamGetBoxText() {
 
     return va("Accept %s's proposition to invite %s to join "
               "your fireteam?",
-              cgs.clientinfo[cgs.propositionClient2].name,
-              cgs.clientinfo[cgs.propositionClient].name);
+              cgs.clientinfo[cgs.propositionClient2].name, cgs.clientinfo[cgs.propositionClient].name);
   }
 
   return NULL;

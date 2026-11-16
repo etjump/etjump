@@ -40,8 +40,7 @@ class ClientRtvHandler {
   std::shared_ptr<ClientCommandsHandler> serverCommands;
 
 public:
-  explicit ClientRtvHandler(
-      const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
+  explicit ClientRtvHandler(const std::shared_ptr<ClientCommandsHandler> &serverCommandsHandler);
   ~ClientRtvHandler();
 
   void setRtvConfigStrings(const char *cs);

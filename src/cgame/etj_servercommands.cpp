@@ -23,28 +23,37 @@
  */
 
 #include "etj_servercommands.h"
+
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_utilities.h"
 
-#include "../game/etj_syscall_ext_shared.h"
 #include "../game/etj_string_utilities.h"
+#include "../game/etj_syscall_ext_shared.h"
 
 namespace ETJump::ServerCommands {
 using Arguments = std::vector<std::string>;
+
 // TODO: The client will always request map list after cgame is initialized,
 // thus making '!listmaps' command sort of redundant. The command itself
 // should probably stay (the output formatting is nice and all),
 // but now that we're always receiving a full map list from server,
 // we could use a local cache for map list instead of requesting it again.
 static void maplist(const Arguments &args) {
-  // we need to forward this command to UI to parse the list there,
+  cgame.serverMapList.insert(cgame.serverMapList.end(), args.cbegin(), args.cend());
+
+  // this gets called few times unnecessarily for an incomplete list,
+  // but it's fine, this only happens on initial cgame load
+  StringUtils::sortStrings(cgame.serverMapList, true);
+
+  // we need to forward this command to UI to parse the list there too,
   // so we can populate the map vote list
-  trap_SendConsoleCommand(
-      va("uiParseMaplist %s\n", StringUtils::join(args, " ").c_str()));
+  trap_SendConsoleCommand(va("uiParseMaplist %s\n", StringUtils::join(args, " ").c_str()));
 }
 
-static void forceCustomvoteRefresh() { resetCustomvoteInfo(); }
+static void forceCustomvoteRefresh() {
+  resetCustomvoteInfo();
+}
 
 static void numCustomvotes(const Arguments &args) {
   if (args.empty()) {
@@ -57,16 +66,18 @@ static void numCustomvotes(const Arguments &args) {
 }
 
 static void customvoteList(const Arguments &args) {
-  // forward to UI
-  trap_SendConsoleCommand(
-      va("uiParseCustomvote %s\n", StringUtils::join(args, " ").c_str()));
+  // store the callvote name in cgame
+  if (args.size() > 2 && args[1] == "type") {
+    cgame.customVoteLists.emplace_back(args[2]);
+  }
+
+  // forward the full command to UI for parsing
+  trap_SendConsoleCommand(va("uiParseCustomvote %s\n", StringUtils::join(args, " ").c_str()));
 }
 
 static void pmFlashWindow() {
-  if (etj_highlight.integer &
-      static_cast<int>(ChatHighlightFlags::HIGHLIGHT_FLASH)) {
-    SyscallExt::trap_SysFlashWindow(
-        SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
+  if (etj_highlight.integer & static_cast<int>(ChatHighlightFlags::HIGHLIGHT_FLASH)) {
+    SyscallExt::trap_SysFlashWindow(SyscallExt::FlashWindowState::SDL_FLASH_UNTIL_FOCUSED);
   }
 }
 
@@ -79,8 +90,7 @@ static void savePrint(const Arguments &args) {
 
   // this happens on forced save (e.g. 'target_save')
   if (args.empty()) {
-    CG_CenterPrint(saveMsg.c_str(), SCREEN_HEIGHT - SCREEN_HEIGHT * 0.2,
-                   SMALLCHAR_WIDTH, false);
+    CG_CenterPrint(saveMsg.c_str(), SCREEN_HEIGHT - SCREEN_HEIGHT * 0.2, SMALLCHAR_WIDTH, false);
     return;
   }
 
@@ -91,14 +101,12 @@ static void savePrint(const Arguments &args) {
   }
 
   if (args.size() >= 2) {
-    const int32_t remainingSaves = Q_atoi(args[1]);
-    const std::string remainingSavesStr =
-        StringUtils::format("^7(^3%d ^7remaining)\n", remainingSaves);
-    saveMsg += '\n' + remainingSavesStr;
+    const int32_t remainingSaves         = Q_atoi(args[1]);
+    const std::string remainingSavesStr  = StringUtils::format("^7(^3%d ^7remaining)\n", remainingSaves);
+    saveMsg                             += '\n' + remainingSavesStr;
   }
 
-  CG_CenterPrint(saveMsg.c_str(), SCREEN_HEIGHT - SCREEN_HEIGHT * 0.2,
-                 SMALLCHAR_WIDTH, false);
+  CG_CenterPrint(saveMsg.c_str(), SCREEN_HEIGHT - SCREEN_HEIGHT * 0.2, SMALLCHAR_WIDTH, false);
 }
 
 // for !rtv admin command
@@ -119,28 +127,59 @@ static void callvote(const Arguments &args) {
 
 void registerCommands() {
   cgame.core.serverCommands->subscribe(
-      "maplist", [](const auto &args) { maplist(args); }, false);
+    "maplist",
+    [](const auto &args) {
+      maplist(args);
+    },
+    false);
 
   cgame.core.serverCommands->subscribe(
-      "forceCustomvoteRefresh", [](const auto &) { forceCustomvoteRefresh(); },
-      false);
+    "forceCustomvoteRefresh",
+    [](const auto &) {
+      forceCustomvoteRefresh();
+    },
+    false);
 
   cgame.core.serverCommands->subscribe(
-      "numcustomvotes", [](const auto &args) { numCustomvotes(args); }, false);
+    "numcustomvotes",
+    [](const auto &args) {
+      numCustomvotes(args);
+    },
+    false);
 
   cgame.core.serverCommands->subscribe(
-      "customvotelist", [](const auto &args) { customvoteList(args); }, false);
+    "customvotelist",
+    [](const auto &args) {
+      customvoteList(args);
+    },
+    false);
 
   cgame.core.serverCommands->subscribe(
-      "pmFlashWindow", [](const auto &) { pmFlashWindow(); }, false);
+    "pmFlashWindow",
+    [](const auto &) {
+      pmFlashWindow();
+    },
+    false);
 
   cgame.core.serverCommands->subscribe(
-      "resetStrafeQuality", [](const auto &) { resetStrafeQuality(); }, false);
+    "resetStrafeQuality",
+    [](const auto &) {
+      resetStrafeQuality();
+    },
+    false);
 
   cgame.core.serverCommands->subscribe(
-      "savePrint", [](const auto &args) { savePrint(args); }, false);
+    "savePrint",
+    [](const auto &args) {
+      savePrint(args);
+    },
+    false);
 
   cgame.core.serverCommands->subscribe(
-      "callvote", [](const auto &args) { callvote(args); }, false);
+    "callvote",
+    [](const auto &args) {
+      callvote(args);
+    },
+    false);
 }
 } // namespace ETJump::ServerCommands

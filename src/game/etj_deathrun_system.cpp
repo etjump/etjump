@@ -23,11 +23,11 @@
  */
 
 #include "etj_deathrun_system.h"
+
 #include <algorithm>
 #include <iostream>
 
-ETJump::DeathrunSystem::DeathrunSystem()
-    : _defaultLocation(PrintLocation::Left) {}
+ETJump::DeathrunSystem::DeathrunSystem() : _defaultLocation(PrintLocation::Left) {}
 
 void ETJump::DeathrunSystem::addStartMessage(const std::string &startMessage) {
   _startMessage = startMessage;
@@ -37,23 +37,19 @@ void ETJump::DeathrunSystem::addEndMessage(const std::string &endMessage) {
   _endMessage = endMessage;
 }
 
-void ETJump::DeathrunSystem::addDefaultCheckpointMessage(
-    const std::string &defaultMessage) {
+void ETJump::DeathrunSystem::addDefaultCheckpointMessage(const std::string &defaultMessage) {
   _defaultMessage = defaultMessage;
 }
 
-void ETJump::DeathrunSystem::addDefaultSoundPath(
-    const std::string &defaultSoundPath) {
+void ETJump::DeathrunSystem::addDefaultSoundPath(const std::string &defaultSoundPath) {
   _defaultSoundPath = defaultSoundPath;
 }
 
-void ETJump::DeathrunSystem::addStartAndCheckpointMessageLocation(
-    PrintLocation location) {
+void ETJump::DeathrunSystem::addStartAndCheckpointMessageLocation(PrintLocation location) {
   _defaultLocation = location;
 }
 
-int ETJump::DeathrunSystem::createCheckpoint(PrintLocation location,
-                                             const std::string &message,
+int ETJump::DeathrunSystem::createCheckpoint(PrintLocation location, const std::string &message,
                                              const std::string &soundPath) {
   for (auto &rs : _runStatuses) {
     rs.checkpointStatuses.push_back(false);
@@ -86,12 +82,11 @@ bool ETJump::DeathrunSystem::hitCheckpoint(int checkpointId, int clientNum) {
 }
 
 int ETJump::DeathrunSystem::hitEnd(int clientNum) {
-  auto score = getScore(clientNum);
+  auto score                     = getScore(clientNum);
   _runStatuses[clientNum].active = false;
 
   // cannot be a range for loop as vector<bool> is special
-  for (int i = 0, len = _runStatuses[clientNum].checkpointStatuses.size();
-       i < len; ++i) {
+  for (int i = 0, len = _runStatuses[clientNum].checkpointStatuses.size(); i < len; ++i) {
     _runStatuses[clientNum].checkpointStatuses[i] = false;
   }
 
@@ -111,19 +106,17 @@ bool ETJump::DeathrunSystem::alreadyReached(int checkpointId, int clientNum) {
 }
 
 int ETJump::DeathrunSystem::getScore(int clientNum) {
-  return static_cast<int>(
-      std::count_if(begin(_runStatuses[clientNum].checkpointStatuses),
-                    end(_runStatuses[clientNum].checkpointStatuses),
-                    [](bool b) { return b; }));
+  return static_cast<int>(std::count_if(begin(_runStatuses[clientNum].checkpointStatuses),
+                                        end(_runStatuses[clientNum].checkpointStatuses), [](bool b) {
+                                          return b;
+                                        }));
 }
 
-ETJump::DeathrunSystem::PrintLocation
-ETJump::DeathrunSystem::getPrintLocation() const {
+ETJump::DeathrunSystem::PrintLocation ETJump::DeathrunSystem::getPrintLocation() const {
   return _defaultLocation;
 }
 
-ETJump::DeathrunSystem::PrintLocation
-ETJump::DeathrunSystem::getPrintLocation(int checkpointId) {
+ETJump::DeathrunSystem::PrintLocation ETJump::DeathrunSystem::getPrintLocation(int checkpointId) {
   auto location = _defaultLocation;
   if (_checkpointData[checkpointId].location != PrintLocation::Unspecified) {
     location = _checkpointData[checkpointId].location;
@@ -135,8 +128,7 @@ std::string ETJump::DeathrunSystem::getStartMessage() const {
   return _startMessage;
 }
 
-std::string
-ETJump::DeathrunSystem::getCheckpointMessage(int checkpointId) const {
+std::string ETJump::DeathrunSystem::getCheckpointMessage(int checkpointId) const {
   if (_checkpointData[checkpointId].message.length() == 0) {
     return _defaultMessage;
   }

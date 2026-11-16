@@ -1,8 +1,8 @@
 // bg_slidemove.c -- part of bg_pmove functionality
 
-#include "q_shared.h"
-#include "bg_public.h"
 #include "bg_local.h"
+#include "bg_public.h"
+#include "q_shared.h"
 
 /*
 
@@ -37,20 +37,19 @@ qboolean PM_SlideMove(qboolean gravity) {
   vec3_t endVelocity;
   vec3_t endClipVelocity;
 
-  numbumps = 4;
+  numbumps   = 4;
   extrabumps = 0;
 
   VectorCopy(pm->ps->velocity, primal_velocity);
 
   if (gravity) {
     VectorCopy(pm->ps->velocity, endVelocity);
-    endVelocity[2] -= pm->ps->gravity * pml.frametime;
-    pm->ps->velocity[2] = (pm->ps->velocity[2] + endVelocity[2]) * 0.5;
-    primal_velocity[2] = endVelocity[2];
+    endVelocity[2]      -= pm->ps->gravity * pml.frametime;
+    pm->ps->velocity[2]  = (pm->ps->velocity[2] + endVelocity[2]) * 0.5;
+    primal_velocity[2]   = endVelocity[2];
     if (pml.groundPlane) {
       // slide along the ground plane
-      PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal,
-                      pm->ps->velocity, OVERCLIP);
+      PM_ClipVelocity(pm->ps->velocity, pml.groundTrace.plane.normal, pm->ps->velocity, OVERCLIP);
     }
   } else {
     VectorClear(endVelocity);
@@ -71,15 +70,13 @@ qboolean PM_SlideMove(qboolean gravity) {
   numplanes++;
 
   for (bumpcount = 0; bumpcount < numbumps; bumpcount++) {
-
     // calculate position we are trying to move to
     VectorMA(pm->ps->origin, time_left, pm->ps->velocity, end);
 
     // see if we can make it there
     PM_TraceAll(&trace, pm->ps->origin, end);
     if (pm->debugLevel > 1) {
-      Com_Printf("%i:%d %d (%f %f %f)\n", c_pmove, trace.allsolid,
-                 trace.startsolid, trace.endpos[0], trace.endpos[1],
+      Com_Printf("%i:%d %d (%f %f %f)\n", c_pmove, trace.allsolid, trace.startsolid, trace.endpos[0], trace.endpos[1],
                  trace.endpos[2]);
     }
 
@@ -282,8 +279,7 @@ void PM_StepSlideMove(qboolean gravity) {
     if (trace.allsolid && !wassolid) {
       Com_Printf("%i:PM_SlideMove solidified! (%f %f "
                  "%f) -> (%f %f %f)\n",
-                 c_pmove, start_o[0], start_o[1], start_o[2], pm->ps->origin[0],
-                 pm->ps->origin[1], pm->ps->origin[2]);
+                 c_pmove, start_o[0], start_o[1], start_o[2], pm->ps->origin[0], pm->ps->origin[1], pm->ps->origin[2]);
     }
 
     if (slidesucceed) {
@@ -306,8 +302,7 @@ void PM_StepSlideMove(qboolean gravity) {
   PM_TraceAll(&trace, start_o, down);
   VectorSet(up, 0, 0, 1);
   // never step up when you still have up velocity
-  if (pm->ps->velocity[2] > 0 &&
-      (trace.fraction == 1.0 || DotProduct(trace.plane.normal, up) < 0.7)) {
+  if (pm->ps->velocity[2] > 0 && (trace.fraction == 1.0 || DotProduct(trace.plane.normal, up) < 0.7)) {
     return;
   }
 
@@ -338,8 +333,8 @@ void PM_StepSlideMove(qboolean gravity) {
 
   // check legs separately
   if (pm->ps->eFlags & EF_PRONE) {
-    PM_TraceLegs(&trace, NULL, pm->ps->origin, down, NULL, pm->ps->viewangles,
-                 pm->trace, pm->ps->clientNum, pm->tracemask);
+    PM_TraceLegs(&trace, NULL, pm->ps->origin, down, NULL, pm->ps->viewangles, pm->trace, pm->ps->clientNum,
+                 pm->tracemask);
     if (trace.allsolid) {
       // legs don't step, just fuzz.
       VectorCopy(down_o, pm->ps->origin);
@@ -351,14 +346,12 @@ void PM_StepSlideMove(qboolean gravity) {
     }
   }
 
-  pm->trace(&trace, pm->ps->origin, pm->mins, pm->maxs, down, pm->ps->clientNum,
-            pm->tracemask);
+  pm->trace(&trace, pm->ps->origin, pm->mins, pm->maxs, down, pm->ps->clientNum, pm->tracemask);
   if (!trace.allsolid) {
     VectorCopy(trace.endpos, pm->ps->origin);
   }
   if (trace.fraction < 1.0) {
-    PM_ClipVelocity(pm->ps->velocity, trace.plane.normal, pm->ps->velocity,
-                    OVERCLIP);
+    PM_ClipVelocity(pm->ps->velocity, trace.plane.normal, pm->ps->velocity, OVERCLIP);
   }
 
 #if 0

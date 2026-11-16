@@ -23,46 +23,42 @@
  */
 
 #include "etj_map_statistics.h"
-#include <sqlite3.h>
+
 #include <algorithm>
+#include <sqlite3.h>
 #include "json/json.h"
 
-#include "etj_utilities.h"
-#include "etj_string_utilities.h"
-#include "g_local.h"
 #include "etj_filesystem.h"
+#include "etj_string_utilities.h"
+#include "etj_utilities.h"
+#include "g_local.h"
 
 namespace ETJump {
 MapStatistics::MapStatistics()
-    : _previousLevelTime(0), _currentMillisecondsPlayed(0),
-      _currentMillisecondsOnServer(0), _currentMap(nullptr) {}
+  : _previousLevelTime(0), _currentMillisecondsPlayed(0), _currentMillisecondsOnServer(0), _currentMap(nullptr) {}
 
-std::vector<const MapStatistics::MapInformation *>
-MapStatistics::getMostPlayed() {
+std::vector<const MapStatistics::MapInformation *> MapStatistics::getMostPlayed() {
   std::vector<const MapInformation *> mostPlayed;
   for (auto &map : _maps) {
     mostPlayed.push_back(&map);
   }
 
-  std::sort(mostPlayed.begin(), mostPlayed.end(),
-            [](const MapInformation *lhs, const MapInformation *rhs) {
-              return lhs->secondsPlayed > rhs->secondsPlayed;
-            });
+  std::sort(mostPlayed.begin(), mostPlayed.end(), [](const MapInformation *lhs, const MapInformation *rhs) {
+    return lhs->secondsPlayed > rhs->secondsPlayed;
+  });
 
   return mostPlayed;
 }
 
-std::vector<const MapStatistics::MapInformation *>
-MapStatistics::getLeastPlayed() {
+std::vector<const MapStatistics::MapInformation *> MapStatistics::getLeastPlayed() {
   std::vector<const MapInformation *> mostPlayed;
   for (auto &map : _maps) {
     mostPlayed.push_back(&map);
   }
 
-  std::sort(mostPlayed.begin(), mostPlayed.end(),
-            [](const MapInformation *lhs, const MapInformation *rhs) {
-              return lhs->secondsPlayed < rhs->secondsPlayed;
-            });
+  std::sort(mostPlayed.begin(), mostPlayed.end(), [](const MapInformation *lhs, const MapInformation *rhs) {
+    return lhs->secondsPlayed < rhs->secondsPlayed;
+  });
 
   return mostPlayed;
 }
@@ -83,16 +79,14 @@ std::vector<std::string> MapStatistics::getMaps() {
   return maps;
 }
 
-const MapStatistics::MapInformation *
-MapStatistics::getMapInformation(const std::string &mapName) {
+const MapStatistics::MapInformation *MapStatistics::getMapInformation(const std::string &mapName) {
   const MapInformation *mi = nullptr;
   if (mapName.length() == 0) {
     mi = _currentMap;
   } else {
-    auto it = std::find_if(_maps.begin(), _maps.end(),
-                           [&mapName](const MapInformation &mapInformation) {
-                             return mapInformation.name == mapName;
-                           });
+    auto it = std::find_if(_maps.begin(), _maps.end(), [&mapName](const MapInformation &mapInformation) {
+      return mapInformation.name == mapName;
+    });
 
     if (it == _maps.end()) {
       return nullptr;
@@ -104,9 +98,9 @@ MapStatistics::getMapInformation(const std::string &mapName) {
 }
 
 void MapStatistics::increasePassedCount(const char *mapName) {
-  auto it = std::find_if(
-      _maps.begin(), _maps.end(),
-      [&mapName](const MapInformation &mi) { return mi.name == mapName; });
+  auto it = std::find_if(_maps.begin(), _maps.end(), [&mapName](const MapInformation &mi) {
+    return mi.name == mapName;
+  });
 
   if (it == _maps.end()) {
     Utilities::Error(std::string("Error: Could not find map ") + mapName);
@@ -118,9 +112,9 @@ void MapStatistics::increasePassedCount(const char *mapName) {
 }
 
 void MapStatistics::increaseCallvoteCount(const char *mapName) {
-  auto it = std::find_if(
-      _maps.begin(), _maps.end(),
-      [&mapName](const MapInformation &mi) { return mi.name == mapName; });
+  auto it = std::find_if(_maps.begin(), _maps.end(), [&mapName](const MapInformation &mi) {
+    return mi.name == mapName;
+  });
 
   if (it == _maps.end()) {
     Utilities::Error(std::string("Error: Could not find map ") + mapName);
@@ -138,16 +132,15 @@ void MapStatistics::saveChanges() {
                    "No map statistics were saved.");
     return;
   }
-  _currentMap->changed = true;
-  _currentMap->secondsPlayed =
-      _originalSecondsPlayed + (_currentMillisecondsPlayed / 1000);
-  _currentMap->timesPlayed += 1;
+  _currentMap->changed        = true;
+  _currentMap->secondsPlayed  = _originalSecondsPlayed + (_currentMillisecondsPlayed / 1000);
+  _currentMap->timesPlayed   += 1;
   time_t t;
   time(&t);
   _currentMap->lastPlayed = static_cast<int>(t);
 
   sqlite3 *db = nullptr;
-  auto rc = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
+  auto rc     = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
     Utilities::Error(StringUtils::format("MapStatistics::saveChanges: Error: "
                                          "Failed to open database. (%d) %s.\n",
@@ -157,10 +150,9 @@ void MapStatistics::saveChanges() {
 
   rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
   if (rc != SQLITE_OK) {
-    Utilities::Error(
-        StringUtils::format("MapStatistics::saveChanges: Error: Failed to "
-                            "start transaction. (%d) %s.\n",
-                            rc, sqlite3_errmsg(db)));
+    Utilities::Error(StringUtils::format("MapStatistics::saveChanges: Error: Failed to "
+                                         "start transaction. (%d) %s.\n",
+                                         rc, sqlite3_errmsg(db)));
     return;
   }
 
@@ -171,16 +163,14 @@ void MapStatistics::saveChanges() {
                                             "seconds_played=%d, callvoted=%d, "
                                             "votes_passed=%d, times_played=%d, "
                                             "last_played=%d WHERE id=%d;",
-                                            map.secondsPlayed, map.callvoted,
-                                            map.votesPassed, map.timesPlayed,
+                                            map.secondsPlayed, map.callvoted, map.votesPassed, map.timesPlayed,
                                             map.lastPlayed, map.id)
-                            .c_str(),
+                          .c_str(),
                         nullptr, nullptr, nullptr);
       if (rc != SQLITE_OK) {
-        Utilities::Error(
-            StringUtils::format("MapStatistics::saveChanges: Error: Failed to "
-                                "update map. (%d) %s.\n",
-                                rc, sqlite3_errmsg(db)));
+        Utilities::Error(StringUtils::format("MapStatistics::saveChanges: Error: Failed to "
+                                             "update map. (%d) %s.\n",
+                                             rc, sqlite3_errmsg(db)));
         return;
       }
     }
@@ -188,45 +178,41 @@ void MapStatistics::saveChanges() {
 
   rc = sqlite3_exec(db, "END TRANSACTION;", nullptr, nullptr, nullptr);
   if (rc != SQLITE_OK) {
-    Utilities::Error(
-        StringUtils::format("MapStatistics::saveChanges: Error: Failed to end "
-                            "transaction. (%d) %s.\n",
-                            rc, sqlite3_errmsg(db)));
+    Utilities::Error(StringUtils::format("MapStatistics::saveChanges: Error: Failed to end "
+                                         "transaction. (%d) %s.\n",
+                                         rc, sqlite3_errmsg(db)));
     return;
   }
 
   rc = sqlite3_close(db);
   if (rc != SQLITE_OK) {
-    Utilities::Error(StringUtils::format(
-        "MapStatistics::saveChanges: Error: Failed to close sqlite db. (%d) %s",
-        rc, sqlite3_errmsg(db)));
+    Utilities::Error(StringUtils::format("MapStatistics::saveChanges: Error: Failed to close sqlite db. (%d) %s", rc,
+                                         sqlite3_errmsg(db)));
   }
 }
 
 void MapStatistics::runFrame(int levelTime) {
-  auto diff = levelTime - _previousLevelTime;
+  auto diff          = levelTime - _previousLevelTime;
   _previousLevelTime = levelTime;
 
   _currentMillisecondsOnServer += diff;
   if (Utilities::anyonePlaying()) {
     _currentMillisecondsPlayed += diff;
-    _currentMap->secondsPlayed =
-        _originalSecondsPlayed + (_currentMillisecondsPlayed / 1000);
+    _currentMap->secondsPlayed  = _originalSecondsPlayed + (_currentMillisecondsPlayed / 1000);
   }
 }
 
 void MapStatistics::resetFields() {
   _maps.clear();
-  _currentMap = nullptr;
+  _currentMap                  = nullptr;
   _currentMillisecondsOnServer = 0;
-  _currentMillisecondsPlayed = 0;
-  _databaseName = "";
-  _originalSecondsPlayed = 0;
-  _previousLevelTime = 0;
+  _currentMillisecondsPlayed   = 0;
+  _databaseName                = "";
+  _originalSecondsPlayed       = 0;
+  _previousLevelTime           = 0;
 }
 
-bool MapStatistics::initialize(std::string database,
-                               const std::string &currentMap) {
+bool MapStatistics::initialize(std::string database, const std::string &currentMap) {
   resetFields();
 
   if (database.length() == 0) {
@@ -253,16 +239,14 @@ const MapStatistics::MapInformation *MapStatistics::getCurrentMap() const {
 }
 
 void MapStatistics::setCurrentMap(const std::string currentMap) {
-  auto it = std::find_if(_maps.begin(), _maps.end(),
-                         [&currentMap](const MapInformation &iteratee) {
-                           return iteratee.name == currentMap;
-                         });
+  auto it = std::find_if(_maps.begin(), _maps.end(), [&currentMap](const MapInformation &iteratee) {
+    return iteratee.name == currentMap;
+  });
 
   if (it == _maps.end()) {
-    Utilities::Error(StringUtils::format(
-        "Error: Failed to set the current map to %s. Map could not be found in "
-        "the maps vector. Map count: %d\n",
-        currentMap, _maps.size()));
+    Utilities::Error(StringUtils::format("Error: Failed to set the current map to %s. Map could not be found in "
+                                         "the maps vector. Map count: %d\n",
+                                         currentMap, _maps.size()));
     return;
   }
 
@@ -270,7 +254,7 @@ void MapStatistics::setCurrentMap(const std::string currentMap) {
 }
 
 void MapStatistics::addNewMaps() {
-  auto maps = Utilities::getMaps();
+  auto maps     = Utilities::getMaps();
   auto mapCount = 0;
   std::vector<std::string> newMaps;
   _currentMaps = maps;
@@ -278,9 +262,9 @@ void MapStatistics::addNewMaps() {
 
   for (auto &map : maps) {
     ++mapCount;
-    auto it = std::find_if(
-        _maps.begin(), _maps.end(),
-        [&map](const MapInformation &mi) { return mi.name == map; });
+    auto it = std::find_if(_maps.begin(), _maps.end(), [&map](const MapInformation &mi) {
+      return mi.name == map;
+    });
 
     if (it != _maps.end()) {
       it->isOnServer = true;
@@ -288,11 +272,10 @@ void MapStatistics::addNewMaps() {
       continue;
     }
 
-    Utilities::Console(
-        StringUtils::format("Notification: New map %s found.\n", map));
+    Utilities::Console(StringUtils::format("Notification: New map %s found.\n", map));
 
     MapInformation mapInformation;
-    mapInformation.name = map;
+    mapInformation.name       = map;
     mapInformation.isOnServer = true;
 
     _maps.push_back(std::move(mapInformation));
@@ -302,17 +285,15 @@ void MapStatistics::addNewMaps() {
   auto count = newMaps.size();
   saveNewMaps(std::move(newMaps));
 
-  Utilities::Console(StringUtils::format(
-      "%d maps on the server. Added %d new maps.\n", mapCount, count));
+  Utilities::Console(StringUtils::format("%d maps on the server. Added %d new maps.\n", mapCount, count));
 }
 
 void MapStatistics::saveNewMaps(std::vector<std::string> newMaps) {
   sqlite3 *db = nullptr;
-  auto rc = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
+  auto rc     = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
-    Utilities::Error(StringUtils::format(
-        "MapStatistics::saveNewMaps: Error: Could not open map database %s\n",
-        _databaseName));
+    Utilities::Error(
+      StringUtils::format("MapStatistics::saveNewMaps: Error: Could not open map database %s\n", _databaseName));
     return;
   }
 
@@ -320,27 +301,25 @@ void MapStatistics::saveNewMaps(std::vector<std::string> newMaps) {
     std::string sqlEscapedMapName = newMap;
     StringUtils::replaceAll(sqlEscapedMapName, "'", "''");
     // Map names won't be doing any SQL injection
-    rc = sqlite3_exec(
-        db,
-        StringUtils::format("INSERT INTO map_statistics (name, seconds_played, "
-                            "callvoted, votes_passed, times_played, "
-                            "last_played) "
-                            "VALUES ('%s', 0, 0, 0, 0, 0);",
-                            sqlEscapedMapName)
-            .c_str(),
-        nullptr, nullptr, nullptr);
+    rc = sqlite3_exec(db,
+                      StringUtils::format("INSERT INTO map_statistics (name, seconds_played, "
+                                          "callvoted, votes_passed, times_played, "
+                                          "last_played) "
+                                          "VALUES ('%s', 0, 0, 0, 0, 0);",
+                                          sqlEscapedMapName)
+                        .c_str(),
+                      nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
-      Utilities::Error(
-          StringUtils::format("MapStatistics::saveNewMaps: Error: Failed to "
-                              "execute statement: (%d) %s",
-                              rc, sqlite3_errmsg(db)));
+      Utilities::Error(StringUtils::format("MapStatistics::saveNewMaps: Error: Failed to "
+                                           "execute statement: (%d) %s",
+                                           rc, sqlite3_errmsg(db)));
       sqlite3_close(db);
       return;
     }
 
-    auto newMapIter = std::find_if(
-        _maps.begin(), _maps.end(),
-        [&newMap](const MapInformation &mi) { return mi.name == newMap; });
+    auto newMapIter = std::find_if(_maps.begin(), _maps.end(), [&newMap](const MapInformation &mi) {
+      return mi.name == newMap;
+    });
 
     if (newMapIter == _maps.end()) {
       Utilities::Error("MapStatistics::saveNewMaps: Error: "
@@ -370,9 +349,8 @@ bool MapStatistics::loadMaps() {
 
   auto rc = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
-    Utilities::Error(StringUtils::format(
-        "MapStatistics::loadMaps: Error: Failed to open database %s\n",
-        _databaseName));
+    Utilities::Error(
+      StringUtils::format("MapStatistics::loadMaps: Error: Failed to open database %s\n", _databaseName));
     return false;
   }
 
@@ -380,16 +358,15 @@ bool MapStatistics::loadMaps() {
   // NULL, callvoted INTEGER NOT NULL, votes_passed INTEGER NOT NULL,
   // times_played INTEGER NOT NULL
   sqlite3_stmt *stmt = nullptr;
-  rc = sqlite3_prepare(db,
-                       "SELECT id, name, seconds_played, callvoted, "
-                       "votes_passed, times_played, "
-                       "last_played FROM map_statistics;",
-                       -1, &stmt, nullptr);
+  rc                 = sqlite3_prepare(db,
+                                       "SELECT id, name, seconds_played, callvoted, "
+                                       "votes_passed, times_played, "
+                                       "last_played FROM map_statistics;",
+                                       -1, &stmt, nullptr);
   if (rc != SQLITE_OK) {
-    Utilities::Error(
-        StringUtils::format("MapStatistics::loadMaps: Error: Failed to prepare "
-                            "statement: (%d) %s\n",
-                            rc, sqlite3_errmsg(db)));
+    Utilities::Error(StringUtils::format("MapStatistics::loadMaps: Error: Failed to prepare "
+                                         "statement: (%d) %s\n",
+                                         rc, sqlite3_errmsg(db)));
     sqlite3_close(db);
     return false;
   }
@@ -398,25 +375,24 @@ bool MapStatistics::loadMaps() {
   while (rc == SQLITE_ROW) {
     MapInformation mi;
 
-    mi.id = sqlite3_column_int(stmt, 0);
-    auto name = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1));
-    mi.name = name ? name : "";
+    mi.id            = sqlite3_column_int(stmt, 0);
+    auto name        = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1));
+    mi.name          = name ? name : "";
     mi.secondsPlayed = sqlite3_column_int(stmt, 2);
-    mi.callvoted = sqlite3_column_int(stmt, 3);
-    mi.votesPassed = sqlite3_column_int(stmt, 4);
-    mi.timesPlayed = sqlite3_column_int(stmt, 5);
-    mi.lastPlayed = sqlite3_column_int(stmt, 6);
-    mi.isOnServer = false;
+    mi.callvoted     = sqlite3_column_int(stmt, 3);
+    mi.votesPassed   = sqlite3_column_int(stmt, 4);
+    mi.timesPlayed   = sqlite3_column_int(stmt, 5);
+    mi.lastPlayed    = sqlite3_column_int(stmt, 6);
+    mi.isOnServer    = false;
 
-    _maps.push_back(mi);
+    _maps.push_back(std::move(mi));
     rc = sqlite3_step(stmt);
   }
 
   if (rc != SQLITE_DONE) {
-    Utilities::Error(
-        StringUtils::format("MapStatistics::loadMaps: Error: Reading map "
-                            "statistics failed. (%d) %s\n",
-                            rc, sqlite3_errmsg(db)));
+    Utilities::Error(StringUtils::format("MapStatistics::loadMaps: Error: Reading map "
+                                         "statistics failed. (%d) %s\n",
+                                         rc, sqlite3_errmsg(db)));
     sqlite3_finalize(stmt);
     sqlite3_close(db);
     return false;
@@ -430,31 +406,29 @@ bool MapStatistics::loadMaps() {
 
 bool MapStatistics::createDatabase() {
   sqlite3 *db = nullptr;
-  auto rc = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
+  auto rc     = sqlite3_open(FileSystem::Path::getPath(_databaseName).c_str(), &db);
   if (rc != SQLITE_OK) {
-    Utilities::Error(StringUtils::format(
-        "MapStatistics::createDatabase: Error: Failed to open database %s\n",
-        _databaseName));
+    Utilities::Error(
+      StringUtils::format("MapStatistics::createDatabase: Error: Failed to open database %s\n", _databaseName));
     return false;
   }
 
   char *errorMessage = nullptr;
-  rc = sqlite3_exec(db,
-                    "CREATE TABLE IF NOT EXISTS map_statistics (id "
-                    "INTEGER PRIMARY KEY "
-                    "AUTOINCREMENT, name TEXT UNIQUE, seconds_played "
-                    "INTEGER NOT NULL, "
-                    "callvoted INTEGER NOT NULL, votes_passed INTEGER "
-                    "NOT NULL, times_played "
-                    "INTEGER NOT NULL, last_played INTEGER NOT NULL);",
-                    nullptr, nullptr, &errorMessage);
+  rc                 = sqlite3_exec(db,
+                                    "CREATE TABLE IF NOT EXISTS map_statistics (id "
+                                    "INTEGER PRIMARY KEY "
+                                    "AUTOINCREMENT, name TEXT UNIQUE, seconds_played "
+                                    "INTEGER NOT NULL, "
+                                    "callvoted INTEGER NOT NULL, votes_passed INTEGER "
+                                    "NOT NULL, times_played "
+                                    "INTEGER NOT NULL, last_played INTEGER NOT NULL);",
+                                    nullptr, nullptr, &errorMessage);
   if (rc != SQLITE_OK) {
     sqlite3_free(errorMessage);
     sqlite3_close(db);
-    Utilities::Error(
-        StringUtils::format("MapStatistics::createDatabase: Error: Failed to "
-                            "create database %s. (%d) %s\n",
-                            _databaseName, rc, errorMessage));
+    Utilities::Error(StringUtils::format("MapStatistics::createDatabase: Error: Failed to "
+                                         "create database %s. (%d) %s\n",
+                                         _databaseName, rc, errorMessage));
     return false;
   }
   sqlite3_free(errorMessage);
@@ -498,27 +472,24 @@ const char *MapStatistics::randomMap() const {
 }
 
 std::vector<std::string> MapStatistics::blockedMaps() {
-  const std::string blockedMapsStr =
-      StringUtils::toLowerCase(g_blockedMaps.string);
+  const std::string blockedMapsStr = StringUtils::toLowerCase(g_blockedMaps.string);
   return StringUtils::split(blockedMapsStr, " ");
 }
 
 bool MapStatistics::isBlockedMap(const std::string &mapName) {
   const auto &blockedMaps = MapStatistics::blockedMaps();
-  return std::any_of(blockedMaps.begin(), blockedMaps.end(),
-                     [&mapName](const std::string &map) {
-                       return StringUtils::iEqual(map, mapName);
-                     });
+  return std::any_of(blockedMaps.begin(), blockedMaps.end(), [&mapName](const std::string &map) {
+    return StringUtils::iEqual(map, mapName);
+  });
 }
 
 bool MapStatistics::isValidMap(const MapInformation *mapInfo) const {
-  return mapInfo != _currentMap && mapInfo->isOnServer &&
-         !MapStatistics::isBlockedMap(mapInfo->name);
+  return mapInfo != _currentMap && mapInfo->isOnServer && !MapStatistics::isBlockedMap(mapInfo->name);
 }
 
 bool MapStatistics::mapExists(const std::string &mapName) {
   auto maps = MapStatistics::getMaps();
-  auto it = std::find(maps.begin(), maps.end(), mapName);
+  auto it   = std::find(maps.begin(), maps.end(), mapName);
   return it != maps.end();
 }
 

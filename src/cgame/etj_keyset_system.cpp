@@ -24,20 +24,19 @@
 
 #include "etj_keyset_system.h"
 
-#include "etj_keyset_keybind_drawer.h"
 #include "cg_local.h"
+#include "etj_keyset_keybind_drawer.h"
 
 namespace ETJump {
-KeySetSystem::KeySetSystem(const vmCvar_t *controlCvar,
-                           const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : keySetMasterDrawer(controlCvar, cvarUpdate) {
+KeySetSystem::KeySetSystem(const vmCvar_t *controlCvar, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+  : keySetMasterDrawer(controlCvar, cvarUpdate) {
   // key set themes
   const char *keySetNames[]{
-      "keyset",  // Keyset 1 (original)
-      "keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
-      "keyset3",
-      "keyset4",
-      // + add more
+    "keyset",  // Keyset 1 (original)
+    "keyset2", // Aciz: Keyset 2 (DeFRaG style keys)
+    "keyset3",
+    "keyset4",
+    // + add more
   };
 
   for (const auto &keySetName : keySetNames) {
@@ -47,21 +46,18 @@ KeySetSystem::KeySetSystem(const vmCvar_t *controlCvar,
   addKeyBindSet("keyset5", cvarUpdate);
 }
 
-void KeySetSystem::addSet(
-    const std::string &keySetName,
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate) {
-  keySetMasterDrawer.push(std::make_unique<KeySetDrawer>(
-      createKeyPressSet(keySetName), cvarUpdate));
+void KeySetSystem::addSet(const std::string &keySetName, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate) {
+  keySetMasterDrawer.push(std::make_unique<KeySetDrawer>(createKeyPressSet(keySetName), cvarUpdate));
 }
 
-void KeySetSystem::addKeyBindSet(
-    const std::string &keySetName,
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate) {
-  keySetMasterDrawer.push(std::make_unique<KeySetKeyBindDrawer>(
-      createKeyPressSet(keySetName), createKeyBindSet(keySetName), cvarUpdate));
+void KeySetSystem::addKeyBindSet(const std::string &keySetName, const std::shared_ptr<CvarUpdateHandler> &cvarUpdate) {
+  keySetMasterDrawer.push(
+    std::make_unique<KeySetKeyBindDrawer>(createKeyPressSet(keySetName), createKeyBindSet(keySetName), cvarUpdate));
 }
 
-bool KeySetSystem::beforeRender() { return keySetMasterDrawer.beforeRender(); }
+bool KeySetSystem::beforeRender() {
+  return keySetMasterDrawer.beforeRender();
+}
 
 void KeySetSystem::render() const {
   if (canSkipDraw()) {
@@ -71,59 +67,50 @@ void KeySetSystem::render() const {
   keySetMasterDrawer.render();
 }
 
-std::vector<KeySetDrawer::KeyShader>
-KeySetSystem::createKeyPressSet(const std::string &keySetName) {
+std::vector<KeySetDrawer::KeyShader> KeySetSystem::createKeyPressSet(const std::string &keySetName) {
   std::vector<KeySetDrawer::KeyShader> keyPressSet;
   keyPressSet.reserve(keyLayout.size());
 
   for (const auto &keyName : keyLayout) {
-    keyPressSet.push_back(
-        {keyName,
-         registerKeySetShader(keySetName,
-                              KeySetDrawer::keyNameToString(keyName)),
-         0});
+    keyPressSet.push_back({keyName, registerKeySetShader(keySetName, KeySetDrawer::keyNameToString(keyName)), 0});
   }
 
   return keyPressSet;
 }
 
-std::map<int, qhandle_t>
-KeySetSystem::createKeyBindSet(const std::string &keySetName) {
+std::map<int, qhandle_t> KeySetSystem::createKeyBindSet(const std::string &keySetName) {
   return {
-      {K_ENTER, registerKeySetShader(keySetName, "enter")},
-      {K_SHIFT, registerKeySetShader(keySetName, "shift")},
-      {K_CAPSLOCK, registerKeySetShader(keySetName, "capslock")},
-      {K_CTRL, registerKeySetShader(keySetName, "control")},
-      {K_TAB, registerKeySetShader(keySetName, "tab")},
-      {K_ALT, registerKeySetShader(keySetName, "alt")},
-      {K_BACKSPACE, registerKeySetShader(keySetName, "backspace")},
-      {K_DEL, registerKeySetShader(keySetName, "delete")},
-      {K_DOWNARROW, registerKeySetShader(keySetName, "downarrow")},
-      {K_UPARROW, registerKeySetShader(keySetName, "uparrow")},
-      {K_RIGHTARROW, registerKeySetShader(keySetName, "rightarrow")},
-      {K_LEFTARROW, registerKeySetShader(keySetName, "leftarrow")},
-      {K_PGDN, registerKeySetShader(keySetName, "pagedown")},
-      {K_PGUP, registerKeySetShader(keySetName, "pageup")},
-      {K_HOME, registerKeySetShader(keySetName, "home")},
-      {K_END, registerKeySetShader(keySetName, "end")},
-      {K_ESCAPE, registerKeySetShader(keySetName, "escape")},
-      {K_SPACE, registerKeySetShader(keySetName, "space")},
-      {K_INS, registerKeySetShader(keySetName, "insert")},
-      {K_PAUSE, registerKeySetShader(keySetName, "pause")},
-      {K_MWHEELDOWN, registerKeySetShader(keySetName, "mwheeldown")},
-      {K_MWHEELUP, registerKeySetShader(keySetName, "mwheelup")},
+    {K_ENTER,      registerKeySetShader(keySetName, "enter")     },
+    {K_SHIFT,      registerKeySetShader(keySetName, "shift")     },
+    {K_CAPSLOCK,   registerKeySetShader(keySetName, "capslock")  },
+    {K_CTRL,       registerKeySetShader(keySetName, "control")   },
+    {K_TAB,        registerKeySetShader(keySetName, "tab")       },
+    {K_ALT,        registerKeySetShader(keySetName, "alt")       },
+    {K_BACKSPACE,  registerKeySetShader(keySetName, "backspace") },
+    {K_DEL,        registerKeySetShader(keySetName, "delete")    },
+    {K_DOWNARROW,  registerKeySetShader(keySetName, "downarrow") },
+    {K_UPARROW,    registerKeySetShader(keySetName, "uparrow")   },
+    {K_RIGHTARROW, registerKeySetShader(keySetName, "rightarrow")},
+    {K_LEFTARROW,  registerKeySetShader(keySetName, "leftarrow") },
+    {K_PGDN,       registerKeySetShader(keySetName, "pagedown")  },
+    {K_PGUP,       registerKeySetShader(keySetName, "pageup")    },
+    {K_HOME,       registerKeySetShader(keySetName, "home")      },
+    {K_END,        registerKeySetShader(keySetName, "end")       },
+    {K_ESCAPE,     registerKeySetShader(keySetName, "escape")    },
+    {K_SPACE,      registerKeySetShader(keySetName, "space")     },
+    {K_INS,        registerKeySetShader(keySetName, "insert")    },
+    {K_PAUSE,      registerKeySetShader(keySetName, "pause")     },
+    {K_MWHEELDOWN, registerKeySetShader(keySetName, "mwheeldown")},
+    {K_MWHEELUP,   registerKeySetShader(keySetName, "mwheelup")  },
   };
 }
 
-qhandle_t KeySetSystem::registerKeySetShader(const std::string &keySetName,
-                                             const std::string &keyName) {
+qhandle_t KeySetSystem::registerKeySetShader(const std::string &keySetName, const std::string &keyName) {
   auto path = createKeyPressSetShaderPath(keySetName, keyName);
   return registerShaderNoMip(path);
 }
 
-std::string
-KeySetSystem::createKeyPressSetShaderPath(const std::string &keySetName,
-                                          const std::string &keyName) {
+std::string KeySetSystem::createKeyPressSetShaderPath(const std::string &keySetName, const std::string &keyName) {
   if (keyName.empty()) {
     return "";
   }

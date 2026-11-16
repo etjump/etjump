@@ -23,6 +23,7 @@
  */
 
 #include "etj_custom_command_menu_drawable.h"
+
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_cvar_update_handler.h"
@@ -32,106 +33,100 @@
 
 namespace ETJump {
 inline constexpr uint8_t NUM_MENU_ITEMS = 10;
-inline constexpr uint8_t MENU_NEXT = 9;
-inline constexpr uint8_t MENU_NEXT_KEY = 0;
-inline constexpr uint8_t MENU_PREV = 8;
-inline constexpr uint8_t MENU_PREV_KEY = 9;
+inline constexpr uint8_t MENU_NEXT      = 9;
+inline constexpr uint8_t MENU_NEXT_KEY  = 0;
+inline constexpr uint8_t MENU_PREV      = 8;
+inline constexpr uint8_t MENU_PREV_KEY  = 9;
 
 // to prevent long names from overflowing in the menu
 inline constexpr size_t DEFAULT_CMD_NAME_LEN = 28;
-inline constexpr float DEFAULT_MENU_WIDTH = 204.0f;
-inline constexpr float MAX_MENU_WIDTH = 620.0f;
+inline constexpr float DEFAULT_MENU_WIDTH    = 204.0f;
+inline constexpr float MAX_MENU_WIDTH        = 620.0f;
 
 static panel_button_text_t commandMenuTitleFont = {
-    0.19f, 0.19f, {0.6f, 0.6f, 0.6f, 1.f}, 0, 0, &cgs.media.limboFont1_lo,
+  0.19f, 0.19f, {0.6f, 0.6f, 0.6f, 1.f},
+    0, 0, &cgs.media.limboFont1_lo,
 };
 
 static panel_button_text_t commandMenuFont = {
-    0.2f,
-    0.2f,
-    {0.6f, 0.6f, 0.6f, 1.f},
-    ITEM_TEXTSTYLE_SHADOWED,
-    0,
-    &cgs.media.limboFont2,
+  0.2f, 0.2f, {0.6f, 0.6f, 0.6f, 1.f},
+    ITEM_TEXTSTYLE_SHADOWED, 0, &cgs.media.limboFont2,
 };
 
 static panel_button_t commandMenuTopBorder = {
-    nullptr,
-    "",
-    {10, 129, DEFAULT_MENU_WIDTH, 136},
-    // set color, r, g, b, a, draw rect
-    {1, static_cast<int32_t>(255 * 0.5f), static_cast<int32_t>(255 * 0.5f),
-     static_cast<int32_t>(255 * 0.5f), static_cast<int32_t>(255 * 0.5f), 1, 0,
-     0},
-    nullptr,
-    nullptr,
-    nullptr,
-    BG_PanelButtonsRender_Img,
-    nullptr,
+  nullptr,
+  "",
+  {10, 129, DEFAULT_MENU_WIDTH, 136},
+  // set color, r, g, b, a, draw rect
+  {1, static_cast<int32_t>(255 * 0.5f), static_cast<int32_t>(255 * 0.5f), static_cast<int32_t>(255 * 0.5f),
+    static_cast<int32_t>(255 * 0.5f), 1, 0, 0},
+  nullptr,
+  nullptr,
+  nullptr,
+  BG_PanelButtonsRender_Img,
+  nullptr,
 };
 
 static panel_button_t commandMenuTopBorderBack = {
-    "white",
-    "",
-    {11, 130, DEFAULT_MENU_WIDTH - 2, 134},
-    // set color, r, g, b, a
-    {1, 0, 0, 0, static_cast<int32_t>(255 * 0.75f), 0, 0, 0},
-    nullptr,
-    nullptr,
-    nullptr,
-    BG_PanelButtonsRender_Img,
-    nullptr,
+  "white",
+  "",
+  {11, 130, DEFAULT_MENU_WIDTH - 2, 134},
+  // set color, r, g, b, a
+  {1, 0, 0, 0, static_cast<int32_t>(255 * 0.75f), 0, 0, 0},
+  nullptr,
+  nullptr,
+  nullptr,
+  BG_PanelButtonsRender_Img,
+  nullptr,
 };
 
 static panel_button_t commandMenuTopBorderInner = {
-    "white",
-    "",
-    {12, 131, DEFAULT_MENU_WIDTH - 4, 12},
-    // set color, r, g, b, a
-    {1, 41, 51, 43, 204, 0, 0, 0},
-    nullptr,
-    nullptr,
-    nullptr,
-    BG_PanelButtonsRender_Img,
-    nullptr,
+  "white",
+  "",
+  {12, 131, DEFAULT_MENU_WIDTH - 4, 12},
+  // set color, r, g, b, a
+  {1, 41, 51, 43, 204, 0, 0, 0},
+  nullptr,
+  nullptr,
+  nullptr,
+  BG_PanelButtonsRender_Img,
+  nullptr,
 };
 
 static panel_button_t commandMenuTopBorderInnerText = {
-    nullptr,
-    "",
-    {15, 141, DEFAULT_MENU_WIDTH - 4, 12},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    &commandMenuTitleFont,
-    nullptr,
-    nullptr,
-    CustomCommandMenuDrawable::commandMenuTitleDraw,
-    nullptr,
+  nullptr,
+  "",
+  {15, 141, DEFAULT_MENU_WIDTH - 4, 12},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  &commandMenuTitleFont,
+  nullptr,
+  nullptr,
+  CustomCommandMenuDrawable::commandMenuTitleDraw,
+  nullptr,
 };
 
 static panel_button_t commandMenuItemText = {
-    nullptr,
-    "",
-    {16, 153, 128, 12},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    &commandMenuFont,
-    nullptr,
-    nullptr,
-    CustomCommandMenuDrawable::commandMenuTextDraw,
-    nullptr,
+  nullptr,
+  "",
+  {16, 153, 128, 12},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  &commandMenuFont,
+  nullptr,
+  nullptr,
+  CustomCommandMenuDrawable::commandMenuTextDraw,
+  nullptr,
 };
 
 static std::vector<panel_button_t> commandMenuPanels;
 uint8_t CustomCommandMenuDrawable::currentPage = 1;
-size_t CustomCommandMenuDrawable::maxChars = DEFAULT_CMD_NAME_LEN;
+size_t CustomCommandMenuDrawable::maxChars     = DEFAULT_CMD_NAME_LEN;
 
-CustomCommandMenuDrawable::CustomCommandMenuDrawable(
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : consoleCommands(consoleCommands), cvarUpdate(cvarUpdate) {
+CustomCommandMenuDrawable::CustomCommandMenuDrawable(const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+                                                     const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+  : consoleCommands(consoleCommands), cvarUpdate(cvarUpdate) {
   setupListeners();
   // this ends up calling 'setupPanels' so no need to call it manually here
-  resizePanels(
-      std::clamp(etj_ccMenu_width.value, DEFAULT_MENU_WIDTH, MAX_MENU_WIDTH));
+  resizePanels(std::clamp(etj_ccMenu_width.value, DEFAULT_MENU_WIDTH, MAX_MENU_WIDTH));
 }
 
 CustomCommandMenuDrawable::~CustomCommandMenuDrawable() {
@@ -143,20 +138,18 @@ CustomCommandMenuDrawable::~CustomCommandMenuDrawable() {
 }
 
 void CustomCommandMenuDrawable::setupListeners() {
-  consoleCommands->subscribe(
-      "openCustomCommandMenu", [](const std::vector<std::string> &args) {
-        if (cg.showCustomCommandMenu && etj_ccMenu_browseWithOpen.integer) {
-          findNextPage(cgame.systems.customCommandMenu->getCustomCommands(),
-                       BrowseDirection::NEXT);
-          return;
-        }
+  consoleCommands->subscribe("openCustomCommandMenu", [](const std::vector<std::string> &args) {
+    if (cg.showCustomCommandMenu && etj_ccMenu_browseWithOpen.integer) {
+      findNextPage(cgame.systems.customCommandMenu->getCustomCommands(), BrowseDirection::NEXT);
+      return;
+    }
 
-        if (args.empty()) {
-          openMenu(currentPage);
-        } else {
-          openMenu(static_cast<uint8_t>(Q_atoi(args[0])));
-        }
-      });
+    if (args.empty()) {
+      openMenu(currentPage);
+    } else {
+      openMenu(static_cast<uint8_t>(Q_atoi(args[0])));
+    }
+  });
 
   cvarUpdate->subscribe(&etj_ccMenu_width, [](const vmCvar_t *cvar) {
     resizePanels(std::clamp(cvar->value, DEFAULT_MENU_WIDTH, MAX_MENU_WIDTH));
@@ -181,8 +174,7 @@ void CustomCommandMenuDrawable::openMenu(const uint8_t page) {
   } else {
     CG_EventHandling(CGAME_EVENT_CUSTOM_COMMAND, qfalse);
 
-    if (page != currentPage && page > 0 &&
-        page <= CUSTOM_COMMAND_MENU_MAX_PAGES) {
+    if (page != currentPage && page > 0 && page <= CUSTOM_COMMAND_MENU_MAX_PAGES) {
       currentPage = page;
     } else if (!etj_ccMenu_rememberPage.integer) {
       currentPage = 1;
@@ -201,9 +193,9 @@ void CustomCommandMenuDrawable::setupPanels() {
 }
 
 void CustomCommandMenuDrawable::resizePanels(const float width) {
-  commandMenuTopBorder.rect.w = width;
-  commandMenuTopBorderBack.rect.w = width - 2;
-  commandMenuTopBorderInner.rect.w = width - 4;
+  commandMenuTopBorder.rect.w          = width;
+  commandMenuTopBorderBack.rect.w      = width - 2;
+  commandMenuTopBorderInner.rect.w     = width - 4;
   commandMenuTopBorderInnerText.rect.w = width - 4;
 
   computeMaxChars();
@@ -217,19 +209,16 @@ void CustomCommandMenuDrawable::resizePanels(const float width) {
 void CustomCommandMenuDrawable::computeMaxChars() {
   char text[MAX_STRING_CHARS]{};
   Q_strncpyz(text, "1. A", sizeof(text));
-  const auto &btn = commandMenuItemText;
-  const float margin =
-      ((btn.rect.x - commandMenuTopBorder.rect.x) * 2) + btn.rect.x;
-  float width = 0;
+  const auto &btn    = commandMenuItemText;
+  const float margin = ((btn.rect.x - commandMenuTopBorder.rect.x) * 2) + btn.rect.x;
+  float width        = 0;
 
   while (true) {
-    width = static_cast<float>(
-        CG_Text_Width_Ext(text, btn.font->scalex, 0, btn.font->font));
+    width = static_cast<float>(CG_Text_Width_Ext(text, btn.font->scalex, 0, btn.font->font));
 
     if (width > commandMenuTopBorderInnerText.rect.w - margin) {
       text[strlen(text) - 1] = '\0';
-      maxChars =
-          MaxCharsForWidth(text, btn.font->scalex, width, btn.font->font);
+      maxChars               = MaxCharsForWidth(text, btn.font->scalex, width, btn.font->font);
       break;
     }
 
@@ -237,24 +226,19 @@ void CustomCommandMenuDrawable::computeMaxChars() {
   }
 }
 
-void CustomCommandMenuDrawable::findNextPage(const CustomCommandMap &commands,
-                                             const BrowseDirection dir) {
+void CustomCommandMenuDrawable::findNextPage(const CustomCommandMap &commands, const BrowseDirection dir) {
   assert(dir == BrowseDirection::PREVIOUS || dir == BrowseDirection::NEXT);
   const auto step = static_cast<int32_t>(dir);
 
   if (etj_ccMenu_showEmptyPages.integer) {
-    currentPage = ((currentPage - 1 + step + CUSTOM_COMMAND_MENU_MAX_PAGES) %
-                   CUSTOM_COMMAND_MENU_MAX_PAGES) +
-                  1;
+    currentPage = ((currentPage - 1 + step + CUSTOM_COMMAND_MENU_MAX_PAGES) % CUSTOM_COMMAND_MENU_MAX_PAGES) + 1;
     return;
   }
 
   uint8_t next = currentPage;
 
   while (true) {
-    next = ((next - 1 + step + CUSTOM_COMMAND_MENU_MAX_PAGES) %
-            CUSTOM_COMMAND_MENU_MAX_PAGES) +
-           1;
+    next = ((next - 1 + step + CUSTOM_COMMAND_MENU_MAX_PAGES) % CUSTOM_COMMAND_MENU_MAX_PAGES) + 1;
 
     if (next == currentPage) {
       break;
@@ -283,51 +267,39 @@ void CustomCommandMenuDrawable::findNextPage(const CustomCommandMap &commands,
 
 void CustomCommandMenuDrawable::commandMenuTitleDraw(panel_button_t *button) {
   const auto &commands = cgame.systems.customCommandMenu->getCustomCommands();
-  std::string title = "CUSTOM COMMANDS";
+  std::string title    = "CUSTOM COMMANDS";
 
   if (!commands.empty()) {
-    title += StringUtils::format(" (PAGE %i OF %i)", currentPage,
-                                 CUSTOM_COMMAND_MENU_MAX_PAGES);
+    title += StringUtils::format(" (PAGE %i OF %i)", currentPage, CUSTOM_COMMAND_MENU_MAX_PAGES);
   }
 
-  CG_Text_Paint_Ext(button->rect.x, button->rect.y, button->font->scalex,
-                    button->font->scaley, button->font->colour, title, 0, 0,
-                    button->font->style, button->font->font);
+  CG_Text_Paint_Ext(button->rect.x, button->rect.y, button->font->scalex, button->font->scaley, button->font->colour,
+                    title, 0, 0, button->font->style, button->font->font);
 }
 
 void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
-  float y = button->rect.y;
+  float y              = button->rect.y;
   const auto &commands = cgame.systems.customCommandMenu->getCustomCommands();
 
   if (commands.empty()) {
-    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
-                      button->font->scaley, button->font->colour,
-                      "No commands saved!", 0, 0, button->font->style,
-                      button->font->font);
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex, button->font->scaley, button->font->colour,
+                      "No commands saved!", 0, 0, button->font->style, button->font->font);
 
     y += button->rect.h;
-    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
-                      button->font->scaley, button->font->colour,
-                      "Use 'addCustomCommand'", 0, 0, button->font->style,
-                      button->font->font);
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex, button->font->scaley, button->font->colour,
+                      "Use 'addCustomCommand'", 0, 0, button->font->style, button->font->font);
 
     y += button->rect.h;
-    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
-                      button->font->scaley, button->font->colour,
-                      "to add a new command, or use", 0, 0, button->font->style,
-                      button->font->font);
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex, button->font->scaley, button->font->colour,
+                      "to add a new command, or use", 0, 0, button->font->style, button->font->font);
 
     y += button->rect.h;
-    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
-                      button->font->scaley, button->font->colour,
-                      "'generateCustomCommandsFile'", 0, 0, button->font->style,
-                      button->font->font);
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex, button->font->scaley, button->font->colour,
+                      "'generateCustomCommandsFile'", 0, 0, button->font->style, button->font->font);
 
     y += button->rect.h;
-    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
-                      button->font->scaley, button->font->colour,
-                      "to generate an example file.", 0, 0, button->font->style,
-                      button->font->font);
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex, button->font->scaley, button->font->colour,
+                      "to generate an example file.", 0, 0, button->font->style, button->font->font);
 
     return;
   }
@@ -353,22 +325,19 @@ void CustomCommandMenuDrawable::commandMenuTextDraw(panel_button_t *button) {
         s += "Next page";
         break;
       default:
-        const auto &cmd = commands.at(currentPage)[i];
-        s += StringUtils::truncate(!cmd.name.empty() ? cmd.name : cmd.command,
-                                   maxChars);
+        const auto &cmd  = commands.at(currentPage)[i];
+        s               += StringUtils::truncate(!cmd.name.empty() ? cmd.name : cmd.command, maxChars);
         break;
     }
 
-    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex,
-                      button->font->scaley, button->font->colour, s, 0, 0,
+    CG_Text_Paint_Ext(button->rect.x, y, button->font->scalex, button->font->scaley, button->font->colour, s, 0, 0,
                       button->font->style, button->font->font);
 
     y += button->rect.h;
   }
 }
 
-void CustomCommandMenuDrawable::keyHandling(const int32_t key,
-                                            const bool down) {
+void CustomCommandMenuDrawable::keyHandling(const int32_t key, const bool down) {
   if (!down) {
     return;
   }
@@ -376,8 +345,7 @@ void CustomCommandMenuDrawable::keyHandling(const int32_t key,
   checkExecKey(key, qtrue);
 }
 
-qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key,
-                                                 const qboolean doAction) {
+qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key, const qboolean doAction) {
   if (key == K_ESCAPE) {
     return qtrue;
   }
@@ -427,8 +395,7 @@ qboolean CustomCommandMenuDrawable::checkExecKey(const int32_t key,
       findNextPage(commands, BrowseDirection::NEXT);
       break;
     default:
-      trap_SendConsoleCommand(
-          commands.at(currentPage)[realKey - 1].command.c_str());
+      trap_SendConsoleCommand(commands.at(currentPage)[realKey - 1].command.c_str());
 
       if (etj_ccMenu_autoClose.integer) {
         CG_EventHandling(CGAME_EVENT_NONE, qfalse);

@@ -23,18 +23,19 @@
  */
 
 #include "etj_save_system.h"
-#include "utilities.hpp"
+
 #include "etj_printer.h"
 #include "etj_session.h"
 #include "etj_worldspawn.h"
+#include "utilities.hpp"
 
 namespace ETJump {
 SaveSystem::Client::Client() {
   for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
-    alliesSaves[i].isValid = false;
+    alliesSaves[i].isValid  = false;
     alliesSaves[i].isLatest = false;
-    axisSaves[i].isValid = false;
-    axisSaves[i].isLatest = false;
+    axisSaves[i].isValid    = false;
+    axisSaves[i].isLatest   = false;
   }
 
   alliesBackups.clear();
@@ -46,27 +47,27 @@ SaveSystem::Client::Client() {
   }
 
   alliesLastLoadPos.isValid = false;
-  axisLastLoadPos.isValid = false;
+  axisLastLoadPos.isValid   = false;
 }
 
 SaveSystem::DisconnectedClient::DisconnectedClient() {
   for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
-    alliesSaves[i].isValid = false;
+    alliesSaves[i].isValid  = false;
     alliesSaves[i].isLatest = false;
-    axisSaves[i].isValid = false;
-    axisSaves[i].isLatest = false;
+    axisSaves[i].isValid    = false;
+    axisSaves[i].isLatest   = false;
   }
 
   alliesLastLoadPos.isValid = false;
-  axisLastLoadPos.isValid = false;
-  progression = 0;
-  saveLimit = 0;
+  axisLastLoadPos.isValid   = false;
+  progression               = 0;
+  saveLimit                 = 0;
 }
 
 // Saves current position
 void SaveSystem::save(gentity_t *ent) {
-  auto *client = ent->client;
-  const int clientNum = ClientNum(ent);
+  auto *client           = ent->client;
+  const int clientNum    = ClientNum(ent);
   const std::string guid = _session->Guid(ent);
 
   if (!client) {
@@ -78,15 +79,13 @@ void SaveSystem::save(gentity_t *ent) {
     return;
   }
 
-  if (!g_cheats.integer &&
-      (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
+  if (!g_cheats.integer && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave))) {
     Printer::center(ent, "^3Save ^7is disabled for this death run.");
     return;
   }
 
-  if (!g_cheats.integer &&
-      game.worldspawn->strictSaveLoad & SaveLoadRestrictions::MOVE) {
+  if (!g_cheats.integer && game.worldspawn->strictSaveLoad & SaveLoadRestrictions::MOVE) {
     // comparing to zero vector
     if (!VectorCompare(client->ps.velocity, vec3_origin)) {
       Printer::center(ent, "^3Save ^7is disabled while moving on this map.");
@@ -102,7 +101,7 @@ void SaveSystem::save(gentity_t *ent) {
   }
 
   const auto argv = GetArgs();
-  int position = 0;
+  int position    = 0;
 
   if (argv->size() > 1) {
     ToInt((*argv)[1], position);
@@ -113,8 +112,7 @@ void SaveSystem::save(gentity_t *ent) {
     }
 
     if (!g_cheats.integer && position > 0 && client->sess.timerunActive &&
-        client->sess.runSpawnflags &
-            static_cast<int>(TimerunSpawnflags::NoBackups)) {
+        client->sess.runSpawnflags & static_cast<int>(TimerunSpawnflags::NoBackups)) {
       Printer::center(ent, "Save slots are disabled for this timerun.");
       return;
     }
@@ -131,27 +129,19 @@ void SaveSystem::save(gentity_t *ent) {
   }
 
   if (!g_cheats.integer && client->sess.timerunActive &&
-      client->sess.runSpawnflags &
-          static_cast<int>(TimerunSpawnflags::NoSave)) {
+      client->sess.runSpawnflags & static_cast<int>(TimerunSpawnflags::NoSave)) {
     Printer::center(ent, "^3Save ^7is disabled for this timerun.");
     return;
   }
 
   trace_t trace;
-  trap_TraceCapsule(&trace, client->ps.origin, ent->r.mins, ent->r.maxs,
-                    client->ps.origin, ent->s.number, CONTENTS_NOSAVE);
+  trap_TraceCapsule(&trace, client->ps.origin, ent->r.mins, ent->r.maxs, client->ps.origin, ent->s.number,
+                    CONTENTS_NOSAVE);
 
   if (!g_cheats.integer) {
-    if (game.worldspawn->noSave) {
-      if (trace.fraction == 1.0f) {
-        Printer::center(ent, "^7You can not ^3save ^7inside this area.");
-        return;
-      }
-    } else {
-      if (trace.fraction != 1.0f) {
-        Printer::center(ent, "^7You can not ^3save ^7inside this area.");
-        return;
-      }
+    if (!WorldspawnShared::areaAllowsAction(game.worldspawn->resolvedKeysForClient(ent).noSave, trace)) {
+      Printer::center(ent, "^7You can not ^3save ^7inside this area.");
+      return;
     }
 
     if (game.worldspawn->limitedSaves > 0) {
@@ -189,9 +179,8 @@ void SaveSystem::save(gentity_t *ent) {
     }
   }
 
-  const auto teamSaves = client->sess.sessionTeam == TEAM_ALLIES
-                             ? _clients[guid].alliesSaves
-                             : _clients[guid].axisSaves;
+  const auto teamSaves =
+    client->sess.sessionTeam == TEAM_ALLIES ? _clients[guid].alliesSaves : _clients[guid].axisSaves;
   SavePosition *pos = teamSaves + position;
 
   if (pos->isLatest) {
@@ -227,8 +216,7 @@ void SaveSystem::load(gentity_t *ent) {
     return;
   }
 
-  if (!g_cheats.integer &&
-      (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
+  if (!g_cheats.integer && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave))) {
     Printer::center(ent, "^3Load ^7is disabled for this death run.");
     return;
@@ -241,7 +229,7 @@ void SaveSystem::load(gentity_t *ent) {
   }
 
   const auto argv = GetArgs();
-  int slot = 0;
+  int slot        = 0;
 
   if (argv->size() > 1) {
     ToInt((*argv)[1], slot);
@@ -265,17 +253,13 @@ void SaveSystem::load(gentity_t *ent) {
   const auto pos = getValidTeamSaveForSlot(ent, client->sess.sessionTeam, slot);
 
   if (pos) {
-    if (pos->stance == PlayerStance::Prone &&
-        client->ps.weapon == WP_MORTAR_SET) {
-      Printer::center(
-          ent,
-          "You cannot ^3load ^7to this position while using a mortar set.");
+    if (pos->stance == PlayerStance::Prone && client->ps.weapon == WP_MORTAR_SET) {
+      Printer::center(ent, "You cannot ^3load ^7to this position while using a mortar set.");
       return;
     }
 
     if (!g_cheats.integer && slot > 0 && client->sess.timerunActive &&
-        client->sess.runSpawnflags &
-            static_cast<int>(TimerunSpawnflags::NoBackups)) {
+        client->sess.runSpawnflags & static_cast<int>(TimerunSpawnflags::NoBackups)) {
       if (!pos->isTimerunSave) {
         InterruptRun(ent);
       } else {
@@ -288,9 +272,7 @@ void SaveSystem::load(gentity_t *ent) {
     restoreStanceFromSave(ent, pos);
 
     if (!g_cheats.integer && client->sess.timerunActive &&
-        (client->sess.runSpawnflags &
-             static_cast<int>(TimerunSpawnflags::NoSave) ||
-         !pos->isTimerunSave)) {
+        (client->sess.runSpawnflags & static_cast<int>(TimerunSpawnflags::NoSave) || !pos->isTimerunSave)) {
       InterruptRun(ent);
     }
 
@@ -308,8 +290,8 @@ void SaveSystem::load(gentity_t *ent) {
 // Saves position, does not check for anything. Used for target_save
 void SaveSystem::forceSave(const gentity_t *location, gentity_t *ent) {
   SavePosition *pos;
-  const auto *client = ent->client;
-  const int clientNum = ClientNum(ent);
+  const auto *client     = ent->client;
+  const int clientNum    = ClientNum(ent);
   const std::string guid = _session->Guid(ent);
 
   if (!client || !location) {
@@ -338,7 +320,7 @@ void SaveSystem::forceSave(const gentity_t *location, gentity_t *ent) {
 
   VectorCopy(location->s.origin, pos->origin);
   VectorCopy(location->s.angles, pos->vangles);
-  pos->isValid = true;
+  pos->isValid  = true;
   pos->isLatest = true;
 
   if (client->ps.eFlags & EF_PRONE) {
@@ -356,7 +338,7 @@ void SaveSystem::forceSave(const gentity_t *location, gentity_t *ent) {
 
 // Loads backup position
 void SaveSystem::loadBackupPosition(gentity_t *ent) {
-  const auto *client = ent->client;
+  const auto *client     = ent->client;
   const std::string guid = _session->Guid(ent);
 
   if (!client) {
@@ -374,14 +356,12 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
   }
 
   if (!g_cheats.integer && client->sess.timerunActive &&
-      client->sess.runSpawnflags &
-          static_cast<int>(TimerunSpawnflags::NoBackups)) {
+      client->sess.runSpawnflags & static_cast<int>(TimerunSpawnflags::NoBackups)) {
     Printer::center(ent, "Backup is disabled for this timerun.");
     return;
   }
 
-  if (!g_cheats.integer &&
-      (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
+  if (!g_cheats.integer && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave))) {
     Printer::center(ent, "^3Backup ^7is disabled for this death run.");
     return;
@@ -399,7 +379,7 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
   }
 
   const auto argv = GetArgs();
-  int slot = 0;
+  int slot        = 0;
 
   if (argv->size() > 1) {
     ToInt(argv->at(1), slot);
@@ -427,10 +407,8 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
     pos = &_clients[guid].axisBackups[slot];
   }
 
-  if (pos->stance == PlayerStance::Prone &&
-      client->ps.weapon == WP_MORTAR_SET) {
-    Printer::center(
-        ent, "You cannot ^3load ^7to this position while using a mortar set.");
+  if (pos->stance == PlayerStance::Prone && client->ps.weapon == WP_MORTAR_SET) {
+    Printer::center(ent, "You cannot ^3load ^7to this position while using a mortar set.");
     return;
   }
 
@@ -438,9 +416,7 @@ void SaveSystem::loadBackupPosition(gentity_t *ent) {
     restoreStanceFromSave(ent, pos);
 
     if (client->sess.timerunActive &&
-        (client->sess.runSpawnflags &
-             static_cast<int>(TimerunSpawnflags::NoSave) ||
-         !pos->isTimerunSave)) {
+        (client->sess.runSpawnflags & static_cast<int>(TimerunSpawnflags::NoSave) || !pos->isTimerunSave)) {
       InterruptRun(ent);
     }
 
@@ -469,8 +445,7 @@ void SaveSystem::unload(gentity_t *ent) {
     return;
   }
 
-  if (!g_cheats.integer &&
-      (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
+  if (!g_cheats.integer && (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::Active)) &&
       (client->sess.deathrunFlags & static_cast<int>(DeathrunFlags::NoSave))) {
     Printer::center(ent, "^3unload ^7is disabled for this death run.");
     return;
@@ -495,30 +470,19 @@ void SaveSystem::unload(gentity_t *ent) {
   const auto pos = getValidTeamUnloadPos(ent, client->sess.sessionTeam);
 
   if (pos) {
-    if (pos->stance == PlayerStance::Prone &&
-        client->ps.weapon == WP_MORTAR_SET) {
-      Printer::center(
-          ent,
-          "You cannot ^3unload ^7to this position while using a mortar set.");
+    if (pos->stance == PlayerStance::Prone && client->ps.weapon == WP_MORTAR_SET) {
+      Printer::center(ent, "You cannot ^3unload ^7to this position while using a mortar set.");
       return;
     }
 
     if (!g_cheats.integer) {
       // check for nosave areas only if we have valid pos
       trace_t trace;
-      trap_TraceCapsule(&trace, pos->origin, ent->r.mins, ent->r.maxs,
-                        pos->origin, ent->s.number, CONTENTS_NOSAVE);
+      trap_TraceCapsule(&trace, pos->origin, ent->r.mins, ent->r.maxs, pos->origin, ent->s.number, CONTENTS_NOSAVE);
 
-      if (game.worldspawn->noSave) {
-        if (trace.fraction == 1.0f) {
-          Printer::center(ent, "^7You can not ^3unload ^7to this area.");
-          return;
-        }
-      } else {
-        if (trace.fraction != 1.0f) {
-          Printer::center(ent, "^7You can not ^3unload ^7to this area.");
-          return;
-        }
+      if (!WorldspawnShared::areaAllowsAction(game.worldspawn->resolvedKeysForClient(ent).noSave, trace)) {
+        Printer::center(ent, "^7You can not ^3unload ^7to this area.");
+        return;
       }
     }
 
@@ -535,7 +499,7 @@ void SaveSystem::unload(gentity_t *ent) {
 // teleported to a position that was valid before that.
 void SaveSystem::saveLastLoadPos(gentity_t *ent) {
   SavePosition *pos;
-  const auto *client = ent->client;
+  const auto *client     = ent->client;
   const std::string guid = _session->Guid(ent);
 
   if (client->sess.sessionTeam == TEAM_ALLIES) {
@@ -574,12 +538,18 @@ void SaveSystem::clearTimerunSaves(gentity_t *ent) {
     }
   }
 
+  // 'etj_autoLoad' uses a separate copy for the autoload save
+  for (auto &autoSave : _clients[guid].quickDeployPositions) {
+    if (autoSave.isTimerunSave) {
+      autoSave.isValid = false;
+    }
+  }
+
   bool backupsHaveTimerunSaves = false;
 
   // check if we actually need to delete any old backups
   for (int i = 0; i < MAX_BACKUP_POSITIONS; i++) {
-    if (_clients[guid].alliesBackups[i].isTimerunSave ||
-        _clients[guid].axisBackups[i].isTimerunSave) {
+    if (_clients[guid].alliesBackups[i].isTimerunSave || _clients[guid].axisBackups[i].isTimerunSave) {
       backupsHaveTimerunSaves = true;
     }
   }
@@ -619,7 +589,7 @@ void SaveSystem::clearTimerunSaves(gentity_t *ent) {
   }
 
   _clients[guid].alliesBackups = std::move(newAlliesBackups);
-  _clients[guid].axisBackups = std::move(newAxisBackups);
+  _clients[guid].axisBackups   = std::move(newAxisBackups);
 }
 
 // Called on client disconnect. Stores saves for future sessions
@@ -633,24 +603,21 @@ void SaveSystem::savePositionsToDatabase(gentity_t *ent) {
 
   for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
     // Allied
-    VectorCopy(_clients[guid].alliesSaves[i].origin,
-               client.alliesSaves[i].origin);
-    VectorCopy(_clients[guid].alliesSaves[i].vangles,
-               client.alliesSaves[i].vangles);
+    VectorCopy(_clients[guid].alliesSaves[i].origin, client.alliesSaves[i].origin);
+    VectorCopy(_clients[guid].alliesSaves[i].vangles, client.alliesSaves[i].vangles);
 
-    client.alliesSaves[i].isValid = _clients[guid].alliesSaves[i].isValid;
+    client.alliesSaves[i].isValid  = _clients[guid].alliesSaves[i].isValid;
     client.alliesSaves[i].isLatest = _clients[guid].alliesSaves[i].isLatest;
     // Axis
     VectorCopy(_clients[guid].axisSaves[i].origin, client.axisSaves[i].origin);
-    VectorCopy(_clients[guid].axisSaves[i].vangles,
-               client.axisSaves[i].vangles);
+    VectorCopy(_clients[guid].axisSaves[i].vangles, client.axisSaves[i].vangles);
 
-    client.axisSaves[i].isValid = _clients[guid].axisSaves[i].isValid;
+    client.axisSaves[i].isValid  = _clients[guid].axisSaves[i].isValid;
     client.axisSaves[i].isLatest = _clients[guid].axisSaves[i].isLatest;
   }
 
   client.progression = ent->client->sess.clientMapProgression;
-  client.saveLimit = ent->client->sess.saveLimit;
+  client.saveLimit   = ent->client->sess.saveLimit;
 
   _savedPositions[guid] = client;
 }
@@ -663,7 +630,7 @@ void SaveSystem::loadPositionsFromDatabase(gentity_t *ent) {
   }
 
   const std::string guid = _session->Guid(ent);
-  const auto it = _savedPositions.find(guid);
+  const auto it          = _savedPositions.find(guid);
 
   if (it == _savedPositions.cend()) {
     return;
@@ -673,12 +640,10 @@ void SaveSystem::loadPositionsFromDatabase(gentity_t *ent) {
 
   for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
     // Allied
-    VectorCopy(it->second.alliesSaves[i].origin,
-               _clients[guid].alliesSaves[i].origin);
-    VectorCopy(it->second.alliesSaves[i].vangles,
-               _clients[guid].alliesSaves[i].vangles);
+    VectorCopy(it->second.alliesSaves[i].origin, _clients[guid].alliesSaves[i].origin);
+    VectorCopy(it->second.alliesSaves[i].vangles, _clients[guid].alliesSaves[i].vangles);
 
-    _clients[guid].alliesSaves[i].isValid = it->second.alliesSaves[i].isValid;
+    _clients[guid].alliesSaves[i].isValid  = it->second.alliesSaves[i].isValid;
     _clients[guid].alliesSaves[i].isLatest = it->second.alliesSaves[i].isLatest;
 
     if (it->second.alliesSaves[i].isValid) {
@@ -686,12 +651,10 @@ void SaveSystem::loadPositionsFromDatabase(gentity_t *ent) {
     }
 
     // Axis
-    VectorCopy(it->second.axisSaves[i].origin,
-               _clients[guid].axisSaves[i].origin);
-    VectorCopy(it->second.axisSaves[i].vangles,
-               _clients[guid].axisSaves[i].vangles);
+    VectorCopy(it->second.axisSaves[i].origin, _clients[guid].axisSaves[i].origin);
+    VectorCopy(it->second.axisSaves[i].vangles, _clients[guid].axisSaves[i].vangles);
 
-    _clients[guid].axisSaves[i].isValid = it->second.axisSaves[i].isValid;
+    _clients[guid].axisSaves[i].isValid  = it->second.axisSaves[i].isValid;
     _clients[guid].axisSaves[i].isLatest = it->second.axisSaves[i].isLatest;
 
     if (it->second.axisSaves[i].isValid) {
@@ -700,11 +663,10 @@ void SaveSystem::loadPositionsFromDatabase(gentity_t *ent) {
   }
 
   ent->client->sess.clientMapProgression = it->second.progression;
-  ent->client->sess.saveLimit = it->second.saveLimit;
+  ent->client->sess.saveLimit            = it->second.saveLimit;
 
   if (validPositionsCount) {
-    Printer::chat(ent,
-                  "^gETJump: ^7loaded saved positions from previous session.");
+    Printer::chat(ent, "^gETJump: ^7loaded saved positions from previous session.");
   }
 }
 
@@ -712,21 +674,18 @@ void SaveSystem::storeTeamQuickDeployPosition(gentity_t *ent, team_t team) {
   const auto lastValidSave = getValidTeamSaveForSlot(ent, team, 0);
 
   if (lastValidSave) {
-    const auto client = &_clients[_session->Guid(ent)];
+    const auto client   = &_clients[_session->Guid(ent)];
     const auto autoSave = &client->quickDeployPositions[team];
-    *autoSave = *lastValidSave;
+    *autoSave           = *lastValidSave;
   }
 }
 
-void SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent,
-                                                 const team_t team) {
+void SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent, const team_t team) {
   const auto validSave = getValidTeamQuickDeploySave(ent, team);
 
   if (validSave) {
     if (!g_cheats.integer && ent->client->sess.timerunActive &&
-        (ent->client->sess.runSpawnflags &
-             static_cast<int>(TimerunSpawnflags::NoSave) ||
-         !validSave->isTimerunSave)) {
+        (ent->client->sess.runSpawnflags & static_cast<int>(TimerunSpawnflags::NoSave) || !validSave->isTimerunSave)) {
       InterruptRun(ent);
     }
 
@@ -736,8 +695,7 @@ void SaveSystem::loadOnceTeamQuickDeployPosition(gentity_t *ent,
   }
 }
 
-void SaveSystem::invalidateTeamQuickDeployPosition(gentity_t *ent,
-                                                   const team_t team) {
+void SaveSystem::invalidateTeamQuickDeployPosition(gentity_t *ent, const team_t team) {
   auto *const validSave = getValidTeamQuickDeploySave(ent, team);
 
   if (validSave) {
@@ -745,9 +703,7 @@ void SaveSystem::invalidateTeamQuickDeployPosition(gentity_t *ent,
   }
 }
 
-SaveSystem::SavePosition *SaveSystem::getValidTeamSaveForSlot(gentity_t *ent,
-                                                              const team_t team,
-                                                              const int slot) {
+SaveSystem::SavePosition *SaveSystem::getValidTeamSaveForSlot(gentity_t *ent, const team_t team, const int slot) {
   if (!ent || !ent->client) {
     return nullptr;
   }
@@ -772,8 +728,7 @@ SaveSystem::SavePosition *SaveSystem::getValidTeamSaveForSlot(gentity_t *ent,
   return pos;
 }
 
-SaveSystem::SavePosition *SaveSystem::getValidTeamUnloadPos(gentity_t *ent,
-                                                            const team_t team) {
+SaveSystem::SavePosition *SaveSystem::getValidTeamUnloadPos(gentity_t *ent, const team_t team) {
   if (!ent || !ent->client) {
     return nullptr;
   }
@@ -798,8 +753,7 @@ SaveSystem::SavePosition *SaveSystem::getValidTeamUnloadPos(gentity_t *ent,
   return pos;
 }
 
-SaveSystem::SavePosition *
-SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, const team_t team) {
+SaveSystem::SavePosition *SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, const team_t team) {
   if (!ent || !ent->client) {
     return nullptr;
   }
@@ -816,7 +770,7 @@ SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, const team_t team) {
   }
 
   const auto client = &_clients[guid];
-  const auto pos = &client->quickDeployPositions[team];
+  const auto pos    = &client->quickDeployPositions[team];
 
   if (!pos->isValid) {
     return nullptr;
@@ -825,8 +779,7 @@ SaveSystem::getValidTeamQuickDeploySave(gentity_t *ent, const team_t team) {
   return pos;
 }
 
-void SaveSystem::restoreStanceFromSave(gentity_t *ent,
-                                       const SavePosition *pos) {
+void SaveSystem::restoreStanceFromSave(gentity_t *ent, const SavePosition *pos) {
   if (!ent || !ent->client) {
     return;
   }
@@ -834,15 +787,15 @@ void SaveSystem::restoreStanceFromSave(gentity_t *ent,
   const auto client = ent->client;
 
   if (pos->stance == PlayerStance::Crouch) {
-    client->ps.eFlags &= ~EF_PRONE;
-    client->ps.eFlags &= ~EF_PRONE_MOVING;
+    client->ps.eFlags   &= ~EF_PRONE;
+    client->ps.eFlags   &= ~EF_PRONE_MOVING;
     client->ps.pm_flags |= PMF_DUCKED;
   } else if (pos->stance == PlayerStance::Prone) {
     client->ps.eFlags |= EF_PRONE;
     SetClientViewAngle(ent, pos->vangles);
   } else {
-    client->ps.eFlags &= ~EF_PRONE;
-    client->ps.eFlags &= ~EF_PRONE_MOVING;
+    client->ps.eFlags   &= ~EF_PRONE;
+    client->ps.eFlags   &= ~EF_PRONE_MOVING;
     client->ps.pm_flags &= ~PMF_DUCKED;
   }
 }
@@ -854,8 +807,7 @@ void SaveSystem::saveBackupPosition(gentity_t *ent, const SavePosition *pos) {
   }
 
   if (ent->client->sess.timerunActive &&
-      ent->client->sess.runSpawnflags &
-          static_cast<int>(TimerunSpawnflags::NoBackups)) {
+      ent->client->sess.runSpawnflags & static_cast<int>(TimerunSpawnflags::NoBackups)) {
     return;
   }
 
@@ -865,9 +817,9 @@ void SaveSystem::saveBackupPosition(gentity_t *ent, const SavePosition *pos) {
   VectorCopy(pos->origin, backup.origin);
   VectorCopy(pos->vangles, backup.vangles);
 
-  backup.isValid = pos->isValid;
-  backup.isLatest = pos->isLatest;
-  backup.stance = pos->stance;
+  backup.isValid       = pos->isValid;
+  backup.isLatest      = pos->isLatest;
+  backup.stance        = pos->stance;
   backup.isTimerunSave = pos->isTimerunSave;
 
   // Can never be spectator as this would not be called
@@ -883,7 +835,7 @@ void SaveSystem::saveBackupPosition(gentity_t *ent, const SavePosition *pos) {
 void SaveSystem::storePosition(const gclient_s *client, SavePosition *pos) {
   VectorCopy(client->ps.origin, pos->origin);
   VectorCopy(client->ps.viewangles, pos->vangles);
-  pos->isValid = true;
+  pos->isValid  = true;
   pos->isLatest = true;
 
   if (client->ps.eFlags & EF_PRONE) {
@@ -899,9 +851,8 @@ void SaveSystem::storePosition(const gclient_s *client, SavePosition *pos) {
 
 int SaveSystem::getLatestSaveSlot(gentity_t *ent) {
   const std::string guid = _session->Guid(ent);
-  const auto teamSaves = ent->client->sess.sessionTeam == TEAM_ALLIES
-                             ? _clients[guid].alliesSaves
-                             : _clients[guid].axisSaves;
+  const auto teamSaves =
+    ent->client->sess.sessionTeam == TEAM_ALLIES ? _clients[guid].alliesSaves : _clients[guid].axisSaves;
   int slot = -1;
 
   for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
@@ -916,9 +867,8 @@ int SaveSystem::getLatestSaveSlot(gentity_t *ent) {
 
 void SaveSystem::resetLatestSaveSlot(gentity_t *ent) {
   const std::string guid = _session->Guid(ent);
-  const auto teamSaves = ent->client->sess.sessionTeam == TEAM_ALLIES
-                             ? _clients[guid].alliesSaves
-                             : _clients[guid].axisSaves;
+  const auto teamSaves =
+    ent->client->sess.sessionTeam == TEAM_ALLIES ? _clients[guid].alliesSaves : _clients[guid].axisSaves;
 
   for (int i = 0; i < MAX_SAVED_POSITIONS; i++) {
     teamSaves[i].isLatest = false;
@@ -937,10 +887,9 @@ void SaveSystem::sendClientCommands(gentity_t *ent, int position) {
   // Send the commands to ourselves and any following clients
   for (int i = 0; i < level.numConnectedClients; i++) {
     target = level.sortedClients[i];
-    if (target == self ||
-        (level.clients[target].sess.sessionTeam == TEAM_SPECTATOR &&
-         level.clients[target].sess.spectatorState == SPECTATOR_FOLLOW &&
-         level.clients[target].sess.spectatorClient == self)) {
+    if (target == self || (level.clients[target].sess.sessionTeam == TEAM_SPECTATOR &&
+                           level.clients[target].sess.spectatorState == SPECTATOR_FOLLOW &&
+                           level.clients[target].sess.spectatorClient == self)) {
       trap_SendServerCommand(target, "resetStrafeQuality\n");
       trap_SendServerCommand(target, "resetJumpSpeeds\n");
       trap_SendServerCommand(target, saveMsg.c_str());
@@ -949,7 +898,7 @@ void SaveSystem::sendClientCommands(gentity_t *ent, int position) {
 }
 
 void SaveSystem::teleportPlayer(gentity_t *ent, SavePosition *pos) {
-  auto *client = ent->client;
+  auto *client       = ent->client;
   client->ps.eFlags ^= EF_TELEPORT_BIT;
 
   G_AddEvent(ent, EV_LOAD_TELEPORT, 0);

@@ -23,6 +23,7 @@
  */
 
 #include "etj_jump_speeds_v2.h"
+
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_color_parser.h"
@@ -30,34 +31,29 @@
 #include "etj_demo_compatibility.h"
 #include "etj_entity_events_handler.h"
 #include "etj_player_events_handler.h"
+#include "etj_upmove_meter_data.h"
 #include "etj_utilities.h"
 
-inline constexpr size_t MAX_JUMPS = 100;
+inline constexpr size_t MAX_JUMPS    = 100;
 inline constexpr int32_t MAX_COLUMNS = 10;
-inline constexpr int32_t MAX_ROWS = 10;
+inline constexpr int32_t MAX_ROWS    = 10;
 
-inline constexpr float POS_X = 6.0f;
-inline constexpr float TEXT_MIN_SIZE = 0.1f;
-inline constexpr float TEXT_MAX_SIZE = 10.0f;
+inline constexpr float POS_X             = 6.0f;
+inline constexpr float TEXT_MIN_SIZE     = 0.1f;
+inline constexpr float TEXT_MAX_SIZE     = 10.0f;
 inline constexpr float DEFAULT_TEXT_SIZE = 0.2f;
 
-// base gap between speeds on horizontal layout
-inline constexpr float BASE_OFFSET_X = 30.0f;
-// base row height on vertical layout
-inline constexpr float BASE_OFFSET_Y = 12.0f;
 // offset for the first jump speed after label on horizontal layout
 inline constexpr float HOR_FIRSTJUMP_OFFSET = 5.0f;
 
 namespace ETJump {
-JumpSpeedsV2::JumpSpeedsV2(
-    const std::shared_ptr<EntityEventsHandler> &entityEvents,
-    const std::shared_ptr<PlayerEventsHandler> &playerEvents,
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
-    const std::shared_ptr<ClientCommandsHandler> &serverCommands,
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : entityEvents(entityEvents), playerEvents(playerEvents),
-      consoleCommands(consoleCommands), serverCommands(serverCommands),
-      cvarUpdate(cvarUpdate) {
+JumpSpeedsV2::JumpSpeedsV2(const std::shared_ptr<EntityEventsHandler> &entityEvents,
+                           const std::shared_ptr<PlayerEventsHandler> &playerEvents,
+                           const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+                           const std::shared_ptr<ClientCommandsHandler> &serverCommands,
+                           const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+  : entityEvents(entityEvents), playerEvents(playerEvents), consoleCommands(consoleCommands),
+    serverCommands(serverCommands), cvarUpdate(cvarUpdate) {
   parseColor(etj_jumpSpeedsColor.string, colorBase);
   parseColor(etj_jumpSpeedsFasterColor.string, colorFaster);
   parseColor(etj_jumpSpeedsSlowerColor.string, colorSlower);
@@ -77,37 +73,44 @@ JumpSpeedsV2::~JumpSpeedsV2() {
   cvarUpdate->unsubscribe(&etj_jumpSpeedsFasterColor);
   cvarUpdate->unsubscribe(&etj_jumpSpeedsSlowerColor);
   cvarUpdate->unsubscribe(&etj_jumpSpeedsTextSize);
+  cvarUpdate->unsubscribe(&etj_jumpSpeedsShowUpmove);
 }
 
 void JumpSpeedsV2::startListeners() {
-  entityEvents->subscribe(EV_JUMP, [this](centity_t *) { updateJumpSpeeds(); });
+  entityEvents->subscribe(EV_JUMP, [this](centity_t *) {
+    updateJumpSpeeds();
+  });
 
   playerEvents->subscribe("respawn", [this](const std::vector<std::string> &) {
     resetQueued = true;
   });
 
-  consoleCommands->subscribe(
-      "resetJumpSpeeds",
-      [this](const std::vector<std::string> &) { resetQueued = true; });
+  consoleCommands->subscribe("resetJumpSpeeds", [this](const std::vector<std::string> &) {
+    resetQueued = true;
+  });
 
-  serverCommands->subscribe(
-      "resetJumpSpeeds",
-      [this](const std::vector<std::string> &) { resetQueued = true; });
+  serverCommands->subscribe("resetJumpSpeeds", [this](const std::vector<std::string> &) {
+    resetQueued = true;
+  });
 
   cvarUpdate->subscribe(&etj_jumpSpeedsColor, [this](const vmCvar_t *cvar) {
     parseColor(cvar->string, colorBase);
   });
 
-  cvarUpdate->subscribe(
-      &etj_jumpSpeedsFasterColor,
-      [this](const vmCvar_t *cvar) { parseColor(cvar->string, colorFaster); });
+  cvarUpdate->subscribe(&etj_jumpSpeedsFasterColor, [this](const vmCvar_t *cvar) {
+    parseColor(cvar->string, colorFaster);
+  });
 
-  cvarUpdate->subscribe(
-      &etj_jumpSpeedsSlowerColor,
-      [this](const vmCvar_t *cvar) { parseColor(cvar->string, colorSlower); });
+  cvarUpdate->subscribe(&etj_jumpSpeedsSlowerColor, [this](const vmCvar_t *cvar) {
+    parseColor(cvar->string, colorSlower);
+  });
 
   cvarUpdate->subscribe(&etj_jumpSpeedsTextSize, [this](const vmCvar_t *cvar) {
     adjustTextSize(*cvar);
+  });
+
+  cvarUpdate->subscribe(&etj_jumpSpeedsShowUpmove, [this](const vmCvar_t *) {
+    computeTextOffsets();
   });
 }
 
@@ -116,8 +119,7 @@ void JumpSpeedsV2::parseColor(const std::string &colorStr, vec4_t &color) {
 }
 
 void JumpSpeedsV2::adjustTextSize(const vmCvar_t &cvar) {
-  size = CvarValueParser::parse<CvarValue::Size>(cvar, TEXT_MIN_SIZE,
-                                                 TEXT_MAX_SIZE);
+  size    = CvarValueParser::parse<CvarValue::Size>(cvar, TEXT_MIN_SIZE, TEXT_MAX_SIZE);
   size.x *= 0.1f;
   size.y *= 0.1f;
 
@@ -132,17 +134,21 @@ void JumpSpeedsV2::adjustTextSize(const vmCvar_t &cvar) {
 // adjustable, it would cause slight mismatch on the position
 // that players have set prior to it being possible.
 void JumpSpeedsV2::computeTextOffsets() {
-  const int32_t defaultTextHeight = CG_Text_Height_Ext(
-      LABEL_TEXT, DEFAULT_TEXT_SIZE, 0, &cgs.media.limboFont2);
-  const int32_t currentTextHeight =
-      CG_Text_Height_Ext(LABEL_TEXT, size.y, 0, &cgs.media.limboFont2);
+  const int32_t defaultTextHeight = CG_Text_Height_Ext(LABEL_TEXT, DEFAULT_TEXT_SIZE, 0, &cgs.media.limboFont2);
+  const int32_t currentTextHeight = CG_Text_Height_Ext(LABEL_TEXT, size.y, 0, &cgs.media.limboFont2);
+
+  static const auto baseOffsetX =
+    static_cast<float>(CG_Text_Width_Ext("99999", DEFAULT_TEXT_SIZE, 0, &cgs.media.limboFont2));
+  static const auto baseOffsetUpmoveX =
+    static_cast<float>(CG_Text_Width_Ext("9999 (1000)", DEFAULT_TEXT_SIZE, 0, &cgs.media.limboFont2));
+  static const auto baseOffsetY =
+    static_cast<float>(CG_Text_Height_Ext("9", DEFAULT_TEXT_SIZE, 0, &cgs.media.limboFont2)) * 2;
 
   textYAdjust = static_cast<float>(defaultTextHeight - currentTextHeight);
-  textOffsetX = BASE_OFFSET_X * (size.x / DEFAULT_TEXT_SIZE);
-  rowHeight = BASE_OFFSET_Y * (size.y / DEFAULT_TEXT_SIZE);
+  textOffsetX = (etj_jumpSpeedsShowUpmove.integer ? baseOffsetUpmoveX : baseOffsetX) * (size.x / DEFAULT_TEXT_SIZE);
+  rowHeight   = baseOffsetY * (size.y / DEFAULT_TEXT_SIZE);
 
-  firstJumpHorOffsetX = static_cast<float>(CG_Text_Width_Ext(
-                            LABEL_TEXT, size.x, 0, &cgs.media.limboFont2)) +
+  firstJumpHorOffsetX = static_cast<float>(CG_Text_Width_Ext(LABEL_TEXT, size.x, 0, &cgs.media.limboFont2)) +
                         (HOR_FIRSTJUMP_OFFSET * (size.x / DEFAULT_TEXT_SIZE));
 }
 
@@ -180,13 +186,38 @@ void JumpSpeedsV2::updateJumpSpeeds() {
   if (etj_jumpSpeedsMinSpeed.integer > current.speed) {
     current.relation = SpeedRelation::SLOWER;
   }
+
+  // start polling upmove if we're currently drawing the jump speeds
+  // this still gets called even if we don't render anything,
+  // as the event check happens separately from drawing
+  // if we were to unconditionally poll this, the latest jump would
+  // always show '0' as upmove after the drawing is enabled
+  if (etj_drawJumpSpeeds.integer) {
+    pollUpmove = true;
+  }
+}
+
+void JumpSpeedsV2::updateCurrentUpmove() {
+  // this may be empty if we switch the spectated player,
+  // and they are currently holding jump
+  // early exit is fine here since we already missed the jump event anyway
+  if (jumpSpeeds.empty()) {
+    return;
+  }
+
+  const auto &s               = cgame.hudData.upmove->getState();
+  jumpSpeeds.back().upmoveStr = std::to_string(s.fullDelay);
+
+  if (!s.jumping) {
+    pollUpmove = false;
+  }
 }
 
 void JumpSpeedsV2::setSpeedRelation() {
   assert(jumpSpeeds.size() > 1);
   const size_t currentJump = jumpSpeeds.size() - 1;
 
-  auto &current = jumpSpeeds[currentJump];
+  auto &current    = jumpSpeeds[currentJump];
   const auto &prev = jumpSpeeds[currentJump - 1];
 
   // speeds are equal, no adjustment needed (default is neutral)
@@ -194,8 +225,7 @@ void JumpSpeedsV2::setSpeedRelation() {
     return;
   }
 
-  current.relation = current.speed > prev.speed ? SpeedRelation::FASTER
-                                                : SpeedRelation::SLOWER;
+  current.relation = current.speed > prev.speed ? SpeedRelation::FASTER : SpeedRelation::SLOWER;
 }
 
 void JumpSpeedsV2::setJumpColor(const Jump &jump, vec4_t color) const {
@@ -227,6 +257,7 @@ bool JumpSpeedsV2::beforeRender() {
     // otherwise just queue the reset to happen on next update
     if (ps->persistant[PERS_TEAM] == TEAM_SPECTATOR) {
       jumpSpeeds.clear();
+      pollUpmove = false;
     } else {
       resetQueued = true;
     }
@@ -235,26 +266,29 @@ bool JumpSpeedsV2::beforeRender() {
   // if 'clientNum' has switched, it means we're either spectating and changed
   // the followed client, or are joining from spectators (while following)
   // to a team -> instantly clear jump speeds so that unrelated speeds
-  // don't linger on the screen
+  // don't linger on the screen, and stop polling upmove, as any 'EV_JUMP'
+  // event that may have caused us to poll for it is no longer relevant
   if (clientNum != ps->clientNum) {
     jumpSpeeds.clear();
+    pollUpmove = false;
   }
 
-  team = static_cast<team_t>(ps->persistant[PERS_TEAM]);
+  team      = static_cast<team_t>(ps->persistant[PERS_TEAM]);
   clientNum = ps->clientNum;
 
   if (canSkipDraw()) {
     return false;
   }
 
-  maxJumps = std::clamp(etj_jumpSpeedsMaxJumps.integer, 1,
-                        static_cast<int32_t>(MAX_JUMPS));
-  jumpsPerColumn =
-      std::clamp(etj_jumpSpeedsMaxJumpsPerColumn.integer, 1, maxJumps);
-  jumpsPerRow = std::clamp(etj_jumpSpeedsMaxJumpsPerRow.integer, 1, maxJumps);
+  if (pollUpmove) {
+    updateCurrentUpmove();
+  }
 
-  textStyle = etj_jumpSpeedsShadow.integer ? ITEM_TEXTSTYLE_SHADOWED
-                                           : ITEM_TEXTSTYLE_NORMAL;
+  maxJumps       = std::clamp(etj_jumpSpeedsMaxJumps.integer, 1, static_cast<int32_t>(MAX_JUMPS));
+  jumpsPerColumn = std::clamp(etj_jumpSpeedsMaxJumpsPerColumn.integer, 1, maxJumps);
+  jumpsPerRow    = std::clamp(etj_jumpSpeedsMaxJumpsPerRow.integer, 1, maxJumps);
+
+  textStyle = etj_jumpSpeedsShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
 
   style.reset();
   style.set(static_cast<Style>(etj_jumpSpeedsStyle.integer));
@@ -266,13 +300,11 @@ void JumpSpeedsV2::render() const {
   float x = std::clamp(POS_X + etj_jumpSpeedsX.value, 0.0f, 640.0f);
   ETJump_AdjustPosition(&x);
 
-  float y = std::clamp(SCREEN_CENTER_Y + etj_jumpSpeedsY.value, 0.0f,
-                       static_cast<float>(SCREEN_HEIGHT));
-  y -= textYAdjust;
+  float y  = std::clamp(SCREEN_CENTER_Y + etj_jumpSpeedsY.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
+  y       -= textYAdjust;
 
   if (!(style & Style::NO_LABEL)) {
-    CG_Text_Paint_Ext(x, y, size.x, size.y, colorBase, LABEL_TEXT, 0, 0,
-                      textStyle, &cgs.media.limboFont2);
+    CG_Text_Paint_Ext(x, y, size.x, size.y, colorBase, LABEL_TEXT, 0, 0, textStyle, &cgs.media.limboFont2);
 
     if (style & Style::HORIZONTAL) {
       x += firstJumpHorOffsetX;
@@ -281,37 +313,40 @@ void JumpSpeedsV2::render() const {
     }
   }
 
-  const float baseX = x;
-  const float baseY = y;
+  const float baseX   = x;
+  const float baseY   = y;
   const auto numJumps = static_cast<int32_t>(jumpSpeeds.size());
   vec4_t color{};
 
   // 'pos' is the current position index we're drawing at on the list,
   // 'i' is the actual jump index that we're drawing at 'pos'
   for (int32_t pos = 0; pos < std::min(maxJumps, numJumps); pos++) {
-    const int32_t i = style & Style::REVERSED
-                          ? numJumps - 1 - pos
-                          : std::max(numJumps - maxJumps, 0) + pos;
+    const int32_t i = style & Style::REVERSED ? numJumps - 1 - pos : std::max(numJumps - maxJumps, 0) + pos;
 
     setJumpColor(jumpSpeeds[i], color);
+    std::string text;
+
+    if (etj_jumpSpeedsShowUpmove.integer) {
+      text = StringUtils::format("%-4s (%s)", jumpSpeeds[i].speedStr, jumpSpeeds[i].upmoveStr);
+    } else {
+      text = jumpSpeeds[i].speedStr;
+    }
 
     if (style & Style::HORIZONTAL) {
-      CG_Text_Paint_Ext(x, y, size.x, size.y, color, jumpSpeeds[i].speedStr, 0,
-                        0, textStyle, &cgs.media.limboFont2);
+      CG_Text_Paint_Ext(x, y, size.x, size.y, color, text, 0, 0, textStyle, &cgs.media.limboFont2);
 
       if ((pos + 1) % jumpsPerRow == 0) {
         y += rowHeight;
-        x = baseX;
+        x  = baseX;
       } else {
         x += textOffsetX;
       }
     } else {
-      CG_Text_Paint_Ext(x, y, size.x, size.y, color, jumpSpeeds[i].speedStr, 0,
-                        0, textStyle, &cgs.media.limboFont2);
+      CG_Text_Paint_Ext(x, y, size.x, size.y, color, text, 0, 0, textStyle, &cgs.media.limboFont2);
 
       if ((pos + 1) % jumpsPerColumn == 0) {
-        x += baseX + textOffsetX;
-        y = baseY;
+        x += textOffsetX;
+        y  = baseY;
       } else {
         y += rowHeight;
       }

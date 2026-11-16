@@ -13,8 +13,7 @@ void *G_Alloc(int size) {
   char *p;
 
   if (g_debugAlloc.integer) {
-    G_Printf("G_Alloc of %i bytes (%i left)\n", size,
-             POOLSIZE - allocPoint - ((size + 31) & ~31));
+    G_Printf("G_Alloc of %i bytes (%i left)\n", size, POOLSIZE - allocPoint - ((size + 31) & ~31));
   }
 
   if (allocPoint + size > POOLSIZE) {
@@ -29,9 +28,10 @@ void *G_Alloc(int size) {
   return p;
 }
 
-void G_InitMemory(void) { allocPoint = 0; }
+void G_InitMemory(void) {
+  allocPoint = 0;
+}
 
 void Svcmd_GameMem_f(void) {
-  G_Printf("Game memory status: %i out of %i bytes allocated\n", allocPoint,
-           POOLSIZE);
+  G_Printf("Game memory status: %i out of %i bytes allocated\n", allocPoint, POOLSIZE);
 }

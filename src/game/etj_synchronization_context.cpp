@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 
-#include <thread>
 #include "etj_synchronization_context.h"
+
+#include <thread>
 
 void ETJump::SynchronizationContext::startWorkerThreads(unsigned numThreads) {
   if (_running) {
@@ -33,8 +34,10 @@ void ETJump::SynchronizationContext::startWorkerThreads(unsigned numThreads) {
 
   _running = true;
 
-  for (int i = 0; i < numThreads; ++i) {
-    auto t = std::thread([this] { worker(); });
+  for (size_t i = 0; i < numThreads; ++i) {
+    auto t = std::thread([this] {
+      worker();
+    });
 
     _threads.push_back(std::move(t));
   }
@@ -50,12 +53,10 @@ void ETJump::SynchronizationContext::stopWorkerThreads() {
   }
 }
 
-void ETJump::SynchronizationContext::postTask(TaskFn task, CallbackFn callback,
-                                              ErrorFn errorCallback) {
+void ETJump::SynchronizationContext::postTask(TaskFn task, CallbackFn callback, ErrorFn errorCallback) {
   std::lock_guard<std::mutex> lock(_incompletedMutex);
 
-  _incompleted.push(std::make_unique<Operation>(
-      std::move(task), std::move(callback), std::move(errorCallback)));
+  _incompleted.push(std::make_unique<Operation>(std::move(task), std::move(callback), std::move(errorCallback)));
 
   _workAvailable.notify_one();
 }
@@ -104,7 +105,7 @@ void ETJump::SynchronizationContext::worker() {
       operation->result = std::unique_ptr<ResultBase>(std::move(result));
       operation->status = Operation::Status::Complete;
     } catch (const std::runtime_error &e) {
-      operation->error = e;
+      operation->error  = e;
       operation->status = Operation::Status::Error;
     }
 

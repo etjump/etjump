@@ -23,6 +23,7 @@
  */
 
 #include "etj_snaphud_v2.h"
+
 #include "cg_local.h"
 #include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
@@ -34,17 +35,14 @@ inline constexpr float SNAPHUD_MAX_FOV = 179.0f;
 namespace ETJump {
 SnaphudV2::SnaphudV2(const std::shared_ptr<SnaphudData> &snaphudData,
                      const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : snaphudData(snaphudData), cvarUpdate(cvarUpdate) {
+  : snaphudData(snaphudData), cvarUpdate(cvarUpdate) {
+  cgame.utils.colorParser->parseColorString(etj_snapHUDColor1.string, snaphud.colors[0]);
+  cgame.utils.colorParser->parseColorString(etj_snapHUDColor2.string, snaphud.colors[1]);
 
-  cgame.utils.colorParser->parseColorString(etj_snapHUDColor1.string,
-                                            snaphud.colors[0]);
-  cgame.utils.colorParser->parseColorString(etj_snapHUDColor2.string,
-                                            snaphud.colors[1]);
+  cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor1.string, snaphud.colors[2]);
+  cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor2.string, snaphud.colors[3]);
 
-  cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor1.string,
-                                            snaphud.colors[2]);
-  cgame.utils.colorParser->parseColorString(etj_snapHUDHLColor2.string,
-                                            snaphud.colors[3]);
+  parseCropOffset(&etj_snapHUDCropOffsets);
   startListeners();
 }
 
@@ -53,6 +51,7 @@ SnaphudV2::~SnaphudV2() {
   cvarUpdate->unsubscribe(&etj_snapHUDColor2);
   cvarUpdate->unsubscribe(&etj_snapHUDHLColor1);
   cvarUpdate->unsubscribe(&etj_snapHUDHLColor2);
+  cvarUpdate->unsubscribe(&etj_snapHUDCropOffsets);
 }
 
 void SnaphudV2::startListeners() {
@@ -71,18 +70,64 @@ void SnaphudV2::startListeners() {
   cvarUpdate->subscribe(&etj_snapHUDHLColor2, [this](const vmCvar_t *cvar) {
     cgame.utils.colorParser->parseColorString(cvar->string, snaphud.colors[3]);
   });
+
+  cvarUpdate->subscribe(&etj_snapHUDCropOffsets, [this](const vmCvar_t *cvar) {
+    parseCropOffset(cvar);
+  });
+}
+
+void SnaphudV2::parseCropOffset(const vmCvar_t *cvar) {
+  // FIXME: THIS IS BAD
+  // this should not be here, it should be in 'etj_cvar_parser.h' - however,
+  // it's practically impossible to make cgame link properly in that case,
+  // because of 'ui_shared.cpp'. Therefore, this code is here now, until
+  // cvartable stuff is refactored to be shared between modules, or we need
+  // another cvar to take 2 values like this.
+  std::vector<std::string> components;
+  components.reserve(2);
+
+  const auto parserError = [&cvar]() {
+    Com_Printf(S_COLOR_YELLOW "Cvar '%s' requires at least two components, "
+                              "setting default value\n",
+               cvarName(cvar));
+    resetCvar(cvar);
+  };
+
+  if (cvar->string[0] == '\0' || StringUtils::isWhiteSpace(cvar->string)) {
+    parserError();
+    components = StringUtils::split(cvarDefaultString(cvar), " ");
+  } else {
+    components = StringUtils::split(cvar->string, " ");
+  }
+
+  // remove any empty components - if user inputs a string like "  2   3  ",
+  // 'split()' gives us empty elements
+  components.erase(std::remove_if(components.begin(), components.end(),
+                                  [](const std::string_view s) {
+                                    return s.empty();
+                                  }),
+                   components.end());
+
+  if (components.size() < 2) {
+    parserError();
+    components = StringUtils::split(cvarDefaultString(cvar), " ");
+  }
+
+  // cap to non-widescreen screen center and adjust to widescreen as
+  // necessary, so the cvar value makes more sense for the user
+  snaphud.cropOffset.val1 = std::clamp(Q_atof(components[0]), 0.0f, 320.0f);
+  snaphud.cropOffset.val2 = std::clamp(Q_atof(components[1]), 0.0f, 320.0f);
+
+  ETJump_AdjustPosition(&snaphud.cropOffset.val1);
+  ETJump_AdjustPosition(&snaphud.cropOffset.val2);
 }
 
 void SnaphudV2::updateSnaphud(const SnaphudData::State &s) {
   snaphud.yaw = std::atan2(s.wishvel[1], s.wishvel[0]);
-  snaphud.y = SCREEN_CENTER_Y + std::clamp(etj_snapHUDOffsetY.value,
-                                           -SCREEN_CENTER_Y, SCREEN_CENTER_Y);
-  snaphud.h = std::clamp(etj_snapHUDHeight.value, 0.0f,
-                         static_cast<float>(SCREEN_HEIGHT));
+  snaphud.y   = SCREEN_CENTER_Y + std::clamp(etj_snapHUDOffsetY.value, -SCREEN_CENTER_Y, SCREEN_CENTER_Y);
+  snaphud.h   = std::clamp(etj_snapHUDHeight.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
   snaphud.fov =
-      etj_snapHUDFov.value > 0
-          ? std::clamp(etj_snapHUDFov.value, SNAPHUD_MIN_FOV, SNAPHUD_MAX_FOV)
-          : cg.refdef.fov_x;
+    etj_snapHUDFov.value > 0 ? std::clamp(etj_snapHUDFov.value, SNAPHUD_MIN_FOV, SNAPHUD_MAX_FOV) : cg.refdef.fov_x;
 
   snaphud.style = static_cast<SnaphudStyle>(etj_drawSnapHUD.integer);
 
@@ -90,18 +135,40 @@ void SnaphudV2::updateSnaphud(const SnaphudData::State &s) {
     case SnaphudStyle::EDGE:
       // FIXME: the unit of this cvar no longer really makes sense,
       // but by doing SHORT2RAD here, it behaves the same as with old hud
-      snaphud.edgeThickness =
-          SHORT2RAD(std::clamp(etj_snapHUDEdgeThickness.integer, 0, 128));
+      snaphud.edgeThickness = SHORT2RAD(std::clamp(etj_snapHUDEdgeThickness.integer, 0, 128));
       break;
     case SnaphudStyle::BORDER:
       snaphud.borderOnly = true;
       snaphud.borderThickness =
-          std::clamp(etj_snapHUDBorderThickness.value, 0.1f,
-                     std::min(etj_snapHUDHeight.value * 2, 10.0f));
+        std::clamp(etj_snapHUDBorderThickness.value, 0.1f, std::min(etj_snapHUDHeight.value * 2, 10.0f));
       break;
     default:
       snaphud.borderOnly = false;
       break;
+  }
+
+  switch (static_cast<CropStyle>(etj_snapHUDCrop.integer)) {
+    default:
+    case CropStyle::OFF:
+      snaphud.minX = std::nullopt;
+      snaphud.maxX = std::nullopt;
+      break;
+    case CropStyle::IF_STRAFING:
+      // NOTE: use stats to determine input, because snaphud has default input
+      if (!(s.pm.ps->stats[STAT_USERCMD_MOVE] & (UMOVE_FORWARD | UMOVE_BACKWARD)) &&
+          !(s.pm.ps->stats[STAT_USERCMD_MOVE] & (UMOVE_RIGHT | UMOVE_LEFT))) {
+        snaphud.minX = std::nullopt;
+        snaphud.maxX = std::nullopt;
+        break;
+      }
+
+      [[fallthrough]];
+    case CropStyle::ALWAYS:
+      const bool rightStrafe =
+        PmoveUtilsV2::rightStrafe(PmoveUtilsV2::strafingForwards(s.pm, s.wishspeed, s.wishvel), s.pm.cmd);
+
+      snaphud.minX = rightStrafe ? SCREEN_CENTER_X - snaphud.cropOffset.val1 : 0.0f + snaphud.cropOffset.val2;
+      snaphud.maxX = rightStrafe ? SCREEN_WIDTH - snaphud.cropOffset.val2 : SCREEN_CENTER_X + snaphud.cropOffset.val1;
   }
 
   buildSnapZones(s);
@@ -111,16 +178,15 @@ void SnaphudV2::buildSnapZones(const SnaphudData::State &s) {
   snaphud.zones.clear();
   snaphud.isCurrentAlt = false;
 
-  for (int32_t i = 0; i < s.snapAngles.size() - 1; i++) {
+  for (int32_t i = 0; i + 1 < static_cast<int32_t>(s.snapAngles.size()); i++) {
     for (int32_t q = 0; q < 4; q++) {
       const float offset = static_cast<float>(q) * M_PI_2f;
-      const float start = s.snapAngles[i] + offset;
-      const float end = s.snapAngles[i + 1] + offset;
+      const float start  = s.snapAngles[i] + offset;
+      const float end    = s.snapAngles[i + 1] + offset;
 
-      const bool active = AngleNormalizePI(snaphud.yaw - start) >= 0 &&
-                          (AngleNormalizePI(snaphud.yaw - start) <=
-                           AngleNormalizePI(end - start));
-      const bool alt = i % 2;
+      const bool active     = AngleNormalizePI(snaphud.yaw - start) >= 0 &&
+                              (AngleNormalizePI(snaphud.yaw - start) <= AngleNormalizePI(end - start));
+      const bool alt        = i % 2;
       snaphud.isCurrentAlt |= active && alt;
 
       snaphud.zones.push_back({start, end, alt, active});
@@ -135,7 +201,7 @@ bool SnaphudV2::beforeRender() {
     return false;
   }
 
-  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, HUDLerpFlags::SNAPHUD, s.pm)) {
+  if (cgame.hudData.pmoveV2->skipUpdate(lastUpdateTime, HUDLerpFlags::SNAPHUD, s.pm)) {
     return true;
   }
 
@@ -157,16 +223,14 @@ void SnaphudV2::render() const {
     }
 
     if (snaphud.style == SnaphudStyle::EDGE) {
-      CG_FillAngleYaw(zone.start, zone.start + snaphud.edgeThickness,
-                      snaphud.yaw, snaphud.y, snaphud.h, snaphud.fov,
-                      snaphud.colors[colorIndex]);
-      CG_FillAngleYaw(zone.end, zone.end - snaphud.edgeThickness, snaphud.yaw,
-                      snaphud.y, snaphud.h, snaphud.fov,
-                      snaphud.colors[colorIndex]);
+      CG_FillAngleYawExt(zone.start, zone.start + snaphud.edgeThickness, snaphud.yaw, snaphud.y, snaphud.h, snaphud.fov,
+                         snaphud.colors[colorIndex], false, snaphud.borderThickness, snaphud.minX, snaphud.maxX);
+      CG_FillAngleYawExt(zone.end, zone.end - snaphud.edgeThickness, snaphud.yaw, snaphud.y, snaphud.h, snaphud.fov,
+                         snaphud.colors[colorIndex], false, snaphud.borderThickness, snaphud.minX, snaphud.maxX);
     } else {
-      CG_FillAngleYawExt(zone.start, zone.end, snaphud.yaw, snaphud.y,
-                         snaphud.h, snaphud.fov, snaphud.colors[colorIndex],
-                         snaphud.borderOnly, snaphud.borderThickness);
+      CG_FillAngleYawExt(zone.start, zone.end, snaphud.yaw, snaphud.y, snaphud.h, snaphud.fov,
+                         snaphud.colors[colorIndex], snaphud.borderOnly, snaphud.borderThickness, snaphud.minX,
+                         snaphud.maxX);
     }
   }
 }
@@ -176,8 +240,7 @@ bool SnaphudV2::canSkipDraw(const SnaphudData::State &s) const {
     return true;
   }
 
-  if (s.result != PmoveUtilsV2::PmoveSingleResult::WALK &&
-      s.result != PmoveUtilsV2::PmoveSingleResult::AIR) {
+  if (s.result != PmoveUtilsV2::PmoveSingleResult::WALK && s.result != PmoveUtilsV2::PmoveSingleResult::AIR) {
     return true;
   }
 
@@ -188,8 +251,8 @@ bool SnaphudV2::canSkipDraw(const SnaphudData::State &s) const {
     return true;
   }
 
-  if (s.pm.ps->persistant[PERS_TEAM] == TEAM_SPECTATOR ||
-      s.pm.ps->pm_type == PM_NOCLIP || s.pm.ps->pm_type == PM_DEAD) {
+  if (s.pm.ps->persistant[PERS_TEAM] == TEAM_SPECTATOR || s.pm.ps->pm_type == PM_NOCLIP ||
+      s.pm.ps->pm_type == PM_DEAD) {
     return true;
   }
 
@@ -201,9 +264,7 @@ bool SnaphudV2::canSkipDraw(const SnaphudData::State &s) const {
     return true;
   }
 
-  if (BG_PlayerMounted(s.pm.ps->eFlags) ||
-      s.pm.ps->weapon == WP_MOBILE_MG42_SET ||
-      s.pm.ps->weapon == WP_MORTAR_SET) {
+  if (BG_PlayerMounted(s.pm.ps->eFlags) || s.pm.ps->weapon == WP_MOBILE_MG42_SET || s.pm.ps->weapon == WP_MORTAR_SET) {
     return true;
   }
 

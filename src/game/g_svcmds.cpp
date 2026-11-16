@@ -97,8 +97,8 @@ qboolean StringToFilter(const char *s, ipFilter_t *f) {
       num[j++] = *s++;
     }
     num[j] = 0;
-    b[i] = Q_atoi(num);
-    m[i] = 255;
+    b[i]   = Q_atoi(num);
+    m[i]   = 255;
 
     if (!*s) {
       break;
@@ -106,7 +106,7 @@ qboolean StringToFilter(const char *s, ipFilter_t *f) {
     s++;
   }
 
-  f->mask = *(unsigned *)m;
+  f->mask    = *(unsigned *)m;
   f->compare = *(unsigned *)b;
 
   return qtrue;
@@ -132,7 +132,7 @@ static void UpdateIPBans(ipFilterList_t *ipFilterList) {
 
     *(unsigned *)b = ipFilterList->ipFilters[i].compare;
     *(unsigned *)m = ipFilterList->ipFilters[i].mask;
-    *ip = 0;
+    *ip            = 0;
     for (j = 0; j < 4; j++) {
       if (m[j] != 255) {
         Q_strcat(ip, sizeof(ip), "*");
@@ -144,8 +144,7 @@ static void UpdateIPBans(ipFilterList_t *ipFilterList) {
     if (strlen(iplist_final) + strlen(ip) < MAX_CVAR_VALUE_STRING) {
       Q_strcat(iplist_final, sizeof(iplist_final), ip);
     } else {
-      Com_Printf("%s overflowed at MAX_CVAR_VALUE_STRING\n",
-                 ipFilterList->cvarIPList);
+      Com_Printf("%s overflowed at MAX_CVAR_VALUE_STRING\n", ipFilterList->cvarIPList);
       break;
     }
   }
@@ -158,10 +157,10 @@ static void UpdateIPBans(ipFilterList_t *ipFilterList) {
 G_FilterPacket
 =================
 */
-qboolean G_FilterPacket(ipFilterList_t *ipFilterList, const char *from) {
+static qboolean G_FilterPacket(ipFilterList_t *ipFilterList, const char *from) {
   int i;
   unsigned in;
-  byte m[4];
+  byte m[4]{};
   const char *p;
 
   i = 0;
@@ -182,8 +181,7 @@ qboolean G_FilterPacket(ipFilterList_t *ipFilterList, const char *from) {
   in = *(unsigned *)m;
 
   for (i = 0; i < ipFilterList->numIPFilters; i++)
-    if ((in & ipFilterList->ipFilters[i].mask) ==
-        ipFilterList->ipFilters[i].compare) {
+    if ((in & ipFilterList->ipFilters[i].mask) == ipFilterList->ipFilters[i].compare) {
       return g_filterBan.integer != 0 ? qtrue : qfalse;
     }
 
@@ -223,7 +221,9 @@ void AddIP(ipFilterList_t *ipFilterList, const char *str) {
   UpdateIPBans(ipFilterList);
 }
 
-void AddIPBan(const char *str) { AddIP(&ipFilters, str); }
+void AddIPBan(const char *str) {
+  AddIP(&ipFilters, str);
+}
 
 /*
 =================
@@ -244,7 +244,8 @@ void G_ProcessIPBans(void) {
     if (!s) {
       break;
     }
-    while (*s == ' ') *s++ = 0;
+    while (*s == ' ')
+      *s++ = 0;
     if (*t) {
       AddIP(&ipFilters, t);
     }
@@ -292,8 +293,7 @@ void Svcmd_RemoveIP_f(void) {
   }
 
   for (i = 0; i < ipFilters.numIPFilters; i++) {
-    if (ipFilters.ipFilters[i].mask == f.mask &&
-        ipFilters.ipFilters[i].compare == f.compare) {
+    if (ipFilters.ipFilters[i].mask == f.mask && ipFilters.ipFilters[i].compare == f.compare) {
       ipFilters.ipFilters[i].compare = 0xffffffffu;
       G_Printf("Removed.\n");
 
@@ -312,8 +312,8 @@ Svcmd_EntityList_f
 */
 static void Svcmd_EntityList_f() {
   int e;
-  int not_inuse = 0;
-  int numBrushEnts = 0;
+  int not_inuse       = 0;
+  int numBrushEnts    = 0;
   int max_type_length = 20; // starting point, no less than 11
 
   // add removed bmodels since these are still part of bmodel limit
@@ -331,14 +331,13 @@ static void Svcmd_EntityList_f() {
     } else {
       l = std::strlen(eventnames[check->s.eType - ET_EVENTS]);
     }
-    if (l > max_type_length) {
+    if (l > static_cast<size_t>(max_type_length)) {
       max_type_length = static_cast<int>(l);
     }
   }
 
   check = g_entities;
-  G_Printf("%-4s  %-*s %-28s %-32s %s\n", " Num", max_type_length,
-           "Entity Type", "Class", "Scriptname", "Model");
+  G_Printf("%-4s  %-*s %-28s %-32s %s\n", " Num", max_type_length, "Entity Type", "Class", "Scriptname", "Model");
   G_Printf("-------------------------------------------------------------------"
            "---------------------------------\n");
   for (e = 0; e < level.num_entities; e++, check++) {
@@ -355,21 +354,13 @@ static void Svcmd_EntityList_f() {
     }
 
     if (check->s.eType < ET_EVENTS) {
-      G_Printf("^7%4i: %-*s %-28s ^9%-32s ^7%s\n", e, max_type_length,
-               entityTypeNames[check->s.eType],
-               check->classname && check->classname[0] ? check->classname
-                                                       : "noclass",
-               check->scriptName && check->scriptName[0] ? check->scriptName
-                                                         : "",
-               bmodel ? check->model : "");
+      G_Printf("^7%4i: %-*s %-28s ^9%-32s ^7%s\n", e, max_type_length, entityTypeNames[check->s.eType],
+               check->classname && check->classname[0] ? check->classname : "noclass",
+               check->scriptName && check->scriptName[0] ? check->scriptName : "", bmodel ? check->model : "");
     } else {
-      G_Printf("^7%4i: %-*s %-28s ^9%-32s ^7%s\n", e, max_type_length,
-               eventnames[check->s.eType - ET_EVENTS],
-               check->classname && check->classname[0] ? check->classname
-                                                       : "noclass",
-               check->scriptName && check->scriptName[0] ? check->scriptName
-                                                         : "",
-               bmodel ? check->model : "");
+      G_Printf("^7%4i: %-*s %-28s ^9%-32s ^7%s\n", e, max_type_length, eventnames[check->s.eType - ET_EVENTS],
+               check->classname && check->classname[0] ? check->classname : "noclass",
+               check->scriptName && check->scriptName[0] ? check->scriptName : "", bmodel ? check->model : "");
     }
   }
 
@@ -453,8 +444,7 @@ void Svcmd_ForceTeam_f(void) {
 
   // set the team
   trap_Argv(2, str, sizeof(str));
-  SetTeam(&g_entities[cl - level.clients], str, qfalse,
-          static_cast<weapon_t>(cl->sess.playerWeapon),
+  SetTeam(&g_entities[cl - level.clients], str, qfalse, static_cast<weapon_t>(cl->sess.playerWeapon),
           static_cast<weapon_t>(cl->sess.playerWeapon2), qtrue);
 }
 
@@ -558,7 +548,7 @@ void G_AddIpMute(char *ip) {
 
 qboolean G_isIPMuted(const char *originalIp) {
   char ip[32] = "\0";
-  int i = 0;
+  int i       = 0;
   Q_strncpyz(ip, originalIp, sizeof(ip));
 
   // Must remove port from ip
@@ -596,13 +586,14 @@ void G_RemoveIPMute(char *ip) {
 
 void G_ClearIPMutes() {
   int i;
-  for (i = 0; i < MAX_IP_MUTES; i++) level.ipMutes[i].inuse = qfalse;
+  for (i = 0; i < MAX_IP_MUTES; i++)
+    level.ipMutes[i].inuse = qfalse;
 }
 
 void AC_ListCheaters() {
   int i = 0;
   for (; i < level.numConnectedClients; i++) {
-    int clientNum = level.sortedClients[i];
+    int clientNum     = level.sortedClients[i];
     gentity_t *target = g_entities + clientNum;
 
     if (target->client->cheatDetected) {

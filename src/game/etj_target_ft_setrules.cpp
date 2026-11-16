@@ -23,6 +23,7 @@
  */
 
 #include "etj_target_ft_setrules.h"
+
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 
@@ -61,7 +62,7 @@ void TargetFtSetRules::use(const gentity_t *self, gentity_t *activator) {
     return;
   }
 
-  fireteamData_t *ft = nullptr;
+  fireteamData_t *ft  = nullptr;
   const int clientNum = ClientNum(activator);
 
   if (!G_IsOnFireteam(clientNum, &ft)) {
@@ -74,8 +75,7 @@ void TargetFtSetRules::use(const gentity_t *self, gentity_t *activator) {
 
       // this will never be nullptr, otherwise we wouldn't have gotten this far
       const gentity_t *leader = getFireteamLeader(clientNum);
-      StringUtils::replaceAll(msg, "%s",
-                              std::string(leader->client->pers.netname) + "^7");
+      StringUtils::replaceAll(msg, "%s", std::string(leader->client->pers.netname) + "^7");
       Printer::center(activator, msg);
     }
 
@@ -85,7 +85,9 @@ void TargetFtSetRules::use(const gentity_t *self, gentity_t *activator) {
   // from here on, ft pointer will always be valid,
   // so we can dereference it safely to check current ft state
 
-  bool rulesChanged = false;
+  bool rulesChanged       = false;
+  const bool noGhost      = self->damage;
+  const bool teamJumpMode = self->health;
 
   if (self->ftSavelimit[0] != '\0' && canSetFtSavelimit(clientNum, self)) {
     if (!Q_stricmp(self->ftSavelimit, "reset")) {
@@ -99,18 +101,16 @@ void TargetFtSetRules::use(const gentity_t *self, gentity_t *activator) {
     }
   }
 
-  if (self->damage != KEY_NOT_SET && ft->noGhost != self->damage &&
-      canEnableFtNoGhost(clientNum, ft, self)) {
-    setFireTeamGhosting(ft, self->damage);
+  if (self->damage != KEY_NOT_SET && ft->noGhost != noGhost && canEnableFtNoGhost(clientNum, ft, self)) {
+    setFireTeamGhosting(ft, noGhost);
     rulesChanged = true;
   }
 
   // this 'canSetFtTeamjumpMode' is redundant here as it will always
   // succeed for non-player entities, but better to have it here
   // if other restrictions are added in the future
-  if (self->health != KEY_NOT_SET && ft->teamJumpMode != self->health &&
-      canSetFtTeamjumpMode(clientNum, self)) {
-    setFireteamTeamjumpMode(ft, self->health);
+  if (self->health != KEY_NOT_SET && ft->teamJumpMode != teamJumpMode && canSetFtTeamjumpMode(clientNum, self)) {
+    setFireteamTeamjumpMode(ft, teamJumpMode);
     rulesChanged = true;
   }
 

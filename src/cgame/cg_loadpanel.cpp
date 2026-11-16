@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "cg_local.h"
+
 #include "../ui/ui_shared.h"
 
 extern displayContextDef_t *DC;
@@ -27,156 +28,150 @@ qhandle_t bg_mappic;
 // panel_button_text_t FONTNAME = { SCALEX, SCALEY, COLOUR, STYLE, FONT };
 
 panel_button_text_t missiondescriptionTxt = {
-    0.2f, 0.2f, {0.0f, 0.0f, 0.0f, 1.f}, 0, 0, &bg_loadscreenfont2,
+  0.2f, 0.2f, {0.0f, 0.0f, 0.0f, 1.f},
+    0, 0, &bg_loadscreenfont2,
 };
 
 panel_button_text_t missiondescriptionHeaderTxt = {
-    0.2f,
-    0.2f,
-    {0.0f, 0.0f, 0.0f, 0.8f},
-    0,
-    ITEM_ALIGN_CENTER,
-    &bg_loadscreenfont2,
+  0.2f, 0.2f, {0.0f, 0.0f, 0.0f, 0.8f},
+    0, ITEM_ALIGN_CENTER, &bg_loadscreenfont2,
 };
 
 panel_button_text_t mapTxt = {
-    0.30f, 0.30f, {1.0f, 1.0f, 1.0f, 0.6f}, 0, 0, &bg_loadscreenfont2,
+  0.30f, 0.30f, {1.0f, 1.0f, 1.0f, 0.6f},
+    0, 0, &bg_loadscreenfont2,
 };
 
 panel_button_text_t loadScreenMeterBackTxt = {
-    0.22f,
-    0.22f,
-    {0.1f, 0.1f, 0.1f, 0.8f},
-    0,
-    ITEM_ALIGN_CENTER,
-    &bg_loadscreenfont2,
+  0.22f, 0.22f, {0.1f, 0.1f, 0.1f, 0.8f},
+    0, ITEM_ALIGN_CENTER, &bg_loadscreenfont2,
 };
 
 panel_button_t loadScreenMap = {
-    "gfx/loading/camp_map",
-    "",
-    {0, 0, 440, 480}, // shouldn't this be square?? // Gordon: no, the map is
-                      // actually WIDER that tall, which makes it even worse...
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    NULL, /* font		*/
-    NULL, /* keyDown	*/
-    NULL, /* keyUp	*/
-    BG_PanelButtonsRender_Img,
-    NULL,
+  "gfx/loading/camp_map",
+  "",
+  {0, 0, 440, 480}, // shouldn't this be square?? // Gordon: no, the map is
+                    // actually WIDER that tall, which makes it even worse...
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  NULL, /* font		*/
+  NULL, /* keyDown	*/
+  NULL, /* keyUp	*/
+  BG_PanelButtonsRender_Img,
+  NULL,
 };
 
 panel_button_t loadScreenBack = {
-    "gfx/loading/camp_side",
-    "",
-    {440, 0, 200, 480},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    NULL, /* font		*/
-    NULL, /* keyDown	*/
-    NULL, /* keyUp	*/
-    BG_PanelButtonsRender_Img,
-    NULL,
+  "gfx/loading/camp_side",
+  "",
+  {440, 0, 200, 480},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  NULL, /* font		*/
+  NULL, /* keyDown	*/
+  NULL, /* keyUp	*/
+  BG_PanelButtonsRender_Img,
+  NULL,
 };
 
 panel_button_t loadScreenPins = {
-    NULL,
-    "",
-    {0, 0, 640, 480},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    NULL, /* font		*/
-    NULL, /* keyDown	*/
-    NULL, /* keyUp	*/
-    CG_LoadPanel_RenderMapPin,
-    NULL,
+  NULL,
+  "",
+  {0, 0, 640, 480},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  NULL, /* font		*/
+  NULL, /* keyDown	*/
+  NULL, /* keyUp	*/
+  CG_LoadPanel_RenderMapPin,
+  NULL,
 };
 
 panel_button_t missiondescriptionPanelHeaderText = {
-    NULL,
-    "***TOP SECRET***",
-    {440, 72, 200, 32},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    &missiondescriptionHeaderTxt, /* font		*/
-    NULL,                         /* keyDown	*/
-    NULL,                         /* keyUp	*/
-    BG_PanelButtonsRender_Text,
-    NULL,
+  NULL,
+  "***TOP SECRET***",
+  {440, 72, 200, 32},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  &missiondescriptionHeaderTxt, /* font		*/
+  NULL, /* keyDown	*/
+  NULL, /* keyUp	*/
+  BG_PanelButtonsRender_Text,
+  NULL,
 };
 
 panel_button_t missiondescriptionPanelText = {
-    NULL,
-    "",
-    {460, 84, 160, 232},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    &missiondescriptionTxt, /* font		*/
-    NULL,                   /* keyDown	*/
-    NULL,                   /* keyUp	*/
-    CG_LoadPanel_RenderMissionDescriptionText,
-    NULL,
+  NULL,
+  "",
+  {460, 84, 160, 232},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  &missiondescriptionTxt, /* font		*/
+  NULL, /* keyDown	*/
+  NULL, /* keyUp	*/
+  CG_LoadPanel_RenderMissionDescriptionText,
+  NULL,
 };
 
 panel_button_t mapPanelText = {
-    NULL,
-    "",
-    {451, 11, 178, 35},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    &mapTxt, /* font		*/
-    NULL,    /* keyDown	*/
-    NULL,    /* keyUp	*/
-    CG_LoadPanel_RenderMapNameText,
-    NULL,
+  NULL,
+  "",
+  {451, 11, 178, 35},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  &mapTxt, /* font		*/
+  NULL, /* keyDown	*/
+  NULL, /* keyUp	*/
+  CG_LoadPanel_RenderMapNameText,
+  NULL,
 };
 
 panel_button_t loadScreenMeterBack = {
-    "gfx/loading/progressbar_back",
-    "",
-    {440 + 26, 480 - 30 + 1, 200 - 56, 20},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    NULL, /* font		*/
-    NULL, /* keyDown	*/
-    NULL, /* keyUp	*/
-    BG_PanelButtonsRender_Img,
-    NULL,
+  "gfx/loading/progressbar_back",
+  "",
+  {440 + 26, 480 - 30 + 1, 200 - 56, 20},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  NULL, /* font		*/
+  NULL, /* keyDown	*/
+  NULL, /* keyUp	*/
+  BG_PanelButtonsRender_Img,
+  NULL,
 };
 
 panel_button_t loadScreenMeterBack2 = {
-    "gfx/loading/progressbar",
-    "",
-    {440 + 26, 480 - 30 + 1, 200 - 56, 20},
-    {1, 255, 0, 0, 255, 0, 0, 0},
-    NULL, /* font		*/
-    NULL, /* keyDown	*/
-    NULL, /* keyUp	*/
-    CG_LoadPanel_RenderLoadingBar,
-    NULL,
+  "gfx/loading/progressbar",
+  "",
+  {440 + 26, 480 - 30 + 1, 200 - 56, 20},
+  {1, 255, 0, 0, 255, 0, 0, 0},
+  NULL, /* font		*/
+  NULL, /* keyDown	*/
+  NULL, /* keyUp	*/
+  CG_LoadPanel_RenderLoadingBar,
+  NULL,
 };
 
 panel_button_t loadScreenMeterBackText = {
-    NULL,
-    "LOADING",
-    {440 + 28, 480 - 28 + 12 + 1, 200 - 56 - 2, 16},
-    {0, 0, 0, 0, 0, 0, 0, 0},
-    &loadScreenMeterBackTxt, /* font		*/
-    NULL,                    /* keyDown	*/
-    NULL,                    /* keyUp	*/
-    BG_PanelButtonsRender_Text,
-    NULL,
+  NULL,
+  "LOADING",
+  {440 + 28, 480 - 28 + 12 + 1, 200 - 56 - 2, 16},
+  {0, 0, 0, 0, 0, 0, 0, 0},
+  &loadScreenMeterBackTxt, /* font		*/
+  NULL, /* keyDown	*/
+  NULL, /* keyUp	*/
+  BG_PanelButtonsRender_Text,
+  NULL,
 };
 
 panel_button_t *loadpanelButtons[] = {
-    &loadScreenMap,
-    &loadScreenBack,
+  &loadScreenMap,
+  &loadScreenBack,
 
-    &missiondescriptionPanelText,
-    &missiondescriptionPanelHeaderText,
+  &missiondescriptionPanelText,
+  &missiondescriptionPanelHeaderText,
 
-    &mapPanelText,
+  &mapPanelText,
 
-    &loadScreenMeterBack,
-    &loadScreenMeterBack2,
-    &loadScreenMeterBackText,
+  &loadScreenMeterBack,
+  &loadScreenMeterBack2,
+  &loadScreenMeterBackText,
 
-    &loadScreenPins,
+  &loadScreenPins,
 
-    NULL,
+  NULL,
 };
 
 std::vector<panel_button_t> loadpanelButtonsLayout;
@@ -188,7 +183,7 @@ CG_DrawConnectScreen
 */
 
 void CG_LoadPanel_Init() {
-  bg_mappic = 0;
+  bg_mappic           = 0;
   bg_loadscreeninited = qfalse;
   trap_Cvar_Set("ui_connecting", "0");
 
@@ -197,10 +192,10 @@ void CG_LoadPanel_Init() {
 
   bg_loadscreenbg = DC->registerShaderNoMip("white");
 
-  bg_axispin = DC->registerShaderNoMip("gfx/loading/pin_axis");
-  bg_alliedpin = DC->registerShaderNoMip("gfx/loading/pin_allied");
+  bg_axispin    = DC->registerShaderNoMip("gfx/loading/pin_axis");
+  bg_alliedpin  = DC->registerShaderNoMip("gfx/loading/pin_allied");
   bg_neutralpin = DC->registerShaderNoMip("gfx/loading/pin_neutral");
-  bg_pin = DC->registerShaderNoMip("gfx/loading/pin_shot");
+  bg_pin        = DC->registerShaderNoMip("gfx/loading/pin_shot");
 
   bg_filter_pb = DC->registerShaderNoMip("ui/assets/filter_pb");
   bg_filter_ff = DC->registerShaderNoMip("ui/assets/filter_ff");
@@ -259,13 +254,11 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh) {
     vec4_t clr3 = {1.f, 1.f, 1.f, .6f};
 
     y = 322;
-    CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.22f, 0.22f, clr3,
-                              GAME_TAG, 0, 0, 0, &bg_loadscreenfont1);
+    CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.22f, 0.22f, clr3, GAME_TAG, 0, 0, 0, &bg_loadscreenfont1);
 
-    y = 340;
+    y   = 340;
     str = Info_ValueForKey(buffer, "sv_hostname");
-    CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.2f, 0.2f, colorWhite,
-                              str && *str ? str : "ETHost", 0, 26, 0,
+    CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.2f, 0.2f, colorWhite, str && *str ? str : "ETHost", 0, 26, 0,
                               &bg_loadscreenfont2);
 
     y += 14;
@@ -275,8 +268,7 @@ void CG_DrawConnectScreen(qboolean interactive, qboolean forcerefresh) {
         break;
       }
 
-      CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.2f, 0.2f,
-                                colorWhite, str, 0, 26, 0, &bg_loadscreenfont2);
+      CG_Text_Paint_Centred_Ext(SCREEN_OFFSET_X + 540, y, 0.2f, 0.2f, colorWhite, str, 0, 26, 0, &bg_loadscreenfont2);
 
       y += 10;
     }
@@ -339,14 +331,14 @@ void CG_LoadPanel_RenderLoadingBar(panel_button_t *button) {
     frac = 1.f;
   }
 
-  CG_DrawPicST(button->rect.x, button->rect.y, button->rect.w * frac,
-               button->rect.h, 0, 0, frac, 1, button->hShaderNormal);
+  CG_DrawPicST(button->rect.x, button->rect.y, button->rect.w * frac, button->rect.h, 0, 0, frac, 1,
+               button->hShaderNormal);
 }
 
 void CG_LoadPanel_RenderMapNameText(panel_button_t *button) {
   const int MAX_LEN = 18; // the box fits roughly 18 chars on default text scale
-  float textScale = button->font->scalex;
-  int len = Q_PrintStrlen(cgs.arenaData.longname);
+  float textScale   = button->font->scalex;
+  int len           = Q_PrintStrlen(cgs.arenaData.longname);
 
   if (!cgs.arenaInfoLoaded) {
     return;
@@ -358,14 +350,10 @@ void CG_LoadPanel_RenderMapNameText(panel_button_t *button) {
     textScale /= (static_cast<float>(len > 32 ? 32 : len) / MAX_LEN);
   }
 
-  auto w = static_cast<float>(CG_Text_Width_Ext(
-      cgs.arenaData.longname, textScale, 0, button->font->font));
-  auto h = static_cast<float>(CG_Text_Height_Ext(
-      cgs.arenaData.longname, textScale, 0, button->font->font));
-  CG_Text_Paint_Ext(button->rect.x + (button->rect.w - w) * 0.5f,
-                    button->rect.y + (button->rect.h + h) * 0.5f, textScale,
-                    textScale, button->font->colour, cgs.arenaData.longname, 0,
-                    0, 0, button->font->font);
+  auto w = static_cast<float>(CG_Text_Width_Ext(cgs.arenaData.longname, textScale, 0, button->font->font));
+  auto h = static_cast<float>(CG_Text_Height_Ext(cgs.arenaData.longname, textScale, 0, button->font->font));
+  CG_Text_Paint_Ext(button->rect.x + (button->rect.w - w) * 0.5f, button->rect.y + (button->rect.h + h) * 0.5f,
+                    textScale, textScale, button->font->colour, cgs.arenaData.longname, 0, 0, 0, button->font->font);
 }
 
 void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button) {
@@ -385,8 +373,7 @@ void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button) {
     *s = '\n';
   }
 
-  BG_FitTextToWidth_Ext(buffer, button->font->scalex, button->rect.w - 16,
-                        sizeof(buffer), button->font->font);
+  BG_FitTextToWidth_Ext(buffer, button->font->scalex, button->rect.w - 16, sizeof(buffer), button->font->font);
 
   y = button->rect.y + 12;
 
@@ -394,45 +381,38 @@ void CG_LoadPanel_RenderMissionDescriptionText(panel_button_t *button) {
   while (*p) {
     if (*p == '\n') {
       *p++ = '\0';
-      DC->drawTextExt(button->rect.x + 4, y, button->font->scalex,
-                      button->font->scaley, button->font->colour, s, 0, 0, 0,
-                      button->font->font);
+      DC->drawTextExt(button->rect.x + 4, y, button->font->scalex, button->font->scaley, button->font->colour, s, 0, 0,
+                      0, button->font->font);
       y += 8;
-      s = p;
+      s  = p;
     } else {
       p++;
     }
   }
 }
 
-void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx,
-                          float sy, qhandle_t shader, float pinsize,
+void CG_LoadPanel_DrawPin(const char *text, float px, float py, float sx, float sy, qhandle_t shader, float pinsize,
                           float backheight) {
   vec4_t colourFadedBlack = {0.f, 0.f, 0.f, 0.4f};
-  const auto textWidth = DC->textWidthExt(text, sx, 0, &bg_loadscreenfont2);
+  const auto textWidth    = DC->textWidthExt(text, sx, 0, &bg_loadscreenfont2);
 
   if (px + 30 + textWidth > 440) {
-    DC->fillRect(SCREEN_OFFSET_X + px - textWidth - 28 + 2,
-                 py - (backheight / 2.f) + 2, 28 + textWidth, backheight,
+    DC->fillRect(SCREEN_OFFSET_X + px - textWidth - 28 + 2, py - (backheight / 2.f) + 2, 28 + textWidth, backheight,
                  colourFadedBlack);
-    DC->fillRect(SCREEN_OFFSET_X + px - textWidth - 28, py - (backheight / 2.f),
-                 28 + textWidth, backheight, colorBlack);
+    DC->fillRect(SCREEN_OFFSET_X + px - textWidth - 28, py - (backheight / 2.f), 28 + textWidth, backheight,
+                 colorBlack);
   } else {
-    DC->fillRect(SCREEN_OFFSET_X + px + 2, py - (backheight / 2.f) + 2,
-                 28 + textWidth, backheight, colourFadedBlack);
-    DC->fillRect(SCREEN_OFFSET_X + px, py - (backheight / 2.f), 28 + textWidth,
-                 backheight, colorBlack);
+    DC->fillRect(SCREEN_OFFSET_X + px + 2, py - (backheight / 2.f) + 2, 28 + textWidth, backheight, colourFadedBlack);
+    DC->fillRect(SCREEN_OFFSET_X + px, py - (backheight / 2.f), 28 + textWidth, backheight, colorBlack);
   }
 
-  DC->drawHandlePic(SCREEN_OFFSET_X + px - pinsize, py - pinsize, pinsize * 2.f,
-                    pinsize * 2.f, shader);
+  DC->drawHandlePic(SCREEN_OFFSET_X + px - pinsize, py - pinsize, pinsize * 2.f, pinsize * 2.f, shader);
 
   if (px + 30 + textWidth > 440) {
-    DC->drawTextExt(SCREEN_OFFSET_X + px - 20 - textWidth, py + 4, sx, sy,
-                    colorWhite, text, 0, 0, 0, &bg_loadscreenfont2);
+    DC->drawTextExt(SCREEN_OFFSET_X + px - 20 - textWidth, py + 4, sx, sy, colorWhite, text, 0, 0, 0,
+                    &bg_loadscreenfont2);
   } else {
-    DC->drawTextExt(SCREEN_OFFSET_X + px + 16, py + 4, sx, sy, colorWhite, text,
-                    0, 0, 0, &bg_loadscreenfont2);
+    DC->drawTextExt(SCREEN_OFFSET_X + px + 16, py + 4, sx, sy, colorWhite, text, 0, 0, 0, &bg_loadscreenfont2);
   }
 }
 
@@ -446,6 +426,5 @@ void CG_LoadPanel_RenderMapPin(panel_button_t *button) {
   px = (cgs.arenaData.mappos[0] / 1024.f) * 440.f;
   py = (cgs.arenaData.mappos[1] / 1024.f) * 480.f;
 
-  CG_LoadPanel_DrawPin(cgs.arenaData.longname, px, py, 0.22f, 0.25f,
-                       bg_neutralpin, 16.f, 16.f);
+  CG_LoadPanel_DrawPin(cgs.arenaData.longname, px, py, 0.22f, 0.25f, bg_neutralpin, 16.f, 16.f);
 }

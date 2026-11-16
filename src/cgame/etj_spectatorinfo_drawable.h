@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include "etj_irenderable.h"
 #include "etj_cvar_parser.h"
+#include "etj_irenderable.h"
 
 namespace ETJump {
 class CvarUpdateHandler;
@@ -40,7 +40,7 @@ class SpectatorInfo : public IRenderable {
 
   enum class DrawDirection {
     DOWN = 0,
-    UP = 1,
+    UP   = 1,
   };
 
   static constexpr vec4_t inactiveColor = {1.0f, 1.0f, 1.0f, 0.33f};

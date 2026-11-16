@@ -32,9 +32,10 @@
   #undef max
 #endif
 
-#include "etj_irenderable.h"
 #include <vector>
+
 #include "etj_cvar_update_handler.h"
+#include "etj_irenderable.h"
 
 namespace ETJump {
 class QuickFollowDrawer : public IRenderable {
@@ -42,7 +43,9 @@ class QuickFollowDrawer : public IRenderable {
 
 public:
   explicit QuickFollowDrawer();
+
   virtual ~QuickFollowDrawer() {}
+
   bool beforeRender() override;
   void render() const override;
 };

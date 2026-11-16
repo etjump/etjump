@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 
+#include "../game/etj_filesystem.h"
+
 #include <algorithm>
 
 #include "../game/etj_file.h"
 #include "../game/etj_string_utilities.h"
-#include "../game/etj_filesystem.h"
 
 #ifdef GAMEDLL
   #include "g_local.h"
@@ -71,8 +72,7 @@ bool FileSystem::safeCopy(const std::string &src, const std::string &dst) {
   try {
     copy(src, dst);
   } catch (const File::FileIOException &e) {
-    Com_Printf("%s: failed to copy file '%s' to '%s'\n", __func__, src.c_str(),
-               dst.c_str());
+    Com_Printf("%s: failed to copy file '%s' to '%s'\n", __func__, src.c_str(), dst.c_str());
 
     if (*e.what()) {
       Com_Printf("%s\n", e.what());
@@ -88,12 +88,9 @@ bool FileSystem::safeMove(const std::string &src, const std::string &dst) {
   return safeCopy(src, dst) && remove(src);
 }
 
-std::vector<std::string> FileSystem::getFileList(const std::string &path,
-                                                 const std::string &ext,
-                                                 const bool sort) {
+std::vector<std::string> FileSystem::getFileList(const std::string &path, const std::string &ext, const bool sort) {
   const auto fileList = std::make_unique<char[]>(BIG_DIR_BUFFER);
-  const int numFiles = trap_FS_GetFileList(path.c_str(), ext.c_str(),
-                                           fileList.get(), BIG_DIR_BUFFER);
+  const int numFiles  = trap_FS_GetFileList(path.c_str(), ext.c_str(), fileList.get(), BIG_DIR_BUFFER);
 
   std::vector<std::string> files;
   files.reserve(numFiles);
@@ -132,7 +129,7 @@ std::string FileSystem::Path::buildOSPath(const std::string &file) {
 
   const std::string game = cvarToString("fs_game");
   const std::string home = cvarToString("fs_homepath");
-  std::string path = home;
+  std::string path       = home;
 
   if (!path.empty() && path.back() != '/') {
     path += '/';

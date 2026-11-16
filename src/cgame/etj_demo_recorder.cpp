@@ -23,6 +23,7 @@
  */
 
 #include "etj_demo_recorder.h"
+
 #include "cg_local.h"
 
 #include "../game/etj_string_utilities.h"
@@ -58,8 +59,7 @@ void ETJump::DemoRecorder::stop() {
 void ETJump::DemoRecorder::restart(const std::string &name) {
   stop();
 
-  if (etj_ad_stopInSpec.integer &&
-      cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
+  if (etj_ad_stopInSpec.integer && cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
     return;
   }
 
@@ -74,10 +74,18 @@ int ETJump::DemoRecorder::elapsed() {
   return (cl_demorecording.integer ? cg.time : _stopTime) - _startTime;
 }
 
-void ETJump::DemoRecorder::lock() { _isLocked = true; }
+void ETJump::DemoRecorder::lock() {
+  _isLocked = true;
+}
 
-void ETJump::DemoRecorder::unlock() { _isLocked = false; }
+void ETJump::DemoRecorder::unlock() {
+  _isLocked = false;
+}
 
-int ETJump::DemoRecorder::getStartTime() { return _startTime; }
+int ETJump::DemoRecorder::getStartTime() {
+  return _startTime;
+}
 
-int ETJump::DemoRecorder::getStopTime() { return _stopTime; }
+int ETJump::DemoRecorder::getStopTime() {
+  return _stopTime;
+}

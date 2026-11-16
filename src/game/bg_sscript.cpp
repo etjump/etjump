@@ -1,14 +1,18 @@
-#include "q_shared.h"
 #include "bg_public.h"
+#include "q_shared.h"
 
 inline constexpr int MAX_SCRIPTSPEAKERS = 256;
 
 static bg_speaker_t scriptSpeakers[MAX_SCRIPTSPEAKERS];
 static int numScriptSpeakers;
 
-void BG_ClearScriptSpeakerPool(void) { numScriptSpeakers = 0; }
+void BG_ClearScriptSpeakerPool(void) {
+  numScriptSpeakers = 0;
+}
 
-int BG_NumScriptSpeakers(void) { return numScriptSpeakers; }
+int BG_NumScriptSpeakers(void) {
+  return numScriptSpeakers;
+}
 
 int BG_GetIndexForSpeaker(bg_speaker_t *speaker) {
   return speaker - scriptSpeakers;
@@ -27,8 +31,7 @@ qboolean BG_SS_DeleteSpeaker(int index) {
     return qfalse;
   }
 
-  memcpy(&scriptSpeakers[index], &scriptSpeakers[index + 1],
-         sizeof(bg_speaker_t) * (numScriptSpeakers - index - 1));
+  memcpy(&scriptSpeakers[index], &scriptSpeakers[index + 1], sizeof(bg_speaker_t) * (numScriptSpeakers - index - 1));
 
   numScriptSpeakers--;
 
@@ -56,7 +59,7 @@ static qboolean BG_SS_ParseError(int handle, const char *format, ...) {
   va_end(argptr);
 
   filename[0] = '\0';
-  line = 0;
+  line        = 0;
   trap_PC_SourceFileAndLine(handle, filename, &line);
 
   Com_Printf(S_COLOR_RED "ERROR: %s, line %d: %s\n", filename, line, string);
@@ -73,7 +76,7 @@ static qboolean BG_SS_ParseSpeaker(int handle) {
   memset(&speaker, 0, sizeof(speaker));
 
   speaker.volume = 127;
-  speaker.range = 1250;
+  speaker.range  = 1250;
 
   if (!trap_PC_ReadToken(handle, &token) || Q_stricmp(token.string, "{")) {
     return BG_SS_ParseError(handle, "expected '{'");
@@ -89,8 +92,7 @@ static qboolean BG_SS_ParseSpeaker(int handle) {
     }
 
     if (!Q_stricmp(token.string, "noise")) {
-      if (!PC_String_ParseNoAlloc(handle, speaker.filename,
-                                  sizeof(speaker.filename))) {
+      if (!PC_String_ParseNoAlloc(handle, speaker.filename, sizeof(speaker.filename))) {
         return BG_SS_ParseError(handle, "expected sound filename");
       }
     } else if (!Q_stricmp(token.string, "origin")) {
@@ -98,8 +100,7 @@ static qboolean BG_SS_ParseSpeaker(int handle) {
         return BG_SS_ParseError(handle, "expected origin vector");
       }
     } else if (!Q_stricmp(token.string, "targetname")) {
-      if (!PC_String_ParseNoAlloc(handle, speaker.targetname,
-                                  sizeof(speaker.targetname))) {
+      if (!PC_String_ParseNoAlloc(handle, speaker.targetname, sizeof(speaker.targetname))) {
         return BG_SS_ParseError(handle, "expected targetname string");
       } else {
         speaker.targetnamehash = BG_StringHashValue(speaker.targetname);
@@ -111,13 +112,12 @@ static qboolean BG_SS_ParseSpeaker(int handle) {
         if (!Q_stricmp(token.string, "no")) {
           speaker.loop = S_LT_NOT_LOOPED;
         } else if (!Q_stricmp(token.string, "on")) {
-          speaker.loop = S_LT_LOOPED_ON;
+          speaker.loop      = S_LT_LOOPED_ON;
           speaker.activated = qtrue;
         } else if (!Q_stricmp(token.string, "off")) {
           speaker.loop = S_LT_LOOPED_OFF;
         } else {
-          return BG_SS_ParseError(handle, "unknown loop value '%s'",
-                                  token.string);
+          return BG_SS_ParseError(handle, "unknown loop value '%s'", token.string);
         }
       }
     } else if (!Q_stricmp(token.string, "broadcast")) {
@@ -141,29 +141,25 @@ static qboolean BG_SS_ParseSpeaker(int handle) {
       if (!PC_Int_Parse(handle, &speaker.wait)) {
         return BG_SS_ParseError(handle, "expected wait value");
       } else if (speaker.wait < 0) {
-        return BG_SS_ParseError(handle, "wait value %i is invalid",
-                                speaker.wait);
+        return BG_SS_ParseError(handle, "wait value %i is invalid", speaker.wait);
       }
     } else if (!Q_stricmp(token.string, "random")) {
       if (!PC_Int_Parse(handle, &speaker.random)) {
         return BG_SS_ParseError(handle, "expected random value");
       } else if (speaker.random < 0) {
-        return BG_SS_ParseError(handle, "random value %i is invalid",
-                                speaker.random);
+        return BG_SS_ParseError(handle, "random value %i is invalid", speaker.random);
       }
     } else if (!Q_stricmp(token.string, "volume")) {
       if (!PC_Int_Parse(handle, &speaker.volume)) {
         return BG_SS_ParseError(handle, "expected volume value");
       } else if (speaker.volume < 0 || speaker.volume > 65535) {
-        return BG_SS_ParseError(handle, "volume value %i is invalid",
-                                speaker.volume);
+        return BG_SS_ParseError(handle, "volume value %i is invalid", speaker.volume);
       }
     } else if (!Q_stricmp(token.string, "range")) {
       if (!PC_Int_Parse(handle, &speaker.range)) {
         return BG_SS_ParseError(handle, "expected range value");
       } else if (speaker.range < 0) {
-        return BG_SS_ParseError(handle, "range value %i is invalid",
-                                speaker.range);
+        return BG_SS_ParseError(handle, "range value %i is invalid", speaker.range);
       }
     } else {
       return BG_SS_ParseError(handle, "unknown token '%s'", token.string);
@@ -171,8 +167,7 @@ static qboolean BG_SS_ParseSpeaker(int handle) {
   }
 
   if (!BG_SS_StoreSpeaker(&speaker)) {
-    return BG_SS_ParseError(handle, "Failed to store speaker '%s'",
-                            token.string);
+    return BG_SS_ParseError(handle, "Failed to store speaker '%s'", token.string);
   }
 
   return qtrue;
@@ -188,8 +183,7 @@ qboolean BG_LoadSpeakerScript(const char *filename) {
     return qfalse;
   }
 
-  if (!trap_PC_ReadToken(handle, &token) ||
-      Q_stricmp(token.string, "speakerScript")) {
+  if (!trap_PC_ReadToken(handle, &token) || Q_stricmp(token.string, "speakerScript")) {
     return BG_SS_ParseError(handle, "expected 'soundScript'");
   }
 

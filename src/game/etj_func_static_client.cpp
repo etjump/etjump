@@ -23,15 +23,14 @@
  */
 
 #include "etj_func_static_client.h"
+
+#include <algorithm>
+
+#include "etj_entity_utilities.h"
 #include "etj_entity_utilities_shared.h"
+#include "etj_portalgun_shared.h"
 
 namespace ETJump {
-inline constexpr int32_t SF_START_INVIS = 1 << 0;
-inline constexpr int32_t SF_PAIN = 1 << 1;
-inline constexpr int32_t SF_GIB_INSIDE = 1 << 2;
-inline constexpr int32_t SF_FT_TEAMJUMP_SYNC = 1 << 3;
-inline constexpr int32_t SF_CONSUME_PORTALS = 1 << 4;
-
 /*
  * 'ent->s.effect1Time' and 'ent->s.effect2Time' are treated as boolean
  * bitsets by this entity. Clients 0-31 map to 'effect1Time',
@@ -52,17 +51,17 @@ void FuncStaticClient::spawn(gentity_t *ent) {
   VectorCopy(ent->s.origin, ent->r.currentOrigin);
   trap_LinkEntity(ent);
 
-  ent->use = use;
+  ent->use     = use;
   ent->s.eType = ET_STATIC_CLIENT;
 
   // hide by default for all clients if spawnflag 1 is set
-  if (ent->spawnflags & SF_START_INVIS) {
+  if (ent->spawnflags & Spawnflags::START_INVIS) {
     ent->s.effect1Time = INT_MAX;
     ent->s.effect2Time = INT_MAX;
   }
 
-  if (ent->spawnflags & SF_PAIN) {
-    ent->pain = pain;
+  if (ent->spawnflags & Spawnflags::PAIN) {
+    ent->pain       = pain;
     ent->takedamage = qtrue;
     // pretty sure this is useless but 'func_static' does it as well
     ent->isProp = qtrue;
@@ -71,7 +70,7 @@ void FuncStaticClient::spawn(gentity_t *ent) {
 
   char *s = nullptr;
 
-  // 'model2' support so we can also use models
+  // 'model2' support so we can also use models (set via 'InitMover')
   // NOTE: using 'ent->s.density' for both 'offModel' and 'offShader',
   // since they are mutually exclusive - client knows how to interpret this
   // by checking if 'ent->s.modelindex2' is set or not
@@ -80,33 +79,53 @@ void FuncStaticClient::spawn(gentity_t *ent) {
     if (G_SpawnString("offModel", "", &s)) {
       ent->s.density = G_ModelIndex(s);
     }
+
+    vec3_t modelscale{};
+
+    // 'modelscale/modelscale_vec' support, stored in 'angles2'
+    // 'modelscale_vec' is preferred over regular 'modelscale'
+    if (G_SpawnVector("modelscale_vec", "1 1 1", modelscale)) {
+      VectorCopy(modelscale, ent->s.angles2);
+    } else if (G_SpawnFloat("modelscale", "1", &modelscale[0])) {
+      modelscale[1] = modelscale[0];
+      modelscale[2] = modelscale[0];
+      VectorCopy(modelscale, ent->s.angles2);
+    }
   } else {
     // custom shader when the brush is in "off" state
     if (G_SpawnString("offShader", "", &s)) {
       ent->s.density = G_ShaderIndex(s);
     }
   }
+
+  if (ent->spawnflags & Spawnflags::PORTAL_TARGET) {
+    if (G_SpawnInt("portalsize", "0", &ent->count)) {
+      ent->count = std::clamp(ent->count, 0, MAX_PORTAL_TARGET_SIZE);
+    }
+
+    // network the portal target info so client can predict portal placement
+    vec3_t center;
+    EntityUtilities::getOriginOrBmodelCenter(ent, center);
+    PortalgunShared::setPortalTarget(ent->s, ent->count, center);
+  }
 }
 
-void FuncStaticClient::use(gentity_t *self, [[maybe_unused]] gentity_t *other,
-                           gentity_t *activator) {
+void FuncStaticClient::use(gentity_t *self, [[maybe_unused]] gentity_t *other, gentity_t *activator) {
   if (!activator || !activator->client) {
     G_Error("'%s' cannot be used by a non-client entity", self->classname);
   }
 
   const int32_t clientNum = ClientNum(activator);
+  self->activator         = activator;
 
   if (clientNum < MAX_CLIENTS / 2) {
-    COM_BitCheck(&self->s.effect1Time, clientNum) ? turnOn(self, clientNum)
-                                                  : turnOff(self, clientNum);
+    COM_BitCheck(&self->s.effect1Time, clientNum) ? turnOn(self, clientNum) : turnOff(self, clientNum);
   } else {
-    COM_BitCheck(&self->s.effect2Time, clientNum) ? turnOn(self, clientNum)
-                                                  : turnOff(self, clientNum);
+    COM_BitCheck(&self->s.effect2Time, clientNum) ? turnOn(self, clientNum) : turnOff(self, clientNum);
   }
 }
 
-void FuncStaticClient::pain(gentity_t *self, gentity_t *attacker,
-                            [[maybe_unused]] int32_t damage,
+void FuncStaticClient::pain(gentity_t *self, gentity_t *attacker, [[maybe_unused]] int32_t damage,
                             [[maybe_unused]] vec_t *point) {
   // do not error here, otherwise things like 'shooter_rocket'
   // hitting the entity will crash the server
@@ -115,7 +134,7 @@ void FuncStaticClient::pain(gentity_t *self, gentity_t *attacker,
   }
 
   // reset the health so the entity never dies
-  self->health = FUNC_STATIC_PAIN_HEALTH;
+  self->health    = FUNC_STATIC_PAIN_HEALTH;
   self->activator = attacker;
 
   G_UseTargets(self, self->activator);
@@ -128,14 +147,16 @@ void FuncStaticClient::turnOn(gentity_t *self, const int32_t clientNum) {
     COM_BitClear(&self->s.effect2Time, clientNum);
   }
 
-  if (self->spawnflags & SF_GIB_INSIDE &&
-      activatorIsInsideEnt(self, clientNum)) {
-    G_Damage(g_entities + clientNum, self, self, nullptr, nullptr, 9999,
-             DAMAGE_NO_PROTECTION, MOD_CRUSH);
+  if (self->spawnflags & Spawnflags::GIB_INSIDE && activatorIsInsideEnt(self, clientNum)) {
+    G_Damage(g_entities + clientNum, self, self, nullptr, nullptr, 9999, DAMAGE_NO_PROTECTION, MOD_CRUSH);
   }
 
-  if (self->spawnflags & SF_CONSUME_PORTALS) {
+  if (self->spawnflags & Spawnflags::CONSUME_PORTALS) {
     deleteTouchingPortals(self, clientNum);
+  }
+
+  if (self->scriptName) {
+    scriptEvent(self, "enabled");
   }
 }
 
@@ -145,10 +166,13 @@ void FuncStaticClient::turnOff(gentity_t *self, const int32_t clientNum) {
   } else {
     COM_BitSet(&self->s.effect2Time, clientNum);
   }
+
+  if (self->scriptName) {
+    scriptEvent(self, "disabled");
+  }
 }
 
-bool FuncStaticClient::activatorIsInsideEnt(const gentity_t *self,
-                                            const int32_t clientNum) {
+bool FuncStaticClient::activatorIsInsideEnt(const gentity_t *self, const int32_t clientNum) {
   std::array<int32_t, MAX_GENTITIES> touch{};
   const gentity_t *activator = g_entities + clientNum;
   vec3_t mins{};
@@ -157,8 +181,7 @@ bool FuncStaticClient::activatorIsInsideEnt(const gentity_t *self,
   VectorAdd(activator->r.currentOrigin, activator->client->ps.mins, mins);
   VectorAdd(activator->r.currentOrigin, activator->client->ps.maxs, maxs);
 
-  const int32_t count =
-      trap_EntitiesInBox(mins, maxs, touch.data(), MAX_GENTITIES);
+  const int32_t count = trap_EntitiesInBox(mins, maxs, touch.data(), MAX_GENTITIES);
 
   for (int32_t i = 0; i < count; i++) {
     if (touch[i] == self->s.number) {
@@ -169,8 +192,7 @@ bool FuncStaticClient::activatorIsInsideEnt(const gentity_t *self,
   return false;
 }
 
-void FuncStaticClient::syncToFireteamLeaderState(const int32_t clientNum,
-                                                 const int32_t leaderNum) {
+void FuncStaticClient::syncToFireteamLeaderState(const int32_t clientNum, const int32_t leaderNum) {
   for (int32_t i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; i++) {
     gentity_t *ent = &g_entities[i];
 
@@ -178,7 +200,7 @@ void FuncStaticClient::syncToFireteamLeaderState(const int32_t clientNum,
       continue;
     }
 
-    if (!(ent->spawnflags & SF_FT_TEAMJUMP_SYNC)) {
+    if (!(ent->spawnflags & Spawnflags::FT_TEAMJUMP_SYNC)) {
       continue;
     }
 
@@ -190,23 +212,32 @@ void FuncStaticClient::syncToFireteamLeaderState(const int32_t clientNum,
   }
 }
 
-void FuncStaticClient::deleteTouchingPortals(const gentity_t *self,
-                                             const int32_t clientNum) {
+void FuncStaticClient::deleteTouchingPortals(const gentity_t *self, const int32_t clientNum) {
   const gentity_t *activator = g_entities + clientNum;
 
   // we check against the portal origin instead of bbox, otherwise it's
   // possible to fire portals next to the entity while it's solid,
   // which then get deleted when it's toggled, which feels very wrong
   if (activator->portalBlue &&
-      trap_EntityContact(activator->portalBlue->r.currentOrigin,
-                         activator->portalBlue->r.currentOrigin, self)) {
+      trap_EntityContact(activator->portalBlue->r.currentOrigin, activator->portalBlue->r.currentOrigin, self)) {
     G_FreeEntity(activator->portalBlue);
   }
 
   if (activator->portalRed &&
-      trap_EntityContact(activator->portalRed->r.currentOrigin,
-                         activator->portalRed->r.currentOrigin, self)) {
+      trap_EntityContact(activator->portalRed->r.currentOrigin, activator->portalRed->r.currentOrigin, self)) {
     G_FreeEntity(activator->portalRed);
+  }
+}
+
+void FuncStaticClient::scriptEvent(gentity_t *self, const char *trigger) {
+  assert(self->activator);
+
+  const team_t team = self->activator->client->sess.sessionTeam;
+
+  if (team == TEAM_ALLIES || team == TEAM_AXIS) {
+    G_Script_ScriptEvent(self, trigger, team == TEAM_AXIS ? "axis" : "allies");
+  } else {
+    G_Script_ScriptEvent(self, trigger, nullptr);
   }
 }
 } // namespace ETJump

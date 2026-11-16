@@ -24,8 +24,9 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
+
 #include "etj_log.h"
 
 namespace ETJump {
@@ -41,15 +42,15 @@ public:
   };
 
   struct TypeInfo {
-    TypeInfo(bool typeExists, const std::string &callvoteText)
-        : typeExists(typeExists), callvoteText(callvoteText) {}
+    TypeInfo(bool typeExists, const std::string &callvoteText) : typeExists(typeExists), callvoteText(callvoteText) {}
+
     TypeInfo() : typeExists(false) {}
+
     bool typeExists;
     std::string callvoteText;
   };
 
-  CustomMapVotes(const std::shared_ptr<MapStatistics> &mapStats,
-                 std::unique_ptr<Log> log);
+  CustomMapVotes(const std::shared_ptr<MapStatistics> &mapStats, std::unique_ptr<Log> log);
   ~CustomMapVotes() = default;
 
   // if 'init' is true, clients aren't forced to invalidate cached customvotes
@@ -66,14 +67,11 @@ public:
   // returns nullptr on invalid index
   CustomMapVotes::MapType *getVotelistByIndex(int index);
 
-  void addCustomvoteList(int clientNum, const std::string &name,
-                         const std::string &fullName, const std::string &maps);
+  void addCustomvoteList(int clientNum, const std::string &name, const std::string &fullName, const std::string &maps);
   void deleteCustomvoteList(int clientNum, const std::string &name);
 
-  void editCustomvoteList(int clientNum, const std::string &list,
-                          const std::string &name, const std::string &fullName,
-                          const std::string &addMaps,
-                          const std::string &removeMaps);
+  void editCustomvoteList(int clientNum, const std::string &list, const std::string &name, const std::string &fullName,
+                          const std::string &addMaps, const std::string &removeMaps);
 
 private:
   std::vector<MapType> customMapVotes_;

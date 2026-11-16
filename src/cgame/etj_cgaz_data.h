@@ -65,7 +65,10 @@ private:
   void friction() const;
   void accelerate(float wishspeed, float accel, bool slick);
 
-  enum class CGazTrueness { UPMOVE = 1, GROUND = 2 };
+  enum class CGazTrueness {
+    UPMOVE = 1,
+    GROUND = 2
+  };
 
   State s{};
   EnumBitset<PmoveUtilsV2::PmoveDefaultInput> defaultInput;

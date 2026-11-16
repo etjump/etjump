@@ -25,22 +25,24 @@
 #ifndef NEW_AUTH
 
   #include "etj_client_authentication.h"
+
+  #include <utility>
+  #include <uuid4.h>
+
+  #include "../game/etj_crypto.h"
   #include "../game/etj_file.h"
   #include "../game/etj_shared.h"
   #include "../game/etj_string_utilities.h"
-  #include "../game/etj_crypto.h"
-  #include <uuid4.h>
 
-ETJump::ClientAuthentication::ClientAuthentication(
-    std::function<void(const std::string &)> sendClientCommand,
-    std::function<void(const std::string &)> print,
-    std::function<std::string()> getHwid,
-    std::shared_ptr<ClientCommandsHandler> serverCommandsHandler)
-    : _sendClientCommand(sendClientCommand), _print(print), _getHwid(getHwid),
-      _serverCommandsHandler(serverCommandsHandler), GUID_FILE("etguid.dat") {
-  _serverCommandsHandler->subscribe(
-      Constants::Authentication::GUID_REQUEST,
-      [&](const std::vector<std::string> &args) { login(); });
+ETJump::ClientAuthentication::ClientAuthentication(std::function<void(const std::string &)> sendClientCommand,
+                                                   std::function<void(const std::string &)> print,
+                                                   std::function<std::string()> getHwid,
+                                                   std::shared_ptr<ClientCommandsHandler> serverCommandsHandler)
+  : _sendClientCommand(std::move(sendClientCommand)), _print(std::move(print)), _getHwid(std::move(getHwid)),
+    _serverCommandsHandler(std::move(serverCommandsHandler)), GUID_FILE("etguid.dat") {
+  _serverCommandsHandler->subscribe(Constants::Authentication::GUID_REQUEST, [&](const std::vector<std::string> &args) {
+    login();
+  });
 }
 
 ETJump::ClientAuthentication::~ClientAuthentication() {
@@ -48,15 +50,14 @@ ETJump::ClientAuthentication::~ClientAuthentication() {
 }
 
 void ETJump::ClientAuthentication::login() {
-  auto guid = getGuid();
+  auto guid   = getGuid();
   auto result = saveGuid(guid);
   if (!result.success) {
     _print("^1Error: " + result.message);
   }
   auto hwid = getHwid();
   auto authenticate =
-      StringUtils::format("%s %s %s", Constants::Authentication::AUTHENTICATE,
-      Crypto::sha1(guid), hwid);
+    StringUtils::format("%s %s %s", Constants::Authentication::AUTHENTICATE, Crypto::sha1(guid), hwid);
   _sendClientCommand(authenticate);
 }
 
@@ -70,7 +71,9 @@ std::string ETJump::ClientAuthentication::getGuid() {
   }
 }
 
-std::string ETJump::ClientAuthentication::getHwid() { return _getHwid(); }
+std::string ETJump::ClientAuthentication::getHwid() {
+  return _getHwid();
+}
 
 std::string ETJump::ClientAuthentication::createGuid() const {
   char buf[UUID4_LEN];
@@ -80,15 +83,13 @@ std::string ETJump::ClientAuthentication::createGuid() const {
   return guid;
 }
 
-ETJump::ClientAuthentication::OperationResult
-ETJump::ClientAuthentication::saveGuid(const std::string &guid) const {
+ETJump::ClientAuthentication::OperationResult ETJump::ClientAuthentication::saveGuid(const std::string &guid) const {
   try {
     const File guidFile(GUID_FILE, File::Mode::Write);
     guidFile.write(guid);
     return {true, ""};
   } catch (const File::FileIOException &e) {
-    return {false, std::string("saving guid failed: ") + e.what() +
-                       " Using temporary guid."};
+    return {false, std::string("saving guid failed: ") + e.what() + " Using temporary guid."};
   }
 }
 #endif

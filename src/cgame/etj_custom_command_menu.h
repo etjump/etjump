@@ -36,14 +36,12 @@ class ClientCommandsHandler;
 inline constexpr int32_t MAX_CUSTOM_COMMANDS = 40;
 // 9 and 0 are reserved for prev/next page navigation
 inline constexpr uint8_t CUSTOM_COMMAND_MENU_PAGE_SIZE = 8;
-inline constexpr uint8_t CUSTOM_COMMAND_MENU_MAX_PAGES =
-    MAX_CUSTOM_COMMANDS / CUSTOM_COMMAND_MENU_PAGE_SIZE;
+inline constexpr uint8_t CUSTOM_COMMAND_MENU_MAX_PAGES = MAX_CUSTOM_COMMANDS / CUSTOM_COMMAND_MENU_PAGE_SIZE;
 
 class CustomCommandMenu {
 public:
-  CustomCommandMenu(
-      const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
-      const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
+  CustomCommandMenu(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate,
+                    const std::shared_ptr<ClientCommandsHandler> &consoleCommands);
   ~CustomCommandMenu();
 
   struct CustomCommand {
@@ -51,8 +49,7 @@ public:
     std::string command;
   };
 
-  [[nodiscard]] const std::map<
-      uint8_t, std::array<CustomCommand, CUSTOM_COMMAND_MENU_PAGE_SIZE>> &
+  [[nodiscard]] const std::map<uint8_t, std::array<CustomCommand, CUSTOM_COMMAND_MENU_PAGE_SIZE>> &
   getCustomCommands() const;
 
 private:
@@ -66,21 +63,14 @@ private:
   void moveCommand(const std::vector<std::string> &args);
   void listCommands(const std::vector<std::string> &args) const;
 
-  bool validateAddCommand(const CommandParser::Command &optCommand,
-                          std::string &name, std::string &cmd,
-                          std::optional<uint8_t> &page,
-                          std::optional<uint8_t> &slot) const;
-  bool validateDeleteCommand(const CommandParser::Command &optCommand,
-                             std::optional<uint8_t> &page,
+  bool validateAddCommand(const CommandParser::Command &optCommand, std::string &name, std::string &cmd,
+                          std::optional<uint8_t> &page, std::optional<uint8_t> &slot) const;
+  bool validateDeleteCommand(const CommandParser::Command &optCommand, std::optional<uint8_t> &page,
                              std::optional<uint8_t> &slot) const;
-  [[nodiscard]] bool
-  validateEditCommand(const CommandParser::Command &optCommand, uint8_t page,
-                      uint8_t slot) const;
+  [[nodiscard]] bool validateEditCommand(const CommandParser::Command &optCommand, uint8_t page, uint8_t slot) const;
 
-  [[nodiscard]] bool
-  validateMoveCommand(const CommandParser::Command &optCommand,
-                      uint8_t fromPage, uint8_t fromSlot, uint8_t toPage,
-                      std::optional<uint8_t> &toSlot) const;
+  [[nodiscard]] bool validateMoveCommand(const CommandParser::Command &optCommand, uint8_t fromPage, uint8_t fromSlot,
+                                         uint8_t toPage, std::optional<uint8_t> &toSlot) const;
 
   [[nodiscard]] inline bool commandsFull() const;
   [[nodiscard]] inline bool pageIsFull(uint8_t page) const;
@@ -100,8 +90,7 @@ private:
   [[nodiscard]] bool writeFile(const toml::ordered_value &table) const;
 
   std::string customCommandMenuFile;
-  std::map<uint8_t, std::array<CustomCommand, CUSTOM_COMMAND_MENU_PAGE_SIZE>>
-      commands;
+  std::map<uint8_t, std::array<CustomCommand, CUSTOM_COMMAND_MENU_PAGE_SIZE>> commands;
   std::shared_ptr<CvarUpdateHandler> cvarUpdate;
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
 };

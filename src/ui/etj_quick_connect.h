@@ -36,8 +36,7 @@ public:
   ~QuickConnect() = default;
 
   void refreshServers(bool force);
-  void addServer(const std::string &address, const std::string &password,
-                 const std::string &customName);
+  void addServer(const std::string &address, const std::string &password, const std::string &customName);
   void deleteServer();
   void editServer();
   void setEditData(int index);
@@ -48,6 +47,8 @@ public:
   // if index is invalid, returns an empty string
   [[nodiscard]] std::string buildConnectCommand(int index) const;
 
+  [[nodiscard]] std::string getServerAddress(int32_t index) const;
+
   static constexpr int32_t MAX_QUICKCONNECT_SERVERS = 5;
 
   // label texts are not fixed sized arrays, they are normally allocated
@@ -56,10 +57,11 @@ public:
   // label texts in a separate locations here, to avoid gradually filling
   // up the string pool when the server infos get updated,
   // since there's no way to free a string from the pool.
-  std::array<char[MAX_CVAR_VALUE_STRING], MAX_QUICKCONNECT_SERVERS>
-      serverLabels{};
+  std::array<char[MAX_CVAR_VALUE_STRING], MAX_QUICKCONNECT_SERVERS> serverLabels{};
 
   bool initialRefreshDone;
+  // the currently selected server for menu interactions
+  int selectedServer;
 
 private:
   struct QuickConnectServer {
@@ -86,6 +88,5 @@ private:
   void buildLabelString(int index);
 
   std::vector<QuickConnectServer> servers;
-  int selectedServer; // the currently selected server for editing/deletion
 };
 } // namespace ETJump

@@ -31,9 +31,9 @@
   #undef max
 #endif
 
-#include <string>
 #include <functional>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace Utilities {
@@ -52,8 +52,7 @@ public:
    * @param page
    * @returns the buffer with the data
    */
-  std::string toString(std::vector<std::string> headers, std::vector<Row> rows,
-                       int pageSize, int page);
+  std::string toString(std::vector<std::string> headers, std::vector<Row> rows, int pageSize, int page);
 
 private:
   unsigned totalWidth(std::map<std::string, unsigned> columnWidths);

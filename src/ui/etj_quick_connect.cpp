@@ -24,8 +24,8 @@
 
 #include "etj_quick_connect.h"
 
-#include "../game/etj_json_utilities.h"
 #include "../game/etj_filesystem.h"
+#include "../game/etj_json_utilities.h"
 
 namespace ETJump {
 QuickConnect::QuickConnect() : initialRefreshDone(false), selectedServer(-1) {
@@ -46,32 +46,24 @@ bool QuickConnect::parseServers() {
   std::string err;
 
   if (!JsonUtils::readFile(QUICKCONNECT_FILE, root, &err)) {
-    uiInfo.uiDC.Print(S_COLOR_YELLOW
-                      "%s: Failed to parse quick connect file:\n%s\n",
-                      __func__, err.c_str());
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to parse quick connect file:\n%s\n", __func__, err.c_str());
     return false;
   }
 
-  const int max =
-      std::min(MAX_QUICKCONNECT_SERVERS, static_cast<int>(root.size()));
+  const int max = std::min(MAX_QUICKCONNECT_SERVERS, static_cast<int>(root.size()));
   servers.clear();
 
   for (int i = 0; i < max; i++) {
     QuickConnectServer server{};
     const Json::Value &current = root[i];
 
-    if (!JsonUtils::parseValue(server.serverName, current["serverName"], &err,
-                               "serverName") ||
+    if (!JsonUtils::parseValue(server.serverName, current["serverName"], &err, "serverName") ||
         !JsonUtils::parseValue(server.ip, current["ip"], &err, "ip") ||
-        !JsonUtils::parseValue(server.password, current["password"], &err,
-                               "password") ||
-        !JsonUtils::parseValue(server.customName, current["customName"], &err,
-                               "customName")) {
+        !JsonUtils::parseValue(server.password, current["password"], &err, "password") ||
+        !JsonUtils::parseValue(server.customName, current["customName"], &err, "customName")) {
       // + 1 for user-facing index
-      uiInfo.uiDC.Print(
-          S_COLOR_YELLOW
-          "%s: Failed to parse server #%i from quick connect file:\n%s\n",
-          __func__, i + 1, err.c_str());
+      uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to parse server #%i from quick connect file:\n%s\n", __func__, i + 1,
+                        err.c_str());
       continue;
     }
 
@@ -131,11 +123,10 @@ bool QuickConnect::getServerInfo(QuickConnectServer &info) {
   }
 
   info.serverName = Info_ValueForKey(status, "sv_hostname");
-  info.map = Info_ValueForKey(status, "mapname");
-  info.maxClients =
-      static_cast<uint8_t>(Q_atoi(Info_ValueForKey(status, "sv_maxclients")));
-  info.players = getPlayerCount(status);
-  info.valid = true;
+  info.map        = Info_ValueForKey(status, "mapname");
+  info.maxClients = static_cast<uint8_t>(Q_atoi(Info_ValueForKey(status, "sv_maxclients")));
+  info.players    = getPlayerCount(status);
+  info.valid      = true;
 
   return true;
 }
@@ -150,7 +141,7 @@ uint8_t QuickConnect::getPlayerCount(const std::string &serverStatus) {
   // single backslashes in the remaining string. If the server has no players,
   // the double backslash is the end of the string.
   std::string playersStr = serverStatus.substr(serverStatus.find("\\\\") + 2);
-  size_t pos = 0;
+  size_t pos             = 0;
 
   while ((pos = playersStr.find('\\', pos)) != std::string::npos) {
     count++;
@@ -166,10 +157,9 @@ bool QuickConnect::serverExists(const std::string &address) const {
   // and really not worth the effort to make this more robust
   // we couldn't even distinguish domain from IP without implementing
   // out own custom solution, since there's no syscall to do that in engine
-  return std::any_of(servers.cbegin(), servers.cend(),
-                     [&address](const QuickConnectServer &server) {
-                       return server.ip == address;
-                     });
+  return std::any_of(servers.cbegin(), servers.cend(), [&address](const QuickConnectServer &server) {
+    return server.ip == address;
+  });
 }
 
 void QuickConnect::updateServerNames() const {
@@ -177,18 +167,14 @@ void QuickConnect::updateServerNames() const {
   std::string err;
 
   if (!FileSystem::exists(QUICKCONNECT_FILE)) {
-    uiInfo.uiDC.Print(S_COLOR_YELLOW
-                      "%s: Failed to update quick connect server names - file "
-                      "'%s' does not exist.\n",
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to update quick connect server names - file "
+                                     "'%s' does not exist.\n",
                       __func__, QUICKCONNECT_FILE);
     return;
   }
 
   if (!JsonUtils::readFile(QUICKCONNECT_FILE, root, &err)) {
-    uiInfo.uiDC.Print(
-        S_COLOR_YELLOW
-        "%s: Failed to open quick connect file for reading:\n%s\n",
-        __func__, err.c_str());
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to open quick connect file for reading:\n%s\n", __func__, err.c_str());
     return;
   }
 
@@ -202,9 +188,7 @@ void QuickConnect::updateServerNames() const {
   }
 
   if (!JsonUtils::writeFile(QUICKCONNECT_FILE, root, &err)) {
-    uiInfo.uiDC.Print(S_COLOR_YELLOW
-                      "%s: Failed to write quick connect file:\n%s",
-                      __func__, err.c_str());
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to write quick connect file:\n%s", __func__, err.c_str());
   }
 }
 
@@ -230,7 +214,7 @@ void QuickConnect::updateLabels() {
     if (StringUtils::startsWith(name, "lblQuickConnectServer")) {
       // menu entries are 1-indexed
       char buf[2] = {name.back(), '\0'};
-      int index = Q_atoi(buf) - 1;
+      int index   = Q_atoi(buf) - 1;
 
       buildLabelString(index);
       item->text = serverLabels[index];
@@ -243,36 +227,29 @@ void QuickConnect::updateLabels() {
 void QuickConnect::buildLabelString(const int index) {
   // for safety
   if (index < 0 || index >= MAX_QUICKCONNECT_SERVERS) {
-    uiInfo.uiDC.Print(
-        S_COLOR_RED
-        "%s: Unable to build quick connect label - index '%i' out of range!\n",
-        __func__, index);
+    uiInfo.uiDC.Print(S_COLOR_RED "%s: Unable to build quick connect label - index '%i' out of range!\n", __func__,
+                      index);
     return;
   }
 
-  bool infoValid = servers[index].valid;
+  bool infoValid     = servers[index].valid;
   bool hasCustomName = !servers[index].customName.empty();
 
-  const std::string line1 = StringUtils::truncate(
-      hasCustomName ? servers[index].customName : servers[index].serverName,
-      MAX_LABEL_LINE_CHARS);
+  const std::string line1 =
+    StringUtils::truncate(hasCustomName ? servers[index].customName : servers[index].serverName, MAX_LABEL_LINE_CHARS);
 
-  const std::string playerCountStr = StringUtils::format(
-      " (%s/%s)", infoValid ? std::to_string(servers[index].players) : "-",
-      infoValid ? std::to_string(servers[index].maxClients) : "-");
+  const std::string playerCountStr =
+    StringUtils::format(" (%s/%s)", infoValid ? std::to_string(servers[index].players) : "-",
+                        infoValid ? std::to_string(servers[index].maxClients) : "-");
   const std::string mapStr =
-      StringUtils::truncate(infoValid ? servers[index].map : "-",
-                            MAX_LABEL_LINE_CHARS - playerCountStr.length());
+    StringUtils::truncate(infoValid ? servers[index].map : "-", MAX_LABEL_LINE_CHARS - playerCountStr.length());
 
   const std::string line2 = StringUtils::format("%s%s", mapStr, playerCountStr);
 
-  Com_sprintf(serverLabels[index], sizeof(serverLabels[index]),
-              StringUtils::format("%s\n%s", line1, line2).c_str());
+  Com_sprintf(serverLabels[index], sizeof(serverLabels[index]), StringUtils::format("%s\n%s", line1, line2).c_str());
 }
 
-void QuickConnect::addServer(const std::string &address,
-                             const std::string &password,
-                             const std::string &customName) {
+void QuickConnect::addServer(const std::string &address, const std::string &password, const std::string &customName) {
   Json::Value root{};
   std::string err;
 
@@ -282,24 +259,19 @@ void QuickConnect::addServer(const std::string &address,
       // this should already be taken care of by the button in UI,
       // but let's check so that we don't somehow end up with too many entires
       if (root.size() >= MAX_QUICKCONNECT_SERVERS) {
-        uiInfo.uiDC.Print(
-            S_COLOR_YELLOW
-            "You may not add more than %i quick connect servers.\n",
-            MAX_QUICKCONNECT_SERVERS);
+        uiInfo.uiDC.Print(S_COLOR_YELLOW "You may not add more than %i quick connect servers.\n",
+                          MAX_QUICKCONNECT_SERVERS);
         return;
       }
 
       if (serverExists(address)) {
-        uiInfo.uiDC.Print(S_COLOR_YELLOW "Server '%s' is already added.\n",
-                          address.c_str());
+        uiInfo.uiDC.Print(S_COLOR_YELLOW "Server '%s' is already added.\n", address.c_str());
         return;
       }
 
     } else {
-      uiInfo.uiDC.Print(
-          S_COLOR_YELLOW
-          "%s: Failed to open quick connect file for reading:\n%s\n",
-          __func__, err.c_str());
+      uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to open quick connect file for reading:\n%s\n", __func__,
+                        err.c_str());
       return;
     }
   }
@@ -310,19 +282,16 @@ void QuickConnect::addServer(const std::string &address,
   // the server name for the user even if they haven't updated the list yet,
   // (e.g. after a fresh start) and custom name is blank
   server["serverName"] = "";
-  server["password"] = password;
+  server["password"]   = password;
   server["customName"] = customName;
-  server["ip"] = address;
+  server["ip"]         = address;
 
   root.append(server);
 
   if (JsonUtils::writeFile(QUICKCONNECT_FILE, root, &err)) {
-    uiInfo.uiDC.Print("Added new server to quick connect with IP '%s'\n",
-                      address.c_str());
+    uiInfo.uiDC.Print("Added new server to quick connect with IP '%s'\n", address.c_str());
   } else {
-    uiInfo.uiDC.Print(S_COLOR_YELLOW
-                      "%s: Failed to write quick connect file:\n%s",
-                      __func__, err.c_str());
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to write quick connect file:\n%s", __func__, err.c_str());
   }
 
   if (parseServers()) {
@@ -335,18 +304,13 @@ void QuickConnect::editServer() {
   std::string err;
 
   if (!FileSystem::exists(QUICKCONNECT_FILE)) {
-    uiInfo.uiDC.Print(
-        S_COLOR_YELLOW
-        "%s: Failed to edit quick connect server - file '%s' does not exist.\n",
-        __func__, QUICKCONNECT_FILE);
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to edit quick connect server - file '%s' does not exist.\n", __func__,
+                      QUICKCONNECT_FILE);
     return;
   }
 
   if (!JsonUtils::readFile(QUICKCONNECT_FILE, root, &err)) {
-    uiInfo.uiDC.Print(
-        S_COLOR_YELLOW
-        "%s: Failed to open quick connect file for reading:\n%s\n",
-        __func__, err.c_str());
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to open quick connect file for reading:\n%s\n", __func__, err.c_str());
     return;
   }
 
@@ -365,14 +329,11 @@ void QuickConnect::editServer() {
   trap_Cvar_VariableStringBuffer("ui_quickconnect_password", buf, sizeof(buf));
   root[selectedServer]["password"] = buf;
 
-  trap_Cvar_VariableStringBuffer("ui_quickconnect_customname", buf,
-                                 sizeof(buf));
+  trap_Cvar_VariableStringBuffer("ui_quickconnect_customname", buf, sizeof(buf));
   root[selectedServer]["customName"] = buf;
 
   if (!JsonUtils::writeFile(QUICKCONNECT_FILE, root, &err)) {
-    uiInfo.uiDC.Print(S_COLOR_YELLOW
-                      "%s: Failed to write quick connect file:\n%s",
-                      __func__, err.c_str());
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to write quick connect file:\n%s", __func__, err.c_str());
     return;
   }
 
@@ -395,27 +356,20 @@ void QuickConnect::deleteServer() {
   }
 
   if (!JsonUtils::readFile(QUICKCONNECT_FILE, root, &err)) {
-    uiInfo.uiDC.Print(
-        S_COLOR_YELLOW
-        "%s: Failed to open quick connect file for reading:\n%s\n",
-        __func__, err.c_str());
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to open quick connect file for reading:\n%s\n", __func__, err.c_str());
     return;
   }
 
   // + 1 for user-facing index
   if (!root.removeIndex(selectedServer, nullptr)) {
-    uiInfo.uiDC.Print(
-        S_COLOR_YELLOW
-        "%s: Failed to delete server - no server saved on slot '%i'\n",
-        __func__, selectedServer + 1);
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to delete server - no server saved on slot '%i'\n", __func__,
+                      selectedServer + 1);
     selectedServer = -1;
     return;
   }
 
   if (!JsonUtils::writeFile(QUICKCONNECT_FILE, root, &err)) {
-    uiInfo.uiDC.Print(S_COLOR_YELLOW
-                      "%s: Failed to write quick connect file:\n%s",
-                      __func__, err.c_str());
+    uiInfo.uiDC.Print(S_COLOR_YELLOW "%s: Failed to write quick connect file:\n%s", __func__, err.c_str());
     return;
   }
 
@@ -442,17 +396,14 @@ void QuickConnect::setEditData(const int index) {
 
   // + 1 for user-facing index
   if (index > static_cast<int>(servers.size())) {
-    uiInfo.uiDC.Print(S_COLOR_RED
-                      "%s: No quick connect server saved at slot '%i'\n",
-                      __func__, index + 1);
+    uiInfo.uiDC.Print(S_COLOR_RED "%s: No quick connect server saved at slot '%i'\n", __func__, index + 1);
     return;
   }
 
   selectedServer = index;
   trap_Cvar_Set("ui_quickconnect_ip", servers[index].ip.c_str());
   trap_Cvar_Set("ui_quickconnect_password", servers[index].password.c_str());
-  trap_Cvar_Set("ui_quickconnect_customname",
-                servers[index].customName.c_str());
+  trap_Cvar_Set("ui_quickconnect_customname", servers[index].customName.c_str());
 }
 
 bool QuickConnect::isFull() const {
@@ -474,9 +425,7 @@ std::string QuickConnect::buildConnectCommand(const int index) const {
 
   // + 1 for user-facing index
   if (index > static_cast<int>(servers.size())) {
-    uiInfo.uiDC.Print(S_COLOR_RED
-                      "%s: No quick connect server saved at slot '%i'\n",
-                      __func__, index + 1);
+    uiInfo.uiDC.Print(S_COLOR_RED "%s: No quick connect server saved at slot '%i'\n", __func__, index + 1);
     return "";
   }
 
@@ -487,5 +436,23 @@ std::string QuickConnect::buildConnectCommand(const int index) const {
   }
 
   return command + '\n';
+}
+
+std::string QuickConnect::getServerAddress(const int32_t index) const {
+  // for safety
+  if (index < 0 || index >= MAX_QUICKCONNECT_SERVERS) {
+    uiInfo.uiDC.Print(S_COLOR_RED "%s: Unable to get server address for quick "
+                                  "connect server - index '%i' out of range!\n",
+                      __func__, index);
+    return "";
+  }
+
+  // + 1 for user-facing index
+  if (index > static_cast<int>(servers.size())) {
+    uiInfo.uiDC.Print(S_COLOR_RED "%s: No quick connect server saved at slot '%i'\n", __func__, index + 1);
+    return "";
+  }
+
+  return servers[index].ip;
 }
 } // namespace ETJump

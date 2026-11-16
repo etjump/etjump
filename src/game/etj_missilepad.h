@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include "g_local.h"
+
 namespace ETJump {
 class Missilepad {
   static void use(gentity_t *self);
@@ -31,9 +33,9 @@ class Missilepad {
 
 public:
   enum class Spawnflags {
-    None = 0,
-    StartInvis = 1,
-    ScaleHorOnly = 2,
+    None          = 0,
+    StartInvis    = 1,
+    ScaleHorOnly  = 2,
     ScaleVertOnly = 4,
   };
 

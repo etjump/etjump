@@ -23,14 +23,14 @@
  */
 
 #include "etj_shader_config_handler.h"
+
 #include "etj_string_utilities.h"
 #include "g_local.h"
 
 // ShaderConfigHandler - manages shader & shaderstate configstrings
 
 namespace ETJump {
-int16_t ShaderConfigHandler::getShaderIndex(const char *name,
-                                            const bool create) {
+int16_t ShaderConfigHandler::getShaderIndex(const char *name, const bool create) {
   if (!name || name[0] == '\0') {
     return 0;
   }
@@ -47,13 +47,12 @@ int16_t ShaderConfigHandler::getShaderIndex(const char *name,
   }
 
   if (gameShaderCache.size() == MAX_SHADER_INDEX) {
-    G_Error(
-        "%s: configstring overflow - MAX_SHADER_INDEX reached (%i), decrease "
-        "the number of unique shaders referenced by mapscript and entities\n",
-        __func__, MAX_SHADER_INDEX);
+    G_Error("%s: configstring overflow - MAX_SHADER_INDEX reached (%i), decrease "
+            "the number of unique shaders referenced by mapscript and entities\n",
+            __func__, MAX_SHADER_INDEX);
   }
 
-  const auto index = static_cast<int16_t>(gameShaderCache.size() + 1);
+  const auto index      = static_cast<int16_t>(gameShaderCache.size() + 1);
   gameShaderCache[name] = index;
 
   const int32_t slot = (index - 1) / MAX_SHADERS_PER_INDEX;
@@ -66,16 +65,15 @@ int16_t ShaderConfigHandler::getShaderIndex(const char *name,
   return index;
 }
 
-void ShaderConfigHandler::addShaderRemap(const char *oldShader,
-                                         const char *newShader) {
+void ShaderConfigHandler::addShaderRemap(const char *oldShader, const char *newShader) {
   const float timeOffset = static_cast<float>(level.time) * 0.001f;
 
   // check for an existing entry first, and just update it if found
-  for (int32_t i = 0; i < shaderRemaps.size(); i++) {
+  for (int32_t i = 0; i < static_cast<int32_t>(shaderRemaps.size()); i++) {
     if (StringUtils::iEqual(shaderRemaps[i].originalShader, oldShader)) {
       shaderRemaps[i].currentShader = newShader;
-      shaderRemaps[i].timeOffset = timeOffset;
-      shaderRemaps[i].i2 = getShaderIndex(newShader, true);
+      shaderRemaps[i].timeOffset    = timeOffset;
+      shaderRemaps[i].i2            = getShaderIndex(newShader, true);
 
       remapQueue.insert(static_cast<int16_t>(i / MAX_SHADERSTATES_PER_INDEX));
       return;
@@ -91,8 +89,8 @@ void ShaderConfigHandler::addShaderRemap(const char *oldShader,
   // new remap, register
   ShaderRemap sr{};
   sr.originalShader = oldShader;
-  sr.currentShader = newShader;
-  sr.timeOffset = timeOffset;
+  sr.currentShader  = newShader;
+  sr.timeOffset     = timeOffset;
 
   const auto truncate = [](std::string &str, size_t maxLen) {
     if (str.size() >= maxLen) {
@@ -108,8 +106,7 @@ void ShaderConfigHandler::addShaderRemap(const char *oldShader,
   sr.i1 = getShaderIndex(oldShader, true);
   sr.i2 = getShaderIndex(newShader, true);
 
-  remapQueue.insert(
-      static_cast<int16_t>(shaderRemaps.size() / MAX_SHADERSTATES_PER_INDEX));
+  remapQueue.insert(static_cast<int16_t>(shaderRemaps.size() / MAX_SHADERSTATES_PER_INDEX));
   shaderRemaps.emplace_back(sr);
 }
 
@@ -122,8 +119,7 @@ void ShaderConfigHandler::updateShaderState() {
     std::string state;
 
     const int32_t start = slot * MAX_SHADERSTATES_PER_INDEX;
-    const int32_t end = std::min(start + MAX_SHADERSTATES_PER_INDEX,
-                                 static_cast<int32_t>(shaderRemaps.size()));
+    const int32_t end   = std::min(start + MAX_SHADERSTATES_PER_INDEX, static_cast<int32_t>(shaderRemaps.size()));
 
     for (int32_t i = start; i < end; i++) {
       state += buildShaderStateString(i);

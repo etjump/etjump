@@ -23,35 +23,33 @@
  */
 
 #include "etj_keyset_keybind_drawer.h"
+
 #include "cg_local.h"
 
 namespace ETJump {
-void KeySetKeyBindDrawer::drawReleaseShader(qhandle_t shader,
-                                            int position) const {}
+void KeySetKeyBindDrawer::drawReleaseShader(qhandle_t shader, int position) const {}
 
-void KeySetKeyBindDrawer::drawPressShader(qhandle_t shader,
-                                          int position) const {
+void KeySetKeyBindDrawer::drawPressShader(qhandle_t shader, int position) const {
   if (!shader) {
     return;
   }
 
   // get command bind key name
-  const float sizeX = attrs.size.x / 3;
-  const float sizeY = attrs.size.y / 3;
+  const float sizeX         = attrs.size.x / 3;
+  const float sizeY         = attrs.size.y / 3;
   const float centerOffsetX = attrs.size.x / 2;
   const float centerOffsetY = attrs.size.y / 2;
-  const auto pos = calcGridPosition<3>(sizeX, sizeY, position);
-  const float x = attrs.origin.x + pos.x - centerOffsetX;
-  const float y = attrs.origin.y + pos.y - centerOffsetY;
-  const vec_t *color = attrs.color;
-  const vec_t *shadowColor =
-      attrs.shouldDrawShadow ? attrs.shadowColor : nullptr;
+  const auto pos            = calcGridPosition<3>(sizeX, sizeY, position);
+  const float x             = attrs.origin.x + pos.x - centerOffsetX;
+  const float y             = attrs.origin.y + pos.y - centerOffsetY;
+  const vec_t *color        = attrs.color;
+  const vec_t *shadowColor  = attrs.shouldDrawShadow ? attrs.shadowColor : nullptr;
 
   // key code handling
-  const auto keyShader = keyShaders[position];
-  auto command = keyNameToCommand(keyShader.key);
-  auto keyCode = getKeyCodeForName(command);
-  keyCode = checkKeyCodeRemap(keyCode);
+  const auto keyShader     = keyShaders[position];
+  auto command             = keyNameToCommand(keyShader.key);
+  auto keyCode             = getKeyCodeForName(command);
+  keyCode                  = checkKeyCodeRemap(keyCode);
   const auto keyCodeShader = checkIfKeyCodeHasShader(keyCode);
 
   // background
@@ -63,12 +61,11 @@ void KeySetKeyBindDrawer::drawPressShader(qhandle_t shader,
     auto binding = StringUtils::toUpperCase(getKeyCodeBinding(keyCode));
     // factor = 16 / ... = 0.20
     // size / factor;
-    auto bindWidth = DrawStringWidth(binding.c_str(), 0.2f);
-    auto bindHeight = DrawStringHeight(binding.c_str(), 0.2f);
+    auto bindWidth   = DrawStringWidth(binding.c_str(), 0.2f);
+    auto bindHeight  = DrawStringHeight(binding.c_str(), 0.2f);
     auto charOffsetX = (sizeX - bindWidth) / 2;
     auto charOffsetY = (sizeY + bindHeight + 1) / 2;
-    DrawString(x + charOffsetX, y + charOffsetY, 0.20f, 0.20f, color, qfalse,
-               binding.c_str(), 0, 0);
+    DrawString(x + charOffsetX, y + charOffsetY, 0.20f, 0.20f, color, qfalse, binding.c_str(), 0, 0);
   }
 }
 

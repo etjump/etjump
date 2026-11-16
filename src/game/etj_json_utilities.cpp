@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 
-#include <fstream>
 #include "etj_json_utilities.h"
-#include "etj_filesystem.h"
-#include "etj_file.h"
 
-bool JsonUtils::writeFile(const std::string &file, const Json::Value &root,
-                          std::string *errors) {
+#include <fstream>
+
+#include "etj_file.h"
+#include "etj_filesystem.h"
+
+bool JsonUtils::writeFile(const std::string &file, const Json::Value &root, std::string *errors) {
   Json::StyledWriter writer;
   const std::string &output = writer.write(root);
 
@@ -53,17 +54,14 @@ bool JsonUtils::writeFile(const std::string &file, const Json::Value &root,
   }
 }
 
-bool JsonUtils::readFile(const std::string &file, Json::Value &root,
-                         std::string *errors) {
+bool JsonUtils::readFile(const std::string &file, Json::Value &root, std::string *errors) {
   std::ifstream fIn(FileSystem::Path::getPath(file));
 
   if (!fIn) {
     fIn.close();
 
     if (errors) {
-      *errors = StringUtils::format(
-          "Failed to read JSON file: unable to open file '%s' for reading",
-          file);
+      *errors = StringUtils::format("Failed to read JSON file: unable to open file '%s' for reading", file);
     }
 
     return false;
@@ -75,8 +73,7 @@ bool JsonUtils::readFile(const std::string &file, Json::Value &root,
 
   if (!parseFromStream(readerBuilder, fIn, &root, &err)) {
     if (errors) {
-      *errors =
-          StringUtils::format("Failed to parse JSON file '%s':\n%s", file, err);
+      *errors = StringUtils::format("Failed to parse JSON file '%s':\n%s", file, err);
     }
 
     return false;

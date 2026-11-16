@@ -1,18 +1,15 @@
 // g_cmds_ext.c: Extended command set handling
 // -------------------------------------------
 //
-#include "g_local.h"
-#include "etj_string_utilities.h"
 #include "etj_printer.h"
+#include "etj_string_utilities.h"
+#include "g_local.h"
 
 int iWeap = WS_MAX;
 
-static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
-                             qboolean invite /* or uninvite */);
-static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
-                           qboolean lock);
-static void Cmd_SpecList_f(gentity_t *ent, unsigned int dwCommand,
-                           qboolean notUsed);
+static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean invite /* or uninvite */);
+static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand, qboolean lock);
+static void Cmd_SpecList_f(gentity_t *ent, unsigned int dwCommand, qboolean notUsed);
 
 //
 // Update info:
@@ -30,86 +27,66 @@ typedef struct {
 
 // VC optimizes for dup strings :)
 static const cmd_reference_t aCommandInfo[] = {
-    {"+stats", qtrue, qtrue, nullptr,
-     ":^7 HUD overlay showing current weapon stats info"},
+  {"+stats",         qtrue,  qtrue,  nullptr,              ":^7 HUD overlay showing current weapon stats info"                  },
 
-    {"+topshots", qtrue, qtrue, nullptr,
-     ":^7 HUD overlay showing current top accuracies of all players"},
+  {"+topshots",      qtrue,  qtrue,  nullptr,              ":^7 HUD overlay showing current top accuracies of all players"      },
 
-    {"?", qtrue, qtrue, G_commands_cmd,
-     ":^7 Gives a list of OSP-specific commands"},
+  {"?",              qtrue,  qtrue,  G_commands_cmd,       ":^7 Gives a list of OSP-specific commands"                          },
 
-    {"autorecord", qtrue, qtrue, nullptr,
-     ":^7 Creates a demo with a consistent naming scheme"},
+  {"autorecord",     qtrue,  qtrue,  nullptr,              ":^7 Creates a demo with a consistent naming scheme"                 },
 
-    {"autoscreenshot", qtrue, qtrue, nullptr,
-     ":^7 Creates a screenshot with a consistent naming scheme"},
+  {"autoscreenshot", qtrue,  qtrue,  nullptr,              ":^7 Creates a screenshot with a consistent naming scheme"           },
 
-    {"bottomshots", qtrue, qfalse, G_weaponRankings_cmd,
-     ":^7 Shows WORST player for each weapon. Add ^3<weapon_ID>^7 to show all "
-     "stats for a weapon"},
+  {"bottomshots",    qtrue,  qfalse, G_weaponRankings_cmd,
+   ":^7 Shows WORST player for each weapon. Add ^3<weapon_ID>^7 to show all "
+   "stats for a weapon"                                                                                                         },
 
-    {"callvote", qtrue, qfalse, Cmd_CallVote_f, " <params>:^7 Calls a vote"},
+  {"callvote",       qtrue,  qfalse, Cmd_CallVote_f,       " <params>:^7 Calls a vote"                                          },
 
-    {"cv", qtrue, qfalse, Cmd_CallVote_f, " <params>:^7 Calls a vote"},
+  {"cv",             qtrue,  qfalse, Cmd_CallVote_f,       " <params>:^7 Calls a vote"                                          },
 
-    {"commands", qtrue, qtrue, G_commands_cmd,
-     ":^7 Gives a list of OSP-specific commands"},
+  {"commands",       qtrue,  qtrue,  G_commands_cmd,       ":^7 Gives a list of OSP-specific commands"                          },
 
-    {"currenttime", qtrue, qtrue, nullptr, ":^7 Displays current local time"},
+  {"currenttime",    qtrue,  qtrue,  nullptr,              ":^7 Displays current local time"                                    },
 
-    {"follow", qtrue, qtrue, Cmd_Follow_f,
-     " <player_ID|allies|axis>:^7 Spectates a particular player or team"},
+  {"follow",         qtrue,  qtrue,  Cmd_Follow_f,         " <player_ID|allies|axis>:^7 Spectates a particular player or team"  },
 
-    {"notready", qtrue, qfalse, G_ready_cmd,
-     ":^7 Sets your status to ^5not ready^7 to start a match"},
+  {"notready",       qtrue,  qfalse, G_ready_cmd,          ":^7 Sets your status to ^5not ready^7 to start a match"             },
 
-    {"players", qtrue, qtrue, G_players_cmd,
-     ":^7 Lists all active players and their IDs/information"},
+  {"players",        qtrue,  qtrue,  G_players_cmd,        ":^7 Lists all active players and their IDs/information"             },
 
-    {"ready", qtrue, qtrue, G_ready_cmd,
-     ":^7 Sets your status to ^5ready^7 to start a match"},
+  {"ready",          qtrue,  qtrue,  G_ready_cmd,          ":^7 Sets your status to ^5ready^7 to start a match"                 },
 
-    {"readyteam", qfalse, qtrue, G_teamready_cmd,
-     ":^7 Sets an entire team's status to ^5ready^7 to start a match"},
+  {"readyteam",      qfalse, qtrue,  G_teamready_cmd,      ":^7 Sets an entire team's status to ^5ready^7 to start a match"     },
 
-    {"scores", qtrue, qtrue, G_scores_cmd,
-     ":^7 Displays current match stat info"},
+  {"scores",         qtrue,  qtrue,  G_scores_cmd,         ":^7 Displays current match stat info"                               },
 
-    {"specinvite", qtrue, qtrue, Cmd_SpecInvite_f,
-     ":^7 Invites a player to spectate"},
+  {"specinvite",     qtrue,  qtrue,  Cmd_SpecInvite_f,     ":^7 Invites a player to spectate"                                   },
 
-    {"specuninvite", qtrue, qfalse, Cmd_SpecInvite_f,
-     ":^7 Uninvites a player to spectate"},
+  {"specuninvite",   qtrue,  qfalse, Cmd_SpecInvite_f,     ":^7 Uninvites a player to spectate"                                 },
 
-    {"speclock", qtrue, qtrue, Cmd_SpecLock_f,
-     ":^7 Locks a player from spectators"},
+  {"speclock",       qtrue,  qtrue,  Cmd_SpecLock_f,       ":^7 Locks a player from spectators"                                 },
 
-    {"specunlock", qtrue, qfalse, Cmd_SpecLock_f,
-     ":^7Unlocks a player from spectators"},
+  {"specunlock",     qtrue,  qfalse, Cmd_SpecLock_f,       ":^7Unlocks a player from spectators"                                },
 
-    {"speclist", qtrue, qtrue, Cmd_SpecList_f, ":^7Lists specinvited players"},
+  {"speclist",       qtrue,  qtrue,  Cmd_SpecList_f,       ":^7Lists specinvited players"                                       },
 
-    {"statsall", qtrue, qfalse, G_statsall_cmd,
-     ":^7 Shows weapon accuracy stats for all players"},
+  {"statsall",       qtrue,  qfalse, G_statsall_cmd,       ":^7 Shows weapon accuracy stats for all players"                    },
 
-    {"statsdump", qtrue, qtrue, nullptr,
-     ":^7 Shows player stats + match info saved locally to a file"},
+  {"statsdump",      qtrue,  qtrue,  nullptr,              ":^7 Shows player stats + match info saved locally to a file"        },
 
-    {"team", qtrue, qtrue, Cmd_Team2_f,
-     " <b|r|s|none>:^7 Joins a team (b = allies, r = axis, s = spectator)"},
+  {"team",           qtrue,  qtrue,  Cmd_Team2_f,          " <b|r|s|none>:^7 Joins a team (b = allies, r = axis, s = spectator)"},
 
-    {"topshots", qtrue, qtrue, G_weaponRankings_cmd,
-     ":^7 Shows BEST player for each weapon. Add ^3<weapon_ID>^7 to show all "
-     "stats for a weapon"},
+  {"topshots",       qtrue,  qtrue,  G_weaponRankings_cmd,
+   ":^7 Shows BEST player for each weapon. Add ^3<weapon_ID>^7 to show all "
+   "stats for a weapon"                                                                                                         },
 
-    {"unready", qtrue, qfalse, G_ready_cmd,
-     ":^7 Sets your status to ^5not ready^7 to start a match"},
+  {"unready",        qtrue,  qfalse, G_ready_cmd,          ":^7 Sets your status to ^5not ready^7 to start a match"             },
 
-    {"weaponstats", qtrue, qfalse, G_weaponStats_cmd,
-     " [player_ID]:^7 Shows weapon accuracy stats for a player"},
+  {"weaponstats",    qtrue,  qfalse, G_weaponStats_cmd,    " [player_ID]:^7 Shows weapon accuracy stats for a player"           },
 
-    {nullptr, qfalse, qtrue, nullptr, nullptr}};
+  {nullptr,          qfalse, qtrue,  nullptr,              nullptr                                                              }
+};
 
 // OSP-specific Commands
 qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime) {
@@ -118,8 +95,7 @@ qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime) {
 
   for (i = 0; i < cCommands; i++) {
     pCR = &aCommandInfo[i];
-    if (NULL != pCR->pCommand && pCR->fAnytime == fDoAnytime &&
-        0 == Q_stricmp(cmd, pCR->pszCommandName)) {
+    if (NULL != pCR->pCommand && pCR->fAnytime == fDoAnytime && 0 == Q_stricmp(cmd, pCR->pszCommandName)) {
       if (!G_commandHelp(ent, cmd, i)) {
         pCR->pCommand(ent, i, pCR->fValue);
       }
@@ -131,8 +107,7 @@ qboolean G_commandCheck(gentity_t *ent, char *cmd, qboolean fDoAnytime) {
 }
 
 // Prints specific command help info.
-qboolean G_commandHelp(gentity_t *ent, const char *pszCommand,
-                       unsigned int dwCommand) {
+qboolean G_commandHelp(gentity_t *ent, const char *pszCommand, unsigned int dwCommand) {
   char arg[MAX_TOKEN_CHARS];
 
   if (!ent) {
@@ -140,8 +115,7 @@ qboolean G_commandHelp(gentity_t *ent, const char *pszCommand,
   }
   trap_Argv(1, arg, sizeof(arg));
   if (!Q_stricmp(arg, "?")) {
-    CP(va("print \"\n^3%s%s\n\n\"", pszCommand,
-          aCommandInfo[dwCommand].pszHelpInfo));
+    CP(va("print \"\n^3%s%s\n\n\"", pszCommand, aCommandInfo[dwCommand].pszHelpInfo));
     return (qtrue);
   }
 
@@ -152,8 +126,7 @@ qboolean G_commandHelp(gentity_t *ent, const char *pszCommand,
 qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommandName) {
   if (ent->client->pers.cmd_debounce > level.time) {
     CP(va("print \"Wait another %.1fs to issue ^3%s\n\"",
-          1.0 * (float)(ent->client->pers.cmd_debounce - level.time) / 1000.0,
-          pszCommandName));
+          1.0 * (float)(ent->client->pers.cmd_debounce - level.time) / 1000.0, pszCommandName));
     return (qfalse);
   }
 
@@ -189,18 +162,13 @@ void G_commands_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
      "Game-Commands:\n----------------------------\n\"");
   for (i = 0; i < rows; i++) {
     if (i + rows * 3 + 1 <= num_cmds) {
-      CP(va("print \"^3%-17s%-17s%-17s%-17s\n\"",
-            aCommandInfo[i].pszCommandName,
-            aCommandInfo[i + rows].pszCommandName,
-            aCommandInfo[i + rows * 2].pszCommandName,
-            aCommandInfo[i + rows * 3].pszCommandName));
+      CP(va("print \"^3%-17s%-17s%-17s%-17s\n\"", aCommandInfo[i].pszCommandName, aCommandInfo[i + rows].pszCommandName,
+            aCommandInfo[i + rows * 2].pszCommandName, aCommandInfo[i + rows * 3].pszCommandName));
     } else if (i + rows * 2 + 1 <= num_cmds) {
-      CP(va("print \"^3%-17s%-17s%-17s\n\"", aCommandInfo[i].pszCommandName,
-            aCommandInfo[i + rows].pszCommandName,
+      CP(va("print \"^3%-17s%-17s%-17s\n\"", aCommandInfo[i].pszCommandName, aCommandInfo[i + rows].pszCommandName,
             aCommandInfo[i + rows * 2].pszCommandName));
     } else if (i + rows + 1 <= num_cmds) {
-      CP(va("print \"^3%-17s%-17s\n\"", aCommandInfo[i].pszCommandName,
-            aCommandInfo[i + rows].pszCommandName));
+      CP(va("print \"^3%-17s%-17s\n\"", aCommandInfo[i].pszCommandName, aCommandInfo[i + rows].pszCommandName));
     } else {
       CP(va("print \"^3%-17s\n\"", aCommandInfo[i].pszCommandName));
     }
@@ -210,16 +178,15 @@ void G_commands_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
 }
 
 struct playersCmdHeader {
-  const char *id = "ID";
-  const char *player = "Player";
-  const char *nudge = "Nudge";
-  const char *rate = "Rate";
+  const char *id         = "ID";
+  const char *player     = "Player";
+  const char *nudge      = "Nudge";
+  const char *rate       = "Rate";
   const char *maxPackets = "MaxPkts";
-  const char *snaps = "Snaps";
-  const char *engine = "Engine";
-  const char *divider =
-      "------------------------------------------------------------------------"
-      "----------------------------"; // 100 chars
+  const char *snaps      = "Snaps";
+  const char *engine     = "Engine";
+  const char *divider    = "------------------------------------------------------------------------"
+                           "----------------------------"; // 100 chars
 };
 
 // ************** PLAYERS
@@ -238,23 +205,20 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   playersCmdHeader header;
 
   if (ent) {
-    Printer::console(clientNum,
-                     va("\n^g  %-4s%-25s%-8s%-6s%-9s%-7s%s\n", header.id,
-                        header.player, header.nudge, header.rate,
-                        header.maxPackets, header.snaps, header.engine));
+    Printer::console(clientNum, va("\n^g  %-4s%-25s%-8s%-6s%-9s%-7s%s\n", header.id, header.player, header.nudge,
+                                   header.rate, header.maxPackets, header.snaps, header.engine));
     Printer::console(clientNum, va("^g%s\n", header.divider));
   } else {
-    G_Printf("  %-4s%-25s%-8s%-6s%-9s%-7s%s\n", header.id, header.player,
-             header.nudge, header.rate, header.maxPackets, header.snaps,
-             header.engine);
+    G_Printf("  %-4s%-25s%-8s%-6s%-9s%-7s%s\n", header.id, header.player, header.nudge, header.rate, header.maxPackets,
+             header.snaps, header.engine);
     G_Printf("%s\n", header.divider);
   }
 
   const int maxRate = trap_Cvar_VariableIntegerValue("sv_maxrate");
-  const int svFps = trap_Cvar_VariableIntegerValue("sv_fps");
+  const int svFps   = trap_Cvar_VariableIntegerValue("sv_fps");
 
   for (int i = 0; i < level.numConnectedClients; i++) {
-    idNum = level.sortedClients[i]; // level.sortedNames[i];
+    idNum  = level.sortedClients[i]; // level.sortedNames[i];
     client = &level.clients[idNum];
 
     // player info
@@ -262,30 +226,26 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
       Q_strncpyz(info, va("%s", "^3>>> CONNECTING <<<"), sizeof(info));
     } else {
       trap_GetUserinfo(idNum, userinfo, sizeof(userinfo));
-      s = Info_ValueForKey(userinfo, "rate");
-      userRate = (maxRate > 0 && Q_atoi(s) > maxRate) ? maxRate : Q_atoi(s);
-      s = Info_ValueForKey(userinfo, "snaps");
+      s         = Info_ValueForKey(userinfo, "rate");
+      userRate  = (maxRate > 0 && Q_atoi(s) > maxRate) ? maxRate : Q_atoi(s);
+      s         = Info_ValueForKey(userinfo, "snaps");
       userSnaps = Q_atoi(s);
 
       // check for ET: Legacy special userinfo key first
-      Q_strncpyz(userEngine, Info_ValueForKey(userinfo, "etVersion"),
-                 sizeof(userEngine));
+      Q_strncpyz(userEngine, Info_ValueForKey(userinfo, "etVersion"), sizeof(userEngine));
       if (!userEngine[0]) {
-        Q_strncpyz(userEngine, Info_ValueForKey(userinfo, "cg_etVersion"),
-                   sizeof(userEngine));
+        Q_strncpyz(userEngine, Info_ValueForKey(userinfo, "cg_etVersion"), sizeof(userEngine));
       }
 
       if (ent) {
         Q_strncpyz(info,
-                   va("%5d%7d%9d%s%7d  ^9%s", client->pers.clientTimeNudge,
-                      userRate, client->pers.clientMaxPackets,
+                   va("%5d%7d%9d%s%7d  ^9%s", client->pers.clientTimeNudge, userRate, client->pers.clientMaxPackets,
                       userSnaps < svFps ? "^1" : "^7", userSnaps, userEngine),
                    sizeof(info));
       } else {
         Q_strncpyz(info,
-                   va("%5d%7d%9d%7d  %s", client->pers.clientTimeNudge,
-                      userRate, client->pers.clientMaxPackets, userSnaps,
-                      userEngine),
+                   va("%5d%7d%9d%7d  %s", client->pers.clientTimeNudge, userRate, client->pers.clientMaxPackets,
+                      userSnaps, userEngine),
                    sizeof(info));
       }
     }
@@ -305,11 +265,8 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
     const std::string name = StringUtils::truncate(client->pers.netname, 23);
 
     if (ent) {
-      const int colorChars =
-          strlen(client->pers.netname) - Q_PrintStrlen(client->pers.netname);
-      Printer::console(clientNum,
-                       StringUtils::format("%s%2d  %-*s^7%s\n", team, idNum,
-                                           25 + colorChars, name, info));
+      const int colorChars = strlen(client->pers.netname) - Q_PrintStrlen(client->pers.netname);
+      Printer::console(clientNum, StringUtils::format("%s%2d  %-*s^7%s\n", team, idNum, 25 + colorChars, name, info));
     } else {
       char cleanName[MAX_NETNAME];
       Q_strncpyz(cleanName, name.c_str(), sizeof(cleanName));
@@ -321,11 +278,9 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
 
   if (ent) {
     // can't use getPluralizedString() here due to color codes
-    Printer::console(clientNum, va("\n^3%2d^7 total player%s\n\n", count,
-                                   level.numConnectedClients == 1 ? "" : "s"));
+    Printer::console(clientNum, va("\n^3%2d^7 total player%s\n\n", count, level.numConnectedClients == 1 ? "" : "s"));
   } else {
-    G_Printf("\n%s\n\n",
-             StringUtils::getPluralizedString(count, "total player").c_str());
+    G_Printf("\n%s\n\n", StringUtils::getPluralizedString(count, "total player").c_str());
   }
 }
 
@@ -335,8 +290,7 @@ void G_players_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
 void G_ready_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state) {
   const char *status[2] = {" NOT", ""};
 
-  if (g_gamestate.integer == GS_PLAYING ||
-      g_gamestate.integer == GS_INTERMISSION) {
+  if (g_gamestate.integer == GS_PLAYING || g_gamestate.integer == GS_INTERMISSION) {
     CP("cpm \"Match is already in progress!\n\"");
     return;
   }
@@ -373,10 +327,8 @@ void G_ready_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state) {
         G_MakeUnready(ent);
       }
 
-      AP(va("print \"%s^7 is%s ready!\n\"", ent->client->pers.netname,
-            status[state]));
-      AP(va("cp \"\n%s\n^3is%s ready!\n\"", ent->client->pers.netname,
-            status[state]));
+      AP(va("print \"%s^7 is%s ready!\n\"", ent->client->pers.netname, status[state]));
+      AP(va("cp \"\n%s\n^3is%s ready!\n\"", ent->client->pers.netname, status[state]));
     }
   }
 
@@ -441,9 +393,7 @@ void G_specinvite_cmd(gentity_t *ent, unsigned int dwCommand, qboolean fLock) {
     CP(va("print \"%s^7 has been sent a spectator "
           "invitation.\n\"",
           player->client->pers.netname));
-    G_printFull(
-        va("*** You've been invited to spectate the %s team!", aTeams[tteam]),
-        player);
+    G_printFull(va("*** You've been invited to spectate the %s team!", aTeams[tteam]), player);
 
   } else {
     CP("cpm \"Spectators can't specinvite players!\n\"");
@@ -480,8 +430,7 @@ void G_teamready_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state) {
   int i, tteam = G_teamID(ent);
   gclient_t *cl;
 
-  if (g_gamestate.integer == GS_PLAYING ||
-      g_gamestate.integer == GS_INTERMISSION) {
+  if (g_gamestate.integer == GS_PLAYING || g_gamestate.integer == GS_INTERMISSION) {
     CP("cpm \"Match is already in progress!\n\"");
     return;
   }
@@ -517,28 +466,28 @@ void G_teamready_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state) {
 
 // These map to WS_* weapon indexes
 const int cQualifyingShots[WS_MAX] = {
-    10,  // 0
-    15,  // 1
-    15,  // 2
-    30,  // 3
-    30,  // 4
-    30,  // 5
-    30,  // 6
-    3,   // 7
-    100, // 8
-    5,   // 9
-    5,   // 10
-    5,   // 11
-    3,   // 12
-    3,   // 13
-    5,   // 14
-    3,   // 15
-    3,   // 16
-    5,   // 17
-    10,  // 18
-    100, // 19
-    30,  // 20
-    30   // 21
+  10,  // 0
+  15,  // 1
+  15,  // 2
+  30,  // 3
+  30,  // 4
+  30,  // 5
+  30,  // 6
+  3,   // 7
+  100, // 8
+  5,   // 9
+  5,   // 10
+  5,   // 11
+  3,   // 12
+  3,   // 13
+  5,   // 14
+  3,   // 15
+  3,   // 16
+  5,   // 17
+  10,  // 18
+  100, // 19
+  30,  // 20
+  30   // 21
 };
 
 // ************** TOPSHOTS/BOTTOMSHOTS
@@ -566,19 +515,15 @@ int QDECL SortStats(const void *a, const void *b) {
     return (-1);
   }
 
-  if (static_cast<int>(ca->sess.aWeaponStats[iWeap].atts) <
-      cQualifyingShots[iWeap]) {
+  if (static_cast<int>(ca->sess.aWeaponStats[iWeap].atts) < cQualifyingShots[iWeap]) {
     return (1);
   }
-  if (static_cast<int>(cb->sess.aWeaponStats[iWeap].atts) <
-      cQualifyingShots[iWeap]) {
+  if (static_cast<int>(cb->sess.aWeaponStats[iWeap].atts) < cQualifyingShots[iWeap]) {
     return (-1);
   }
 
-  accA = (float)(ca->sess.aWeaponStats[iWeap].hits * 100.0) /
-         (float)(ca->sess.aWeaponStats[iWeap].atts);
-  accB = (float)(cb->sess.aWeaponStats[iWeap].hits * 100.0) /
-         (float)(cb->sess.aWeaponStats[iWeap].atts);
+  accA = (float)(ca->sess.aWeaponStats[iWeap].hits * 100.0) / (float)(ca->sess.aWeaponStats[iWeap].atts);
+  accB = (float)(cb->sess.aWeaponStats[iWeap].hits * 100.0) / (float)(cb->sess.aWeaponStats[iWeap].atts);
 
   // then sort by accuracy
   if (accA > accB) {
@@ -588,8 +533,7 @@ int QDECL SortStats(const void *a, const void *b) {
 }
 
 // Shows the most accurate players for each weapon to the requesting client
-void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop,
-                              qboolean doWindow) {
+void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop, qboolean doWindow) {
   int i, iWeap, shots, wBestAcc, cClients, cPlaces;
   int aClients[MAX_CLIENTS];
   float acc;
@@ -600,7 +544,7 @@ void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop,
   for (iWeap = WS_KNIFE; iWeap < WS_MAX; iWeap++) {
     wBestAcc = (doTop) ? 0 : 99999;
     cClients = 0;
-    cPlaces = 0;
+    cPlaces  = 0;
 
     // suckfest - needs two passes, in case there are ties
     for (i = 0; i < level.numConnectedClients; i++) {
@@ -612,8 +556,7 @@ void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop,
 
       shots = cl->sess.aWeaponStats[iWeap].atts;
       if (shots >= cQualifyingShots[iWeap]) {
-        acc =
-            (float)((cl->sess.aWeaponStats[iWeap].hits) * 100.0) / (float)shots;
+        acc                  = (float)((cl->sess.aWeaponStats[iWeap].hits) * 100.0) / (float)shots;
         aClients[cClients++] = level.sortedClients[i];
         if (((doTop) ? acc : (float)wBestAcc) > ((doTop) ? wBestAcc : acc)) {
           wBestAcc = (int)acc;
@@ -627,17 +570,13 @@ void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop,
     }
 
     for (i = 0; i < cClients; i++) {
-      cl = &level.clients[aClients[i]];
-      acc = (float)(cl->sess.aWeaponStats[iWeap].hits * 100.0) /
-            (float)(cl->sess.aWeaponStats[iWeap].atts);
+      cl  = &level.clients[aClients[i]];
+      acc = (float)(cl->sess.aWeaponStats[iWeap].hits * 100.0) / (float)(cl->sess.aWeaponStats[iWeap].atts);
 
-      if (((doTop) ? acc : (float)wBestAcc + 0.999) >=
-          ((doTop) ? wBestAcc : acc)) {
+      if (((doTop) ? acc : (float)wBestAcc + 0.999) >= ((doTop) ? wBestAcc : acc)) {
         Q_strcat(z, sizeof(z),
-                 va(" %d %d %d %d %d %d", iWeap + 1, aClients[i],
-                    cl->sess.aWeaponStats[iWeap].hits,
-                    cl->sess.aWeaponStats[iWeap].atts,
-                    cl->sess.aWeaponStats[iWeap].kills,
+                 va(" %d %d %d %d %d %d", iWeap + 1, aClients[i], cl->sess.aWeaponStats[iWeap].hits,
+                    cl->sess.aWeaponStats[iWeap].atts, cl->sess.aWeaponStats[iWeap].kills,
                     cl->sess.aWeaponStats[iWeap].deaths));
       }
     }
@@ -647,8 +586,7 @@ void G_weaponStatsLeaders_cmd(gentity_t *ent, qboolean doTop,
 
 // Shows best/worst accuracy for all weapons, or sorted
 // accuracies for a single weapon.
-void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand,
-                          qboolean state) {
+void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand, qboolean state) {
   gclient_t *cl;
   int c = 0, i, shots, wBestAcc;
   char z[MAX_STRING_CHARS];
@@ -675,17 +613,14 @@ void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand,
 
     Q_strncpyz(z, "^3Available weapon codes:^7\n", sizeof(z));
     for (i = WS_KNIFE; i < WS_MAX; i++) {
-      Q_strcat(
-          z, sizeof(z),
-          va("  %s - %s\n", aWeaponInfo[i].pszCode, aWeaponInfo[i].pszName));
+      Q_strcat(z, sizeof(z), va("  %s - %s\n", aWeaponInfo[i].pszCode, aWeaponInfo[i].pszName));
     }
     CP(va("print \"%s\"", z));
     return;
   }
 
   memcpy(&level.sortedStats, &level.sortedClients, sizeof(level.sortedStats));
-  qsort(level.sortedStats, level.numConnectedClients,
-        sizeof(level.sortedStats[0]), SortStats);
+  qsort(level.sortedStats, level.numConnectedClients, sizeof(level.sortedStats[0]), SortStats);
 
   z[0] = 0;
   for (i = 0; i < level.numConnectedClients; i++) {
@@ -697,18 +632,13 @@ void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand,
 
     shots = cl->sess.aWeaponStats[iWeap].atts;
     if (shots >= cQualifyingShots[iWeap]) {
-      float acc =
-          (float)(cl->sess.aWeaponStats[iWeap].hits * 100.0) / (float)shots;
+      float acc = (float)(cl->sess.aWeaponStats[iWeap].hits * 100.0) / (float)shots;
 
       c++;
-      wBestAcc = (((state) ? acc : wBestAcc) > ((state) ? wBestAcc : acc))
-                     ? (int)acc
-                     : wBestAcc;
+      wBestAcc = (((state) ? acc : wBestAcc) > ((state) ? wBestAcc : acc)) ? (int)acc : wBestAcc;
       Q_strcat(z, sizeof(z),
-               va(" %d %d %d %d %d", level.sortedStats[i],
-                  cl->sess.aWeaponStats[iWeap].hits, shots,
-                  cl->sess.aWeaponStats[iWeap].kills,
-                  cl->sess.aWeaponStats[iWeap].deaths));
+               va(" %d %d %d %d %d", level.sortedStats[i], cl->sess.aWeaponStats[iWeap].hits, shots,
+                  cl->sess.aWeaponStats[iWeap].kills, cl->sess.aWeaponStats[iWeap].deaths));
     }
   }
 
@@ -718,8 +648,7 @@ void G_weaponRankings_cmd(gentity_t *ent, unsigned int dwCommand,
 /*
  * Sends an invitation to a client to spectate him.
  */
-static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
-                             qboolean invite /* or uninvite */) {
+static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand, qboolean invite /* or uninvite */) {
   int selfClient, targetClient;
   gentity_t *other;
   char arg[MAX_TOKEN_CHARS];
@@ -743,49 +672,39 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
 
   // can't invite self
   if (other == ent) {
-    selfMsg = StringUtils::format("You can not spec%sinvite yourself!\n",
-                                  invite ? "" : "un");
+    selfMsg = StringUtils::format("You can not spec%sinvite yourself!\n", invite ? "" : "un");
     Printer::console(selfClient, selfMsg);
     return;
   }
 
   if (invite) {
     if (COM_BitCheck(ent->client->sess.specInvitedClients, targetClient)) {
-      selfMsg = StringUtils::format("%s^7 is already specinvited.\n",
-                                    other->client->pers.netname);
+      selfMsg = StringUtils::format("%s^7 is already specinvited.\n", other->client->pers.netname);
       Printer::console(selfClient, selfMsg);
       return;
     }
     COM_BitSet(ent->client->sess.specInvitedClients, targetClient);
 
-    selfMsg =
-        StringUtils::format("%s^7 has been sent a spectator invitation.\n",
-                            other->client->pers.netname);
+    selfMsg = StringUtils::format("%s^7 has been sent a spectator invitation.\n", other->client->pers.netname);
     Printer::console(selfClient, selfMsg);
-    otherMsg = StringUtils::format("You have been invited to spectate %s^7.",
-                                   ent->client->pers.netname);
+    otherMsg = StringUtils::format("You have been invited to spectate %s^7.", ent->client->pers.netname);
     Printer::popup(targetClient, otherMsg);
   } else {
     if (!COM_BitCheck(ent->client->sess.specInvitedClients, targetClient)) {
-      selfMsg = StringUtils::format("%s^7 is not specinvited.\n",
-                                    other->client->pers.netname);
+      selfMsg = StringUtils::format("%s^7 is not specinvited.\n", other->client->pers.netname);
       Printer::console(selfClient, selfMsg);
       return;
     }
 
     COM_BitClear(ent->client->sess.specInvitedClients, targetClient);
-    if (other->client->sess.spectatorState == SPECTATOR_FOLLOW &&
-        other->client->sess.spectatorClient == selfClient &&
+    if (other->client->sess.spectatorState == SPECTATOR_FOLLOW && other->client->sess.spectatorClient == selfClient &&
         !G_AllowFollow(other, ent)) {
       StopFollowing(other);
     }
 
-    selfMsg = StringUtils::format("%s^7 was removed from invited spectators.\n",
-                                  other->client->pers.netname);
+    selfMsg = StringUtils::format("%s^7 was removed from invited spectators.\n", other->client->pers.netname);
     Printer::console(selfClient, selfMsg);
-    otherMsg =
-        StringUtils::format("^7You are no longer invited to spectate %s^7.",
-                            ent->client->pers.netname);
+    otherMsg = StringUtils::format("^7You are no longer invited to spectate %s^7.", ent->client->pers.netname);
     Printer::popup(targetClient, otherMsg);
   }
 }
@@ -793,8 +712,7 @@ static void Cmd_SpecInvite_f(gentity_t *ent, unsigned int dwCommand,
 /*
  * Locks/unlocks a client from spectators.
  */
-static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
-                           qboolean lock) {
+static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand, qboolean lock) {
   int i;
   gentity_t *other;
   auto client = ClientNum(ent);
@@ -809,16 +727,13 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
   }
 
   if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
-    msg = StringUtils::format(
-        "^7You cannot use ^3spec%slock ^7while spectating!\n",
-        lock ? "" : "un");
+    msg = StringUtils::format("^7You cannot use ^3spec%slock ^7while spectating!\n", lock ? "" : "un");
     Printer::console(client, msg);
     return;
   }
 
   if (ent->client->sess.specLocked == lock) {
-    msg = StringUtils::format("You are already %slocked from spectators!\n",
-                              lock ? "" : "un");
+    msg = StringUtils::format("You are already %slocked from spectators!\n", lock ? "" : "un");
     Printer::console(client, msg);
     return;
   }
@@ -845,8 +760,7 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
     }
 
     if (other->client->sess.spectatorState == SPECTATOR_FOLLOW &&
-        other->client->sess.spectatorClient == ent->client->ps.clientNum &&
-        !G_AllowFollow(other, ent)) {
+        other->client->sess.spectatorClient == ent->client->ps.clientNum && !G_AllowFollow(other, ent)) {
       StopFollowing(other);
     }
   }
@@ -855,8 +769,7 @@ static void Cmd_SpecLock_f(gentity_t *ent, unsigned int dwCommand,
 /*
  * Lists specinvited players.
  */
-static void Cmd_SpecList_f(gentity_t *ent, unsigned int dwCommand,
-                           qboolean notUsed) {
+static void Cmd_SpecList_f(gentity_t *ent, unsigned int dwCommand, qboolean notUsed) {
   int i;
   auto client = ClientNum(ent);
   std::string msg;
@@ -867,11 +780,8 @@ static void Cmd_SpecList_f(gentity_t *ent, unsigned int dwCommand,
   }
 
   for (i = 0; i < level.numConnectedClients; i++)
-    if (COM_BitCheck(ent->client->sess.specInvitedClients,
-                     level.sortedClients[i])) {
-      msg = StringUtils::format(
-          "%s ^7is specinvited.\n",
-          level.clients[level.sortedClients[i]].pers.netname);
+    if (COM_BitCheck(ent->client->sess.specInvitedClients, level.sortedClients[i])) {
+      msg = StringUtils::format("%s ^7is specinvited.\n", level.clients[level.sortedClients[i]].pers.netname);
       Printer::console(client, msg);
     }
 }

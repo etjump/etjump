@@ -23,12 +23,15 @@
  */
 
 #include "etj_database.h"
-#include "utilities.hpp"
+
+#include <iostream>
+#include <utility>
+
 #include "etj_filesystem.h"
-#include "etj_string_utilities.h"
 #include "etj_printer.h"
 #include "etj_session.h"
-#include <iostream>
+#include "etj_string_utilities.h"
+#include "utilities.hpp"
 
 Database::Database() {}
 
@@ -62,10 +65,8 @@ bool Database::BindInt(sqlite3_stmt *stmt, int index, int val) {
   return true;
 }
 
-bool Database::BindString(sqlite3_stmt *stmt, int index,
-                          const std::string &val) {
-  int rc =
-      sqlite3_bind_text(stmt, index, val.c_str(), val.length(), SQLITE_STATIC);
+bool Database::BindString(sqlite3_stmt *stmt, int index, const std::string &val) {
+  int rc = sqlite3_bind_text(stmt, index, val.c_str(), val.length(), SQLITE_STATIC);
   if (rc != SQLITE_OK) {
     message_ = std::string("SQL error: ") + sqlite3_errmsg(db_);
     return false;
@@ -74,7 +75,7 @@ bool Database::BindString(sqlite3_stmt *stmt, int index,
 }
 
 bool Database::AddBanToSQLite(Ban ban) {
-  AddBanOperation *addBan = new AddBanOperation(ban);
+  auto *addBan = new AddBanOperation(std::move(ban));
   addBan->RunAndDeleteObject();
   return true;
   //    int rc = 0;
@@ -114,7 +115,7 @@ bool Database::AddBanToSQLite(Ban ban) {
 }
 
 bool Database::AddUserToSQLite(User user) {
-  InsertUserOperation *insert = new InsertUserOperation(user);
+  auto *insert = new InsertUserOperation(std::move(user));
   insert->RunAndDeleteObject();
   return true;
   //    int rc = 0;
@@ -169,10 +170,9 @@ unsigned Database::GetHighestFreeId() const {
 }
 
 bool Database::UserExists(std::string const &guid) {
-  auto user = std::find_if(users_.begin(), users_.end(),
-                           [&guid](const std::pair<int, User> &u) -> bool {
-                             return u.second->guid == guid;
-                           });
+  auto user = std::find_if(users_.begin(), users_.end(), [&guid](const std::pair<int, User> &u) -> bool {
+    return u.second->guid == guid;
+  });
   return user != users_.end();
 }
 
@@ -207,39 +207,37 @@ bool Database::UserExists(std::string const &guid) {
 // }
 
 bool Database::UserInfo(gentity_t *ent, int id) {
-  auto user = GetUserConst(id);
+  auto user           = GetUserConst(id);
   const int clientNum = ClientNum(ent);
 
   if (user == users_.end()) {
-    Printer::chat(clientNum,
-                  "^3userinfo: ^7no user found with id " + std::to_string(id));
+    Printer::chat(clientNum, "^3userinfo: ^7no user found with id " + std::to_string(id));
     return false;
   }
 
   Printer::chat(clientNum, "^3userinfo: ^7check console for more information.");
 
-  std::string ip = "N/A";
+  std::string ip   = "N/A";
   gentity_t *other = ETJump::session->gentityFromId(id);
 
   if (other) {
-    std::string ipport = ValueForKey(other, "ip");
+    std::string ipport         = ValueForKey(other, "ip");
     std::string::size_type pos = ipport.find(':');
-    ip = ipport.substr(0, pos);
+    ip                         = ipport.substr(0, pos);
   }
 
-  std::string msg = StringUtils::format(
-      "^5ID: ^7%d\n"
-      "^5GUID: ^7%s\n"
-      "^5IP: ^7%s\n"
-      "^5Level: ^7%d\n"
-      "^5Last seen:^7 %s\n"
-      "^5Name: ^7%s\n"
-      "^5Title: ^7%s\n"
-      "^5Commands: ^7%s\n"
-      "^5Greeting: ^7%s\n",
-      user->second->id, user->second->guid, ip, user->second->level,
-      TimeStampToString(user->second->lastSeen), user->second->name,
-      user->second->title, user->second->commands, user->second->greeting);
+  std::string msg = StringUtils::format("^5ID: ^7%d\n"
+                                        "^5GUID: ^7%s\n"
+                                        "^5IP: ^7%s\n"
+                                        "^5Level: ^7%d\n"
+                                        "^5Last seen:^7 %s\n"
+                                        "^5Name: ^7%s\n"
+                                        "^5Title: ^7%s\n"
+                                        "^5Commands: ^7%s\n"
+                                        "^5Greeting: ^7%s\n",
+                                        user->second->id, user->second->guid, ip, user->second->level,
+                                        TimeStampToString(user->second->lastSeen), user->second->name,
+                                        user->second->title, user->second->commands, user->second->greeting);
 
   Printer::console(clientNum, msg);
   return true;
@@ -247,9 +245,9 @@ bool Database::UserInfo(gentity_t *ent, int id) {
 
 bool Database::ListUsers(gentity_t *ent, int page) {
   const int USERS_PER_PAGE = 20;
-  int size = users_.size();
-  int pages = (size / USERS_PER_PAGE) + 1;
-  int i = (page - 1) * USERS_PER_PAGE;
+  int size                 = users_.size();
+  int pages                = (size / USERS_PER_PAGE) + 1;
+  int i                    = (page - 1) * USERS_PER_PAGE;
 
   if (page > pages) {
     Printer::chat(ent, "^3listusers: ^7no page #" + std::to_string(page));
@@ -262,18 +260,14 @@ bool Database::ListUsers(gentity_t *ent, int page) {
   time_t t;
   time(&t);
 
-  std::string msg = StringUtils::format("Listing page %d/%d\n", page, pages);
-  msg += StringUtils::format("^7%-5s %-10s %-15s %-36s\n", "ID", "Level",
-                             "Last seen", "Name");
+  std::string msg  = StringUtils::format("Listing page %d/%d\n", page, pages);
+  msg             += StringUtils::format("^7%-5s %-10s %-15s %-36s\n", "ID", "Level", "Last seen", "Name");
 
   for (const auto &user : users_) {
     if (curr >= i && curr < i + USERS_PER_PAGE) {
-      msg += StringUtils::format(
-          "^7%-5d %-10d %-15s %-36s\n", user.second->id, user.second->level,
-          TimeStampDifferenceToString(static_cast<int>(t) -
-                                      user.second->lastSeen) +
-              " ago",
-          user.second->name);
+      msg += StringUtils::format("^7%-5d %-10d %-15s %-36s\n", user.second->id, user.second->level,
+                                 TimeStampDifferenceToString(static_cast<int>(t) - user.second->lastSeen) + " ago",
+                                 user.second->name);
     }
 
     curr++;
@@ -334,10 +328,10 @@ bool Database::Unban(gentity_t *ent, int id) {
 bool Database::ListBans(gentity_t *ent, int page) {
   const int BANS_PER_PAGE = 10;
   // 0-19, 20-39
-  int i = (page - 1) * BANS_PER_PAGE;
+  int i       = (page - 1) * BANS_PER_PAGE;
   int printed = 0;
-  int size = bans_.size();
-  int pages = (size / BANS_PER_PAGE) + 1;
+  int size    = bans_.size();
+  int pages   = (size / BANS_PER_PAGE) + 1;
 
   if (page > pages) {
     Printer::chat(ent, "^3listbans: ^7no page #" + std::to_string(page));
@@ -353,11 +347,8 @@ bool Database::ListBans(gentity_t *ent, int page) {
     }
 
     msg += StringUtils::format(
-        "%d %s ^7%s %s ^7%s %s\n", bans_[i]->id, bans_[i]->name,
-        bans_[i]->banDate, bans_[i]->bannedBy,
-        bans_[i]->expires != 0 ? TimeStampToString(bans_[i]->expires)
-                               : "PERMANENTLY",
-        bans_[i]->reason);
+      "%d %s ^7%s %s ^7%s %s\n", bans_[i]->id, bans_[i]->name, bans_[i]->banDate, bans_[i]->bannedBy,
+      bans_[i]->expires != 0 ? TimeStampToString(bans_[i]->expires) : "PERMANENTLY", bans_[i]->reason);
   }
 
   Printer::console(ent, msg);
@@ -383,20 +374,19 @@ bool Database::IsIpBanned(std::string const &ip) {
   return false;
 }
 
-bool Database::BanUser(std::string const &name, std::string const &guid,
-                       std::string const &hwid, std::string const &ip,
-                       std::string const &bannedBy, std::string const &banDate,
-                       unsigned expires, std::string const &reason) {
+bool Database::BanUser(std::string const &name, std::string const &guid, std::string const &hwid, std::string const &ip,
+                       std::string const &bannedBy, std::string const &banDate, unsigned expires,
+                       std::string const &reason) {
   Ban newBan(new Ban_s);
 
-  newBan->name = name;
-  newBan->guid = guid;
-  newBan->hwid = hwid;
-  newBan->ip = ip;
+  newBan->name     = name;
+  newBan->guid     = guid;
+  newBan->hwid     = hwid;
+  newBan->ip       = ip;
   newBan->bannedBy = bannedBy;
-  newBan->banDate = banDate;
-  newBan->expires = expires;
-  newBan->reason = reason;
+  newBan->banDate  = banDate;
+  newBan->expires  = expires;
+  newBan->reason   = reason;
 
   AddBanToSQLite(newBan);
 
@@ -416,7 +406,7 @@ bool Database::BanUser(std::string const &name, std::string const &guid,
   //        }
   //    }
 
-  bans_.push_back(newBan);
+  bans_.push_back(std::move(newBan));
 
   return true;
 }
@@ -435,9 +425,8 @@ void Database::NewName(int id, std::string const &name) {
   return;
 }
 
-bool Database::UpdateUser(gentity_t *ent, int id, std::string const &commands,
-                          std::string const &greeting, std::string const &title,
-                          int updated) {
+bool Database::UpdateUser(gentity_t *ent, int id, std::string const &commands, std::string const &greeting,
+                          std::string const &title, int updated) {
   auto user = GetUser(id);
   if (user != users_.end()) {
     if (updated & Updated::COMMANDS) {
@@ -458,8 +447,7 @@ bool Database::UpdateUser(gentity_t *ent, int id, std::string const &commands,
 }
 
 void Database::ListUserNames(gentity_t *ent, int id) {
-  ListUserNamesOperation *listUserNamesOperation =
-      new ListUserNamesOperation(ent, id);
+  ListUserNamesOperation *listUserNamesOperation = new ListUserNamesOperation(ent, id);
   listUserNamesOperation->RunAndDeleteObject();
 }
 
@@ -469,8 +457,7 @@ void Database::FindUser(gentity_t *ent, std::string const &user) {
 }
 
 bool Database::UpdateLastSeenToSQLite(User user) {
-  UpdateLastSeenOperation *updateLastSeenOperation =
-      new UpdateLastSeenOperation(user);
+  auto *updateLastSeenOperation = new UpdateLastSeenOperation(std::move(user));
   updateLastSeenOperation->RunAndDeleteObject();
   return true;
   //    sqlite3_stmt *stmt = NULL;
@@ -536,7 +523,7 @@ bool Database::SetLevel(int id, int level) {
 }
 
 bool Database::Save(User user, unsigned updated) {
-  AsyncSaveUserOperation *op = new AsyncSaveUserOperation(user, updated);
+  auto *op = new AsyncSaveUserOperation(std::move(user), updated);
   op->RunAndDeleteObject();
   return true;
   //    std::vector<std::string> queryOptions;
@@ -662,7 +649,7 @@ bool Database::Save(User user, unsigned updated) {
 
 bool Database::AddNewHWIDToDatabase(User user) {
   sqlite3_stmt *stmt = NULL;
-  int rc = 0;
+  int rc             = 0;
 
   if (!PrepareStatement("UPDATE users SET hwid=? WHERE id=?;", &stmt)) {
     return false;
@@ -691,8 +678,7 @@ bool Database::AddNewHardwareId(int id, std::string const &hwid) {
   if (user != users_.end()) {
     user->second->hwids.push_back(hwid);
 
-    InsertNewHardwareIdOperation *op =
-        new InsertNewHardwareIdOperation(user->second);
+    InsertNewHardwareIdOperation *op = new InsertNewHardwareIdOperation(user->second);
     op->RunAndDeleteObject();
 
     return true;
@@ -701,8 +687,7 @@ bool Database::AddNewHardwareId(int id, std::string const &hwid) {
   return false;
 }
 
-bool Database::AddUser(std::string const &guid, std::string const &hwid,
-                       std::string const &name) {
+bool Database::AddUser(std::string const &guid, std::string const &hwid, std::string const &name) {
   unsigned id = GetHighestFreeId();
 
   if (UserExists(guid)) {
@@ -754,7 +739,7 @@ User_s const *Database::GetUserData(unsigned id) const {
 }
 
 bool Database::CreateNamesTable() {
-  int rc = 0;
+  int rc       = 0;
   char *errMsg = NULL;
 
   rc = sqlite3_exec(db_,
@@ -773,7 +758,7 @@ bool Database::CreateNamesTable() {
 }
 
 bool Database::LoadBans() {
-  int rc = 0;
+  int rc             = 0;
   sqlite3_stmt *stmt = NULL;
 
   // keep bans but ignore expired ones
@@ -786,27 +771,27 @@ bool Database::LoadBans() {
   }
 
   const char *val = NULL;
-  rc = sqlite3_step(stmt);
+  rc              = sqlite3_step(stmt);
   while (rc != SQLITE_DONE) {
     Ban newBan(new Ban_s());
     switch (rc) {
       case SQLITE_ROW:
-        newBan->id = sqlite3_column_int(stmt, 0);
-        val = (const char *)(sqlite3_column_text(stmt, 1));
-        newBan->name = val ? val : "";
-        val = (const char *)(sqlite3_column_text(stmt, 2));
-        newBan->guid = val ? val : "";
-        val = (const char *)(sqlite3_column_text(stmt, 3));
-        newBan->hwid = val ? val : "";
-        val = (const char *)(sqlite3_column_text(stmt, 4));
-        newBan->ip = val ? val : "";
-        val = (const char *)(sqlite3_column_text(stmt, 5));
+        newBan->id       = sqlite3_column_int(stmt, 0);
+        val              = (const char *)(sqlite3_column_text(stmt, 1));
+        newBan->name     = val ? val : "";
+        val              = (const char *)(sqlite3_column_text(stmt, 2));
+        newBan->guid     = val ? val : "";
+        val              = (const char *)(sqlite3_column_text(stmt, 3));
+        newBan->hwid     = val ? val : "";
+        val              = (const char *)(sqlite3_column_text(stmt, 4));
+        newBan->ip       = val ? val : "";
+        val              = (const char *)(sqlite3_column_text(stmt, 5));
         newBan->bannedBy = val ? val : "";
-        val = (const char *)(sqlite3_column_text(stmt, 6));
-        newBan->banDate = val ? val : "";
-        newBan->expires = sqlite3_column_int(stmt, 7);
-        val = (const char *)(sqlite3_column_text(stmt, 8));
-        newBan->reason = val ? val : "";
+        val              = (const char *)(sqlite3_column_text(stmt, 6));
+        newBan->banDate  = val ? val : "";
+        newBan->expires  = sqlite3_column_int(stmt, 7);
+        val              = (const char *)(sqlite3_column_text(stmt, 8));
+        newBan->reason   = val ? val : "";
         bans_.push_back(newBan);
         G_DPrintf("Ban: %s\n", newBan->ToChar());
         break;
@@ -826,7 +811,7 @@ bool Database::LoadBans() {
 }
 
 bool Database::LoadUsers() {
-  int rc = 0;
+  int rc             = 0;
   sqlite3_stmt *stmt = NULL;
 
   if (!PrepareStatement("SELECT id, guid, level, lastSeen, name, hwid, title, "
@@ -836,28 +821,28 @@ bool Database::LoadUsers() {
   }
 
   const char *val = NULL;
-  rc = sqlite3_step(stmt);
+  rc              = sqlite3_step(stmt);
   while (rc != SQLITE_DONE) {
     User_s newUser;
 
     switch (rc) {
       case SQLITE_ROW:
-        newUser.id = sqlite3_column_int(stmt, 0);
-        val = (const char *)(sqlite3_column_text(stmt, 1));
-        newUser.guid = val ? val : "";
-        newUser.level = sqlite3_column_int(stmt, 2);
+        newUser.id       = sqlite3_column_int(stmt, 0);
+        val              = (const char *)(sqlite3_column_text(stmt, 1));
+        newUser.guid     = val ? val : "";
+        newUser.level    = sqlite3_column_int(stmt, 2);
         newUser.lastSeen = sqlite3_column_int(stmt, 3);
-        val = (const char *)(sqlite3_column_text(stmt, 4));
-        newUser.name = val ? val : "";
-        val = (const char *)(sqlite3_column_text(stmt, 5));
+        val              = (const char *)(sqlite3_column_text(stmt, 4));
+        newUser.name     = val ? val : "";
+        val              = (const char *)(sqlite3_column_text(stmt, 5));
         if (val) {
           newUser.hwids = StringUtils::split(val, ",");
         }
-        val = (const char *)(sqlite3_column_text(stmt, 6));
-        newUser.title = val ? val : "";
-        val = (const char *)(sqlite3_column_text(stmt, 7));
+        val              = (const char *)(sqlite3_column_text(stmt, 6));
+        newUser.title    = val ? val : "";
+        val              = (const char *)(sqlite3_column_text(stmt, 7));
         newUser.commands = val ? val : "";
-        val = (const char *)(sqlite3_column_text(stmt, 8));
+        val              = (const char *)(sqlite3_column_text(stmt, 8));
         newUser.greeting = val ? val : "";
         users_.emplace(newUser.id, std::make_shared<User_s>(newUser));
         G_DPrintf("User: %s\n", newUser.ToChar());
@@ -878,7 +863,7 @@ bool Database::LoadUsers() {
 }
 
 bool Database::CreateBansTable() {
-  int rc = 0;
+  int rc       = 0;
   char *errMsg = NULL;
 
   rc = sqlite3_exec(db_,
@@ -899,15 +884,14 @@ bool Database::CreateBansTable() {
 }
 
 bool Database::CreateUsersTable() {
-  int rc = 0;
+  int rc       = 0;
   char *errMsg = NULL;
 
-  rc =
-      sqlite3_exec(db_,
-                   "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY, guid "
-                   "TEXT UNIQUE NOT NULL, level INT, lastSeen INT, name TEXT, "
-                   "hwid TEXT, title TEXT, commands TEXT, greeting TEXT);",
-                   NULL, NULL, &errMsg);
+  rc = sqlite3_exec(db_,
+                    "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY, guid "
+                    "TEXT UNIQUE NOT NULL, level INT, lastSeen INT, name TEXT, "
+                    "hwid TEXT, title TEXT, commands TEXT, greeting TEXT);",
+                    NULL, NULL, &errMsg);
 
   if (rc != SQLITE_OK) {
     message_ = std::string("SQL error: ") + errMsg;
@@ -918,7 +902,9 @@ bool Database::CreateUsersTable() {
   return true;
 }
 
-std::string const Database::GetMessage() const { return message_; }
+std::string const Database::GetMessage() const {
+  return message_;
+}
 
 User_s const *Database::GetUserData(int id) const {
   auto user = GetUserConst(static_cast<unsigned>(id));
@@ -929,10 +915,9 @@ User_s const *Database::GetUserData(int id) const {
 }
 
 User_s const *Database::GetUserData(std::string const &guid) const {
-  auto user = std::find_if(users_.begin(), users_.end(),
-                           [&guid](const std::pair<int, User> &u) -> bool {
-                             return u.second->guid == guid;
-                           });
+  auto user = std::find_if(users_.begin(), users_.end(), [&guid](const std::pair<int, User> &u) -> bool {
+    return u.second->guid == guid;
+  });
   return user->second.get();
 }
 
@@ -964,7 +949,7 @@ bool Database::InitDatabase(char const *config) {
   return true;
 }
 
-Database::InsertUserOperation::InsertUserOperation(User user) : user_(user) {}
+Database::InsertUserOperation::InsertUserOperation(User user) : user_(std::move(user)) {}
 
 Database::InsertUserOperation::~InsertUserOperation() {}
 
@@ -976,10 +961,9 @@ void Database::InsertUserOperation::Execute() {
     return;
   }
 
-  if (!PrepareStatement(
-          "INSERT INTO users (id, guid, level, lastSeen, name, hwid, "
-          "title, "
-          "commands, greeting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
+  if (!PrepareStatement("INSERT INTO users (id, guid, level, lastSeen, name, hwid, "
+                        "title, "
+                        "commands, greeting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
     G_LogPrintf("ERROR: failed to prepare insert user "
                 "operation statement. %s\n",
                 GetMessage().c_str());
@@ -988,11 +972,9 @@ void Database::InsertUserOperation::Execute() {
 
   std::string hardwareIds = StringUtils::join(user_->hwids, ",");
 
-  if (!BindInt(1, user_->id) || !BindString(2, user_->guid) ||
-      !BindInt(3, user_->level) || !BindInt(4, user_->lastSeen) ||
-      !BindString(5, user_->name) || !BindString(6, hardwareIds) ||
-      !BindString(7, user_->title) || !BindString(8, user_->commands) ||
-      !BindString(9, user_->greeting)) {
+  if (!BindInt(1, user_->id) || !BindString(2, user_->guid) || !BindInt(3, user_->level) ||
+      !BindInt(4, user_->lastSeen) || !BindString(5, user_->name) || !BindString(6, hardwareIds) ||
+      !BindString(7, user_->title) || !BindString(8, user_->commands) || !BindString(9, user_->greeting)) {
     G_LogPrintf("ERROR: failed to bind value to insert user "
                 "operation statement. %s\n",
                 GetMessage().c_str());
@@ -1000,14 +982,12 @@ void Database::InsertUserOperation::Execute() {
   }
 
   if (!ExecuteStatement()) {
-    G_LogPrintf("ERROR: failed to execute insert user operation. %s\n",
-                GetMessage().c_str());
+    G_LogPrintf("ERROR: failed to execute insert user operation. %s\n", GetMessage().c_str());
     return;
   }
 }
 
-Database::InsertNewHardwareIdOperation::InsertNewHardwareIdOperation(User user)
-    : user_(user) {}
+Database::InsertNewHardwareIdOperation::InsertNewHardwareIdOperation(User user) : user_(std::move(user)) {}
 
 Database::InsertNewHardwareIdOperation::~InsertNewHardwareIdOperation() {}
 
@@ -1020,8 +1000,7 @@ void Database::InsertNewHardwareIdOperation::Execute() {
   }
 
   if (!PrepareStatement("UPDATE users SET hwid=? WHERE id=?;")) {
-    G_LogPrintf("ERROR: failed to update user's hardware id. %s\n",
-                GetMessage().c_str());
+    G_LogPrintf("ERROR: failed to update user's hardware id. %s\n", GetMessage().c_str());
     return;
   }
 
@@ -1043,7 +1022,7 @@ void Database::InsertNewHardwareIdOperation::Execute() {
 }
 
 Database::AsyncSaveUserOperation::AsyncSaveUserOperation(User user, int updated)
-    : user_(user), updated_(updated) {}
+  : user_(std::move(user)), updated_(updated) {}
 
 Database::AsyncSaveUserOperation::~AsyncSaveUserOperation() {}
 
@@ -1077,8 +1056,7 @@ void Database::AsyncSaveUserOperation::Execute() {
     queryOptions.push_back("title=:title");
   }
 
-  std::string query = "UPDATE users SET " +
-                      StringUtils::join(queryOptions, ", ") + " WHERE id=:id;";
+  std::string query = "UPDATE users SET " + StringUtils::join(queryOptions, ", ") + " WHERE id=:id;";
 
   if (!OpenDatabase(g_userConfig.string)) {
     G_LogPrintf("ERROR: failed to open database on save user "
@@ -1156,15 +1134,14 @@ void Database::AsyncSaveUserOperation::Execute() {
   }
 
   if (!ExecuteStatement()) {
-    G_LogPrintf("ERROR: failed to execute save user statement. %s\n",
-                GetMessage().c_str());
+    G_LogPrintf("ERROR: failed to execute save user statement. %s\n", GetMessage().c_str());
     return;
   }
 
   return;
 }
 
-Database::AddBanOperation::AddBanOperation(Ban ban) : ban_(ban) {}
+Database::AddBanOperation::AddBanOperation(Ban ban) : ban_(std::move(ban)) {}
 
 Database::AddBanOperation::~AddBanOperation() {}
 
@@ -1185,9 +1162,8 @@ void Database::AddBanOperation::Execute() {
     return;
   }
 
-  if (!BindString(1, ban_->name) || !BindString(2, ban_->guid) ||
-      !BindString(3, ban_->hwid) || !BindString(4, ban_->ip) ||
-      !BindString(5, ban_->bannedBy) || !BindString(6, ban_->banDate) ||
+  if (!BindString(1, ban_->name) || !BindString(2, ban_->guid) || !BindString(3, ban_->hwid) ||
+      !BindString(4, ban_->ip) || !BindString(5, ban_->bannedBy) || !BindString(6, ban_->banDate) ||
       !BindInt(7, ban_->expires) || !BindString(8, ban_->reason)) {
     G_LogPrintf("ERROR: failed to bind value to add ban "
                 "operation statement. %s\n",
@@ -1196,8 +1172,7 @@ void Database::AddBanOperation::Execute() {
   }
 
   if (!ExecuteStatement()) {
-    G_LogPrintf("ERROR: failed to execute add ban operation. %s\n",
-                GetMessage().c_str());
+    G_LogPrintf("ERROR: failed to execute add ban operation. %s\n", GetMessage().c_str());
     return;
   }
 }
@@ -1229,8 +1204,7 @@ void Database::RemoveBanOperation::Execute() {
   }
 }
 
-Database::UpdateLastSeenOperation::UpdateLastSeenOperation(User user)
-    : user_(user) {}
+Database::UpdateLastSeenOperation::UpdateLastSeenOperation(User user) : user_(std::move(user)) {}
 
 Database::UpdateLastSeenOperation::~UpdateLastSeenOperation() {}
 
@@ -1257,9 +1231,7 @@ void Database::UpdateLastSeenOperation::Execute() {
   }
 }
 
-Database::FindUserOperation::FindUserOperation(gentity_t *ent,
-                                               std::string const &user)
-    : ent_(ent), user_(user) {}
+Database::FindUserOperation::FindUserOperation(gentity_t *ent, std::string const &user) : ent_(ent), user_(user) {}
 
 Database::FindUserOperation::~FindUserOperation() {}
 
@@ -1282,14 +1254,14 @@ void Database::FindUserOperation::Execute() {
   }
 
   sqlite3_stmt *stmt = GetStatement();
-  int rc = SQLITE_OK;
+  int rc             = SQLITE_OK;
   std::vector<std::pair<int, std::string>> users;
   while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
     std::pair<int, std::string> user;
-    user.first = sqlite3_column_int(stmt, 0);
+    user.first      = sqlite3_column_int(stmt, 0);
     const char *val = (const char *)sqlite3_column_text(stmt, 1);
-    user.second = val ? val : "";
-    users.push_back(user);
+    user.second     = val ? val : "";
+    users.push_back(std::move(user));
   }
 
   if (users.empty()) {
@@ -1307,8 +1279,7 @@ void Database::FindUserOperation::Execute() {
   Printer::console(ent_, msg);
 }
 
-Database::SaveNameOperation::SaveNameOperation(std::string const &name, int id)
-    : name_(name), id_(id) {}
+Database::SaveNameOperation::SaveNameOperation(std::string const &name, int id) : name_(name), id_(id) {}
 
 Database::SaveNameOperation::~SaveNameOperation() {}
 
@@ -1327,8 +1298,7 @@ void Database::SaveNameOperation::Execute() {
 
   std::string sanitizedName = StringUtils::sanitize(name_, true);
 
-  if (!BindString(1, sanitizedName) || !BindString(2, name_) ||
-      !BindInt(3, id_)) {
+  if (!BindString(1, sanitizedName) || !BindString(2, name_) || !BindInt(3, id_)) {
     PrintBindError(op);
     return;
   }
@@ -1338,8 +1308,7 @@ void Database::SaveNameOperation::Execute() {
   }
 }
 
-Database::ListUserNamesOperation::ListUserNamesOperation(gentity_t *ent, int id)
-    : ent_(ent), id_(id) {}
+Database::ListUserNamesOperation::ListUserNamesOperation(gentity_t *ent, int id) : ent_(ent), id_(id) {}
 
 Database::ListUserNamesOperation::~ListUserNamesOperation() {}
 
@@ -1361,22 +1330,19 @@ void Database::ListUserNamesOperation::Execute() {
   }
 
   sqlite3_stmt *stmt = GetStatement();
-  int rc = 0;
+  int rc             = 0;
   std::vector<std::string> names;
   while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
     const char *name = NULL;
-    name = (const char *)sqlite3_column_text(stmt, 0);
+    name             = (const char *)sqlite3_column_text(stmt, 0);
     names.push_back(name ? name : "");
   }
 
   if (names.empty()) {
-    Printer::chat(ent_, "^3listusernames: ^7couldn't find any names with id " +
-                            std::to_string(id_));
+    Printer::chat(ent_, "^3listusernames: ^7couldn't find any names with id " + std::to_string(id_));
   } else {
-    Printer::chat(ent_,
-                  "^3listusernames: ^7check console for more information.");
-    std::string msg =
-        StringUtils::format("Found %d names with id: %d\n", names.size(), id_);
+    Printer::chat(ent_, "^3listusernames: ^7check console for more information.");
+    std::string msg = StringUtils::format("Found %d names with id: %d\n", names.size(), id_);
 
     for (const auto &name : names) {
       msg += name + '\n';
@@ -1387,7 +1353,7 @@ void Database::ListUserNamesOperation::Execute() {
 }
 
 int Database::ResetUsersWithLevel(int level) {
-  auto it = users_.begin();
+  auto it  = users_.begin();
   auto end = users_.end();
 
   int resetedUsersCount = 0;
@@ -1403,8 +1369,7 @@ int Database::ResetUsersWithLevel(int level) {
   return resetedUsersCount;
 }
 
-Database::ResetUsersWithLevelOperation::ResetUsersWithLevelOperation(int level)
-    : level_(level) {}
+Database::ResetUsersWithLevelOperation::ResetUsersWithLevelOperation(int level) : level_(level) {}
 
 Database::ResetUsersWithLevelOperation::~ResetUsersWithLevelOperation() {}
 

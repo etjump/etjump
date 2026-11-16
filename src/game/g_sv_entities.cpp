@@ -45,9 +45,8 @@ g_serverEntity_t *GetFreeServerEntity() {
     return NULL;
   }
 
-  g_serverEntities[numServerEntities].number =
-      MAX_GENTITIES + numServerEntities;
-  g_serverEntities[numServerEntities].inuse = qtrue;
+  g_serverEntities[numServerEntities].number = MAX_GENTITIES + numServerEntities;
+  g_serverEntities[numServerEntities].inuse  = qtrue;
   return &g_serverEntities[numServerEntities++];
 }
 
@@ -73,7 +72,7 @@ g_serverEntity_t *CreateServerEntity(gentity_t *ent) {
     }
 
     newEnt->spawnflags = ent->spawnflags;
-    newEnt->team = ent->aiTeam;
+    newEnt->team       = ent->aiTeam;
     VectorCopy(ent->s.origin, newEnt->origin);
     VectorCopy(ent->s.angles, newEnt->angles);
     // DON'T set the number - that should have been set when it
@@ -118,8 +117,7 @@ void InitialServerEntitySetup() {
 }
 
 // Like G_Find, but for server entities
-g_serverEntity_t *FindServerEntity(g_serverEntity_t *from, int fieldofs,
-                                   char *match) {
+g_serverEntity_t *FindServerEntity(g_serverEntity_t *from, int fieldofs, char *match) {
   char *s;
   g_serverEntity_t *max = &g_serverEntities[numServerEntities];
 
@@ -146,8 +144,8 @@ g_serverEntity_t *FindServerEntity(g_serverEntity_t *from, int fieldofs,
 }
 
 // Create a server entity from some basic data
-void CreateServerEntityFromData(char *classname, char *targetname, char *target,
-                                vec3_t origin, int spawnflags, vec3_t angle) {
+void CreateServerEntityFromData(char *classname, char *targetname, char *target, vec3_t origin, int spawnflags,
+                                vec3_t angle) {
   // get the entity out of our pool
   g_serverEntity_t *newEnt = GetFreeServerEntity();
 

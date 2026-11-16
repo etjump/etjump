@@ -28,8 +28,8 @@ extern "C" {
 #include "sha1.h"
 }
 
-#include "picosha2.h"
 #include "etj_string_utilities.h"
+#include "picosha2.h"
 
 namespace ETJump {
 class Crypto {
@@ -39,16 +39,14 @@ public:
     SHA1Context sha{};
 
     SHA1Reset(&sha);
-    SHA1Input(&sha, reinterpret_cast<const unsigned char *>(str.c_str()),
-              str.length());
+    SHA1Input(&sha, reinterpret_cast<const unsigned char *>(str.c_str()), str.length());
 
     if (!SHA1Result(&sha)) {
       return "";
     }
 
-    return StringUtils::format("%08X%08X%08X%08X%08X", sha.Message_Digest[0],
-                               sha.Message_Digest[1], sha.Message_Digest[2],
-                               sha.Message_Digest[3], sha.Message_Digest[4]);
+    return StringUtils::format("%08X%08X%08X%08X%08X", sha.Message_Digest[0], sha.Message_Digest[1],
+                               sha.Message_Digest[2], sha.Message_Digest[3], sha.Message_Digest[4]);
   }
 
   // returned hash is always uppercased

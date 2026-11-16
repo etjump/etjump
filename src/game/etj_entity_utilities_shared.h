@@ -29,28 +29,20 @@
 namespace ETJump {
 class EntityUtilsShared {
 public:
-  static void touchPusher(playerState_t *ps, int time,
-                          const entityState_t *pusher);
+  static void touchPusher(playerState_t *ps, int time, const entityState_t *pusher);
 
-  static void setPushVelocity(const playerState_t *ps, const vec3_t origin2,
-                              const int &spawnflags, vec3_t pushVel);
+  static void setPushVelocity(const playerState_t *ps, const vec3_t origin2, const int &spawnflags, vec3_t pushVel);
 
-  static void teleportPlayer(playerState_t *ps, entityState_t *player,
-                             entityState_t *teleporter, usercmd_t *cmd,
-                             const vec3_t origin, vec3_t angles,
-                             bool &teleportBitFlipped);
+  static void teleportPlayer(playerState_t *ps, entityState_t *player, entityState_t *teleporter, usercmd_t *cmd,
+                             const vec3_t origin, vec3_t angles, bool &teleportBitFlipped);
 
-  static void setViewAngles(playerState_t *ps, entityState_t *es,
-                            usercmd_t *cmd, const vec3_t angle);
+  static void setViewAngles(playerState_t *ps, entityState_t *es, usercmd_t *cmd, const vec3_t angle);
 
-  static void portalTeleport(playerState_t *ps, entityState_t *player,
-                             const entityState_t *portal, usercmd_t *cmd,
+  static void portalTeleport(playerState_t *ps, entityState_t *player, const entityState_t *portal, usercmd_t *cmd,
                              int time, bool &teleportBitFlipped);
 
-  static void setPortalBBox(vec3_t mins, vec3_t maxs, const vec3_t angles,
-                            float scale);
+  static void setPortalBBox(vec3_t mins, vec3_t maxs, const vec3_t angles, float scale);
 
-  static bool funcStaticClientIsHidden(const entityState_t *es,
-                                       int32_t clientNum);
+  static bool funcStaticClientIsHidden(const entityState_t *es, int32_t clientNum);
 };
 } // namespace ETJump

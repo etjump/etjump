@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#include "g_local.h"
 #include "etj_missilepad.h"
+
 #include "etj_entity_utilities.h"
 
 namespace ETJump {
@@ -33,8 +33,7 @@ void Missilepad::touch(gentity_t *self, gentity_t *other) {
   // we CANNOT check for ent->s.weapon here
   // because a client might be holding the weapon
   if (!(other->methodOfDeath == MOD_GPG40 || other->methodOfDeath == MOD_M7 ||
-        other->methodOfDeath == MOD_GRENADE_LAUNCHER ||
-        other->methodOfDeath == MOD_GRENADE_PINEAPPLE)) {
+        other->methodOfDeath == MOD_GRENADE_LAUNCHER || other->methodOfDeath == MOD_GRENADE_PINEAPPLE)) {
     return;
   }
 
@@ -44,8 +43,7 @@ void Missilepad::touch(gentity_t *self, gentity_t *other) {
     vec3_t noiseOrigin;
     EntityUtilities::getOriginOrBmodelCenter(self, noiseOrigin);
 
-    const auto te =
-        soundEvent(noiseOrigin, EV_GENERAL_SOUND_VOLUME, self->noise_index);
+    const auto te     = soundEvent(noiseOrigin, EV_GENERAL_SOUND_VOLUME, self->noise_index);
     te->s.onFireStart = self->s.onFireStart;
   }
 }

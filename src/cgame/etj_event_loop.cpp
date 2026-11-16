@@ -22,11 +22,14 @@
  * SOFTWARE.
  */
 
+#include "etj_event_loop.h"
+
 #include <algorithm>
 #include <chrono>
 #include <stdexcept>
+#include <utility>
+
 #include "cg_local.h"
-#include "etj_event_loop.h"
 
 using std::find_if;
 using std::remove_if;
@@ -39,15 +42,13 @@ void ETJump::EventLoop::run() {
   cleanUpEvents();
 }
 
-int ETJump::EventLoop::schedule(function<void()> fn, int delay,
-                                TaskPriorities priority) {
-  Task task{fn, ++eventCounter, delay, getNow() + delay, false, false};
+int ETJump::EventLoop::schedule(function<void()> fn, int delay, TaskPriorities priority) {
+  Task task{std::move(fn), ++eventCounter, delay, getNow() + delay, false, false};
   return scheduleEvent(task, priority);
 }
 
-int ETJump::EventLoop::schedulePersistent(function<void()> fn, int delay,
-                                          TaskPriorities priority) {
-  Task task{fn, ++eventCounter, delay, getNow() + delay, true, false};
+int ETJump::EventLoop::schedulePersistent(function<void()> fn, int delay, TaskPriorities priority) {
+  Task task{std::move(fn), ++eventCounter, delay, getNow() + delay, true, false};
   return scheduleEvent(task, priority);
 }
 
@@ -114,8 +115,7 @@ void ETJump::EventLoop::processEvents() {
   isExecutingEvents = false;
 }
 
-int ETJump::EventLoop::scheduleEvent(const Task &task,
-                                     TaskPriorities priority) {
+int ETJump::EventLoop::scheduleEvent(const Task &task, TaskPriorities priority) {
   if (priority == TaskPriorities::Default)
     ordinaryTasks.push_back(task);
   else if (priority == TaskPriorities::Immediate)
@@ -125,7 +125,9 @@ int ETJump::EventLoop::scheduleEvent(const Task &task,
 
 void ETJump::EventLoop::iterateEvents(function<void(Task &task)> fn) {
   for (auto *storage : {&importantTasks, &ordinaryTasks}) {
-    for_each(storage->begin(), storage->end(), [&](Task &task) { fn(task); });
+    for_each(storage->begin(), storage->end(), [&](Task &task) {
+      fn(task);
+    });
   }
 }
 
@@ -142,9 +144,10 @@ void ETJump::EventLoop::cleanUpEvents() {
 
 void ETJump::EventLoop::removeEventsIf(function<bool(Task &task)> fn) {
   for (auto *storage : {&importantTasks, &ordinaryTasks}) {
-    const auto sz = storage->size();
-    auto removeIter = remove_if(storage->begin(), storage->end(),
-                                [&](Task &task) { return fn(task); });
+    const auto sz   = storage->size();
+    auto removeIter = remove_if(storage->begin(), storage->end(), [&](Task &task) {
+      return fn(task);
+    });
     if (sz != storage->size())
       throw std::runtime_error("Iterator invalidation: A task has added "
                                "another task during its removal");
@@ -155,13 +158,17 @@ void ETJump::EventLoop::removeEventsIf(function<bool(Task &task)> fn) {
 
 void ETJump::EventLoop::removeEvents(function<void(Task &task)> fn) {
   for (auto *storage : {&importantTasks, &ordinaryTasks}) {
-    for_each(storage->begin(), storage->end(), [&](Task &task) { fn(task); });
+    for_each(storage->begin(), storage->end(), [&](Task &task) {
+      fn(task);
+    });
     storage->clear();
   }
 }
 
 ETJump::EventLoop::Task *ETJump::EventLoop::findTask(int taskId) {
-  auto predicate = [&taskId](const Task &task) { return task.id == taskId; };
+  auto predicate = [&taskId](const Task &task) {
+    return task.id == taskId;
+  };
   for (auto *storage : {&ordinaryTasks, &importantTasks}) {
     auto it = find_if(storage->begin(), storage->end(), predicate);
     if (it != storage->end())
@@ -170,7 +177,9 @@ ETJump::EventLoop::Task *ETJump::EventLoop::findTask(int taskId) {
   return nullptr;
 }
 
-int64_t ETJump::EventLoop::getNow() { return static_cast<int64_t>(cg.time); }
+int64_t ETJump::EventLoop::getNow() {
+  return static_cast<int64_t>(cg.time);
+}
 
 void ETJump::EventLoop::execute(int taskId) {
   Task *target = findTask(taskId);

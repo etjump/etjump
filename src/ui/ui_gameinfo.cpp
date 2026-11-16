@@ -4,13 +4,13 @@
 // gameinfo.c
 //
 
-#include <memory>
 #include <algorithm>
+#include <memory>
+
+#include "ui_local.h"
 
 #include "../game/etj_filesystem.h"
 #include "../game/etj_string_utilities.h"
-
-#include "ui_local.h"
 
 //
 // arena and bot info
@@ -39,7 +39,7 @@ static void UI_LoadArenasFromFile(const int handle, char *filename) {
 
   uiInfo.mapList[uiInfo.mapCount].cinematic = -1;
   uiInfo.mapList[uiInfo.mapCount].levelShot = -1;
-  uiInfo.mapList[uiInfo.mapCount].typeBits = 0;
+  uiInfo.mapList[uiInfo.mapCount].typeBits  = 0;
 
   while (trap_PC_ReadToken(handle, &token)) {
     if (*token.string == '}') {
@@ -66,88 +66,73 @@ static void UI_LoadArenasFromFile(const int handle, char *filename) {
         return;
       }
     } else if (!Q_stricmp(token.string, "map")) {
-      if (!PC_String_Parse(handle,
-                           &uiInfo.mapList[uiInfo.mapCount].mapLoadName)) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+      if (!PC_String_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].mapLoadName)) {
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
     } else if (!Q_stricmp(token.string, "longname")) {
       if (!PC_String_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].mapName)) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
     } else if (!Q_stricmp(token.string, "briefing")) {
       if (!PC_String_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].briefing)) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
     } else if (!Q_stricmp(token.string, "lmsbriefing")) {
-      if (!PC_String_Parse(handle,
-                           &uiInfo.mapList[uiInfo.mapCount].lmsbriefing)) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+      if (!PC_String_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].lmsbriefing)) {
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
     } else if (!Q_stricmp(token.string, "timelimit")) {
       if (!PC_Int_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].Timelimit)) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
     } else if (!Q_stricmp(token.string, "axisrespawntime")) {
-      if (!PC_Int_Parse(handle,
-                        &uiInfo.mapList[uiInfo.mapCount].AxisRespawnTime)) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+      if (!PC_Int_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].AxisRespawnTime)) {
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
     } else if (!Q_stricmp(token.string, "alliedrespawntime")) {
-      if (!PC_Int_Parse(handle,
-                        &uiInfo.mapList[uiInfo.mapCount].AlliedRespawnTime)) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+      if (!PC_Int_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].AlliedRespawnTime)) {
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
     } else if (!Q_stricmp(token.string, "type")) {
       if (!trap_PC_ReadToken(handle, &token)) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
 
-      if (strstr(token.string, "wolfsp") || strstr(token.string, "wolflms") ||
-          strstr(token.string, "wolfmp") || strstr(token.string, "wolfsw")) {
+      if (strstr(token.string, "wolfsp") || strstr(token.string, "wolflms") || strstr(token.string, "wolfmp") ||
+          strstr(token.string, "wolfsw")) {
         uiInfo.mapList[uiInfo.mapCount].typeBits |= (1 << ETJUMP_GAMETYPE);
       }
     } else if (!Q_stricmp(token.string, "mapposition_x")) {
       if (!PC_Float_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].mappos[0])) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
     } else if (!Q_stricmp(token.string, "mapposition_y")) {
       if (!PC_Float_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].mappos[1])) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
     } else if (!Q_stricmp(token.string, "author")) {
       if (!PC_String_Parse(handle, &uiInfo.mapList[uiInfo.mapCount].author)) {
-        trap_Print(
-            va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
+        trap_Print(va(S_COLOR_RED "unexpected end of file inside: %s\n", filename));
         trap_PC_FreeSource(handle);
         return;
       }
@@ -172,8 +157,7 @@ void UI_LoadArenas() {
 
   // we're in the menus, parse local files
   if (cstate.connState == CA_DISCONNECTED) {
-    const std::vector<std::string> files =
-        FileSystem::getFileList("scripts", ".arena", true);
+    const std::vector<std::string> files = FileSystem::getFileList("scripts", ".arena", true);
 
     for (const auto &file : files) {
       Q_strncpyz(filename, "scripts/", sizeof(filename));
@@ -201,7 +185,7 @@ void UI_LoadArenas() {
         uiInfo.mapList[uiInfo.mapCount].levelShot = -1;
 
         uiInfo.mapList[uiInfo.mapCount].mapLoadName = String_Alloc(map.c_str());
-        uiInfo.mapList[uiInfo.mapCount].mapName = String_Alloc(map.c_str());
+        uiInfo.mapList[uiInfo.mapCount].mapName     = String_Alloc(map.c_str());
 
         uiInfo.mapCount++;
       } else {

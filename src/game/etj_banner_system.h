@@ -28,10 +28,16 @@
 namespace ETJump {
 class BannerSystem {
 public:
-  enum Location { Center, Top, Chat, Left };
+  enum Location {
+    Center,
+    Top,
+    Chat,
+    Left
+  };
 
   struct Options {
     Options() : interval(60), location(Top) {}
+
     int interval;
     Location location;
     std::vector<const char *> messages;

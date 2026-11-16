@@ -23,55 +23,59 @@
  */
 
 #pragma once
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
 namespace ETJump {
 namespace Constants {
 // these match the values that 'g_oss' uses
-inline constexpr int OS_DEFAULT = 0;              // unknown
-inline constexpr int OS_WIN_X86 = 1 << 0;         // Windows x86
-inline constexpr int OS_LINUX_X86 = 1 << 1;       // Linux x86
-inline constexpr int OS_LINUX_X86_64 = 1 << 2;    // Linux x86_64
-inline constexpr int OS_MACOS_X86_64 = 1 << 3;    // macOS x86_64
-inline constexpr int OS_ANDROID_AARCH64 = 1 << 4; // Android aarch64
-inline constexpr int OS_LINUX_ARMV7 = 1 << 5;     // Raspberry Pi arm
-inline constexpr int OS_LINUX_ARMV8_64 = 1 << 6;  // Raspberry Pi aarch64
-inline constexpr int OS_MACOS_AARCH64 = 1 << 7;   // macOS aarch64
-inline constexpr int OS_WIN_X86_64 = 1 << 8;      // Windows x86_64
-inline constexpr int OS_ANDROID_X86 = 1 << 9;     // Android x86
-inline constexpr int OS_ANDROID_X86_64 = 1 << 10; // Android x86_64
+inline constexpr int OS_DEFAULT         = 0;       // unknown
+inline constexpr int OS_WIN_X86         = 1 << 0;  // Windows x86
+inline constexpr int OS_LINUX_X86       = 1 << 1;  // Linux x86
+inline constexpr int OS_LINUX_X86_64    = 1 << 2;  // Linux x86_64
+inline constexpr int OS_MACOS_X86_64    = 1 << 3;  // macOS x86_64
+inline constexpr int OS_ANDROID_AARCH64 = 1 << 4;  // Android aarch64
+inline constexpr int OS_LINUX_ARMV7     = 1 << 5;  // Raspberry Pi arm
+inline constexpr int OS_LINUX_ARMV8_64  = 1 << 6;  // Raspberry Pi aarch64
+inline constexpr int OS_MACOS_AARCH64   = 1 << 7;  // macOS aarch64
+inline constexpr int OS_WIN_X86_64      = 1 << 8;  // Windows x86_64
+inline constexpr int OS_ANDROID_X86     = 1 << 9;  // Android x86
+inline constexpr int OS_ANDROID_X86_64  = 1 << 10; // Android x86_64
 
 // only contains the platforms we actually support + fallback
 inline const std::unordered_map<int32_t, std::string> operatingSystemStrings = {
-    {OS_DEFAULT, "Default (unknown)"},   {OS_WIN_X86, "Windows x86"},
-    {OS_WIN_X86_64, "Windows x86_64"},   {OS_LINUX_X86, "Linux x86"},
-    {OS_LINUX_X86_64, "Linux x86_64"},   {OS_MACOS_X86_64, "macOS x86_64"},
-    {OS_MACOS_AARCH64, "macOS AArch64"},
+  {OS_DEFAULT,       "Default (unknown)"},
+  {OS_WIN_X86,       "Windows x86"      },
+  {OS_WIN_X86_64,    "Windows x86_64"   },
+  {OS_LINUX_X86,     "Linux x86"        },
+  {OS_LINUX_X86_64,  "Linux x86_64"     },
+  {OS_MACOS_X86_64,  "macOS x86_64"     },
+  {OS_MACOS_AARCH64, "macOS AArch64"    },
 };
 
 namespace Authentication {
 #ifdef NEW_AUTH
 enum class MigrationType {
-  AUTO = 0,
+  AUTO   = 0,
   MANUAL = 1,
   // forces the server to perform migration again even if
   // the user database contains old GUID for the client
   MANUAL_FORCE = 2,
 };
 
-inline constexpr char AUTH_REQUEST[] = "auth_request";
+inline constexpr char AUTH_REQUEST[]         = "auth_request";
 inline constexpr char GUID_MIGRATE_REQUEST[] = "guid_migrate_request";
 
-inline constexpr char GUID_MIGRATE[] = "guid_migrate";
+inline constexpr char GUID_MIGRATE[]      = "guid_migrate";
 inline constexpr char GUID_MIGRATE_FAIL[] = "guid_migrate_fail";
 
 inline constexpr char AUTHENTICATE[] = "auth";
 
 // not a big fan of this tbh but whatever, works
-inline constexpr size_t HWID_SIZE_WIN = 6;
+inline constexpr size_t HWID_SIZE_WIN   = 6;
 inline constexpr size_t HWID_SIZE_LINUX = 4;
-inline constexpr size_t HWID_SIZE_MAC = 1;
+inline constexpr size_t HWID_SIZE_MAC   = 1;
 #else
 const std::string GUID_REQUEST = "guid_request";
 const std::string AUTHENTICATE = "authenticate";
@@ -80,10 +84,9 @@ const std::string AUTHENTICATE = "authenticate";
 } // namespace Constants
 
 // template class for a bitset that uses 'enum class' as values for the bits
-template <typename EnumT>
-class EnumBitset {
+template <typename EnumT> class EnumBitset {
   using UnderlyingT = std::underlying_type_t<EnumT>;
-  UnderlyingT bits = 0;
+  UnderlyingT bits  = 0;
 
 public:
   // default constructor, empty bitset
@@ -91,8 +94,7 @@ public:
 
   // construct from enum value
   // EnumBitset<MyEnum> bitset(MyEnum::VALUE_1)
-  constexpr explicit EnumBitset(EnumT flag)
-      : bits(static_cast<UnderlyingT>(flag)) {}
+  constexpr explicit EnumBitset(EnumT flag) : bits(static_cast<UnderlyingT>(flag)) {}
 
   // construct from initializer list
   // EnumBitset<MyEnum> bitset({MyEnum::VALUE_1, MyEnum::VALUE_2 ...})
@@ -102,9 +104,13 @@ public:
     }
   }
 
+  // construct from underlying integer value
+  // EnumBitset<MyEnum> bitset(int)
+  constexpr explicit EnumBitset(UnderlyingT flags) : bits(flags) {}
+
   // we don't want floating point implicit conversions for constructors
-  EnumBitset(float) = delete;
-  EnumBitset(double) = delete;
+  EnumBitset(float)       = delete;
+  EnumBitset(double)      = delete;
   EnumBitset(long double) = delete;
 
   constexpr EnumBitset &set(EnumT flag) {
@@ -136,7 +142,9 @@ public:
     return (bits & static_cast<UnderlyingT>(flag)) != 0;
   }
 
-  constexpr bool operator&(EnumT flag) const { return has(flag); }
+  constexpr bool operator&(EnumT flag) const {
+    return has(flag);
+  }
 
   constexpr EnumBitset operator&(EnumBitset other) const {
     EnumBitset result;
@@ -160,6 +168,12 @@ public:
     return bits == other.bits;
   }
 
-  constexpr explicit operator bool() const { return bits != 0; }
+  constexpr explicit operator bool() const {
+    return bits != 0;
+  }
+
+  constexpr explicit operator UnderlyingT() const {
+    return bits;
+  }
 };
 } // namespace ETJump

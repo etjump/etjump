@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
+#include "etj_awaited_command_handler.h"
+
 #include <algorithm>
 
-#include "etj_awaited_command_handler.h"
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 #include "etj_inline_command_parser.h"
@@ -33,10 +34,9 @@
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
-AwaitedCommandHandler::AwaitedCommandHandler(
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
-    const std::shared_ptr<PlayerEventsHandler> &playerEvents)
-    : consoleCommands(consoleCommands), playerEvents(playerEvents) {
+AwaitedCommandHandler::AwaitedCommandHandler(const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+                                             const std::shared_ptr<PlayerEventsHandler> &playerEvents)
+  : consoleCommands(consoleCommands), playerEvents(playerEvents) {
   startListeners();
 }
 
@@ -46,25 +46,21 @@ AwaitedCommandHandler::~AwaitedCommandHandler() {
 }
 
 void AwaitedCommandHandler::startListeners() {
-  consoleCommands->subscribe("await",
-                             [this](const std::vector<std::string> &args) {
-                               if (cgs.clientinfo->timerunActive) {
-                                 message("^3Error: ^7cannot use ^3await "
-                                         "^7during timeruns.");
-                                 return;
-                               }
-                               this->awaitCommand(args);
-                             });
+  consoleCommands->subscribe("await", [this](const std::vector<std::string> &args) {
+    if (cgs.clientinfo->timerunActive) {
+      message("^3Error: ^7cannot use ^3await "
+              "^7during timeruns.");
+      return;
+    }
+    this->awaitCommand(args);
+  });
 
-  playerEvents->subscribe(
-      "timerun:start", [this](const std::vector<std::string> &) {
-        if (awaitedCommands.size()) {
-          CG_AddPMItem(PM_MESSAGE,
-                       "^7Timerun started, ^3await ^7queue cleared.",
-                       cgs.media.stopwatchIcon);
-          awaitedCommands.clear();
-        }
-      });
+  playerEvents->subscribe("timerun:start", [this](const std::vector<std::string> &) {
+    if (awaitedCommands.size()) {
+      CG_AddPMItem(PM_MESSAGE, "^7Timerun started, ^3await ^7queue cleared.", cgs.media.stopwatchIcon);
+      awaitedCommands.clear();
+    }
+  });
 }
 
 void AwaitedCommandHandler::runFrame() {
@@ -72,8 +68,7 @@ void AwaitedCommandHandler::runFrame() {
   for (const auto &awaitedCommand : awaitedCommands) {
     awaitedCommand->currentFrameCount++;
 
-    if (awaitedCommand->currentFrameCount >=
-        awaitedCommand->requiredFrameCount) {
+    if (awaitedCommand->currentFrameCount >= awaitedCommand->requiredFrameCount) {
       executedCommands.push_back(awaitedCommand.get());
 
       for (const auto &command : awaitedCommand->commands) {
@@ -83,11 +78,10 @@ void AwaitedCommandHandler::runFrame() {
   }
 
   for (auto executedCommand : executedCommands) {
-    awaitedCommands.erase(
-        std::remove_if(awaitedCommands.begin(), awaitedCommands.end(),
-                       [&](const std::unique_ptr<AwaitedCommand> &command) {
-                         return command.get() == executedCommand;
-                       }));
+    awaitedCommands.erase(std::remove_if(awaitedCommands.begin(), awaitedCommands.end(),
+                                         [&](const std::unique_ptr<AwaitedCommand> &command) {
+                                           return command.get() == executedCommand;
+                                         }));
   }
 }
 
@@ -111,10 +105,9 @@ void AwaitedCommandHandler::awaitCommand(const std::vector<std::string> &args) {
 
   const auto &waitedFramesStr = args[0];
   int waitedFrames;
-  std::string outOfRangeError =
-      StringUtils::format("^3Error: ^7First parameter (number of frames) must "
-                          "be between ^31 ^7and ^3%i^7.",
-                          std::numeric_limits<int>::max());
+  std::string outOfRangeError = StringUtils::format("^3Error: ^7First parameter (number of frames) must "
+                                                    "be between ^31 ^7and ^3%i^7.",
+                                                    std::numeric_limits<int>::max());
   try {
     waitedFrames = std::stoi(waitedFramesStr);
   } catch (const std::out_of_range &) {
@@ -132,17 +125,14 @@ void AwaitedCommandHandler::awaitCommand(const std::vector<std::string> &args) {
     return;
   }
 
-  auto command = std::make_unique<AwaitedCommand>();
-  command->currentFrameCount = 0;
+  auto command                = std::make_unique<AwaitedCommand>();
+  command->currentFrameCount  = 0;
   command->requiredFrameCount = waitedFrames;
-  command->commands = InlineCommandParser().parse(
-      std::vector<std::string>(args.begin() + 1, args.end()));
+  command->commands           = InlineCommandParser().parse(std::vector<std::string>(args.begin() + 1, args.end()));
 
-  auto numCommandsString =
-      command->commands.size() == 1 ? "command" : "commands";
-  auto numFramesString = command->requiredFrameCount == 1 ? "frame" : "frames";
-  message(StringUtils::format("Executing ^3%d ^7%s after ^3%d ^7%s.",
-                              command->commands.size(), numCommandsString,
+  auto numCommandsString = command->commands.size() == 1 ? "command" : "commands";
+  auto numFramesString   = command->requiredFrameCount == 1 ? "frame" : "frames";
+  message(StringUtils::format("Executing ^3%d ^7%s after ^3%d ^7%s.", command->commands.size(), numCommandsString,
                               command->requiredFrameCount, numFramesString));
   awaitedCommands.push_back(std::move(command));
 }

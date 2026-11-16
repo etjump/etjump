@@ -24,8 +24,8 @@
 
 #pragma once
 #include <mutex>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "etj_string_utilities.h"
 
@@ -38,13 +38,11 @@ class Log {
 public:
   explicit Log(std::string name) : _name(std::move(name)) {}
 
-  template <typename... Targs>
-  void info(const std::string &format, const Targs &...fargs) const {
+  template <typename... Targs> void info(const std::string &format, const Targs &...fargs) const {
     println("info", StringUtils::format(format, fargs...));
   }
 
-  template <typename... Targs>
-  void error(const std::string &format, const Targs &...fargs) const {
+  template <typename... Targs> void error(const std::string &format, const Targs &...fargs) const {
     println("error", StringUtils::format(format, fargs...));
   }
 

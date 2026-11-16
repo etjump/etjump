@@ -8,10 +8,10 @@
 // normal keys should be passed as lowercased ascii
 
 typedef enum {
-  K_TAB = 9,
-  K_ENTER = 13,
+  K_TAB    = 9,
+  K_ENTER  = 13,
   K_ESCAPE = 27,
-  K_SPACE = 32,
+  K_SPACE  = 32,
 
   K_BACKSPACE = 127,
 

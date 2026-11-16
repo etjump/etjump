@@ -33,11 +33,11 @@
   #undef max
 #endif
 
-#include <string>
 #include <functional>
 #include <map>
-#include <vector>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace ETJump {
 class EntityEventsHandler {
@@ -50,10 +50,8 @@ public:
 
   // registers a event handler that will be called if the event was
   // received from the server
-  bool subscribe(const std::string &eventName,
-                 const std::function<void(centity_t *cent)> &callback);
-  bool subscribe(int event,
-                 const std::function<void(centity_t *cent)> &callback);
+  bool subscribe(const std::string &eventName, const std::function<void(centity_t *cent)> &callback);
+  bool subscribe(int event, const std::function<void(centity_t *cent)> &callback);
 
   // unsubscribes the event handler
   // returns false if it does not exist
@@ -61,7 +59,6 @@ public:
   bool unsubscribe(int event);
 
 private:
-  std::map<std::string, std::vector<std::function<void(centity_t *cent)>>>
-      _callbacks;
+  std::map<std::string, std::vector<std::function<void(centity_t *cent)>>> _callbacks;
 };
 } // namespace ETJump

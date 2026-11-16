@@ -9,6 +9,13 @@ inline constexpr float MIN_WALK_NORMAL = 0.7f;
 
 inline constexpr int STEPSIZE = 18;
 
+inline constexpr float DELTA_FALL_NDIE   = 77.0f;
+inline constexpr float DELTA_FALL_DMG_50 = 67.0f;
+inline constexpr float DELTA_FALL_DMG_25 = 58.0f;
+inline constexpr float DELTA_FALL_DMG_15 = 48.0f;
+inline constexpr float DELTA_FALL_DMG_10 = 38.75f;
+inline constexpr float DELTA_FALL_SHORT  = 7.0f; // no damage, just step sound
+
 // all of the locals will be zeroed before each
 // pmove, just to make damn sure we don't have
 // any differences when running on client or server
@@ -46,23 +53,23 @@ inline constexpr float pm_stopspeed = 100;
 
 inline constexpr float pm_waterSwimScale = 0.5;
 inline constexpr float pm_waterWadeScale = 0.70;
-inline constexpr float pm_slagSwimScale = 0.30;
-inline constexpr float pm_slagWadeScale = 0.70;
+inline constexpr float pm_slagSwimScale  = 0.30;
+inline constexpr float pm_slagWadeScale  = 0.70;
 
 // was: 0.18 (too slow) then: 0.24 (too fast)
 inline constexpr float pm_proneSpeedScale = 0.21;
 
-inline constexpr float pm_accelerate = 10;
-inline constexpr float pm_airaccelerate = 1;
+inline constexpr float pm_accelerate      = 10;
+inline constexpr float pm_airaccelerate   = 1;
 inline constexpr float pm_wateraccelerate = 4;
-inline constexpr float pm_slagaccelerate = 2;
-inline constexpr float pm_flyaccelerate = 8;
+inline constexpr float pm_slagaccelerate  = 2;
+inline constexpr float pm_flyaccelerate   = 8;
 
-inline constexpr float pm_friction = 6;
-inline constexpr float pm_waterfriction = 1;
-inline constexpr float pm_slagfriction = 1;
-inline constexpr float pm_flightfriction = 3;
-inline constexpr float pm_ladderfriction = 14;
+inline constexpr float pm_friction          = 6;
+inline constexpr float pm_waterfriction     = 1;
+inline constexpr float pm_slagfriction      = 1;
+inline constexpr float pm_flightfriction    = 3;
+inline constexpr float pm_ladderfriction    = 14;
 inline constexpr float pm_spectatorfriction = 5.0f;
 
 extern int c_pmove;

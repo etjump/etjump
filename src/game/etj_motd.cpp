@@ -23,17 +23,18 @@
  */
 
 #include "etj_motd.h"
-#include "json/json.h"
-#include "etj_local.h"
-#include "utilities.hpp"
-#include "etj_filesystem.h"
-#include "etj_printer.h"
+
 #include <fstream>
+#include "json/json.h"
+
+#include "etj_filesystem.h"
 #include "etj_json_utilities.h"
+#include "etj_local.h"
+#include "etj_printer.h"
+#include "utilities.hpp"
 
 namespace ETJump {
-Motd::Motd(std::unique_ptr<Log> log)
-    : initialized(false), logger(std::move(log)) {}
+Motd::Motd(std::unique_ptr<Log> log) : initialized(false), logger(std::move(log)) {}
 
 void Motd::initialize() {
   if (strlen(g_motdFile.string) == 0) {
@@ -54,13 +55,11 @@ void Motd::initialize() {
     return;
   }
 
-  if (!JsonUtils::parseValue(chatMotd, root["chat_message"], &errors,
-                             "chat_message")) {
+  if (!JsonUtils::parseValue(chatMotd, root["chat_message"], &errors, "chat_message")) {
     logger->error(errors);
   }
 
-  if (!JsonUtils::parseValue(consoleMotd, root["console_message"], &errors,
-                             "console_message")) {
+  if (!JsonUtils::parseValue(consoleMotd, root["console_message"], &errors, "console_message")) {
     logger->error(errors);
   }
 
@@ -98,12 +97,11 @@ void Motd::generateMotdFile() {
   }
 
   if (overwrite) {
-    G_Printf("Overwriting MOTD file '%s' with a default one.\n",
-             g_motdFile.string);
+    G_Printf("Overwriting MOTD file '%s' with a default one.\n", g_motdFile.string);
   }
 
   Json::Value root;
-  root["chat_message"] = "This is the chat message.";
+  root["chat_message"]    = "This is the chat message.";
   root["console_message"] = "This is the console message.";
 
   if (JsonUtils::writeFile(g_motdFile.string, root, &errors)) {

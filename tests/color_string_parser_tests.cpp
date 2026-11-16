@@ -1,7 +1,8 @@
-#include <gtest/gtest.h>
-#include "../src/cgame/etj_color_parser.h"
-#include <string>
 #include <algorithm>
+#include <gtest/gtest.h>
+#include <string>
+
+#include "../src/cgame/etj_color_parser.h"
 
 #define EPSILON 1.19209290E-07F
 
@@ -16,9 +17,7 @@ public:
   std::unique_ptr<ColorParser> parser = std::make_unique<ColorParser>();
 
   static bool Vector4Compare(const vec4_t &v1, const vec4_t &v2) {
-    if (std::abs(v1[0] - v2[0]) < EPSILON ||
-        std::abs(v1[1] - v2[1]) < EPSILON ||
-        std::abs(v1[2] - v2[2]) < EPSILON ||
+    if (std::abs(v1[0] - v2[0]) < EPSILON || std::abs(v1[1] - v2[1]) < EPSILON || std::abs(v1[2] - v2[2]) < EPSILON ||
         std::abs(v1[3] - v2[3]) < EPSILON) {
       return true;
     }
@@ -33,32 +32,28 @@ TEST_F(ColorStringParsingTests, parseColorString_ShouldParseNamedColorString) {
   ASSERT_TRUE(Vector4Compare(outColor, colorYellow));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParseNamedColorStringAndIgnoreWhiteSpace) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParseNamedColorStringAndIgnoreWhiteSpace) {
   const std::string colorString{"   yellow   "};
   vec4_t outColor;
   parser->parseColorString(colorString, outColor);
   ASSERT_TRUE(Vector4Compare(outColor, colorYellow));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParseWrongNamedColorStringAndSetBlack) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParseWrongNamedColorStringAndSetBlack) {
   const std::string colorString{"yellowish"};
   vec4_t outColor;
   parser->parseColorString(colorString, outColor);
   ASSERT_TRUE(Vector4Compare(outColor, colorBlack));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParseUppserCasedNamedColorString) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParseUppserCasedNamedColorString) {
   const std::string colorString{"YELLOW"};
   vec4_t outColor;
   parser->parseColorString(colorString, outColor);
   ASSERT_TRUE(Vector4Compare(outColor, colorYellow));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_RGBUpperCasedHexColorString) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_RGBUpperCasedHexColorString) {
   const std::string colorString{"0XAABBCC"};
   vec4_t expectedColor{0xaa / 255.f, 0xbb / 255.f, 0xcc / 255.f, 1.0f};
   vec4_t outColor;
@@ -66,8 +61,7 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_RGBLowerCasedHexColorString) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_RGBLowerCasedHexColorString) {
   const std::string colorString{"0xaabbcc"};
   vec4_t expectedColor{0xaa / 255.f, 0xbb / 255.f, 0xcc / 255.f, 1.0f};
   vec4_t outColor;
@@ -75,9 +69,7 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_RGBLowerCasedHexColorStringAndIgnoreWhiteSpace) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_RGBLowerCasedHexColorStringAndIgnoreWhiteSpace) {
   const std::string colorString{"  0xaabbcc  "};
   vec4_t expectedColor{0xaa / 255.f, 0xbb / 255.f, 0xcc / 255.f, 1.0f};
   vec4_t outColor;
@@ -85,8 +77,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_RGBALowerCasedHexColorString) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_RGBALowerCasedHexColorString) {
   const std::string colorString{"0xaabbccdd"};
   vec4_t expectedColor{0xaa / 255.f, 0xbb / 255.f, 0xcc / 255.f, 0xdd / 255.f};
   vec4_t outColor;
@@ -94,9 +85,7 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_InvalidRGBALowerCasedHexColorStringAndSetBlack) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_InvalidRGBALowerCasedHexColorStringAndSetBlack) {
   const std::string colorString{"0xaabbccddeeffgghhiijj"};
   vec4_t expectedColor{0.f, 0.f, 0.f, 1.f};
   vec4_t outColor;
@@ -104,9 +93,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_LongRGBALowerCasedHexColorStringAndIgnoreExtra) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_LongRGBALowerCasedHexColorStringAndIgnoreExtra) {
   const std::string colorString{"0xaabbccddeeff9988"};
   vec4_t expectedColor{0xaa / 255.f, 0xbb / 255.f, 0xcc / 255.f, 0xdd / 255.f};
   vec4_t outColor;
@@ -114,9 +101,8 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_RGBLowerCasedHexColorStringWithInvalidHexCharactersAndSetBlack) {
+TEST_F(ColorStringParsingTests,
+       parseColorString_ShouldParse_RGBLowerCasedHexColorStringWithInvalidHexCharactersAndSetBlack) {
   const std::string colorString{"0xaagghh"};
   vec4_t expectedColor{0.f, 0.f, 0.f, 1.f};
   vec4_t outColor;
@@ -124,8 +110,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_RGBUpperCasedHashPrefixedColorString) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_RGBUpperCasedHashPrefixedColorString) {
   const std::string colorString{"#AABBCC"};
   vec4_t expectedColor{0xaa / 255.f, 0xbb / 255.f, 0xcc / 255.f, 1.0f};
   vec4_t outColor;
@@ -133,8 +118,7 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_RGBLowerCasedHashPrefixedColorString) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_RGBLowerCasedHashPrefixedColorString) {
   const std::string colorString{"#aabbcc"};
   vec4_t expectedColor{0xaa / 255.f, 0xbb / 255.f, 0xcc / 255.f, 1.0f};
   vec4_t outColor;
@@ -142,9 +126,7 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_RGBLowerCasedHashPrefixedColorStringAndIgnoreWhiteSpace) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_RGBLowerCasedHashPrefixedColorStringAndIgnoreWhiteSpace) {
   const std::string colorString{"  #aabbcc  "};
   vec4_t expectedColor{0xaa / 255.f, 0xbb / 255.f, 0xcc / 255.f, 1.0f};
   vec4_t outColor;
@@ -152,8 +134,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_RGBALowerCasedHashPrefixedColorString) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_RGBALowerCasedHashPrefixedColorString) {
   const std::string colorString{"#aabbccdd"};
   vec4_t expectedColor{0xaa / 255.f, 0xbb / 255.f, 0xcc / 255.f, 0xdd / 255.f};
   vec4_t outColor;
@@ -161,9 +142,7 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_InvalidRGBALowerCasedHashPrefixedColorStringAndSetBlack) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_InvalidRGBALowerCasedHashPrefixedColorStringAndSetBlack) {
   const std::string colorString{"#aabbccddeeffgghhiijj"};
   vec4_t expectedColor{0.f, 0.f, 0.f, 1.f};
   vec4_t outColor;
@@ -171,9 +150,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_LongRGBALowerCasedHashPrefixedColorStringAndIgnoreExtra) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_LongRGBALowerCasedHashPrefixedColorStringAndIgnoreExtra) {
   const std::string colorString{"#aabbccddeeff9988"};
   vec4_t expectedColor{0xaa / 255.f, 0xbb / 255.f, 0xcc / 255.f, 0xdd / 255.f};
   vec4_t outColor;
@@ -181,9 +158,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_LowerCasedHashPrefixedColorStringWithOnlyRedValueSet) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_LowerCasedHashPrefixedColorStringWithOnlyRedValueSet) {
   const std::string colorString{"#aa"};
   vec4_t expectedColor{0xaa / 255.f, 0.f, 0.f, 1.f};
   vec4_t outColor;
@@ -191,9 +166,8 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_LowerCasedHashPrefixedColorStringWithArbitraryNumberOfValuesSet) {
+TEST_F(ColorStringParsingTests,
+       parseColorString_ShouldParse_LowerCasedHashPrefixedColorStringWithArbitraryNumberOfValuesSet) {
   const std::string colorString{"#aff"};
   vec4_t expectedColor{0x0a / 255.f, 0xff / 255.f, 0.f, 1.f};
   vec4_t outColor;
@@ -201,9 +175,8 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_RGBLowerCasedHashPrefixedColorStringWithInvalidHexCharactersAndSetBlack) {
+TEST_F(ColorStringParsingTests,
+       parseColorString_ShouldParse_RGBLowerCasedHashPrefixedColorStringWithInvalidHexCharactersAndSetBlack) {
   const std::string colorString{"#aappgg"};
   vec4_t expectedColor{0.f, 0.f, 0.f, 1.f};
   vec4_t outColor;
@@ -211,8 +184,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_ColorStringWithNormalizedRGBValues) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_ColorStringWithNormalizedRGBValues) {
   const std::string colorString{"0.5 0.2 0.1"};
   vec4_t expectedColor{0.5f, 0.2f, 0.1f, 1.0f};
   vec4_t outColor;
@@ -220,9 +192,7 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_ColorStringWithNormalizedRGBValuesAndIgnoreWhiteSpace) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_ColorStringWithNormalizedRGBValuesAndIgnoreWhiteSpace) {
   const std::string colorString{"  0.5  0.2   0.1  "};
   vec4_t expectedColor{0.5f, 0.2f, 0.1f, 1.0f};
   vec4_t outColor;
@@ -230,8 +200,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_ColorStringWithNonNormalizedRGBValues) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_ColorStringWithNonNormalizedRGBValues) {
   const std::string colorString{"127 192 204"};
   vec4_t expectedColor{127.f / 255.f, 192.f / 255.f, 204.f / 255.f, 1.0f};
   vec4_t outColor;
@@ -239,8 +208,7 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_ColorStringWithNormalizedRGBAValues) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_ColorStringWithNormalizedRGBAValues) {
   const std::string colorString{"0.8 0.5 0.2 0.7"};
   vec4_t expectedColor{0.8f, 0.5f, 0.2f, 0.7f};
   vec4_t outColor;
@@ -248,29 +216,23 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_ColorStringWithNonNormalizedRGBAValues) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_ColorStringWithNonNormalizedRGBAValues) {
   const std::string colorString{"127 192 204 156"};
-  vec4_t expectedColor{127.f / 255.f, 192.f / 255.f, 204.f / 255.f,
-                       156.f / 255.f};
+  vec4_t expectedColor{127.f / 255.f, 192.f / 255.f, 204.f / 255.f, 156.f / 255.f};
   vec4_t outColor;
   parser->parseColorString(colorString, outColor);
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_ColorStringRGBAValuesAndIgnoreExtraValues) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_ColorStringRGBAValuesAndIgnoreExtraValues) {
   const std::string colorString{"127 192 204 156 207 206 107"};
-  vec4_t expectedColor{127.f / 255.f, 192.f / 255.f, 204.f / 255.f,
-                       156.f / 255.f};
+  vec4_t expectedColor{127.f / 255.f, 192.f / 255.f, 204.f / 255.f, 156.f / 255.f};
   vec4_t outColor;
   parser->parseColorString(colorString, outColor);
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParseAndValidate_ColorStringWithNormalizedRGBValues) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParseAndValidate_ColorStringWithNormalizedRGBValues) {
   const std::string colorString{"-1.0 -0.5 0.5"};
   vec4_t expectedColor{0.0f, 0.0f, 0.5f, 1.0f};
   vec4_t outColor;
@@ -278,9 +240,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParseAndValidate_ColorStringWithNonNormalizedRGBValues) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParseAndValidate_ColorStringWithNonNormalizedRGBValues) {
   const std::string colorString{"-20 300 204"};
   vec4_t expectedColor{0.0f, 1.0f, 204.f / 255.f, 1.0f};
   vec4_t outColor;
@@ -288,9 +248,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(
-    ColorStringParsingTests,
-    parseColorString_ShouldParse_ColorStringWithMixedRGBValuesAndConsiderItNonNormalized) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_ColorStringWithMixedRGBValuesAndConsiderItNonNormalized) {
   const std::string colorString{"0.51 1.0 192"};
   vec4_t expectedColor{0.51f / 255.f, 1.0f / 255.f, 192.f / 255.f, 1.0f};
   vec4_t outColor;
@@ -298,8 +256,7 @@ TEST_F(
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_ColorStringWithOnlyRedValueSet) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_ColorStringWithOnlyRedValueSet) {
   const std::string colorString{"0.75"};
   vec4_t expectedColor{0.75f, 0.f, 0.f, 1.0f};
   vec4_t outColor;
@@ -307,8 +264,7 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_ColorStringWithMixedValuesAndSetBlack) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_ColorStringWithMixedValuesAndSetBlack) {
   const std::string colorString{"0.75 red #ffffff"};
   vec4_t expectedColor{0.f, 0.f, 0.f, 1.0f};
   vec4_t outColor;
@@ -316,8 +272,7 @@ TEST_F(ColorStringParsingTests,
   ASSERT_TRUE(Vector4Compare(outColor, expectedColor));
 }
 
-TEST_F(ColorStringParsingTests,
-       parseColorString_ShouldParse_MaliciousColorStringAndSetBlack) {
+TEST_F(ColorStringParsingTests, parseColorString_ShouldParse_MaliciousColorStringAndSetBlack) {
   const std::string colorString{"0.75 .- .."};
   vec4_t expectedColor{0.f, 0.f, 0.f, 1.0f};
   vec4_t outColor;

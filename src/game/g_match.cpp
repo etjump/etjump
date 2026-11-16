@@ -2,6 +2,7 @@
 // -------------------------
 //
 #include "g_local.h"
+
 #include "../../assets/ui/menudef.h"
 
 void G_initMatch(void) {
@@ -28,23 +29,19 @@ void G_loadMatchGame() {
 
   // Set up the random reinforcement seeds for both teams and send to clients
   dwBlueOffset = rand() % MAX_REINFSEEDS;
-  dwRedOffset = rand() % MAX_REINFSEEDS;
-  Q_strncpyz(
-      strReinfSeeds,
-      va("%d %d",
-         (dwBlueOffset << REINF_BLUEDELT) + (rand() % (1 << REINF_BLUEDELT)),
-         (dwRedOffset << REINF_REDDELT) + (rand() % (1 << REINF_REDDELT))),
-      sizeof(strReinfSeeds));
+  dwRedOffset  = rand() % MAX_REINFSEEDS;
+  Q_strncpyz(strReinfSeeds,
+             va("%d %d", (dwBlueOffset << REINF_BLUEDELT) + (rand() % (1 << REINF_BLUEDELT)),
+                (dwRedOffset << REINF_REDDELT) + (rand() % (1 << REINF_REDDELT))),
+             sizeof(strReinfSeeds));
 
   for (i = 0; i < MAX_REINFSEEDS; i++) {
     aRandomValues[i] = (rand() % REINF_RANGE) * aReinfSeeds[i];
     Q_strcat(strReinfSeeds, sizeof(strReinfSeeds), va(" %d", aRandomValues[i]));
   }
 
-  level.dwBlueReinfOffset = static_cast<int>(
-      1000 * aRandomValues[dwBlueOffset] / aReinfSeeds[dwBlueOffset]);
-  level.dwRedReinfOffset = static_cast<int>(1000 * aRandomValues[dwRedOffset] /
-                                            aReinfSeeds[dwRedOffset]);
+  level.dwBlueReinfOffset = static_cast<int>(1000 * aRandomValues[dwBlueOffset] / aReinfSeeds[dwBlueOffset]);
+  level.dwRedReinfOffset  = static_cast<int>(1000 * aRandomValues[dwRedOffset] / aReinfSeeds[dwRedOffset]);
 
   trap_SetConfigstring(CS_REINFSEEDS, strReinfSeeds);
 }
@@ -62,9 +59,9 @@ void G_printFull(const char *str, gentity_t *ent) {
 
 // Plays specified sound globally.
 void G_globalSound(const char *sound) {
-  gentity_t *te = G_TempEntity(level.intermission_origin, EV_GLOBAL_SOUND);
-  te->s.eventParm = G_SoundIndex(sound);
-  te->r.svFlags |= SVF_BROADCAST;
+  gentity_t *te    = G_TempEntity(level.intermission_origin, EV_GLOBAL_SOUND);
+  te->s.eventParm  = G_SoundIndex(sound);
+  te->r.svFlags   |= SVF_BROADCAST;
 }
 
 void G_delayPrint(gentity_t *dpent) {
@@ -74,15 +71,14 @@ void G_delayPrint(gentity_t *dpent) {
   switch (dpent->spawnflags) {
     case DP_PAUSEINFO: {
       if (level.match_pause > PAUSE_UNPAUSING) {
-        int cSeconds = match_timeoutlength.integer * 1000 -
-                       (level.time - dpent->timestamp);
+        int cSeconds = match_timeoutlength.integer * 1000 - (level.time - dpent->timestamp);
 
         if (cSeconds > 1000) {
           AP(va("cp \"^3Match resuming "
                 "in ^1%d^3 seconds!\n\"",
                 cSeconds / 1000));
           think_next = level.time + 15000;
-          fFree = qfalse;
+          fFree      = qfalse;
         } else {
           level.match_pause = PAUSE_UNPAUSING;
           AP("print \"^3Match resuming "
@@ -103,16 +99,14 @@ void G_delayPrint(gentity_t *dpent) {
                 "in ^1%d^3 seconds!\n\"",
                 cSeconds / 1000));
           think_next = level.time + 1000;
-          fFree = qfalse;
+          fFree      = qfalse;
         } else {
           level.match_pause = PAUSE_NONE;
           G_globalSound("sound/osp/fight.wav");
           G_printFull("^1FIGHT!", NULL);
-          trap_SetConfigstring(CS_LEVEL_START_TIME,
-                               va("%i", level.startTime + level.timeDelta));
+          trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime + level.timeDelta));
           level.server_settings &= ~CV_SVS_PAUSE;
-          trap_SetConfigstring(CS_SERVERTOGGLES,
-                               va("%d", level.server_settings));
+          trap_SetConfigstring(CS_SERVERTOGGLES, va("%d", level.server_settings));
         }
       }
       break;
@@ -129,26 +123,25 @@ void G_delayPrint(gentity_t *dpent) {
   }
 }
 
-static const char *pszDPInfo[] = {
-    "DPRINTF_PAUSEINFO", "DPRINTF_UNPAUSING", "DPRINTF_CONNECTINFO",
-    "DPRINTF_MVSPAWN",   "DPRINTF_UNK1",      "DPRINTF_UNK2",
-    "DPRINTF_UNK3",      "DPRINTF_UNK4",      "DPRINTF_UNK5"};
+static const char *pszDPInfo[] = {"DPRINTF_PAUSEINFO", "DPRINTF_UNPAUSING", "DPRINTF_CONNECTINFO",
+                                  "DPRINTF_MVSPAWN",   "DPRINTF_UNK1",      "DPRINTF_UNK2",
+                                  "DPRINTF_UNK3",      "DPRINTF_UNK4",      "DPRINTF_UNK5"};
 
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner) {
   gentity_t *ent = G_Spawn();
 
-  ent->classname = pszDPInfo[print_type];
-  ent->clipmask = 0;
-  ent->parent = owner;
+  ent->classname  = pszDPInfo[print_type];
+  ent->clipmask   = 0;
+  ent->parent     = owner;
   ent->r.svFlags |= SVF_NOCLIENT;
-  ent->s.eFlags |= EF_NODRAW;
-  ent->s.eType = ET_ITEM;
+  ent->s.eFlags  |= EF_NODRAW;
+  ent->s.eType    = ET_ITEM;
 
   ent->spawnflags = print_type; // Tunnel in DP enum
-  ent->timestamp = level.time;  // Time entity was created
+  ent->timestamp  = level.time; // Time entity was created
 
   ent->nextthink = print_time;
-  ent->think = G_delayPrint;
+  ent->think     = G_delayPrint;
 }
 
 // Records accuracy, damage, and kill/death stats.
@@ -167,8 +160,7 @@ void G_addStats(gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod) {
   // Special hack for intentional gibbage
   if (targ->health <= 0 && targ->client->ps.pm_type == PM_DEAD) {
     if (mod < MOD_CROSS && attacker && attacker->client) {
-      int x =
-          attacker->client->sess.aWeaponStats[G_weapStatIndex_MOD(mod)].atts--;
+      int x = attacker->client->sess.aWeaponStats[G_weapStatIndex_MOD(mod)].atts--;
       if (x < 1) {
         attacker->client->sess.aWeaponStats[G_weapStatIndex_MOD(mod)].atts = 1;
       }
@@ -181,8 +173,7 @@ void G_addStats(gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod) {
   // dmg_ref);
 
   // Suicides only affect the player specifically
-  if (targ == attacker || !attacker || !attacker->client ||
-      mod == MOD_SUICIDE) {
+  if (targ == attacker || !attacker || !attacker->client || mod == MOD_SUICIDE) {
     if (targ->health <= 0) {
       targ->client->sess.suicides++;
     }
@@ -213,7 +204,7 @@ void G_addStats(gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod) {
   // General player stats
   if (mod != MOD_SYRINGE) {
     attacker->client->sess.damage_given += dmg;
-    targ->client->sess.damage_received += dmg;
+    targ->client->sess.damage_received  += dmg;
     if (targ->health <= 0) {
       attacker->client->sess.kills++;
       targ->client->sess.deaths++;
@@ -253,83 +244,81 @@ void G_addStatsHeadShot(gentity_t *attacker, int mod) {
 // FIXME: Remove everything that maps to WS_MAX to save space
 //
 static const weap_ws_convert_t aWeapMOD[MOD_NUM_MODS] = {
-    {(weapon_t)MOD_UNKNOWN, WS_MAX},
-    {(weapon_t)MOD_MACHINEGUN, WS_MG42},
-    {(weapon_t)MOD_GRENADE, WS_GRENADE},
-    {(weapon_t)MOD_ROCKET, WS_PANZERFAUST},
+  {(weapon_t)MOD_UNKNOWN,                 WS_MAX            },
+  {(weapon_t)MOD_MACHINEGUN,              WS_MG42           },
+  {(weapon_t)MOD_GRENADE,                 WS_GRENADE        },
+  {(weapon_t)MOD_ROCKET,                  WS_PANZERFAUST    },
 
-    {(weapon_t)MOD_KNIFE, WS_KNIFE},
-    {(weapon_t)MOD_LUGER, WS_LUGER},
-    {(weapon_t)MOD_COLT, WS_COLT},
-    {(weapon_t)MOD_MP40, WS_MP40},
-    {(weapon_t)MOD_THOMPSON, WS_THOMPSON},
-    {(weapon_t)MOD_STEN, WS_STEN},
-    {(weapon_t)MOD_GARAND, WS_GARAND},
-    {(weapon_t)MOD_SILENCER, WS_LUGER},
-    {(weapon_t)MOD_FG42, WS_FG42},
-    {(weapon_t)MOD_FG42SCOPE, WS_FG42},
-    {(weapon_t)MOD_PANZERFAUST, WS_PANZERFAUST},
-    {(weapon_t)MOD_GRENADE_LAUNCHER, WS_GRENADE},
-    {(weapon_t)MOD_FLAMETHROWER, WS_FLAMETHROWER},
-    {(weapon_t)MOD_GRENADE_PINEAPPLE, WS_GRENADE},
-    {(weapon_t)MOD_CROSS, WS_MAX},
-    {(weapon_t)MOD_AKIMBO_COLT, WS_COLT},
-    {(weapon_t)MOD_AKIMBO_LUGER, WS_LUGER},
-    {(weapon_t)MOD_AKIMBO_SILENCEDCOLT, WS_COLT},
-    {(weapon_t)MOD_AKIMBO_SILENCEDLUGER, WS_LUGER},
+  {(weapon_t)MOD_KNIFE,                   WS_KNIFE          },
+  {(weapon_t)MOD_LUGER,                   WS_LUGER          },
+  {(weapon_t)MOD_COLT,                    WS_COLT           },
+  {(weapon_t)MOD_MP40,                    WS_MP40           },
+  {(weapon_t)MOD_THOMPSON,                WS_THOMPSON       },
+  {(weapon_t)MOD_STEN,                    WS_STEN           },
+  {(weapon_t)MOD_GARAND,                  WS_GARAND         },
+  {(weapon_t)MOD_SILENCER,                WS_LUGER          },
+  {(weapon_t)MOD_FG42,                    WS_FG42           },
+  {(weapon_t)MOD_FG42SCOPE,               WS_FG42           },
+  {(weapon_t)MOD_PANZERFAUST,             WS_PANZERFAUST    },
+  {(weapon_t)MOD_GRENADE_LAUNCHER,        WS_GRENADE        },
+  {(weapon_t)MOD_FLAMETHROWER,            WS_FLAMETHROWER   },
+  {(weapon_t)MOD_GRENADE_PINEAPPLE,       WS_GRENADE        },
+  {(weapon_t)MOD_CROSS,                   WS_MAX            },
+  {(weapon_t)MOD_AKIMBO_COLT,             WS_COLT           },
+  {(weapon_t)MOD_AKIMBO_LUGER,            WS_LUGER          },
+  {(weapon_t)MOD_AKIMBO_SILENCEDCOLT,     WS_COLT           },
+  {(weapon_t)MOD_AKIMBO_SILENCEDLUGER,    WS_LUGER          },
 
-    {(weapon_t)MOD_MAPMORTAR, WS_MORTAR},
-    {(weapon_t)MOD_MAPMORTAR_SPLASH, WS_MORTAR},
+  {(weapon_t)MOD_MAPMORTAR,               WS_MORTAR         },
+  {(weapon_t)MOD_MAPMORTAR_SPLASH,        WS_MORTAR         },
 
-    {(weapon_t)MOD_KICKED, WS_MAX},
-    {(weapon_t)MOD_GRABBER, WS_MAX},
+  {(weapon_t)MOD_KICKED,                  WS_MAX            },
+  {(weapon_t)MOD_GRABBER,                 WS_MAX            },
 
-    {(weapon_t)MOD_DYNAMITE, WS_DYNAMITE},
-    {(weapon_t)MOD_AIRSTRIKE, WS_AIRSTRIKE},
-    {(weapon_t)MOD_SYRINGE, WS_SYRINGE},
-    {(weapon_t)MOD_AMMO, WS_MAX},
-    {(weapon_t)MOD_ARTY, WS_ARTILLERY},
+  {(weapon_t)MOD_DYNAMITE,                WS_DYNAMITE       },
+  {(weapon_t)MOD_AIRSTRIKE,               WS_AIRSTRIKE      },
+  {(weapon_t)MOD_SYRINGE,                 WS_SYRINGE        },
+  {(weapon_t)MOD_AMMO,                    WS_MAX            },
+  {(weapon_t)MOD_ARTY,                    WS_ARTILLERY      },
 
-    {(weapon_t)MOD_WATER, WS_MAX},
-    {(weapon_t)MOD_SLIME, WS_MAX},
-    {(weapon_t)MOD_LAVA, WS_MAX},
-    {(weapon_t)MOD_CRUSH, WS_MAX},
-    {(weapon_t)MOD_TELEFRAG, WS_MAX},
-    {(weapon_t)MOD_FALLING, WS_MAX},
-    {(weapon_t)MOD_SUICIDE, WS_MAX},
-    {(weapon_t)MOD_TARGET_LASER, WS_MAX},
-    {(weapon_t)MOD_TRIGGER_HURT, WS_MAX},
-    {(weapon_t)MOD_EXPLOSIVE, WS_MAX},
+  {(weapon_t)MOD_WATER,                   WS_MAX            },
+  {(weapon_t)MOD_SLIME,                   WS_MAX            },
+  {(weapon_t)MOD_LAVA,                    WS_MAX            },
+  {(weapon_t)MOD_CRUSH,                   WS_MAX            },
+  {(weapon_t)MOD_TELEFRAG,                WS_MAX            },
+  {(weapon_t)MOD_FALLING,                 WS_MAX            },
+  {(weapon_t)MOD_SUICIDE,                 WS_MAX            },
+  {(weapon_t)MOD_TARGET_LASER,            WS_MAX            },
+  {(weapon_t)MOD_TRIGGER_HURT,            WS_MAX            },
+  {(weapon_t)MOD_EXPLOSIVE,               WS_MAX            },
 
-    {(weapon_t)MOD_CARBINE, WS_GARAND},
+  {(weapon_t)MOD_CARBINE,                 WS_GARAND         },
 
-    {(weapon_t)MOD_KAR98, WS_K43},
-    {(weapon_t)MOD_GPG40, WS_GRENADELAUNCHER},
-    {(weapon_t)MOD_M7, WS_GRENADELAUNCHER},
-    {(weapon_t)MOD_LANDMINE, WS_LANDMINE},
-    {(weapon_t)MOD_SATCHEL, WS_SATCHEL},
-    {(weapon_t)MOD_TRIPMINE, WS_LANDMINE},
-    {(weapon_t)MOD_SMOKEBOMB, WS_SMOKE},        // ??
-    {(weapon_t)MOD_SMOKEGRENADE, WS_AIRSTRIKE}, // rain - airstrike tag
-    {(weapon_t)MOD_MOBILE_MG42, WS_MG42},
-    {(weapon_t)MOD_SILENCED_COLT,
-     WS_COLT}, // where is silencer? // Gordon: up top^
-    {(weapon_t)MOD_GARAND_SCOPE, WS_GARAND},
+  {(weapon_t)MOD_KAR98,                   WS_K43            },
+  {(weapon_t)MOD_GPG40,                   WS_GRENADELAUNCHER},
+  {(weapon_t)MOD_M7,                      WS_GRENADELAUNCHER},
+  {(weapon_t)MOD_LANDMINE,                WS_LANDMINE       },
+  {(weapon_t)MOD_SATCHEL,                 WS_SATCHEL        },
+  {(weapon_t)MOD_TRIPMINE,                WS_LANDMINE       },
+  {(weapon_t)MOD_SMOKEBOMB,               WS_SMOKE          }, // ??
+  {(weapon_t)MOD_SMOKEGRENADE,            WS_AIRSTRIKE      }, // rain - airstrike tag
+  {(weapon_t)MOD_MOBILE_MG42,             WS_MG42           },
+  {(weapon_t)MOD_SILENCED_COLT,           WS_COLT           }, // where is silencer? // Gordon: up top^
+  {(weapon_t)MOD_GARAND_SCOPE,            WS_GARAND         },
 
-    {(weapon_t)MOD_CRUSH_CONSTRUCTION, WS_MAX},
-    {(weapon_t)MOD_CRUSH_CONSTRUCTIONDEATH, WS_MAX},
+  {(weapon_t)MOD_CRUSH_CONSTRUCTION,      WS_MAX            },
+  {(weapon_t)MOD_CRUSH_CONSTRUCTIONDEATH, WS_MAX            },
 
-    {(weapon_t)MOD_K43, WS_K43},
-    {(weapon_t)MOD_K43_SCOPE, WS_K43},
+  {(weapon_t)MOD_K43,                     WS_K43            },
+  {(weapon_t)MOD_K43_SCOPE,               WS_K43            },
 
-    {(weapon_t)MOD_MORTAR, WS_MORTAR},
+  {(weapon_t)MOD_MORTAR,                  WS_MORTAR         },
 
-    {(weapon_t)MOD_PORTAL_GUN, WS_PORTAL_GUN},
+  {(weapon_t)MOD_PORTAL_GUN,              WS_PORTAL_GUN     },
 
-    {(weapon_t)MOD_SWAP_PLACES, WS_MAX},
+  {(weapon_t)MOD_SWAP_PLACES,             WS_MAX            },
 
-    {(weapon_t)MOD_SWITCHTEAM, WS_MAX}
-
+  {(weapon_t)MOD_SWITCHTEAM,              WS_MAX            }
 };
 
 // Get right stats index based on weapon mod
@@ -347,7 +336,7 @@ unsigned int G_weapStatIndex_MOD(int iWeaponMOD) {
 // Generates weapon stat info for given ent
 char *G_createStats(gentity_t *refEnt) {
   unsigned int i, dwWeaponMask = 0, dwSkillPointMask = 0;
-  char strWeapInfo[MAX_STRING_CHARS] = {0};
+  char strWeapInfo[MAX_STRING_CHARS]  = {0};
   char strSkillInfo[MAX_STRING_CHARS] = {0};
 
   if (!refEnt) {
@@ -356,51 +345,46 @@ char *G_createStats(gentity_t *refEnt) {
 
   // Add weapon stats as necessary
   for (i = WS_KNIFE; i < WS_MAX; i++) {
-    if (refEnt->client->sess.aWeaponStats[i].atts ||
-        refEnt->client->sess.aWeaponStats[i].hits ||
+    if (refEnt->client->sess.aWeaponStats[i].atts || refEnt->client->sess.aWeaponStats[i].hits ||
         refEnt->client->sess.aWeaponStats[i].deaths) {
       dwWeaponMask |= (1 << i);
       Q_strcat(strWeapInfo, sizeof(strWeapInfo),
                va(" %d %d %d %d %d", refEnt->client->sess.aWeaponStats[i].hits,
-                  refEnt->client->sess.aWeaponStats[i].atts,
-                  refEnt->client->sess.aWeaponStats[i].kills,
-                  refEnt->client->sess.aWeaponStats[i].deaths,
-                  refEnt->client->sess.aWeaponStats[i].headshots));
+                  refEnt->client->sess.aWeaponStats[i].atts, refEnt->client->sess.aWeaponStats[i].kills,
+                  refEnt->client->sess.aWeaponStats[i].deaths, refEnt->client->sess.aWeaponStats[i].headshots));
     }
   }
 
   // Additional info
   Q_strcat(strWeapInfo, sizeof(strWeapInfo),
-           va(" %d %d %d", refEnt->client->sess.damage_given,
-              refEnt->client->sess.damage_received,
+           va(" %d %d %d", refEnt->client->sess.damage_given, refEnt->client->sess.damage_received,
               refEnt->client->sess.team_damage));
 
   // Add skillpoints as necessary
   for (i = SK_BATTLE_SENSE; i < SK_NUM_SKILLS; i++) {
     if (refEnt->client->sess.skillpoints[i] > 0) {
       dwSkillPointMask |= (1 << i);
-      Q_strcat(strSkillInfo, sizeof(strSkillInfo),
-               va(" %d", (int)refEnt->client->sess.skillpoints[i]));
+      Q_strcat(strSkillInfo, sizeof(strSkillInfo), va(" %d", (int)refEnt->client->sess.skillpoints[i]));
     }
   }
 
-  return (va("%d %d %d%s %d%s", ClientNum(refEnt), refEnt->client->sess.rounds,
-             dwWeaponMask, strWeapInfo, dwSkillPointMask, strSkillInfo));
+  return (va("%d %d %d%s %d%s", ClientNum(refEnt), refEnt->client->sess.rounds, dwWeaponMask, strWeapInfo,
+             dwSkillPointMask, strSkillInfo));
 }
 
 // Resets player's current stats
 void G_deleteStats(int nClient) {
   gclient_t *cl = &level.clients[nClient];
 
-  cl->sess.damage_given = 0;
+  cl->sess.damage_given    = 0;
   cl->sess.damage_received = 0;
-  cl->sess.deaths = 0;
-  cl->sess.game_points = 0;
-  cl->sess.rounds = 0;
-  cl->sess.kills = 0;
-  cl->sess.suicides = 0;
-  cl->sess.team_damage = 0;
-  cl->sess.team_kills = 0;
+  cl->sess.deaths          = 0;
+  cl->sess.game_points     = 0;
+  cl->sess.rounds          = 0;
+  cl->sess.kills           = 0;
+  cl->sess.suicides        = 0;
+  cl->sess.team_damage     = 0;
+  cl->sess.team_kills      = 0;
 
   memset(&cl->sess.aWeaponStats, 0, sizeof(cl->sess.aWeaponStats));
   trap_Cvar_Set(va("wstats%i", nClient), va("%d", nClient));
@@ -419,10 +403,10 @@ void G_parseStats(char *pszStatsInfo) {
 
   cl = &level.clients[dwClientID];
 
-#define GETVAL(x)                                                              \
-  if ((tmp = strchr(tmp, ' ')) == NULL) {                                      \
-    return;                                                                    \
-  }                                                                            \
+#define GETVAL(x)                         \
+  if ((tmp = strchr(tmp, ' ')) == NULL) { \
+    return;                               \
+  }                                       \
   x = Q_atoi(++tmp);
 
   GETVAL(cl->sess.rounds);
@@ -457,14 +441,14 @@ void G_printMatchInfo(gentity_t *ent) {
       continue;
     }
 
-    tot_kills = 0;
+    tot_kills  = 0;
     tot_deaths = 0;
-    tot_sui = 0;
-    tot_tk = 0;
-    tot_dg = 0;
-    tot_dr = 0;
-    tot_td = 0;
-    tot_gp = 0;
+    tot_sui    = 0;
+    tot_tk     = 0;
+    tot_dg     = 0;
+    tot_dr     = 0;
+    tot_td     = 0;
+    tot_gp     = 0;
 
     CP("sc \"\n^7TEAM   Player          Kll Dth Sui TK Eff  "
        "^3GP^7    ^2DG    "
@@ -483,26 +467,23 @@ void G_printMatchInfo(gentity_t *ent) {
       SanitizeString(cl->pers.netname, n2, qfalse);
       n2[15] = 0;
 
-      ref = "^7";
-      tot_kills += cl->sess.kills;
+      ref         = "^7";
+      tot_kills  += cl->sess.kills;
       tot_deaths += cl->sess.deaths;
-      tot_sui += cl->sess.suicides;
-      tot_tk += cl->sess.team_kills;
-      tot_dg += cl->sess.damage_given;
-      tot_dr += cl->sess.damage_received;
-      tot_td += cl->sess.team_damage;
-      tot_gp += cl->sess.game_points;
+      tot_sui    += cl->sess.suicides;
+      tot_tk     += cl->sess.team_kills;
+      tot_dg     += cl->sess.damage_given;
+      tot_dr     += cl->sess.damage_received;
+      tot_td     += cl->sess.team_damage;
+      tot_gp     += cl->sess.game_points;
 
-      eff = (cl->sess.deaths + cl->sess.kills == 0)
-                ? 0
-                : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
+      eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
       if (eff < 0) {
         eff = 0;
       }
 
       if (ent->client == cl ||
-          (ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
-           ent->client->sess.spectatorState == SPECTATOR_FOLLOW &&
+          (ent->client->sess.sessionTeam == TEAM_SPECTATOR && ent->client->sess.spectatorState == SPECTATOR_FOLLOW &&
            ent->client->sess.spectatorClient == level.sortedClients[j])) {
         ref = "^3";
       }
@@ -511,16 +492,12 @@ void G_printMatchInfo(gentity_t *ent) {
       CP(va("sc \"%-10s "
             "%s%-15s^3%4d%4d%4d%3d%s%4d^3%4d^2%6d^1%6d^"
             "6%5d^3%7d\n\"",
-            aTeams[i], ref, n2, cl->sess.kills, cl->sess.deaths,
-            cl->sess.suicides, cl->sess.team_kills, ref, eff,
-            cl->sess.game_points - (cl->sess.kills * WOLF_FRAG_BONUS),
-            cl->sess.damage_given, cl->sess.damage_received,
+            aTeams[i], ref, n2, cl->sess.kills, cl->sess.deaths, cl->sess.suicides, cl->sess.team_kills, ref, eff,
+            cl->sess.game_points - (cl->sess.kills * WOLF_FRAG_BONUS), cl->sess.damage_given, cl->sess.damage_received,
             cl->sess.team_damage, cl->ps.persistant[PERS_SCORE]));
     }
 
-    eff = (tot_kills + tot_deaths == 0)
-              ? 0
-              : 100 * tot_kills / (tot_kills + tot_deaths);
+    eff = (tot_kills + tot_deaths == 0) ? 0 : 100 * tot_kills / (tot_kills + tot_deaths);
     if (eff < 0) {
       eff = 0;
     }
@@ -531,9 +508,8 @@ void G_printMatchInfo(gentity_t *ent) {
           "-----\n"
           "%-10s "
           "^5%-15s%4d%4d%4d%3d^5%4d^3%4d^2%6d^1%6d^6%5d^3%7d\n\"",
-          aTeams[i], "Totals", tot_kills, tot_deaths, tot_sui, tot_tk, eff,
-          tot_gp - (tot_kills * WOLF_FRAG_BONUS), tot_dg, tot_dr, tot_td,
-          tot_gp));
+          aTeams[i], "Totals", tot_kills, tot_deaths, tot_sui, tot_tk, eff, tot_gp - (tot_kills * WOLF_FRAG_BONUS),
+          tot_dg, tot_dr, tot_td, tot_gp));
   }
 
   CP(va("sc \"%s\n\n\" 0", ((!cnt) ? "^3\nNo scores to report." : "")));
@@ -548,7 +524,7 @@ void G_matchInfoDump(unsigned int dwDumpType) {
   for (i = 0; i < level.numConnectedClients; i++) {
     ref = level.sortedClients[i];
     ent = &g_entities[ref];
-    cl = ent->client;
+    cl  = ent->client;
 
     if (cl->pers.connected != CON_CONNECTED) {
       continue;
@@ -604,8 +580,8 @@ int G_checkServerToggle(vmCvar_t *cv) {
   else if (cv == &match_warmupDamage) {
     if (cv->integer > 0) {
       level.server_settings &= ~CV_SVS_WARMUPDMG;
-      nFlag = (cv->integer > 2) ? 2 : cv->integer;
-      nFlag = nFlag << 2;
+      nFlag                  = (cv->integer > 2) ? 2 : cv->integer;
+      nFlag                  = nFlag << 2;
     } else {
       nFlag = CV_SVS_WARMUPDMG;
     }
@@ -632,9 +608,7 @@ int G_checkServerToggle(vmCvar_t *cv) {
 // Sends a player's stats to the requesting client.
 void G_statsPrint(gentity_t *ent, int nType) {
   int pid;
-  const char *cmd =
-      (nType == 0) ? "ws"
-                   : ((nType == 1) ? "wws" : "gstats"); // Yes, not the cleanest
+  const char *cmd = (nType == 0) ? "ws" : ((nType == 1) ? "wws" : "gstats"); // Yes, not the cleanest
   char arg[MAX_TOKEN_CHARS];
 
   if (!ent || (ent->r.svFlags & SVF_BOT)) {
@@ -647,8 +621,7 @@ void G_statsPrint(gentity_t *ent, int nType) {
       CP(va("%s %s\n", cmd, G_createStats(ent)));
       // Specs default to players they are chasing
     } else if (ent->client->sess.spectatorState == SPECTATOR_FOLLOW) {
-      CP(va("%s %s\n", cmd,
-            G_createStats(g_entities + ent->client->sess.spectatorClient)));
+      CP(va("%s %s\n", cmd, G_createStats(g_entities + ent->client->sess.spectatorClient)));
     } else {
       CP("cpm \"Type ^3\\stats <player_id>^7 to see "
          "stats on an active "

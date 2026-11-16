@@ -23,15 +23,20 @@
  */
 
 #pragma once
-#include <string>
-#include <vector>
 #include <array>
 #include <string>
+#include <vector>
 
 namespace ETJump {
 class DeathrunSystem {
 public:
-  enum class PrintLocation { Unspecified, Console, Chat, Center, Left };
+  enum class PrintLocation {
+    Unspecified,
+    Console,
+    Chat,
+    Center,
+    Left
+  };
 
   struct CheckpointData {
     PrintLocation location;
@@ -72,8 +77,7 @@ public:
    * Creates a checkpoint
    * @returns id for the created checkpoint
    */
-  int createCheckpoint(PrintLocation location, const std::string &message,
-                       const std::string &soundPath);
+  int createCheckpoint(PrintLocation location, const std::string &message, const std::string &soundPath);
   /**
    * Activates run for the player
    * @param clientNum ID of the activating player
@@ -144,9 +148,11 @@ private:
       checkpointStatuses.clear();
       active = false;
     }
+
     std::vector<bool> checkpointStatuses;
     bool active;
   };
+
   /**
    * Resets run score and starts a new run
    * @param clientNum activating player ID

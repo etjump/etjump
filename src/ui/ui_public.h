@@ -1,6 +1,8 @@
 #ifndef __UI_PUBLIC_H__
 #define __UI_PUBLIC_H__
 
+#include "../game/q_shared.h"
+
 inline constexpr int UI_API_VERSION = 4;
 
 typedef struct {
@@ -143,12 +145,12 @@ typedef enum {
 
 } uiImport_t;
 
-inline constexpr int SORT_HOST = 0;
-inline constexpr int SORT_MAP = 1;
-inline constexpr int SORT_CLIENTS = 2;
-inline constexpr int SORT_GAME = 3;
-inline constexpr int SORT_PING = 4;
-inline constexpr int SORT_FILTERS = 5;
+inline constexpr int SORT_HOST       = 0;
+inline constexpr int SORT_MAP        = 1;
+inline constexpr int SORT_CLIENTS    = 2;
+inline constexpr int SORT_GAME       = 3;
+inline constexpr int SORT_PING       = 4;
+inline constexpr int SORT_FILTERS    = 5;
 inline constexpr int SORT_FAVOURITES = 6;
 
 typedef enum {

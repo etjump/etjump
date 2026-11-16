@@ -23,6 +23,7 @@
  */
 
 #include "etj_utilities.h"
+
 #include "ui_local.h"
 
 namespace ETJump::Utilities {
@@ -40,9 +41,7 @@ void parseMaplist() {
 
 void parseNumCustomvotes() {
   if (trap_Argc() < 2) {
-    Com_Printf(va(S_COLOR_YELLOW
-                  "%s: unable to parse customvote count: no arguments given.\n",
-                  __func__));
+    Com_Printf(va(S_COLOR_YELLOW "%s: unable to parse customvote count: no arguments given.\n", __func__));
     return;
   }
 
@@ -54,7 +53,7 @@ void parseNumCustomvotes() {
 void parseCustomvote() {
   // if a mapsOnServer or otherMaps is empty, we only have 3 args
   static constexpr int minArgs = 3;
-  const int numArgs = trap_Argc();
+  const int numArgs            = trap_Argc();
 
   if (numArgs < minArgs) {
     Com_Printf(va(S_COLOR_YELLOW "%s: unable to parse customvote: malformed "
@@ -79,7 +78,7 @@ void parseCustomvote() {
   // create a new entry if we didn't find an existing list
   if (mapType == nullptr) {
     uiInfo.customVotes.emplace_back();
-    mapType = &uiInfo.customVotes.back();
+    mapType       = &uiInfo.customVotes.back();
     mapType->type = arg;
   }
 
@@ -115,16 +114,16 @@ void parseCustomvote() {
 
 void resetCustomvotes() {
   uiInfo.customVotes.clear();
-  uiInfo.numCustomvotes = -1;
-  uiInfo.customvoteIndex = 0;
+  uiInfo.numCustomvotes              = -1;
+  uiInfo.customvoteIndex             = 0;
   uiInfo.customvoteMapsOnServerIndex = 0;
-  uiInfo.customvoteOtherMapsIndex = 0;
+  uiInfo.customvoteOtherMapsIndex    = 0;
 
   static constexpr char DETAILS_MENU[] = "ingame_customvote_details";
-  static constexpr char VOTE_MENU[] = "ingame_vote_customvote";
+  static constexpr char VOTE_MENU[]    = "ingame_vote_customvote";
 
   const menuDef_t *detailsMenu = Menus_FindByName(DETAILS_MENU);
-  const menuDef_t *voteMenu = Menus_FindByName(VOTE_MENU);
+  const menuDef_t *voteMenu    = Menus_FindByName(VOTE_MENU);
 
   if (detailsMenu && detailsMenu->window.flags & WINDOW_VISIBLE) {
     Menus_CloseByName(DETAILS_MENU);
@@ -139,8 +138,7 @@ void resetCustomvotes() {
 void toggleSettingsMenu() {
   const menuDef_t *activeMenu = Menu_GetFocused();
 
-  if (activeMenu &&
-      StringUtils::startsWith(activeMenu->window.name, "etjump_settings_")) {
+  if (activeMenu && StringUtils::startsWith(activeMenu->window.name, "etjump_settings_")) {
     Menus_CloseAll();
   } else {
     trap_Key_SetCatcher(KEYCATCH_UI);
@@ -159,7 +157,7 @@ static void markAllServersVisible() {
 
 static void keepServerListUpdating() {
   uiInfo.serverStatus.refreshActive = qtrue;
-  uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime + 1000;
+  uiInfo.serverStatus.refreshtime   = uiInfo.uiDC.realTime + 1000;
 }
 
 static void openPlayOnlineMenu() {
@@ -181,21 +179,18 @@ void handleIllegalRedirect() {
 void drawLevelshotPreview(const rectDef_t &rect) {
   // unregistered levelshot is -1, not 0
   if (uiInfo.mapList[ui_mapIndex.integer].levelShot == -1) {
-    uiInfo.mapList[ui_mapIndex.integer].levelShot = trap_R_RegisterShaderNoMip(
-        va("levelshots/%s", uiInfo.mapList[ui_mapIndex.integer].mapLoadName));
+    uiInfo.mapList[ui_mapIndex.integer].levelShot =
+      trap_R_RegisterShaderNoMip(va("levelshots/%s", uiInfo.mapList[ui_mapIndex.integer].mapLoadName));
 
     if (!uiInfo.mapList[ui_mapIndex.integer].levelShot) {
-      uiInfo.mapList[ui_mapIndex.integer].levelShot =
-          trap_R_RegisterShaderNoMip("levelshots/unknownmap");
+      uiInfo.mapList[ui_mapIndex.integer].levelShot = trap_R_RegisterShaderNoMip("levelshots/unknownmap");
     }
   }
 
-  uiInfo.uiDC.drawHandlePic(rect.x, rect.y, rect.w, rect.h,
-                            uiInfo.mapList[ui_mapIndex.integer].levelShot);
+  uiInfo.uiDC.drawHandlePic(rect.x, rect.y, rect.w, rect.h, uiInfo.mapList[ui_mapIndex.integer].levelShot);
 }
 
-void drawMapname(rectDef_t &rect, float scale, vec4_t color, float text_x,
-                 int textStyle, int align) {
+void drawMapname(rectDef_t &rect, float scale, vec4_t color, float text_x, int textStyle, int align) {
   rectDef_t textRect = {0, 0, rect.w, rect.h};
 
   const int map = ui_currentNetMap.integer;
@@ -207,8 +202,7 @@ void drawMapname(rectDef_t &rect, float scale, vec4_t color, float text_x,
     mapname = "unknownmap";
   }
 
-  const auto width =
-      static_cast<float>(uiInfo.uiDC.textWidth(mapname.c_str(), scale, 0));
+  const auto width = static_cast<float>(uiInfo.uiDC.textWidth(mapname.c_str(), scale, 0));
 
   switch (align) {
     case ITEM_ALIGN_LEFT:
@@ -226,18 +220,16 @@ void drawMapname(rectDef_t &rect, float scale, vec4_t color, float text_x,
 
   textRect.x += rect.x;
   textRect.y += rect.y;
-  uiInfo.uiDC.drawText(textRect.x, textRect.y, scale, color, mapname.c_str(), 0,
-                       0, textStyle);
+  uiInfo.uiDC.drawText(textRect.x, textRect.y, scale, color, mapname.c_str(), 0, 0, textStyle);
 }
 
-std::vector<std::string>
-fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
-                         const float scale, fontInfo_t *font) {
+std::vector<std::string> fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW, const float scale,
+                                                  fontInfo_t *font) {
   std::vector<std::string> fmtLines;
 
   for (auto &line : lines) {
-    int width = 0;
-    size_t indent = 0;
+    int width             = 0;
+    size_t indent         = 0;
     size_t lastWhitespace = 0;
     size_t lastColorStart = 0;
 
@@ -314,6 +306,12 @@ fitChangelogLinesToWidth(std::vector<std::string> &lines, const int maxW,
 
     fmtLines.emplace_back(line);
   }
+
+  // HACK: ensure last line never gets dropped, by inserting an empty line
+  // remove this once we have a dedicated changelog item type that handles
+  // maxscroll calculations correctly
+  // https://github.com/etjump/etjump/issues/1957
+  fmtLines.emplace_back(" ");
 
   return fmtLines;
 }

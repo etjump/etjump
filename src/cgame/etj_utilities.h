@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include <string>
 #include <functional>
+#include <string>
 
 #include "etj_local.h"
 
@@ -34,12 +34,10 @@
 namespace ETJump {
 typedef std::initializer_list<const char *> ShaderStage;
 typedef std::initializer_list<ShaderStage> ShaderStages;
-std::string composeShader(const char *name, ShaderStage general,
-                          ShaderStages stages);
+std::string composeShader(const char *name, ShaderStage general, ShaderStages stages);
 std::string composeShader(const char *name, ShaderStages stages);
 
-template <typename T, std::size_t N>
-constexpr std::size_t nelem(T (&)[N]) {
+template <typename T, std::size_t N> constexpr std::size_t nelem(T (&)[N]) {
   return N;
 }
 
@@ -84,11 +82,10 @@ void registerGameShader(int32_t index, const char *shaderStr);
 
 void centerCursor();
 
-void addLoopingSound(const vec3_t origin, const vec3_t velocity,
-                     sfxHandle_t sfx, int volume, int soundTime);
+void addLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int volume, int soundTime);
 
-void addRealLoopingSound(const vec3_t origin, const vec3_t velocity,
-                         sfxHandle_t sfx, int range, int volume, int soundTime);
+void addRealLoopingSound(const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx, int range, int volume,
+                         int soundTime);
 
 // true if 'entityNum' is a player with hideme enabled
 bool hideMeCheck(int32_t entityNum);

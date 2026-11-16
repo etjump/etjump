@@ -32,30 +32,30 @@
 
 #if defined(_DEBUG)
   #define GAME_VERSION_DATED GAME_VERSION " " CPUSTRING " " __DATE__ " DEBUG"
-  #define GAME_VERSION_N GAME_VERSION " DEBUG"
+  #define GAME_VERSION_N     GAME_VERSION " DEBUG"
 #else
   #define GAME_VERSION_DATED GAME_VERSION " " CPUSTRING " " __DATE__
-  #define GAME_VERSION_N GAME_VERSION
+  #define GAME_VERSION_N     GAME_VERSION
 #endif
 
 #define GAME_TAG (GAME_NAME " " GAME_VERSION)
 
-#define GAME_SIGNATURE                                                         \
-  "      __    _               \n"                                             \
-  " ___ / /_  (_)_ ____ _  ___ \n"                                             \
-  "/ -_) __/ / / // /  ' \\/ _ \\\n"                                           \
-  "\\__/\\__/_/ /\\_,_/_/_/_/ .__/\n"                                          \
+#define GAME_SIGNATURE                \
+  "      __    _               \n"    \
+  " ___ / /_  (_)_ ____ _  ___ \n"    \
+  "/ -_) __/ / / // /  ' \\/ _ \\\n"  \
+  "\\__/\\__/_/ /\\_,_/_/_/_/ .__/\n" \
   "      |___/          /_/    \n"
 
-#define GAME_HEADER                                                            \
-  GAME_SIGNATURE                                                               \
-  "\n"                                                                         \
-  "- MOD NAME:     " GAME_NAME "\n"                                            \
-  "- MOD URL:      " GAME_URL "\n"                                             \
-  "- MOD BINARY:   " GAME_BINARY_NAME "\n"                                     \
-  "- MOD VERSION:  " GAME_VERSION_N "\n"                                       \
-  "- BUILD DATE:   " __DATE__ "\n"                                             \
-  "- BUILD COMMIT: " GIT_COMMIT_HASH "\n"                                      \
+#define GAME_HEADER                        \
+  GAME_SIGNATURE                           \
+  "\n"                                     \
+  "- MOD NAME:     " GAME_NAME "\n"        \
+  "- MOD URL:      " GAME_URL "\n"         \
+  "- MOD BINARY:   " GAME_BINARY_NAME "\n" \
+  "- MOD VERSION:  " GAME_VERSION_N "\n"   \
+  "- BUILD DATE:   " __DATE__ "\n"         \
+  "- BUILD COMMIT: " GIT_COMMIT_HASH "\n"  \
   "- BUILD ARCH:   " CPUSTRING "\n"
 
 // bani
@@ -67,9 +67,9 @@
 
 inline constexpr float SPRINTTIME = 20000.0f;
 
-inline constexpr int DEFAULT_GRAVITY = 800;
-inline constexpr int FORCE_LIMBO_HEALTH = -75; // JPW NERVE
-inline constexpr int GIB_HEALTH = -175;        // JPW NERVE
+inline constexpr int DEFAULT_GRAVITY    = 800;
+inline constexpr int FORCE_LIMBO_HEALTH = -75;  // JPW NERVE
+inline constexpr int GIB_HEALTH         = -175; // JPW NERVE
 
 inline constexpr int HOLDBREATHTIME = 12000;
 
@@ -83,12 +83,12 @@ inline constexpr int FLAMETHROWER_RANGE = 2500;
 inline constexpr int VOTE_TIME = 30000; // 30 seconds before vote times out
 
 inline constexpr int DEFAULT_VIEWHEIGHT = 40;
-inline constexpr int CROUCH_VIEWHEIGHT = 16;
-inline constexpr int DEAD_VIEWHEIGHT = -16;
-inline constexpr int PRONE_VIEWHEIGHT = -8;
+inline constexpr int CROUCH_VIEWHEIGHT  = 16;
+inline constexpr int DEAD_VIEWHEIGHT    = -16;
+inline constexpr int PRONE_VIEWHEIGHT   = -8;
 
-inline constexpr vec3_t playerMins = {-18, -18, -24};
-inline constexpr vec3_t playerMaxs = {18, 18, 48};
+inline constexpr vec3_t playerMins          = {-18, -18, -24};
+inline constexpr vec3_t playerMaxs          = {18, 18, 48};
 inline constexpr vec3_t playerlegsProneMins = {-13.5f, -13.5f, -24.f};
 inline constexpr vec3_t playerlegsProneMaxs = {13.5f, 13.5f, -14.4f};
 
@@ -99,24 +99,24 @@ inline constexpr vec3_t playerlegsProneMaxs = {13.5f, 13.5f, -14.4f};
 // these are always correct anyway, there's no variation in any scenario
 
 inline constexpr int32_t CROUCH_MAXS_Z = playerMaxs[2] - 24;
-inline constexpr int32_t PRONE_MAXS_Z = playerMaxs[2] - 32;
+inline constexpr int32_t PRONE_MAXS_Z  = playerMaxs[2] - 32;
 
 // RF, on fire effects
-inline constexpr int FIRE_FLASH_TIME = 2000;
+inline constexpr int FIRE_FLASH_TIME        = 2000;
 inline constexpr int FIRE_FLASH_FADEIN_TIME = 1000;
 
 inline constexpr int AAGUN_DAMAGE = 25;
 inline constexpr int AAGUN_SPREAD = 10;
 
-inline constexpr int MG42_SPREAD_MP = 100;
-inline constexpr int MG42_DAMAGE_MP = 20;
+inline constexpr int MG42_SPREAD_MP       = 100;
+inline constexpr int MG42_DAMAGE_MP       = 20;
 inline constexpr int MG42_RATE_OF_FIRE_MP = 66;
 
-inline constexpr float MAX_MG42_HEAT = 1500.0f;
+inline constexpr float MAX_MG42_HEAT    = 1500.0f;
 inline constexpr int MG42_HEAT_RECOVERY = 2000;
 
 inline constexpr int AAGUN_RATE_OF_FIRE = 100;
-inline constexpr float MG42_YAWSPEED = 300.f; // degrees per second
+inline constexpr float MG42_YAWSPEED    = 300.f; // degrees per second
 
 enum ChatMode {
   SAY_ALL,
@@ -153,11 +153,11 @@ inline constexpr float ZOOM_PITCH_FREQUENCY = 0.24f;
 // minimum amount of sway even if completely settled on target
 inline constexpr float ZOOM_PITCH_MIN_AMPLITUDE = 0.1f;
 
-inline constexpr float ZOOM_YAW_AMPLITUDE = 0.7f;
-inline constexpr float ZOOM_YAW_FREQUENCY = 0.12f;
+inline constexpr float ZOOM_YAW_AMPLITUDE     = 0.7f;
+inline constexpr float ZOOM_YAW_FREQUENCY     = 0.12f;
 inline constexpr float ZOOM_YAW_MIN_AMPLITUDE = 0.2f;
 
-inline constexpr int MAX_OBJECTIVES = 8;
+inline constexpr int MAX_OBJECTIVES   = 8;
 inline constexpr int MAX_OID_TRIGGERS = 18;
 
 // ETJump: need to keep this at default so that 'gameinfo.txt' parses correctly,
@@ -197,40 +197,40 @@ typedef struct {
 // Random reinforcement seed settings
 // FIXME: remove
 inline constexpr int MAX_REINFSEEDS = 8;
-inline constexpr int REINF_RANGE = 16;   // (0 to n-1 second offset)
-inline constexpr int REINF_BLUEDELT = 3; // Allies shift offset
-inline constexpr int REINF_REDDELT = 2;  // Axis shift offset
+inline constexpr int REINF_RANGE    = 16; // (0 to n-1 second offset)
+inline constexpr int REINF_BLUEDELT = 3;  // Allies shift offset
+inline constexpr int REINF_REDDELT  = 2;  // Axis shift offset
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 
 // Client flags for server processing
-inline constexpr int CGF_AUTORELOAD = 1 << 0;
-inline constexpr int CGF_STATSDUMP = 1 << 1;
-inline constexpr int CGF_AUTOACTIVATE = 1 << 2;
-inline constexpr int CGF_NOFATIGUE = 1 << 3;
-inline constexpr int CGF_PMOVEFIXED = 1 << 4;
-inline constexpr int CGF_CGAZ = 1 << 5;
-inline constexpr int CGF_LOADVIEWANGLES = 1 << 6;
-inline constexpr int CGF_CHEATCVARSON = 1 << 7;
-inline constexpr int CGF_HIDEME = 1 << 8;
+inline constexpr int CGF_AUTORELOAD      = 1 << 0;
+inline constexpr int CGF_STATSDUMP       = 1 << 1;
+inline constexpr int CGF_AUTOACTIVATE    = 1 << 2;
+inline constexpr int CGF_NOFATIGUE       = 1 << 3;
+inline constexpr int CGF_PMOVEFIXED      = 1 << 4;
+inline constexpr int CGF_CGAZ            = 1 << 5;
+inline constexpr int CGF_LOADVIEWANGLES  = 1 << 6;
+inline constexpr int CGF_CHEATCVARSON    = 1 << 7;
+inline constexpr int CGF_HIDEME          = 1 << 8;
 inline constexpr int CGF_ENABLE_TIMERUNS = 1 << 9;
-inline constexpr int CGF_NOACTIVATELEAN = 1 << 10;
-inline constexpr int CGF_AUTO_LOAD = 1 << 11;
-inline constexpr int CGF_QUICK_FOLLOW = 1 << 12;
-inline constexpr int CGF_SNAPHUD = 1 << 13;
-inline constexpr int CGF_NOPANZERSWITCH = 1 << 14;
-inline constexpr int CGF_AUTOSPRINT = 1 << 15;
+inline constexpr int CGF_NOACTIVATELEAN  = 1 << 10;
+inline constexpr int CGF_AUTO_LOAD       = 1 << 11;
+inline constexpr int CGF_QUICK_FOLLOW    = 1 << 12;
+inline constexpr int CGF_SNAPHUD         = 1 << 13;
+inline constexpr int CGF_NOPANZERSWITCH  = 1 << 14;
+inline constexpr int CGF_AUTOSPRINT      = 1 << 15;
 
 inline constexpr int MAX_MOTDLINES = 6;
 
 // Multiview settings
 // FIXME: remove
-inline constexpr int MAX_MVCLIENTS = 32;
+inline constexpr int MAX_MVCLIENTS           = 32;
 inline constexpr int MV_SCOREUPDATE_INTERVAL = 5000; // in msec
 
 inline constexpr int MAX_CHARACTERS = 16;
 
-inline constexpr int MAX_FIRETEAMS = 12;
-inline constexpr int MAX_FIRETEAM_USERS = 15;
+inline constexpr int MAX_FIRETEAMS        = 12;
+inline constexpr int MAX_FIRETEAM_USERS   = 15;
 inline constexpr int FT_SAVELIMIT_NOT_SET = -1;
 
 extern const char *bg_fireteamNames[MAX_FIRETEAMS];
@@ -247,18 +247,18 @@ inline constexpr int CS_MESSAGE = 3;
 // g_motd string for server message of the day
 inline constexpr int CS_MOTD = 4;
 // server time when the match will be restarted
-inline constexpr int CS_WARMUP = 5;
-inline constexpr int CS_VOTE_TIME = 6;
-inline constexpr int CS_VOTE_STRING = 7;
-inline constexpr int CS_VOTE_YES = 8;
-inline constexpr int CS_VOTE_NO = 9;
+inline constexpr int CS_WARMUP       = 5;
+inline constexpr int CS_VOTE_TIME    = 6;
+inline constexpr int CS_VOTE_STRING  = 7;
+inline constexpr int CS_VOTE_YES     = 8;
+inline constexpr int CS_VOTE_NO      = 9;
 inline constexpr int CS_GAME_VERSION = 10;
 
 // so the timer only shows the current level
 inline constexpr int CS_LEVEL_START_TIME = 11;
 // when 1, intermission will start in a second or two
-inline constexpr int CS_INTERMISSION = 12;
-inline constexpr int CS_MULTI_INFO = 13;
+inline constexpr int CS_INTERMISSION    = 12;
+inline constexpr int CS_MULTI_INFO      = 13;
 inline constexpr int CS_MULTI_MAPWINNER = 14;
 inline constexpr int CS_MULTI_OBJECTIVE = 15;
 // 16 = unused
@@ -268,7 +268,7 @@ inline constexpr int CS_SCREENFADE = 17;
 // used for saving the current state/settings of the fog
 inline constexpr int CS_FOGVARS = 18;
 // this is where we should view the skybox from
-inline constexpr int CS_SKYBOXORG = 19;
+inline constexpr int CS_SKYBOXORG    = 19;
 inline constexpr int CS_TARGETEFFECT = 20;
 
 // ETJump: this whole CS is useless for us and can be reused for something
@@ -285,9 +285,9 @@ inline constexpr int CS_ROUNDSCORES2 = 24;
 inline constexpr int CS_MAIN_AXIS_OBJECTIVE = 25;
 // Most important current objective
 inline constexpr int CS_MAIN_ALLIES_OBJECTIVE = 26;
-inline constexpr int CS_MUSIC_QUEUE = 27;
-inline constexpr int CS_SCRIPT_MOVER_NAMES = 28;
-inline constexpr int CS_CONSTRUCTION_NAMES = 29;
+inline constexpr int CS_MUSIC_QUEUE           = 27;
+inline constexpr int CS_SCRIPT_MOVER_NAMES    = 28;
+inline constexpr int CS_CONSTRUCTION_NAMES    = 29;
 // Versioning info for demo playback compatibility
 inline constexpr int CS_VERSIONINFO = 30;
 
@@ -303,40 +303,43 @@ inline constexpr int CS_VERSIONINFO = 30;
 // Reinforcement seeds
 inline constexpr int CS_REINFSEEDS = 31;
 // Shows current enable/disabled settings (for voting UI)
-inline constexpr int CS_SERVERTOGGLES = 32;
-inline constexpr int CS_GLOBALFOGVARS = 33;
+inline constexpr int CS_SERVERTOGGLES           = 32;
+inline constexpr int CS_GLOBALFOGVARS           = 33;
 inline constexpr int CS_INTERMISSION_START_TIME = 34;
-inline constexpr int CS_ENDGAME_STATS = 35;
-inline constexpr int CS_CHARGETIMES = 36;
-inline constexpr int CS_FILTERCAMS = 37;
+inline constexpr int CS_ENDGAME_STATS           = 35;
+inline constexpr int CS_CHARGETIMES             = 36;
+inline constexpr int CS_FILTERCAMS              = 37;
 
 // any index up from 38/40 to 64 that isn't defined = unused (see comment above)
 
 // for now, this holds mapscript/entity file hashes, rename to something
 // more fitting if different data is added in the future
 inline constexpr int32_t CS_ETJUMP_MAPINFO = 40;
+// any worldspawn key-value pairs that need to be communicated to clients,
+// for prediction purposes
+inline constexpr int32_t CS_ETJUMP_WS_KEYS = 41;
+// \key:value:flags\key:value:flags\...
+inline constexpr int32_t CS_ETJUMP_WS_KEY_OVERRIDES = 42;
 
-inline constexpr int CS_MODELS = 64;
-inline constexpr int CS_SOUNDS = CS_MODELS + MAX_MODELS;
-inline constexpr int CS_SHADERS = CS_SOUNDS + MAX_SOUNDS;
-inline constexpr int CS_SHADERSTATE = CS_SHADERS + MAX_CS_SHADERS;
-inline constexpr int CS_SKINS = CS_SHADERSTATE + MAX_CS_SHADERSTATES;
-inline constexpr int CS_CHARACTERS = CS_SKINS + MAX_CS_SKINS;
-inline constexpr int CS_PLAYERS = CS_CHARACTERS + MAX_CHARACTERS;
+inline constexpr int CS_MODELS             = 64;
+inline constexpr int CS_SOUNDS             = CS_MODELS + MAX_MODELS;
+inline constexpr int CS_SHADERS            = CS_SOUNDS + MAX_SOUNDS;
+inline constexpr int CS_SHADERSTATE        = CS_SHADERS + MAX_CS_SHADERS;
+inline constexpr int CS_SKINS              = CS_SHADERSTATE + MAX_CS_SHADERSTATES;
+inline constexpr int CS_CHARACTERS         = CS_SKINS + MAX_CS_SKINS;
+inline constexpr int CS_PLAYERS            = CS_CHARACTERS + MAX_CHARACTERS;
 inline constexpr int CS_MULTI_SPAWNTARGETS = CS_PLAYERS + MAX_CLIENTS;
-inline constexpr int CS_OID_TRIGGERS =
-    CS_MULTI_SPAWNTARGETS + MAX_MULTI_SPAWNTARGETS;
-inline constexpr int CS_OID_DATA = CS_OID_TRIGGERS + MAX_OID_TRIGGERS;
-inline constexpr int CS_DLIGHTS = CS_OID_DATA + MAX_OID_TRIGGERS;
-inline constexpr int CS_SPLINES = CS_DLIGHTS + MAX_DLIGHT_CONFIGSTRINGS;
-inline constexpr int CS_TAGCONNECTS = CS_SPLINES + MAX_SPLINE_CONFIGSTRINGS;
-inline constexpr int CS_FIRETEAMS = CS_TAGCONNECTS + MAX_TAGCONNECTS;
-inline constexpr int CS_CUSTMOTD = CS_FIRETEAMS + MAX_FIRETEAMS;
-inline constexpr int CS_STRINGS = CS_CUSTMOTD + MAX_MOTDLINES;
-inline constexpr int CS_MAX = CS_STRINGS + MAX_CSSTRINGS;
+inline constexpr int CS_OID_TRIGGERS       = CS_MULTI_SPAWNTARGETS + MAX_MULTI_SPAWNTARGETS;
+inline constexpr int CS_OID_DATA           = CS_OID_TRIGGERS + MAX_OID_TRIGGERS;
+inline constexpr int CS_DLIGHTS            = CS_OID_DATA + MAX_OID_TRIGGERS;
+inline constexpr int CS_SPLINES            = CS_DLIGHTS + MAX_DLIGHT_CONFIGSTRINGS;
+inline constexpr int CS_TAGCONNECTS        = CS_SPLINES + MAX_SPLINE_CONFIGSTRINGS;
+inline constexpr int CS_FIRETEAMS          = CS_TAGCONNECTS + MAX_TAGCONNECTS;
+inline constexpr int CS_CUSTMOTD           = CS_FIRETEAMS + MAX_FIRETEAMS;
+inline constexpr int CS_STRINGS            = CS_CUSTMOTD + MAX_MOTDLINES;
+inline constexpr int CS_MAX                = CS_STRINGS + MAX_CSSTRINGS;
 
-static_assert(CS_MAX <= MAX_CONFIGSTRINGS,
-              "CS_MAX cannot exceed MAX_CONFIGSTRINGS");
+static_assert(CS_MAX <= MAX_CONFIGSTRINGS, "CS_MAX cannot exceed MAX_CONFIGSTRINGS");
 
 typedef int gametype_t;
 // since we don't support gametypes, this is just an int instead of an enum
@@ -344,10 +347,14 @@ typedef int gametype_t;
 // we still need to keep 'g_gametype' cvar around for server browser
 inline constexpr gametype_t ETJUMP_GAMETYPE = 2;
 
-typedef enum { GENDER_MALE, GENDER_FEMALE, GENDER_NEUTER } gender_t;
+typedef enum {
+  GENDER_MALE,
+  GENDER_FEMALE,
+  GENDER_NEUTER
+} gender_t;
 
 // 'sc0', 'sc1'
-inline constexpr int32_t NUM_SCORESTRINGS = 2;
+inline constexpr int32_t NUM_SCORESTRINGS    = 2;
 inline constexpr int32_t MAX_SCORESTRING_LEN = 1000;
 
 // for client side parsing
@@ -396,7 +403,7 @@ typedef enum {
 
 // pmove->pm_flags	(sent as max 16 bits in msg.c)
 
-inline constexpr int PMF_DUCKED = 1;
+inline constexpr int PMF_DUCKED    = 1;
 inline constexpr int PMF_JUMP_HELD = 2;
 // player is on a ladder
 inline constexpr int PMF_LADDER = 4;
@@ -414,7 +421,7 @@ inline constexpr int PMF_TIME_WATERJUMP = 256;
 inline constexpr int PMF_RESPAWNED = 512;
 // unused
 inline constexpr int PMF_PRONE_BIPOD = 1024;
-inline constexpr int PMF_FLAILING = 2048;
+inline constexpr int PMF_FLAILING    = 2048;
 // spectate following another player
 inline constexpr int PMF_FOLLOW = 4096;
 // hold for this time after a load game, and prevent large thinks
@@ -424,8 +431,45 @@ inline constexpr int PMF_LIMBO = 16384;
 // DHM - Nerve :: Lock all movement and view changes
 inline constexpr int PMF_TIME_LOCKPLAYER = 32768;
 
-inline constexpr int PMF_ALL_TIMES = PMF_TIME_WATERJUMP | PMF_TIME_LAND |
-                                     PMF_TIME_KNOCKBACK | PMF_TIME_LOCKPLAYER;
+inline constexpr int PMF_ALL_TIMES = PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_KNOCKBACK | PMF_TIME_LOCKPLAYER;
+
+namespace ETJump {
+enum class AreaOpts {
+  FORBID_INSIDE     = 0,
+  FORBID_OUTSIDE    = 1,
+  ALLOW_EVERYWHERE  = 2,
+  FORBID_EVERYWHERE = 3,
+};
+
+enum class NoFallDamageOpts {
+  OFF      = 0,
+  ON       = 1,
+  FORCE_ON = 2,
+};
+
+enum class OverbouncePlayersOpts {
+  INHERIT   = 0, // no special behavior, follows 'nooverbounce'
+  FORCE_ON  = 1,
+  FORCE_OFF = 2,
+};
+
+// keys needed on both client and server
+struct SharedWorldspawnKeys {
+  bool noOverbounce;
+  bool noJumpDelay;
+  bool noDrop;
+  bool noWallbug;
+  bool portalPredict;
+  bool portalSurfaces;
+
+  AreaOpts noSave;
+  AreaOpts noProne;
+  AreaOpts noNoclip;
+
+  NoFallDamageOpts noFallDamage;
+  OverbouncePlayersOpts overbouncePlayers;
+};
+} // namespace ETJump
 
 typedef struct {
   qboolean bAutoReload; // do we predict autoreload of weapons
@@ -479,6 +523,8 @@ typedef struct {
   // enable buggy nojumpdelay behavior on solstice and stonehalls2,
   // where jump time does not get updated when a player jumps on a NJD surface
   bool jumpDelayBug;
+
+  ETJump::SharedWorldspawnKeys sharedWSKeys;
 } pmoveExt_t; // data used both in client and server - store it here
               // instead of playerstate to prevent different engine versions of
               // playerstate between XP and MP
@@ -534,26 +580,21 @@ typedef struct {
   int pmove_fixed;
   int pmove_msec;
 
-  // ETJump: shared values between client & server
-  int shared;
   // ETJump: enable/disable strafe + activate = lean
   qboolean noActivateLean;
   bool noPanzerAutoswitch;
 
   // callbacks to test the world
   // these will be different functions during game and cgame
-  void (*trace)(trace_t *results, const vec3_t start, const vec3_t mins,
-                const vec3_t maxs, const vec3_t end, int passEntityNum,
-                int contentMask);
+  void (*trace)(trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
+                int passEntityNum, int contentMask);
   int (*pointcontents)(const vec3_t point, int passEntityNum);
 } pmove_t;
 
 // if a full pmove isn't done on the client, you can just update the angles
 void PM_UpdateViewAngles(playerState_t *ps, pmoveExt_t *pmext, usercmd_t *cmd,
-                         void(trace)(trace_t *results, const vec3_t start,
-                                     const vec3_t mins, const vec3_t maxs,
-                                     const vec3_t end, int passEntityNum,
-                                     int contentMask),
+                         void(trace)(trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+                                     const vec3_t end, int passEntityNum, int contentMask),
                          int tracemask);
 void Pmove(pmove_t *pmove);
 void PmoveSingle(pmove_t *pmove);
@@ -563,7 +604,7 @@ bool canFireWeapon(const playerState_t *ps);
 }
 
 inline constexpr int8_t CMDSCALE_DEFAULT = 127;
-inline constexpr int8_t CMDSCALE_WALK = 64;
+inline constexpr int8_t CMDSCALE_WALK    = 64;
 
 // ms before jump is allowed again
 inline constexpr int JUMP_DELAY_TIME = 850;
@@ -576,10 +617,10 @@ inline constexpr float TRACE_LADDER_DIST = 48.0f;
 
 //===================================================================================
 
-inline constexpr int PC_SOLDIER = 0;   //	shoot stuff
-inline constexpr int PC_MEDIC = 1;     //	heal stuff
-inline constexpr int PC_ENGINEER = 2;  //	build stuff
-inline constexpr int PC_FIELDOPS = 3;  //	bomb stuff
+inline constexpr int PC_SOLDIER   = 0; //	shoot stuff
+inline constexpr int PC_MEDIC     = 1; //	heal stuff
+inline constexpr int PC_ENGINEER  = 2; //	build stuff
+inline constexpr int PC_FIELDOPS  = 3; //	bomb stuff
 inline constexpr int PC_COVERTOPS = 4; //	sneak about ;o
 
 inline constexpr int NUM_PLAYER_CLASSES = 5;
@@ -591,12 +632,12 @@ inline constexpr int MAX_WEAP_BANKS_MP = 11;
 // jpw
 
 // Keys pressed
-inline constexpr int UMOVE_FORWARD = 0x0001;
+inline constexpr int UMOVE_FORWARD  = 0x0001;
 inline constexpr int UMOVE_BACKWARD = 0x0002;
-inline constexpr int UMOVE_LEFT = 0x0004;
-inline constexpr int UMOVE_RIGHT = 0x0008;
-inline constexpr int UMOVE_UP = 0x0010;
-inline constexpr int UMOVE_DOWN = 0x0020;
+inline constexpr int UMOVE_LEFT     = 0x0004;
+inline constexpr int UMOVE_RIGHT    = 0x0008;
+inline constexpr int UMOVE_UP       = 0x0010;
+inline constexpr int UMOVE_DOWN     = 0x0020;
 
 // player_state->stats[] indexes
 typedef enum {
@@ -609,8 +650,8 @@ typedef enum {
   STAT_PLAYER_CLASS,     // DHM - Nerve :: player class in multiplayer
   STAT_CAPTUREHOLD_RED,  // JPW NERVE - red team score
   STAT_CAPTUREHOLD_BLUE, // JPW NERVE - blue team score
-  STAT_XP, // Gordon: "realtime" version of xp that doesnt need to go
-           // thru the scoreboard
+  STAT_XP,               // Gordon: "realtime" version of xp that doesnt need to go
+                         // thru the scoreboard
   // setup - keys pressed (high byte contains buttons, low byte contains
   // wbuttons)
   STAT_USERCMD_BUTTONS,
@@ -705,9 +746,7 @@ inline constexpr int32_t EF_PLAYER_UNUSED4 = EF_PATH_LINK;       // used only on
 inline constexpr int32_t EF_PLAYER_UNUSED5 = EF_SPARE0;          // used only on entities
 // clang-format on
 
-#define BG_PlayerMounted(eFlags)                                               \
-  ((eFlags & EF_MG42_ACTIVE) || (eFlags & EF_MOUNTEDTANK) ||                   \
-   (eFlags & EF_AAGUN_ACTIVE))
+#define BG_PlayerMounted(eFlags) ((eFlags & EF_MG42_ACTIVE) || (eFlags & EF_MOUNTEDTANK) || (eFlags & EF_AAGUN_ACTIVE))
 
 inline constexpr int ADRENALINE_TIME = 10000;
 
@@ -733,7 +772,7 @@ typedef enum {
 
   PW_ADRENALINE,
 
-  PW_BLACKOUT = 14,     // OSP - spec blackouts. FIXME: we don't need 32bits
+  PW_BLACKOUT     = 14, // OSP - spec blackouts. FIXME: we don't need 32bits
                         // here...relocate
   PW_MVCLIENTLIST = 15, // OSP - MV client info.. need a full 32 bits
 
@@ -851,8 +890,7 @@ enum weapon_t : int8_t {
   WP_NUM_WEAPONS
 };
 
-static_assert(WP_NUM_WEAPONS < MAX_WEAPONS,
-              "WP_NUM_WEAPONS must be less than MAX_WEAPONS");
+static_assert(WP_NUM_WEAPONS < MAX_WEAPONS, "WP_NUM_WEAPONS must be less than MAX_WEAPONS");
 
 // JPW NERVE moved from cg_weapons (now used in g_active) for drop command,
 // actual array in bg_misc.c
@@ -913,11 +951,11 @@ typedef struct ammotable_s {
   int fireDelayTime;       //
   int nextShotTime;        //
                            //----(SA)	added
-  int maxHeat;  // max active firing time before weapon 'overheats' (at
-                // which point the weapon will fail)
-  int coolRate; // how fast the weapon cools down. (per second)
-                //----(SA)	end
-  int mod;      // means of death
+  int maxHeat;             // max active firing time before weapon 'overheats' (at
+                           // which point the weapon will fail)
+  int coolRate;            // how fast the weapon cools down. (per second)
+                           //----(SA)	end
+  int mod;                 // means of death
 } ammotable_t;
 
 // Lookup table to find ammo table entry
@@ -928,19 +966,16 @@ extern int weapAlts[]; // defined in bg_misc.c
 //----(SA)
 // for routines that need to check if a WP_ is </=/> a given set of weapons
 inline constexpr weapon_t WP_BEGINSECONDARY = WP_GPG40;
-inline constexpr weapon_t WP_LASTSECONDARY = WP_SILENCED_COLT;
+inline constexpr weapon_t WP_LASTSECONDARY  = WP_SILENCED_COLT;
 
 // TTimo
 // NOTE: what about WP_VENOM and other XP weapons?
 // rain - #81 - added added akimbo weapons and deployed MG42
-#define IS_AUTORELOAD_WEAPON(weapon)                                           \
-  (weapon == WP_LUGER || weapon == WP_COLT || weapon == WP_MP40 ||             \
-   weapon == WP_THOMPSON || weapon == WP_STEN || weapon == WP_KAR98 ||         \
-   weapon == WP_CARBINE || weapon == WP_GARAND_SCOPE || weapon == WP_FG42 ||   \
-   weapon == WP_K43 || weapon == WP_MOBILE_MG42 ||                             \
-   weapon == WP_SILENCED_COLT || weapon == WP_SILENCER ||                      \
-   weapon == WP_GARAND || weapon == WP_K43_SCOPE || weapon == WP_FG42SCOPE ||  \
-   BG_IsAkimboWeapon(weapon) || weapon == WP_MOBILE_MG42_SET)
+#define IS_AUTORELOAD_WEAPON(weapon)                                                                                   \
+  (weapon == WP_LUGER || weapon == WP_COLT || weapon == WP_MP40 || weapon == WP_THOMPSON || weapon == WP_STEN ||       \
+   weapon == WP_KAR98 || weapon == WP_CARBINE || weapon == WP_GARAND_SCOPE || weapon == WP_FG42 || weapon == WP_K43 || \
+   weapon == WP_MOBILE_MG42 || weapon == WP_SILENCED_COLT || weapon == WP_SILENCER || weapon == WP_GARAND ||           \
+   weapon == WP_K43_SCOPE || weapon == WP_FG42SCOPE || BG_IsAkimboWeapon(weapon) || weapon == WP_MOBILE_MG42_SET)
 
 // shared flamethrower constants
 
@@ -948,15 +983,14 @@ inline constexpr float FLAME_START_SIZE = 1.0f;
 
 // speed of flame as it leaves the nozzle
 inline constexpr float FLAME_START_SPEED = 1200.0f;
-inline constexpr float FLAME_MIN_SPEED = 60.0f;
+inline constexpr float FLAME_MIN_SPEED   = 60.0f;
 
 // these are calculated (don't change)
 // NOTE: only modify the range, since this should always reflect that range
 inline constexpr int FLAME_LENGTH = FLAMETHROWER_RANGE + 50;
 
 // life duration in milliseconds
-inline constexpr int FLAME_LIFETIME =
-    static_cast<int>((FLAME_LENGTH / FLAME_START_SPEED) * 1000);
+inline constexpr int FLAME_LIFETIME           = static_cast<int>((FLAME_LENGTH / FLAME_START_SPEED) * 1000);
 inline constexpr float FLAME_FRICTION_PER_SEC = 2.0f * FLAME_START_SPEED;
 // x is the current sizeMax
 #define GET_FLAME_SIZE_SPEED(x) ((static_cast<float>(x) / FLAME_LIFETIME) / 0.3)
@@ -1120,143 +1154,143 @@ typedef enum {
 } entity_event_t;
 
 static constexpr std::array<const char *, EV_MAX_EVENTS + 1> eventnames = {
-    "EV_NONE",
-    "EV_FOOTSTEP",
-    "EV_FOOTSTEP_METAL",
-    "EV_FOOTSTEP_WOOD",
-    "EV_FOOTSTEP_GRASS",
-    "EV_FOOTSTEP_GRAVEL",
-    "EV_FOOTSTEP_ROOF",
-    "EV_FOOTSTEP_SNOW",
-    "EV_FOOTSTEP_CARPET",
-    "EV_FOOTSPLASH",
-    "EV_FOOTWADE",
-    "EV_SWIM",
-    "EV_STEP_4",
-    "EV_STEP_8",
-    "EV_STEP_12",
-    "EV_STEP_16",
-    "EV_FALL_SHORT",
-    "EV_FALL_MEDIUM",
-    "EV_FALL_FAR",
-    "EV_FALL_NDIE",
-    "EV_FALL_DMG_10",
-    "EV_FALL_DMG_15",
-    "EV_FALL_DMG_25",
-    "EV_FALL_DMG_50",
-    "EV_JUMP",
-    "EV_WATER_TOUCH",
-    "EV_WATER_LEAVE",
-    "EV_WATER_UNDER",
-    "EV_WATER_CLEAR",
-    "EV_ITEM_PICKUP",
-    "EV_ITEM_PICKUP_QUIET",
-    "EV_GLOBAL_ITEM_PICKUP",
-    "EV_NOAMMO",
-    "EV_WEAPONSWITCHED",
-    "EV_EMPTYCLIP",
-    "EV_FILL_CLIP",
-    "EV_MG42_FIXED",
-    "EV_WEAP_OVERHEAT",
-    "EV_CHANGE_WEAPON",
-    "EV_CHANGE_WEAPON_2",
-    "EV_FIRE_WEAPON",
-    "EV_FIRE_WEAPONB",
-    "EV_FIRE_WEAPON_LASTSHOT",
-    "EV_NOFIRE_UNDERWATER",
-    "EV_FIRE_WEAPON_MG42",
-    "EV_FIRE_WEAPON_MOUNTEDMG42",
-    "EV_ITEM_RESPAWN",
-    "EV_ITEM_POP",
-    "EV_PLAYER_TELEPORT_IN",
-    "EV_PLAYER_TELEPORT_OUT",
-    "EV_GRENADE_BOUNCE",
-    "EV_GENERAL_SOUND",
-    "EV_GENERAL_SOUND_VOLUME",
-    "EV_GENERAL_CLIENT_SOUND_VOLUME",
-    "EV_GLOBAL_SOUND",
-    "EV_GLOBAL_CLIENT_SOUND",
-    "EV_GLOBAL_TEAM_SOUND",
-    "EV_FX_SOUND",
-    "EV_BULLET_HIT_FLESH",
-    "EV_BULLET_HIT_WALL",
-    "EV_MISSILE_HIT",
-    "EV_MISSILE_MISS",
-    "EV_RAILTRAIL",
-    "EV_VENOM",
-    "EV_BULLET",
-    "EV_LOSE_HAT",
-    "EV_PAIN",
-    "EV_CROUCH_PAIN",
-    "EV_DEATH1",
-    "EV_DEATH2",
-    "EV_DEATH3",
-    "EV_OBITUARY",
-    "EV_STOPSTREAMINGSOUND",
-    "EV_POWERUP_QUAD",
-    "EV_POWERUP_BATTLESUIT",
-    "EV_POWERUP_REGEN",
-    "EV_GIB_PLAYER",
-    "EV_DEBUG_LINE",
-    "EV_STOPLOOPINGSOUND",
-    "EV_TAUNT",
-    "EV_SMOKE",
-    "EV_SPARKS",
-    "EV_SPARKS_ELECTRIC",
-    "EV_EXPLODE",
-    "EV_RUBBLE",
-    "EV_EFFECT",
-    "EV_MORTAREFX",
-    "EV_SPINUP",
-    "EV_SNOW_ON",
-    "EV_SNOW_OFF",
-    "EV_MISSILE_MISS_SMALL",
-    "EV_MISSILE_MISS_LARGE",
-    "EV_MORTAR_IMPACT",
-    "EV_MORTAR_MISS",
-    "EV_SPIT_HIT",
-    "EV_SPIT_MISS",
-    "EV_SHARD",
-    "EV_JUNK",
-    "EV_EMITTER",
-    "EV_OILPARTICLES",
-    "EV_OILSLICK",
-    "EV_OILSLICKREMOVE",
-    "EV_MG42EFX",
-    "EV_FLAKGUN1",
-    "EV_FLAKGUN2",
-    "EV_FLAKGUN3",
-    "EV_FLAKGUN4",
-    "EV_EXERT1",
-    "EV_EXERT2",
-    "EV_EXERT3",
-    "EV_SNOWFLURRY",
-    "EV_CONCUSSIVE",
-    "EV_DUST",
-    "EV_RUMBLE_EFX",
-    "EV_GUNSPARKS",
-    "EV_FLAMETHROWER_EFFECT",
-    "EV_POPUP",
-    "EV_POPUPBOOK",
-    "EV_GIVEPAGE",
-    "EV_MG42BULLET_HIT_FLESH",
-    "EV_MG42BULLET_HIT_WALL",
-    "EV_SHAKE",
-    "EV_DISGUISE_SOUND",
-    "EV_BUILDDECAYED_SOUND",
-    "EV_FIRE_WEAPON_AAGUN",
-    "EV_DEBRIS",
-    "EV_ALERT_SPEAKER",
-    "EV_POPUPMESSAGE",
-    "EV_ARTYMESSAGE",
-    "EV_AIRSTRIKEMESSAGE",
-    "EV_MEDIC_CALL",
-    "EV_PORTAL_TELEPORT",
-    "EV_LOAD_TELEPORT",
-    "EV_UPHILLSTEP",
-    "EV_PORTAL_TRAIL",
-    "EV_CUSHIONFALLSTEP",
-    "EV_MAX_EVENTS",
+  "EV_NONE",
+  "EV_FOOTSTEP",
+  "EV_FOOTSTEP_METAL",
+  "EV_FOOTSTEP_WOOD",
+  "EV_FOOTSTEP_GRASS",
+  "EV_FOOTSTEP_GRAVEL",
+  "EV_FOOTSTEP_ROOF",
+  "EV_FOOTSTEP_SNOW",
+  "EV_FOOTSTEP_CARPET",
+  "EV_FOOTSPLASH",
+  "EV_FOOTWADE",
+  "EV_SWIM",
+  "EV_STEP_4",
+  "EV_STEP_8",
+  "EV_STEP_12",
+  "EV_STEP_16",
+  "EV_FALL_SHORT",
+  "EV_FALL_MEDIUM",
+  "EV_FALL_FAR",
+  "EV_FALL_NDIE",
+  "EV_FALL_DMG_10",
+  "EV_FALL_DMG_15",
+  "EV_FALL_DMG_25",
+  "EV_FALL_DMG_50",
+  "EV_JUMP",
+  "EV_WATER_TOUCH",
+  "EV_WATER_LEAVE",
+  "EV_WATER_UNDER",
+  "EV_WATER_CLEAR",
+  "EV_ITEM_PICKUP",
+  "EV_ITEM_PICKUP_QUIET",
+  "EV_GLOBAL_ITEM_PICKUP",
+  "EV_NOAMMO",
+  "EV_WEAPONSWITCHED",
+  "EV_EMPTYCLIP",
+  "EV_FILL_CLIP",
+  "EV_MG42_FIXED",
+  "EV_WEAP_OVERHEAT",
+  "EV_CHANGE_WEAPON",
+  "EV_CHANGE_WEAPON_2",
+  "EV_FIRE_WEAPON",
+  "EV_FIRE_WEAPONB",
+  "EV_FIRE_WEAPON_LASTSHOT",
+  "EV_NOFIRE_UNDERWATER",
+  "EV_FIRE_WEAPON_MG42",
+  "EV_FIRE_WEAPON_MOUNTEDMG42",
+  "EV_ITEM_RESPAWN",
+  "EV_ITEM_POP",
+  "EV_PLAYER_TELEPORT_IN",
+  "EV_PLAYER_TELEPORT_OUT",
+  "EV_GRENADE_BOUNCE",
+  "EV_GENERAL_SOUND",
+  "EV_GENERAL_SOUND_VOLUME",
+  "EV_GENERAL_CLIENT_SOUND_VOLUME",
+  "EV_GLOBAL_SOUND",
+  "EV_GLOBAL_CLIENT_SOUND",
+  "EV_GLOBAL_TEAM_SOUND",
+  "EV_FX_SOUND",
+  "EV_BULLET_HIT_FLESH",
+  "EV_BULLET_HIT_WALL",
+  "EV_MISSILE_HIT",
+  "EV_MISSILE_MISS",
+  "EV_RAILTRAIL",
+  "EV_VENOM",
+  "EV_BULLET",
+  "EV_LOSE_HAT",
+  "EV_PAIN",
+  "EV_CROUCH_PAIN",
+  "EV_DEATH1",
+  "EV_DEATH2",
+  "EV_DEATH3",
+  "EV_OBITUARY",
+  "EV_STOPSTREAMINGSOUND",
+  "EV_POWERUP_QUAD",
+  "EV_POWERUP_BATTLESUIT",
+  "EV_POWERUP_REGEN",
+  "EV_GIB_PLAYER",
+  "EV_DEBUG_LINE",
+  "EV_STOPLOOPINGSOUND",
+  "EV_TAUNT",
+  "EV_SMOKE",
+  "EV_SPARKS",
+  "EV_SPARKS_ELECTRIC",
+  "EV_EXPLODE",
+  "EV_RUBBLE",
+  "EV_EFFECT",
+  "EV_MORTAREFX",
+  "EV_SPINUP",
+  "EV_SNOW_ON",
+  "EV_SNOW_OFF",
+  "EV_MISSILE_MISS_SMALL",
+  "EV_MISSILE_MISS_LARGE",
+  "EV_MORTAR_IMPACT",
+  "EV_MORTAR_MISS",
+  "EV_SPIT_HIT",
+  "EV_SPIT_MISS",
+  "EV_SHARD",
+  "EV_JUNK",
+  "EV_EMITTER",
+  "EV_OILPARTICLES",
+  "EV_OILSLICK",
+  "EV_OILSLICKREMOVE",
+  "EV_MG42EFX",
+  "EV_FLAKGUN1",
+  "EV_FLAKGUN2",
+  "EV_FLAKGUN3",
+  "EV_FLAKGUN4",
+  "EV_EXERT1",
+  "EV_EXERT2",
+  "EV_EXERT3",
+  "EV_SNOWFLURRY",
+  "EV_CONCUSSIVE",
+  "EV_DUST",
+  "EV_RUMBLE_EFX",
+  "EV_GUNSPARKS",
+  "EV_FLAMETHROWER_EFFECT",
+  "EV_POPUP",
+  "EV_POPUPBOOK",
+  "EV_GIVEPAGE",
+  "EV_MG42BULLET_HIT_FLESH",
+  "EV_MG42BULLET_HIT_WALL",
+  "EV_SHAKE",
+  "EV_DISGUISE_SOUND",
+  "EV_BUILDDECAYED_SOUND",
+  "EV_FIRE_WEAPON_AAGUN",
+  "EV_DEBRIS",
+  "EV_ALERT_SPEAKER",
+  "EV_POPUPMESSAGE",
+  "EV_ARTYMESSAGE",
+  "EV_AIRSTRIKEMESSAGE",
+  "EV_MEDIC_CALL",
+  "EV_PORTAL_TELEPORT",
+  "EV_LOAD_TELEPORT",
+  "EV_UPHILLSTEP",
+  "EV_PORTAL_TRAIL",
+  "EV_CUSHIONFALLSTEP",
+  "EV_MAX_EVENTS",
 };
 
 static_assert(sizeof(eventnames) / sizeof(eventnames[0]) == EV_MAX_EVENTS + 1,
@@ -1467,7 +1501,7 @@ typedef enum hudHeadAnimNumber_s {
 
 inline constexpr int ANIMFL_LADDERANIM = 0x1;
 inline constexpr int ANIMFL_FIRINGANIM = 0x2;
-inline constexpr int ANIMFL_REVERSED = 0x4;
+inline constexpr int ANIMFL_REVERSED   = 0x4;
 
 typedef struct animation_s {
 #ifdef CGAMEDLL
@@ -1518,6 +1552,7 @@ typedef struct headAnimation_s {
   int firstFrame;
   int numFrames;
 } headAnimation_t;
+
 // done.
 
 // flip the togglebit every time an animation
@@ -1688,7 +1723,7 @@ typedef enum {
 } itemType_t;
 
 inline constexpr int MAX_ITEM_MODELS = 3;
-inline constexpr int MAX_ITEM_ICONS = 4;
+inline constexpr int MAX_ITEM_ICONS  = 4;
 
 // JOSEPH 4-17-00
 typedef struct gitem_s {
@@ -1719,6 +1754,7 @@ typedef struct gitem_s {
 
   //	int			gameskillnumber[5];
 } gitem_t;
+
 // END JOSEPH
 
 // included in both the game dll and the client
@@ -1741,8 +1777,7 @@ int BG_AkimboSidearm(int weaponNum);
 
 #define ITEM_INDEX(x) ((x) - bg_itemlist)
 
-qboolean BG_CanItemBeGrabbed(const entityState_t *ent, const playerState_t *ps,
-                             int *skill, int teamNum);
+qboolean BG_CanItemBeGrabbed(const entityState_t *ent, const playerState_t *ps, int *skill, int teamNum);
 qboolean BG_WeaponIsExplosive(int weap);
 bool BG_WeaponDisallowedInTimeruns(int weap);
 bool BG_WeaponHasAmmo(playerState_t *ps, int weap);
@@ -1751,20 +1786,16 @@ bool BG_WeaponHasAmmo(playerState_t *ps, int weap);
 
 inline constexpr int32_t MASK_SOLID = CONTENTS_SOLID;
 
-inline constexpr int32_t MASK_PLAYERSOLID =
-    CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_BODY;
-inline constexpr int32_t MASK_DEADSOLID = CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
-inline constexpr int32_t MASK_WATER =
-    CONTENTS_WATER | CONTENTS_LAVA | CONTENTS_SLIME;
-inline constexpr int32_t MASK_OPAQUE = CONTENTS_SOLID | CONTENTS_LAVA;
-inline constexpr int32_t MASK_SHOT =
-    CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE;
+inline constexpr int32_t MASK_PLAYERSOLID = CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_BODY;
+inline constexpr int32_t MASK_DEADSOLID   = CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
+inline constexpr int32_t MASK_WATER       = CONTENTS_WATER | CONTENTS_LAVA | CONTENTS_SLIME;
+inline constexpr int32_t MASK_OPAQUE      = CONTENTS_SOLID | CONTENTS_LAVA;
+inline constexpr int32_t MASK_SHOT        = CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE;
 inline constexpr int32_t MASK_MISSILESHOT = MASK_SHOT | CONTENTS_MISSILECLIP;
 
 // portalgun trace hits solid objects, players and portalclips
 // corpses are ignored, and players only block portals if they are solid
-inline constexpr int32_t MASK_PORTAL =
-    CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_PORTALCLIP;
+inline constexpr int32_t MASK_PORTAL = CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_PORTALCLIP;
 
 //
 // entityState_t->eType
@@ -1828,116 +1859,110 @@ typedef enum {
 } hintType_t;
 
 static constexpr std::array<const char *, HINT_NUM_HINTS + 1> hintStrings = {
-    "",          // HINT_NONE
-    "HINT_NONE", // actually HINT_FORCENONE, but since this is being specified
-                 // in the ent, the designer actually means HINT_FORCENONE
-    "HINT_PLAYER",
-    "HINT_ACTIVATE",
-    "HINT_DOOR",
-    "HINT_DOOR_ROTATING",
-    "HINT_DOOR_LOCKED",
-    "HINT_DOOR_ROTATING_LOCKED",
-    "HINT_MG42",
-    "HINT_BREAKABLE",
-    "HINT_BREAKABLE_BIG",
-    "HINT_CHAIR",
-    "HINT_ALARM",
-    "HINT_HEALTH",
-    "HINT_TREASURE",
-    "HINT_KNIFE",
-    "HINT_LADDER",
-    "HINT_BUTTON",
-    "HINT_WATER",
-    "HINT_CAUTION",
-    "HINT_DANGER",
-    "HINT_SECRET",
-    "HINT_QUESTION",
-    "HINT_EXCLAMATION",
-    "HINT_CLIPBOARD",
-    "HINT_WEAPON",
-    "HINT_AMMO",
-    "HINT_ARMOR",
-    "HINT_POWERUP",
-    "HINT_HOLDABLE",
-    "HINT_INVENTORY",
-    "HINT_SCENARIC",
-    "HINT_EXIT",
-    "HINT_NOEXIT",
-    "HINT_PLYR_FRIEND",
-    "HINT_PLYR_NEUTRAL",
-    "HINT_PLYR_ENEMY",
-    "HINT_PLYR_UNKNOWN",
-    "HINT_BUILD",    // DHM - Nerve
-    "HINT_DISARM",   // DHM - Nerve
-    "HINT_REVIVE",   // DHM - Nerve
-    "HINT_DYNAMITE", // DHM - Nerve
+  "",          // HINT_NONE
+  "HINT_NONE", // actually HINT_FORCENONE, but since this is being specified
+               // in the ent, the designer actually means HINT_FORCENONE
+  "HINT_PLAYER",
+  "HINT_ACTIVATE",
+  "HINT_DOOR",
+  "HINT_DOOR_ROTATING",
+  "HINT_DOOR_LOCKED",
+  "HINT_DOOR_ROTATING_LOCKED",
+  "HINT_MG42",
+  "HINT_BREAKABLE",
+  "HINT_BREAKABLE_BIG",
+  "HINT_CHAIR",
+  "HINT_ALARM",
+  "HINT_HEALTH",
+  "HINT_TREASURE",
+  "HINT_KNIFE",
+  "HINT_LADDER",
+  "HINT_BUTTON",
+  "HINT_WATER",
+  "HINT_CAUTION",
+  "HINT_DANGER",
+  "HINT_SECRET",
+  "HINT_QUESTION",
+  "HINT_EXCLAMATION",
+  "HINT_CLIPBOARD",
+  "HINT_WEAPON",
+  "HINT_AMMO",
+  "HINT_ARMOR",
+  "HINT_POWERUP",
+  "HINT_HOLDABLE",
+  "HINT_INVENTORY",
+  "HINT_SCENARIC",
+  "HINT_EXIT",
+  "HINT_NOEXIT",
+  "HINT_PLYR_FRIEND",
+  "HINT_PLYR_NEUTRAL",
+  "HINT_PLYR_ENEMY",
+  "HINT_PLYR_UNKNOWN",
+  "HINT_BUILD",    // DHM - Nerve
+  "HINT_DISARM",   // DHM - Nerve
+  "HINT_REVIVE",   // DHM - Nerve
+  "HINT_DYNAMITE", // DHM - Nerve
 
-    "HINT_CONSTRUCTIBLE",
-    "HINT_UNIFORM",
-    "HINT_LANDMINE",
-    "HINT_TANK",
-    "HINT_SATCHELCHARGE",
-    // START Mad Doc - TDF
-    "HINT_LOCKPICK",
-    // END Mad Doc - TDF
+  "HINT_CONSTRUCTIBLE",
+  "HINT_UNIFORM",
+  "HINT_LANDMINE",
+  "HINT_TANK",
+  "HINT_SATCHELCHARGE",
+  // START Mad Doc - TDF
+  "HINT_LOCKPICK",
+  // END Mad Doc - TDF
 
-    "", // HINT_BAD_USER
+  "", // HINT_BAD_USER
 };
 
 // cursorhint trace distances
 // most of these are server only and could live somewhere in qagame headers,
 // but to avoid any accidents with mismatched distances, they should live here
 
-inline constexpr float CH_DIST = 100.0f;
-inline constexpr float CH_KNIFE_DIST = 48.0f;
-inline constexpr float CH_LADDER_DIST = 100.0f;
-inline constexpr float CH_WATER_DIST = 100.0f;
+inline constexpr float CH_DIST           = 100.0f;
+inline constexpr float CH_KNIFE_DIST     = 48.0f;
+inline constexpr float CH_LADDER_DIST    = 100.0f;
+inline constexpr float CH_WATER_DIST     = 100.0f;
 inline constexpr float CH_BREAKABLE_DIST = 64.0f;
-inline constexpr float CH_DOOR_DIST = 96.0f;
-inline constexpr float CH_ACTIVATE_DIST = 96.0f;
-inline constexpr float CH_FRIENDLY_DIST = 1024.0f;
+inline constexpr float CH_DOOR_DIST      = 96.0f;
+inline constexpr float CH_ACTIVATE_DIST  = 96.0f;
+inline constexpr float CH_FRIENDLY_DIST  = 1024.0f;
 
 // use the largest value from above
 inline constexpr float CH_MAX_DIST = 1024.0f;
 // max dist for zooming hints
 inline constexpr float CH_MAX_DIST_ZOOM = 8192.0f;
 
-inline constexpr int NUM_PREDEF_DLIGHT_STRINGS = 19;
-inline constexpr std::array<const char *, NUM_PREDEF_DLIGHT_STRINGS>
-    predef_lightstyles = {"mmnmmommommnonmmonqnmmo",
-                          "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba",
-                          "mmmmmaaaaammmmmaaaaaabcdefgabcdefg",
-                          "ma",
-                          "jklmnopqrstuvwxyzyxwvutsrqponmlkj",
-                          "nmonqnmomnmomomono",
-                          "mmmaaaabcdefgmmmmaaaammmaamm",
-                          "aaaaaaaazzzzzzzz",
-                          "mmamammmmammamamaaamammma",
-                          "abcdefghijklmnopqrrqponmlkjihgfedcba",
-                          "mmnommomhkmmomnonmmonqnmmo",
-                          "kmamaamakmmmaakmamakmakmmmma",
-                          "kmmmakakmmaaamammamkmamakmmmma",
-                          "mmnnoonnmmmmmmmmmnmmmmnonmmmmmmm",
-                          "mmmmnonmmmmnmmmmmnonmmmmmnmmmmmmm",
-                          "zzzzzzzzaaaaaaaa",
-                          "zzzzzzzzaaaaaaaaaaaaaaaa",
-                          "aaaaaaaazzzzzzzzaaaaaaaa",
-                          "aaaaaaaaaaaaaaaazzzzzzzz"};
+inline constexpr int NUM_PREDEF_DLIGHT_STRINGS                                          = 19;
+inline constexpr std::array<const char *, NUM_PREDEF_DLIGHT_STRINGS> predef_lightstyles = {
+  "mmnmmommommnonmmonqnmmo",
+  "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba",
+  "mmmmmaaaaammmmmaaaaaabcdefgabcdefg",
+  "ma",
+  "jklmnopqrstuvwxyzyxwvutsrqponmlkj",
+  "nmonqnmomnmomomono",
+  "mmmaaaabcdefgmmmmaaaammmaamm",
+  "aaaaaaaazzzzzzzz",
+  "mmamammmmammamamaaamammma",
+  "abcdefghijklmnopqrrqponmlkjihgfedcba",
+  "mmnommomhkmmomnonmmonqnmmo",
+  "kmamaamakmmmaakmamakmakmmmma",
+  "kmmmakakmmaaamammamkmamakmmmma",
+  "mmnnoonnmmmmmmmmmnmmmmnonmmmmmmm",
+  "mmmmnonmmmmnmmmmmnonmmmmmnmmmmmmm",
+  "zzzzzzzzaaaaaaaa",
+  "zzzzzzzzaaaaaaaaaaaaaaaa",
+  "aaaaaaaazzzzzzzzaaaaaaaa",
+  "aaaaaaaaaaaaaaaazzzzzzzz"};
 
-void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result,
-                           qboolean isAngle, int splinePath);
-void BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int atTime,
-                                vec3_t result, qboolean isAngle,
-                                int splineData);
+void BG_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qboolean isAngle, int splinePath);
+void BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int atTime, vec3_t result, qboolean isAngle, int splineData);
 void BG_GetMarkDir(const vec3_t dir, const vec3_t normal, vec3_t out);
 
-void BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm,
-                                         playerState_t *ps);
+void BG_AddPredictableEventToPlayerstate(int newEvent, int eventParm, playerState_t *ps);
 
-void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s,
-                                 qboolean snap);
-void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s,
-                                            int time, qboolean snap);
+void BG_PlayerStateToEntityState(playerState_t *ps, entityState_t *s, qboolean snap);
+void BG_PlayerStateToEntityStateExtraPolate(playerState_t *ps, entityState_t *s, int time, qboolean snap);
 weapon_t BG_DuplicateWeapon(weapon_t weap);
 gitem_t *BG_ValidStatWeapon(weapon_t weap);
 weapon_t BG_WeaponForMOD(int MOD);
@@ -1949,16 +1974,14 @@ weapon_t BG_GrenadeTypeForTeam(team_t team);
 
 qboolean BG_PlayerSeesItem(playerState_t *ps, entityState_t *item, int atTime);
 qboolean BG_CheckMagicAmmo(const playerState_t *ps, int *skill, int teamNum);
-qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum,
-                         int numOfClips);
+qboolean BG_AddMagicAmmo(playerState_t *ps, int *skill, int teamNum, int numOfClips);
 
-bool BG_DropItems(int contents, int shared);
+bool BG_DropItems(int contents, bool noDrop);
 
 inline constexpr float OVERCLIP = 1.001f;
 
 //----(SA)	removed PM_ammoNeeded 11/27/00
-void PM_ClipVelocity(const vec3_t in, const vec3_t normal, vec3_t out,
-                     float overbounce);
+void PM_ClipVelocity(const vec3_t in, const vec3_t normal, vec3_t out, float overbounce);
 
 typedef enum {
   FOOTSTEP_NORMAL,
@@ -1994,11 +2017,11 @@ typedef enum {
 //==================================================================
 // New Animation Scripting Defines
 
-inline constexpr int MAX_ANIMSCRIPT_MODELS = 32;
+inline constexpr int MAX_ANIMSCRIPT_MODELS          = 32;
 inline constexpr int MAX_ANIMSCRIPT_ITEMS_PER_MODEL = 2048;
-inline constexpr int MAX_MODEL_ANIMATIONS = 512; // animations per model
-inline constexpr int MAX_ANIMSCRIPT_ANIMCOMMANDS = 8;
-inline constexpr int MAX_ANIMSCRIPT_ITEMS = 128;
+inline constexpr int MAX_MODEL_ANIMATIONS           = 512; // animations per model
+inline constexpr int MAX_ANIMSCRIPT_ANIMCOMMANDS    = 8;
+inline constexpr int MAX_ANIMSCRIPT_ITEMS           = 128;
 // NOTE: these must all be in sync with string tables in bg_animation.c
 
 typedef enum {
@@ -2156,17 +2179,15 @@ typedef struct {
   qboolean isSkeletal;
 
   // parsed from animgroup file
-  animation_t
-      *animations[MAX_MODEL_ANIMATIONS]; // anim names, frame ranges, etc
+  animation_t *animations[MAX_MODEL_ANIMATIONS]; // anim names, frame ranges, etc
   headAnimation_t headAnims[MAX_HEAD_ANIMS];
   int numAnimations, numHeadAnims;
 
   // parsed from script file
-  animScript_t scriptAnims[MAX_AISTATES]
-                          [NUM_ANIM_MOVETYPES];       // locomotive anims, etc
-  animScript_t scriptCannedAnims[NUM_ANIM_MOVETYPES]; // played randomly
-  animScript_t scriptEvents[NUM_ANIM_EVENTTYPES];     // events that trigger
-                                                      // special anims
+  animScript_t scriptAnims[MAX_AISTATES][NUM_ANIM_MOVETYPES]; // locomotive anims, etc
+  animScript_t scriptCannedAnims[NUM_ANIM_MOVETYPES];         // played randomly
+  animScript_t scriptEvents[NUM_ANIM_EVENTTYPES];             // events that trigger
+                                                              // special anims
 
   // global list of script items for this model
   animScriptItem_t scriptItems[MAX_ANIMSCRIPT_ITEMS_PER_MODEL];
@@ -2313,35 +2334,28 @@ typedef struct bg_character_s {
 // Global Function Decs
 
 void BG_InitWeaponStrings(void);
-void BG_AnimParseAnimScript(animModelInfo_t *modelInfo,
-                            animScriptData_t *scriptData, const char *filename,
+void BG_AnimParseAnimScript(animModelInfo_t *modelInfo, animScriptData_t *scriptData, const char *filename,
                             char *input);
-int BG_AnimScriptAnimation(playerState_t *ps, animModelInfo_t *modelInfo,
-                           scriptAnimMoveTypes_t movetype, qboolean isContinue);
+int BG_AnimScriptAnimation(playerState_t *ps, animModelInfo_t *modelInfo, scriptAnimMoveTypes_t movetype,
+                           qboolean isContinue);
 int BG_AnimScriptCannedAnimation(playerState_t *ps, animModelInfo_t *modelInfo);
-int BG_AnimScriptEvent(playerState_t *ps, animModelInfo_t *modelInfo,
-                       scriptAnimEventTypes_t event, qboolean isContinue,
+int BG_AnimScriptEvent(playerState_t *ps, animModelInfo_t *modelInfo, scriptAnimEventTypes_t event, qboolean isContinue,
                        qboolean force);
-int BG_IndexForString(const char *token, animStringItem_t *strings,
-                      qboolean allowFail);
-int BG_PlayAnimName(playerState_t *ps, animModelInfo_t *animModelInfo,
-                    char *animName, animBodyPart_t bodyPart, qboolean setTimer,
-                    qboolean isContinue, qboolean force);
+int BG_IndexForString(const char *token, animStringItem_t *strings, qboolean allowFail);
+int BG_PlayAnimName(playerState_t *ps, animModelInfo_t *animModelInfo, char *animName, animBodyPart_t bodyPart,
+                    qboolean setTimer, qboolean isContinue, qboolean force);
 void BG_ClearAnimTimer(playerState_t *ps, animBodyPart_t bodyPart);
 qboolean BG_ValidAnimScript(int clientNum);
 char *BG_GetAnimString(animModelInfo_t *animModelInfo, int anim);
-void BG_UpdateConditionValue(int client, int condition, int value,
-                             qboolean checkConversion);
+void BG_UpdateConditionValue(int client, int condition, int value, qboolean checkConversion);
 int BG_GetConditionValue(int client, int condition, qboolean checkConversion);
 qboolean BG_GetConditionBitFlag(int client, int condition, int bitNumber);
 void BG_SetConditionBitFlag(int client, int condition, int bitNumber);
 void BG_ClearConditionBitFlag(int client, int condition, int bitNumber);
-int BG_GetAnimScriptAnimation(int client, animModelInfo_t *animModelInfo,
-                              aistateEnum_t aistate,
+int BG_GetAnimScriptAnimation(int client, animModelInfo_t *animModelInfo, aistateEnum_t aistate,
                               scriptAnimMoveTypes_t movetype);
 void BG_AnimUpdatePlayerStateConditions(pmove_t *pmove);
-animation_t *BG_AnimationForString(char *string,
-                                   animModelInfo_t *animModelInfo);
+animation_t *BG_AnimationForString(char *string, animModelInfo_t *animModelInfo);
 animation_t *BG_GetAnimationForIndex(animModelInfo_t *animModelInfo, int index);
 int BG_GetAnimScriptEvent(playerState_t *ps, scriptAnimEventTypes_t event);
 int PM_IdleAnimForWeapon(int weapon);
@@ -2354,8 +2368,7 @@ extern animStringItem_t animBodyPartsStr[];
 bg_playerclass_t *BG_GetPlayerClassInfo(int team, int cls);
 bg_playerclass_t *BG_PlayerClassForPlayerState(playerState_t *ps);
 qboolean BG_ClassHasWeapon(bg_playerclass_t *classInfo, weapon_t weap);
-qboolean BG_WeaponIsPrimaryForClassAndTeam(int classnum, team_t team,
-                                           weapon_t weapon);
+qboolean BG_WeaponIsPrimaryForClassAndTeam(int classnum, team_t team, weapon_t weapon);
 int BG_ClassWeaponCount(bg_playerclass_t *classInfo, team_t team);
 const char *BG_ShortClassnameForNumber(int classNum);
 const char *BG_ClassnameForNumber(int classNum);
@@ -2402,7 +2415,7 @@ extern const char *miniRankNames_Allies[NUM_EXPERIENCE_LEVELS];
 extern const char *rankSoundNames_Axis[NUM_EXPERIENCE_LEVELS];
 extern const char *rankSoundNames_Allies[NUM_EXPERIENCE_LEVELS];
 
-inline constexpr int MAX_SPLINE_PATHS = 512;
+inline constexpr int MAX_SPLINE_PATHS    = 512;
 inline constexpr int MAX_SPLINE_CONTROLS = 4;
 inline constexpr int MAX_SPLINE_SEGMENTS = 16;
 
@@ -2438,14 +2451,12 @@ extern splinePath_t splinePaths[MAX_SPLINE_PATHS];
 pathCorner_t *BG_Find_PathCorner(const char *match);
 splinePath_t *BG_GetSplineData(int number, qboolean *backwards);
 void BG_AddPathCorner(const char *name, vec3_t origin);
-splinePath_t *BG_AddSplinePath(const char *name, const char *target,
-                               vec3_t origin);
+splinePath_t *BG_AddSplinePath(const char *name, const char *target, vec3_t origin);
 void BG_BuildSplinePaths();
 splinePath_t *BG_Find_Spline(const char *match);
 float BG_SplineLength(splinePath_t *pSpline);
 void BG_AddSplineControl(splinePath_t *spline, const char *name);
-void BG_LinearPathOrigin2(float radius, splinePath_t **pSpline,
-                          float *deltaTime, vec3_t result, qboolean backwards);
+void BG_LinearPathOrigin2(float radius, splinePath_t **pSpline, float *deltaTime, vec3_t result, qboolean backwards);
 
 int BG_MaxAmmoForWeapon(weapon_t weaponNum, int *skill);
 
@@ -2464,7 +2475,7 @@ typedef struct {
   char joinOrder[MAX_CLIENTS]; // order in which clients joined the fire
                                // team (server), client uses to store if
                                // a client is on this fireteam
-  int leader; // leader = joinOrder[0] on server, stored here on client
+  int leader;                  // leader = joinOrder[0] on server, stored here on client
   int saveLimit;
   // Toggle whether target_relay_fireteam will activate for all ft
   // members or just one
@@ -2507,8 +2518,7 @@ qboolean PC_Float_Parse(int handle, float *f);
 
 // for boolean parsing where the value must be explicitly set via int
 // can be used for both bool and qboolean values
-template <typename T>
-qboolean PC_Boolean_Parse(int handle, T *value) {
+template <typename T> qboolean PC_Boolean_Parse(int handle, T *value) {
   int temp;
 
   if (!PC_Int_Parse(handle, &temp)) {
@@ -2545,10 +2555,11 @@ typedef enum {
 
   // fireteam savelimit input box
   UIMENU_INGAME_FT_SAVELIMIT,
+
+  UIMENU_INGAME_PRIVATE_MESSAGE,
 } uiMenuCommand_t;
 
-void BG_AdjustAAGunMuzzleForBarrel(vec_t *origin, vec_t *forward, vec_t *right,
-                                   vec_t *up, int barrel);
+void BG_AdjustAAGunMuzzleForBarrel(vec_t *origin, vec_t *forward, vec_t *right, vec_t *up, int barrel);
 
 int BG_ClassTextToClass(char *token);
 skillType_t BG_ClassSkillForClass(int classnum);
@@ -2571,12 +2582,10 @@ int BG_simpleWeaponState(int ws);
 int BG_colorstrncpyz(char *in, char *out, int str_max, int out_max);
 int BG_drawStrlen(const char *str);
 int BG_strRelPos(char *in, int index);
-int BG_cleanName(const char *pszIn, char *pszOut, unsigned int dwMaxLength,
-                 qboolean fCRLF);
+int BG_cleanName(const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF);
 
 // color support
-void BG_setColor(char *colString, vec4_t col, float alpha,
-                 const char *cvarName);
+void BG_setColor(char *colString, vec4_t col, float alpha, const char *cvarName);
 
 // Voting
 #define VOTING_DISABLED ((1 << numVotesAvailable) - 1)
@@ -2607,8 +2616,7 @@ struct RtvMapVoteInfo {
 #ifdef CGAMEDLL
 void CG_GenerateTracemap(void);
 #endif // CGAMEDLL
-qboolean BG_LoadTraceMap(char *rawmapname, vec2_t world_mins,
-                         vec2_t world_maxs);
+qboolean BG_LoadTraceMap(char *rawmapname, vec2_t world_mins, vec2_t world_maxs);
 float BG_GetSkyHeightAtPoint(vec3_t pos);
 float BG_GetSkyGroundHeightAtPoint(vec3_t pos);
 float BG_GetGroundHeightAtPoint(vec3_t pos);
@@ -2619,8 +2627,7 @@ int BG_GetTracemapGroundCeil(void);
 // bg_animgroup.c
 //
 void BG_ClearAnimationPool(void);
-qboolean BG_R_RegisterAnimationGroup(const char *filename,
-                                     animModelInfo_t *animModelInfo);
+qboolean BG_R_RegisterAnimationGroup(const char *filename, animModelInfo_t *animModelInfo);
 
 //
 // bg_character.c
@@ -2638,8 +2645,7 @@ typedef struct bg_characterDef_s {
   char hudheadskin[MAX_QPATH];
 } bg_characterDef_t;
 
-qboolean BG_ParseCharacterFile(const char *filename,
-                               bg_characterDef_t *characterDef);
+qboolean BG_ParseCharacterFile(const char *filename, bg_characterDef_t *characterDef);
 bg_character_t *BG_GetCharacter(int team, int cls);
 bg_character_t *BG_GetCharacterForPlayerstate(playerState_t *ps);
 void BG_ClearCharacterPool(void);
@@ -2655,7 +2661,11 @@ typedef enum {
   S_LT_LOOPED_OFF
 } speakerLoopType_t;
 
-typedef enum { S_BT_LOCAL, S_BT_GLOBAL, S_BT_NOPVS } speakerBroadcastType_t;
+typedef enum {
+  S_BT_LOCAL,
+  S_BT_GLOBAL,
+  S_BT_NOPVS
+} speakerBroadcastType_t;
 
 typedef struct bg_speaker_s {
   char filename[MAX_QPATH];
@@ -2730,19 +2740,12 @@ extern weapon_t bg_heavyWeapons[NUM_HEAVY_WEAPONS];
 int PM_AltSwitchFromForWeapon(int weapon);
 int PM_AltSwitchToForWeapon(int weapon);
 
-void PM_TraceLegs(trace_t *trace, float *legsOffset, vec3_t start, vec3_t end,
-                  trace_t *bodytrace, vec3_t viewangles,
-                  void(tracefunc)(trace_t *results, const vec3_t start,
-                                  const vec3_t mins, const vec3_t maxs,
-                                  const vec3_t end, int passEntityNum,
-                                  int contentMask),
+void PM_TraceLegs(trace_t *trace, float *legsOffset, vec3_t start, vec3_t end, trace_t *bodytrace, vec3_t viewangles,
+                  void(tracefunc)(trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+                                  const vec3_t end, int passEntityNum, int contentMask),
                   int ignoreent, int tracemask);
-void PM_TraceAllLegs(trace_t *trace, float *legsOffset, vec3_t start,
-                     vec3_t end);
+void PM_TraceAllLegs(trace_t *trace, float *legsOffset, vec3_t start, vec3_t end);
 void PM_TraceAll(trace_t *trace, vec3_t start, vec3_t end);
-
-// Feen: Color Methods
-void BG_ColorComplement(const vec4_t in_RGB, vec4_t *out_RGB);
 
 struct Manual {
   const char *cmd;
@@ -2751,117 +2754,104 @@ struct Manual {
 };
 
 static constexpr Manual commandManuals[] = {
-    {"8ball", "!8ball [question]",
-     "Magical 8 Ball of pure awesomeness gives an answer to any question you "
-     "might have!"},
-    {"addlevel",
-     "!addlevel [level] -cmds [commands] -greeting [greeting] -title [title]",
-     "Adds a new level. Provide optional -switches to set level attributes."},
-    {"admintest", "!admintest", "Displays your admin level."},
+  {"8ball",         "!8ball [question]",
+   "Magical 8 Ball of pure awesomeness gives an answer to any question you "
+   "might have!"                                                                                                                                                    },
+  {"addlevel",      "!addlevel [level] -cmds [commands] -greeting [greeting] -title [title]",
+   "Adds a new level. Provide optional -switches to set level attributes."                                                                                          },
+  {"admintest",     "!admintest",                                                             "Displays your admin level."                                          },
 #ifdef NEW_AUTH
-    {"ban",
-     "!ban [player] [(optional) seconds] [(optional) reason]\n"
-     "!ban -id [id] [(optional) seconds] [(optional) reason]",
-     "Bans target player from server. If seconds is 0, ban is permanent."},
+  {"ban",
+   "!ban [player] [(optional) seconds] [(optional) reason]\n"
+   "!ban -id [id] [(optional) seconds] [(optional) reason]",                                  "Bans target player from server. If seconds is 0, ban is permanent."  },
 #else
-    {"ban", "!ban [player] [(optional) seconds] [(optional) reason]",
-     "Bans target player from server. If seconds is 0, ban is permanent."},
+  {"ban", "!ban [player] [(optional) seconds] [(optional) reason]",
+   "Bans target player from server. If seconds is 0, ban is permanent."},
 #endif
-    {"cancelvote", "!cancelvote", "Cancels current vote in progress."},
-    {"deletelevel", "!deletelevel [level]", "Deletes a level."},
-    //    {"deleteuser", "!deleteuser -id [user id]", "Deletes a user based on
-    //    ID."},
-    {"editcommands",
-     "!editcommands [level] [+command|-command] [+command|-command...]",
-     "Edits commands of a level."},
-    {"editlevel",
-     "!editlevel [level] -cmds [new commands] -greeting [new greeting] -title "
-     "[new title]",
-     "Edits an existing level. If level does not exist, creates it."},
-    {"edituser",
-     "!edituser [id] -cmds [personal commands] -title [personal title] "
-     "-greeting [personal greeting] -clear [switch]\n",
-     "Used to edit user admin attributes such as personal commands, personal "
-     "title and personal greeting. "
-     "All of the \"-cmds|-title|-greeting\" switches are optional, "
-     "but at least one must be given. Use -clear [switch] to reset a switch."},
-    {"finger", "!finger [target]", "Displays target's admin level."},
-    {"finduser", "!finduser [name]", "Finds all matching users."},
-    {"help", "!help\n!help [command]",
-     "Prints useful information about commands."},
-    {"kick",
-     "!kick [target]\n!kick [target] [timeout]\n!kick [target] [timeout] "
-     "[reason]",
-     "Kicks target player."},
-    {"levelinfo", "!levelinfo [level]",
-     "Prints useful information about a level."},
-    {"listbans", "!listbans [page]", "Lists 10 bans per page."},
-    //	{ "listcmds",     "!listcmds", "Lists all commands or prints a command
-    // manual."                                     },
-    {"listflags", "!listflags", "Lists all command flags."},
-    {"listmaps", "!listmaps", "Lists all maps."},
-    {"listplayers", "!listplayers", "Lists all players on server."},
-    {"listusernames", "!listusernames [id]",
-     "Lists all usernames of specified user ID."},
-    {"listusers", "!listusers [page]", "Lists 20 users per page."},
-    {"map", "!map [map name]", "Changes map."},
-    {"mapinfo", "!mapinfo [map name]", "Prints information about map."},
-    {"mostplayed", "!mostplayed [(optional) count]",
-     "Prints the most played maps on the server."},
-    {"moverscale", "!moverscale [scale]", "Scales vehicle movement speed."},
-    {"mute", "!mute [target]", "Mutes target player."},
-    {"noclip", "!noclip [(optional) target] [(optional) count]",
-     "Gives noclip to yourself or target player. Use count to specify how many "
-     "times "
-     "the target can use noclip."},
-    {"passvote", "!passvote", "Passes current vote in progress."},
-    //	{ "race",         "/race [start|end|checkpoint|clear|settings|undo]
-    //[additional parameters]\n\n/race start [xyz size]\n/race start [xy size]
-    //[z size]\n/race start [x size] [y size] [z size]\n\n",
-    //	  "" },
-    //	{ "readconfig",   "!readconfig", "Reads user, level and ban databases."
-    //},
-    {"rename", "!rename [target] [new name]", "Renames target player."},
-    {"restart", "!restart", "Restarts map."},
-    //    { "routemaker", "!routemaker [player]", "Makes target player the route
-    //    maker." },
-    {"setlevel", "!setlevel [target] [level]\n!setlevel -id [id] [level]",
-     "Sets the target's admin level."},
-    {"spectate", "!spectate [(optional) target]",
-     "Puts yourself into spectators, optionally spectating targeted player."},
-    {"tokens", "!tokens [create e|m|h] [move] [delete] [delete e|m|h 1-6]",
-     "Creates/deletes/moves a collectible token with given parameters. Move "
-     "and delete "
-     "default to the token nearest to your position."},
-    {"unban", "!unban [ban ID]", "Unbans a player based on ban ID"},
-    {"unmute", "!unmute [target]", "Unmutes target player."},
-    {"userinfo", "!userinfo [id]", "Prints user info."},
-    {"ad_save", "/ad_save [(optional) name]",
-     "Saves currently ongoing autodemo temp file manually with given name."},
-    {"clearsaves", "/clearsaves", "Removes all your saved positions."},
-    {"newmaps", "!newmaps [(optional) count]",
-     "Lists latest ^3[count] ^7maps added to server, sorted from oldest to "
-     "newest."},
-    {"rtv", "!rtv", "Calls Rock The Vote."},
+  {"cancelvote",    "!cancelvote",                                                            "Cancels current vote in progress."                                   },
+  {"deletelevel",   "!deletelevel [level]",                                                   "Deletes a level."                                                    },
+  //    {"deleteuser", "!deleteuser -id [user id]", "Deletes a user based on
+  //    ID."},
+  {"editcommands",  "!editcommands [level] [+command|-command] [+command|-command...]",       "Edits commands of a level."                                          },
+  {"editlevel",
+   "!editlevel [level] -cmds [new commands] -greeting [new greeting] -title "
+   "[new title]",                                                                             "Edits an existing level. If level does not exist, creates it."       },
+  {"edituser",
+   "!edituser [id] -cmds [personal commands] -title [personal title] "
+   "-greeting [personal greeting] -clear [switch]\n",                                         "Used to edit user admin attributes such as personal commands, personal "
+   "title and personal greeting. "
+   "All of the \"-cmds|-title|-greeting\" switches are optional, "
+   "but at least one must be given. Use -clear [switch] to reset a switch."                                    },
+  {"finger",        "!finger [target]",                                                       "Displays target's admin level."                                      },
+  {"finduser",      "!finduser [name]",                                                       "Finds all matching users."                                           },
+  {"help",          "!help\n!help [command]",                                                 "Prints useful information about commands."                           },
+  {"kick",
+   "!kick [target]\n!kick [target] [timeout]\n!kick [target] [timeout] "
+   "[reason]",                                                                                "Kicks target player."                                                },
+  {"levelinfo",     "!levelinfo [level]",                                                     "Prints useful information about a level."                            },
+  {"listbans",      "!listbans [page]",                                                       "Lists 10 bans per page."                                             },
+  //	{ "listcmds",     "!listcmds", "Lists all commands or prints a command
+  // manual."                                     },
+  {"listflags",     "!listflags",                                                             "Lists all command flags."                                            },
+  {"listmaps",      "!listmaps",                                                              "Lists all maps."                                                     },
+  {"listplayers",   "!listplayers",                                                           "Lists all players on server."                                        },
+  {"listusernames", "!listusernames [id]",                                                    "Lists all usernames of specified user ID."                           },
+  {"listusers",     "!listusers [page]",                                                      "Lists 20 users per page."                                            },
+  {"map",           "!map [map name]",                                                        "Changes map."                                                        },
+  {"mapinfo",       "!mapinfo [map name]",                                                    "Prints information about map."                                       },
+  {"mostplayed",    "!mostplayed [(optional) count]",                                         "Prints the most played maps on the server."                          },
+  {"moverscale",    "!moverscale [scale]",                                                    "Scales vehicle movement speed."                                      },
+  {"mute",          "!mute [target]",                                                         "Mutes target player."                                                },
+  {"noclip",        "!noclip [(optional) target] [(optional) count]",
+   "Gives noclip to yourself or target player. Use count to specify how many "
+   "times "
+   "the target can use noclip."                                                                                                                                     },
+  {"passvote",      "!passvote",                                                              "Passes current vote in progress."                                    },
+  //	{ "race",         "/race [start|end|checkpoint|clear|settings|undo]
+  //[additional parameters]\n\n/race start [xyz size]\n/race start [xy size]
+  //[z size]\n/race start [x size] [y size] [z size]\n\n",
+  //	  "" },
+  //	{ "readconfig",   "!readconfig", "Reads user, level and ban databases."
+  //},
+  {"rename",        "!rename [target] [new name]",                                            "Renames target player."                                              },
+  {"restart",       "!restart",                                                               "Restarts map."                                                       },
+  //    { "routemaker", "!routemaker [player]", "Makes target player the route
+  //    maker." },
+  {"setlevel",      "!setlevel [target] [level]\n!setlevel -id [id] [level]",                 "Sets the target's admin level."                                      },
+  {"spectate",      "!spectate [(optional) target]",
+   "Puts yourself into spectators, optionally spectating targeted player."                                                                                          },
+  {"tokens",        "!tokens [create e|m|h] [move] [delete] [delete e|m|h 1-6]",
+   "Creates/deletes/moves a collectible token with given parameters. Move "
+   "and delete "
+   "default to the token nearest to your position."                                                                                                                 },
+  {"unban",         "!unban [ban ID]",                                                        "Unbans a player based on ban ID"                                     },
+  {"unmute",        "!unmute [target]",                                                       "Unmutes target player."                                              },
+  {"userinfo",      "!userinfo [id]",                                                         "Prints user info."                                                   },
+  {"ad_save",       "/ad_save [(optional) name]",                                             "Saves currently ongoing autodemo temp file manually with given name."},
+  {"clearsaves",    "/clearsaves",                                                            "Removes all your saved positions."                                   },
+  {"newmaps",       "!newmaps [(optional) count]",
+   "Lists latest ^3[count] ^7maps added to server, sorted from oldest to "
+   "newest."                                                                                                                                                        },
+  {"rtv",           "!rtv",                                                                   "Calls Rock The Vote."                                                },
 
-    {"savepos", "/savepos [(optional) name] [(optional) flags]",
-     "Saves your current position to a savepos file.\n\n"
-     "Flags:\n"
-     "1 - don't save velocity\n"
-     "2 - don't save pitch angle\n\n"
-     "If no arguments are given, saves to 'savepos/default.dat'.\n"
-     "If only one argument is given, the argument is treated as a 'flag' if "
-     "it's numeric, otherwise as 'name'."},
+  {"savepos",       "/savepos [(optional) name] [(optional) flags]",
+   "Saves your current position to a savepos file.\n\n"
+   "Flags:\n"
+   "1 - don't save velocity\n"
+   "2 - don't save pitch angle\n\n"
+   "If no arguments are given, saves to 'savepos/default.dat'.\n"
+   "If only one argument is given, the argument is treated as a 'flag' if "
+   "it's numeric, otherwise as 'name'."                                                                                                                             },
 
-    {"loadpos", "/loadpos [(optional) name]",
-     "Loads position from a given savepos file. If 'name' isn't specified, "
-     "loads 'savepos/default.dat'.\n"
-     "Cheats must be enabled to use this command."},
+  {"loadpos",       "/loadpos [(optional) name]",
+   "Loads position from a given savepos file. If 'name' isn't specified, "
+   "loads 'savepos/default.dat'.\n"
+   "Cheats must be enabled to use this command."                                                                                                                    },
 
-    {"dumpEntities", "/dumpEntities [(optional) filename]",
-     "Dumps entities from the current map into a file. If 'filename' isn't "
-     "specified, defaults to '<mapname>.ent'.\nYou must be in developer mode "
-     "to use this command."},
+  {"dumpEntities",  "/dumpEntities [(optional) filename]",
+   "Dumps entities from the current map into a file. If 'filename' isn't "
+   "specified, defaults to '<mapname>.ent'.\nYou must be in developer mode "
+   "to use this command."                                                                                                                                           },
 };
 
 typedef struct {
@@ -2871,40 +2861,17 @@ typedef struct {
   float random;     // recieve random from the server
 } vsayCmd_t;
 
-// Overbounce is disabled on current map
-inline constexpr int BG_LEVEL_NO_OVERBOUNCE = 1 << 0;
-// jump delay is disabled
-inline constexpr int BG_LEVEL_NO_JUMPDELAY = 1 << 1;
-// Save is disabled
-inline constexpr int BG_LEVEL_NO_SAVE = 1 << 2;
-// Fall damage is disabled
-inline constexpr int BG_LEVEL_NO_FALLDAMAGE = 1 << 3;
-// Fall damage is disabled (force)
-inline constexpr int BG_LEVEL_NO_FALLDAMAGE_FORCE = 1 << 4;
-// Prone is disabled
-inline constexpr int BG_LEVEL_NO_PRONE = 1 << 5;
-// Nodrop is enabled
-inline constexpr int BG_LEVEL_NO_DROP = 1 << 6;
-// Wallbugging is disabled
-inline constexpr int BG_LEVEL_NO_WALLBUG = 1 << 7;
-// Noclip is disabled
-inline constexpr int BG_LEVEL_NO_NOCLIP = 1 << 8;
-// portalgun prediction is force-enabled
-inline constexpr int BG_LEVEL_PORTAL_PREDICT = 1 << 9;
-// overbounces are always allowed on CONTENTS_BODY
-inline constexpr int32_t BG_LEVEL_BODY_OB_ALWAYS = 1 << 10;
-// overbounces are never allowed on CONTENTS_BODY
-inline constexpr int32_t BG_LEVEL_BODY_OB_NEVER = 1 << 11;
-
 namespace ETJump {
-inline constexpr char CUSTOMVOTE_TYPE[] = "type";
-inline constexpr char CUSTOMVOTE_CVTEXT[] = "cvtext";
+inline constexpr char CUSTOMVOTE_TYPE[]       = "type";
+inline constexpr char CUSTOMVOTE_CVTEXT[]     = "cvtext";
 inline constexpr char CUSTOMVOTE_SERVERMAPS[] = "servermaps";
-inline constexpr char CUSTOMVOTE_OTHERMAPS[] = "othermaps";
+inline constexpr char CUSTOMVOTE_OTHERMAPS[]  = "othermaps";
+
+inline constexpr char AUTOEXEC_MAP_DEFAULT[] = "autoexec_default.cfg";
 
 enum class CheatCvarFlags {
-  None = 0,
-  LookYaw = 1,
+  None     = 0,
+  LookYaw  = 1,
   PmoveFPS = 2,
 };
 
@@ -2913,49 +2880,49 @@ enum class CheatCvarFlags {
 // from player to player, such as playerState_t fields that don't
 // normally get mapped to entityState in BG_PlayerStateToEntityState
 enum class PlayerDensityFlags {
-  None = 0 << 0,
+  None   = 0 << 0,
   Noclip = 1 << 0,
 };
 
 enum class TeleporterSpawnflags {
-  None = 0,
-  ResetSpeed = 1 << 0,
-  ConvertSpeed = 1 << 1,
-  RelativeYaw = 1 << 2,
+  None             = 0,
+  ResetSpeed       = 1 << 0,
+  ConvertSpeed     = 1 << 1,
+  RelativeYaw      = 1 << 2,
   RelativePitchYaw = 1 << 3,
-  Knockback = 1 << 4,
-  NoZOffset = 1 << 5,
+  Knockback        = 1 << 4,
+  NoZOffset        = 1 << 5,
 };
 
 enum class PusherSpawnFlags {
   None = 0,
   // reserved by 'target_push' but unused as the sounds don't exist in ET
   AltSound = 1 << 0,
-  AddXY = 1 << 1,
-  AddZ = 1 << 2
+  AddXY    = 1 << 1,
+  AddZ     = 1 << 2
 };
 
 // PERS_HWEAPON_USE
 enum class HeavyWeaponState {
   MountedMG = 1,
-  AAGun = 2, // not sure if this is actually used/functional
+  AAGun     = 2, // not sure if this is actually used/functional
 };
 
 enum class ViewlockState {
-  Jitter = 2,  // screen jitter (firing mounted MG42)
+  Jitter  = 2, // screen jitter (firing mounted MG42)
   Mounted = 3, // lock to direction of mounted gun
-  Medic = 7,   // look at nearest medic
+  Medic   = 7, // look at nearest medic
 };
 
 enum class PlayerStance {
-  Stand = 0,
+  Stand  = 0,
   Crouch = 1,
-  Prone = 2,
+  Prone  = 2,
 };
 } // namespace ETJump
 
 inline constexpr int32_t G_GRAVITY = 800;
-inline constexpr int32_t G_SPEED = 320;
+inline constexpr int32_t G_SPEED   = 320;
 
 inline constexpr int JUMP_VELOCITY = 270;
 // FIXME: this is incorrect when ps.speed is modified

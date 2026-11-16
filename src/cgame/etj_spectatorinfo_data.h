@@ -31,7 +31,7 @@
 namespace ETJump {
 class SpectatorInfoData {
 public:
-  SpectatorInfoData() = default;
+  SpectatorInfoData()  = default;
   ~SpectatorInfoData() = default;
 
   // If 'clientNum' has value, then this is a 'CS_PLAYERS' update.

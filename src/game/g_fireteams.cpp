@@ -1,15 +1,15 @@
 #include <optional>
 
+#include "etj_entity_utilities.h"
+#include "etj_fireteam_countdown.h"
 #include "etj_func_static_client.h"
-#include "g_local.h"
+#include "etj_local.h"
+#include "etj_portalgun_shared.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
-#include "etj_entity_utilities.h"
-#include "etj_local.h"
-#include "etj_fireteam_countdown.h"
-#include "etj_portalgun_shared.h"
 #include "etj_utilities.h"
 #include "etj_worldspawn.h"
+#include "g_local.h"
 
 // Gordon
 // What we need....
@@ -56,8 +56,8 @@
 // Configstring for each fireteam "\\n\\%NAME%\\l\\%LEADERNUM%\\c\\%CLIENTS%"
 // clients "compressed" using hex
 
-#define G_ClientPrintAndReturn(entityNum, text)                                \
-  trap_SendServerCommand(entityNum, "cpm \"" text "\"\n");                     \
+#define G_ClientPrintAndReturn(entityNum, text)            \
+  trap_SendServerCommand(entityNum, "cpm \"" text "\"\n"); \
   return
 
 // Utility functions
@@ -84,6 +84,7 @@ team_t G_GetFireteamTeam(fireteamData_t *ft) {
 
   return g_entities[(int)ft->joinOrder[0]].client->sess.sessionTeam;
 }
+
 // Confusing name, actually counts all fireteams
 int G_CountTeamFireteams(team_t team) {
   int i, cnt = 0;
@@ -112,9 +113,8 @@ void G_UpdateFireteamConfigString(fireteamData_t *ft) {
       }
     }
 
-    Com_sprintf(buffer, 128, R"(\id\%i\l\%i\sl\%i\ng\%i\tj\%i\c\%.8x%.8x)",
-                ft->ident - 1, ft->joinOrder[0], ft->saveLimit, ft->noGhost,
-                ft->teamJumpMode, clnts[1], clnts[0]);
+    Com_sprintf(buffer, 128, R"(\id\%i\l\%i\sl\%i\ng\%i\tj\%i\c\%.8x%.8x)", ft->ident - 1, ft->joinOrder[0],
+                ft->saveLimit, ft->noGhost, ft->teamJumpMode, clnts[1], clnts[0]);
     // G_Printf(va("%s\n", buffer));
   }
 
@@ -124,8 +124,7 @@ void G_UpdateFireteamConfigString(fireteamData_t *ft) {
 qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum) {
   int i, j;
 
-  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) ||
-      !g_entities[entityNum].client) {
+  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client) {
     G_Error("G_IsOnFireteam: invalid client");
   }
 
@@ -157,8 +156,7 @@ qboolean G_IsOnFireteam(int entityNum, fireteamData_t **teamNum) {
 qboolean G_IsFireteamLeader(int entityNum, fireteamData_t **teamNum) {
   int i;
 
-  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) ||
-      !g_entities[entityNum].client) {
+  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client) {
     G_Error("G_IsFireteamLeader: invalid client");
   }
 
@@ -225,8 +223,7 @@ void G_RegisterFireteam(int entityNum) {
   }
 
   if (G_IsOnFireteam(entityNum, nullptr)) {
-    G_ClientPrintAndReturn(entityNum,
-                           "You are already on a fireteam, leave it first");
+    G_ClientPrintAndReturn(entityNum, "You are already on a fireteam, leave it first");
   }
 
   if ((ft = G_FindFreeFireteam()) == nullptr) {
@@ -235,8 +232,7 @@ void G_RegisterFireteam(int entityNum) {
 
   count = G_CountTeamFireteams(leader->client->sess.sessionTeam);
   if (count >= MAX_FIRETEAMS) {
-    G_ClientPrintAndReturn(entityNum,
-                           "There is a maximum number of fireteams in use.");
+    G_ClientPrintAndReturn(entityNum, "There is a maximum number of fireteams in use.");
   }
 
   ident = G_FindFreeFireteamIdent(leader->client->sess.sessionTeam) + 1;
@@ -248,10 +244,10 @@ void G_RegisterFireteam(int entityNum) {
   ft->inuse = qtrue;
   memset(ft->joinOrder, -1, sizeof(level.fireTeams[0].joinOrder));
   ft->joinOrder[0] = static_cast<char>(leader - g_entities);
-  ft->ident = ident;
-  ft->saveLimit = FT_SAVELIMIT_NOT_SET;
+  ft->ident        = ident;
+  ft->saveLimit    = FT_SAVELIMIT_NOT_SET;
   ft->teamJumpMode = qfalse;
-  ft->noGhost = false;
+  ft->noGhost      = false;
 
   if (g_autoFireteams.integer) {
     ft->priv = qfalse;
@@ -270,19 +266,16 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
   fireteamData_t *ft;
   int i;
 
-  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) ||
-      !g_entities[entityNum].client) {
+  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client) {
     G_Error("G_AddClientToFireteam: invalid client");
   }
 
-  if ((leaderNum < 0 || leaderNum >= MAX_CLIENTS) ||
-      !g_entities[leaderNum].client) {
+  if ((leaderNum < 0 || leaderNum >= MAX_CLIENTS) || !g_entities[leaderNum].client) {
     G_Error("G_AddClientToFireteam: invalid client");
   }
 
   if (!G_IsFireteamLeader(leaderNum, &ft)) {
-    G_ClientPrintAndReturn(
-        entityNum, "The leader has now left the Fireteam you applied to");
+    G_ClientPrintAndReturn(entityNum, "The leader has now left the Fireteam you applied to");
   }
 
   if (G_IsOnFireteam(entityNum, NULL)) {
@@ -292,9 +285,7 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
   for (i = 0; i < MAX_CLIENTS; i++) {
     // Zero: changed to 20 instead of 6
     if (i >= MAX_FIRETEAM_USERS) {
-      G_ClientPrintAndReturn(entityNum,
-                             "Too many players already on this Fireteam");
-      return;
+      G_ClientPrintAndReturn(entityNum, "Too many players already on this Fireteam");
     }
 
     if (ft->joinOrder[i] == -1) {
@@ -307,33 +298,28 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
       if (ft->noGhost) {
         if (otherEnt->client->pers.hideMe) {
           otherEnt->client->pers.hideMe = false;
-          Printer::popup(
-              otherEnt,
-              "Fireteam ^3noghost ^7is enabled, disabling ^3etj_hideMe\n");
+          Printer::popup(otherEnt, "Fireteam ^3noghost ^7is enabled, disabling ^3etj_hideMe\n");
         }
 
         otherEnt->client->ftNoGhostThisLife = true;
 
         if (otherEnt->client->sess.timerunActive &&
-            !(otherEnt->client->sess.runSpawnflags &
-              static_cast<int>(ETJump::TimerunSpawnflags::AllowFTNoGhost))) {
+            !(otherEnt->client->sess.runSpawnflags & static_cast<int>(ETJump::TimerunSpawnflags::AllowFTNoGhost))) {
           Printer::popup(otherEnt, "Fireteam ^3noghost ^7is not allowed in "
                                    "this timerun, interrupting!\n");
           InterruptRun(otherEnt);
         }
       }
 
-      if (game.worldspawn->portalTeam == ETJump::PortalTeam::FIRETEAM &&
+      if (game.worldspawn->portalTeam == ETJump::PortalTeamOpts::FIRETEAM &&
           ETJump::EntityUtilities::clearPortals(otherEnt)) {
         Printer::center(otherEnt, "Your portal gun portals have been reset.");
-        Printer::console(otherEnt,
-                         "Your portals have been reset due to ^3'portalteam' "
-                         "^7setting of the current map.\n");
+        Printer::console(otherEnt, "Your portals have been reset due to ^3'portalteam' "
+                                   "^7setting of the current map.\n");
       }
 
       if (ft->teamJumpMode) {
-        ETJump::FuncStaticClient::syncToFireteamLeaderState(entityNum,
-                                                            leaderNum);
+        ETJump::FuncStaticClient::syncToFireteamLeaderState(entityNum, leaderNum);
       }
 
       G_UpdateFireteamConfigString(ft);
@@ -344,13 +330,11 @@ void G_AddClientToFireteam(int entityNum, int leaderNum) {
 }
 
 // The only way a client should be removed from a fireteam
-void G_RemoveClientFromFireteams(int entityNum, qboolean update,
-                                 qboolean print) {
+void G_RemoveClientFromFireteams(int entityNum, qboolean update, qboolean print) {
   fireteamData_t *ft;
   int i, j;
 
-  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) ||
-      !g_entities[entityNum].client) {
+  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client) {
     G_Error("G_RemoveClientFromFireteams: invalid client");
   }
 
@@ -400,8 +384,7 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update,
       }
 
       trap_SendServerCommand(ft->joinOrder[i],
-                             va("cpm \"%s ^7has left the Fireteam\"\n",
-                                level.clients[entityNum].pers.netname));
+                             va("cpm \"%s ^7has left the Fireteam\"\n", level.clients[entityNum].pers.netname));
     }
   }
 
@@ -413,7 +396,7 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update,
       if (ft->joinOrder[i] == -1) {
         continue;
       } else {
-        ent = g_entities + ft->joinOrder[i];
+        ent                           = g_entities + ft->joinOrder[i];
         ent->client->sess.saveLimitFt = ft->saveLimit;
       }
     }
@@ -429,13 +412,11 @@ void G_RemoveClientFromFireteams(int entityNum, qboolean update,
 void G_InviteToFireTeam(int entityNum, int otherEntityNum) {
   fireteamData_t *ft;
 
-  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) ||
-      !g_entities[entityNum].client) {
+  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client) {
     G_Error("G_InviteToFireTeam: invalid client");
   }
 
-  if ((otherEntityNum < 0 || otherEntityNum >= MAX_CLIENTS) ||
-      !g_entities[otherEntityNum].client) {
+  if ((otherEntityNum < 0 || otherEntityNum >= MAX_CLIENTS) || !g_entities[otherEntityNum].client) {
     G_Error("G_InviteToFireTeam: invalid client");
   }
 
@@ -444,8 +425,7 @@ void G_InviteToFireTeam(int entityNum, int otherEntityNum) {
   }
 
   if (G_IsOnFireteam(otherEntityNum, NULL)) {
-    G_ClientPrintAndReturn(entityNum,
-                           "The other player is already on a fireteam");
+    G_ClientPrintAndReturn(entityNum, "The other player is already on a fireteam");
   }
 
   if (g_entities[otherEntityNum].r.svFlags & SVF_BOT) {
@@ -454,14 +434,12 @@ void G_InviteToFireTeam(int entityNum, int otherEntityNum) {
   } else {
     trap_SendServerCommand(entityNum, va("invitation -1"));
     trap_SendServerCommand(otherEntityNum, va("invitation %i", entityNum));
-    g_entities[otherEntityNum].client->pers.invitationClient = entityNum;
-    g_entities[otherEntityNum].client->pers.invitationEndTime =
-        level.time + 20500;
+    g_entities[otherEntityNum].client->pers.invitationClient  = entityNum;
+    g_entities[otherEntityNum].client->pers.invitationEndTime = level.time + 20500;
   }
 }
 
-static void inviteMultipleClientsToFireteam(const int32_t clientNum,
-                                            const std::optional<team_t> team) {
+static void inviteMultipleClientsToFireteam(const int32_t clientNum, const std::optional<team_t> team) {
   fireteamData_t *ft = nullptr;
 
   if (!G_IsFireteamLeader(clientNum, &ft)) {
@@ -471,20 +449,17 @@ static void inviteMultipleClientsToFireteam(const int32_t clientNum,
 
   bool anyoneInvited = false;
 
-  const auto inviteClient = [clientNum,
-                             &anyoneInvited](const int32_t otherNum) {
+  const auto inviteClient = [clientNum, &anyoneInvited](const int32_t otherNum) {
     if (G_IsOnFireteam(otherNum, nullptr)) {
-      Printer::console(
-          clientNum,
-          StringUtils::format("Player %s ^7is already on a fireteam\n",
-                              g_entities[otherNum].client->pers.netname));
+      Printer::console(clientNum, StringUtils::format("Player %s ^7is already on a fireteam\n",
+                                                      g_entities[otherNum].client->pers.netname));
       return;
     }
 
     trap_SendServerCommand(otherNum, va("invitation %i", clientNum));
-    g_entities[otherNum].client->pers.invitationClient = clientNum;
+    g_entities[otherNum].client->pers.invitationClient  = clientNum;
     g_entities[otherNum].client->pers.invitationEndTime = level.time + 20500;
-    anyoneInvited = true;
+    anyoneInvited                                       = true;
   };
 
   for (int32_t i = 0; i < level.numConnectedClients; i++) {
@@ -494,15 +469,13 @@ static void inviteMultipleClientsToFireteam(const int32_t clientNum,
       continue;
     }
 
-    if (!team.has_value() ||
-        (g_entities + otherNum)->client->sess.sessionTeam == team.value()) {
+    if (!team.has_value() || (g_entities + otherNum)->client->sess.sessionTeam == team.value()) {
       inviteClient(otherNum);
     }
   }
 
   if (!anyoneInvited) {
-    Printer::console(clientNum,
-                     "No invitations sent - no eligible players connected\n");
+    Printer::console(clientNum, "No invitations sent - no eligible players connected\n");
     return;
   }
 
@@ -528,17 +501,14 @@ static void inviteMultipleClientsToFireteam(const int32_t clientNum,
         break;
     }
 
-    Printer::console(
-        clientNum,
-        StringUtils::format("Invited all %s to the fireteam\n", teamStr));
+    Printer::console(clientNum, StringUtils::format("Invited all %s to the fireteam\n", teamStr));
   }
 }
 
 void G_DestroyFireteam(int entityNum) {
   fireteamData_t *ft;
 
-  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) ||
-      !g_entities[entityNum].client) {
+  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client) {
     G_Error("G_DestroyFireteam: invalid client");
   }
 
@@ -548,9 +518,8 @@ void G_DestroyFireteam(int entityNum) {
 
   while (ft->joinOrder[0] != -1) {
     if (ft->joinOrder[0] != entityNum) {
-      trap_SendServerCommand(ft->joinOrder[0],
-                             "cpm \"The Fireteam you are on has been "
-                             "disbanded\"\n");
+      trap_SendServerCommand(ft->joinOrder[0], "cpm \"The Fireteam you are on has been "
+                                               "disbanded\"\n");
     }
 
     G_RemoveClientFromFireteams(ft->joinOrder[0], qfalse, qfalse);
@@ -566,13 +535,11 @@ void G_WarnFireTeamPlayer(int entityNum, int otherEntityNum) {
     return; // ok, stop being silly :p
   }
 
-  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) ||
-      !g_entities[entityNum].client) {
+  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client) {
     G_Error("G_WarnFireTeamPlayer: invalid client");
   }
 
-  if ((otherEntityNum < 0 || otherEntityNum >= MAX_CLIENTS) ||
-      !g_entities[otherEntityNum].client) {
+  if ((otherEntityNum < 0 || otherEntityNum >= MAX_CLIENTS) || !g_entities[otherEntityNum].client) {
     G_Error("G_WarnFireTeamPlayer: invalid client");
   }
 
@@ -581,13 +548,10 @@ void G_WarnFireTeamPlayer(int entityNum, int otherEntityNum) {
   }
 
   if ((!G_IsOnFireteam(otherEntityNum, &ft2)) || ft != ft2) {
-    G_ClientPrintAndReturn(
-        entityNum, "You are not on the same Fireteam as the other player");
+    G_ClientPrintAndReturn(entityNum, "You are not on the same Fireteam as the other player");
   }
 
-  trap_SendServerCommand(
-      otherEntityNum,
-      "cpm \"You have been warned by your Fireteam Commander\n\"");
+  trap_SendServerCommand(otherEntityNum, "cpm \"You have been warned by your Fireteam Commander\n\"");
 }
 
 void G_KickFireTeamPlayer(int entityNum, int otherEntityNum) {
@@ -598,13 +562,11 @@ void G_KickFireTeamPlayer(int entityNum, int otherEntityNum) {
     return; // ok, stop being silly :p
   }
 
-  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) ||
-      !g_entities[entityNum].client) {
+  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client) {
     G_Error("G_KickFireTeamPlayer: invalid client");
   }
 
-  if ((otherEntityNum < 0 || otherEntityNum >= MAX_CLIENTS) ||
-      !g_entities[otherEntityNum].client) {
+  if ((otherEntityNum < 0 || otherEntityNum >= MAX_CLIENTS) || !g_entities[otherEntityNum].client) {
     G_Error("G_KickFireTeamPlayer: invalid client");
   }
 
@@ -613,14 +575,12 @@ void G_KickFireTeamPlayer(int entityNum, int otherEntityNum) {
   }
 
   if ((!G_IsOnFireteam(otherEntityNum, &ft2)) || ft != ft2) {
-    G_ClientPrintAndReturn(
-        entityNum, "You are not on the same Fireteam as the other player");
+    G_ClientPrintAndReturn(entityNum, "You are not on the same Fireteam as the other player");
   }
 
   G_RemoveClientFromFireteams(otherEntityNum, qtrue, qfalse);
 
-  G_ClientPrintAndReturn(otherEntityNum,
-                         "You have been kicked from the fireteam");
+  G_ClientPrintAndReturn(otherEntityNum, "You have been kicked from the fireteam");
 }
 
 // The only way a client should ever apply to join a team
@@ -628,8 +588,7 @@ void G_ApplyToFireTeam(int entityNum, int fireteamNum) {
   gentity_t *leader;
   fireteamData_t *ft;
 
-  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) ||
-      !g_entities[entityNum].client) {
+  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client) {
     G_Error("G_AddClientToFireteam: invalid client");
   }
 
@@ -639,8 +598,7 @@ void G_ApplyToFireTeam(int entityNum, int fireteamNum) {
 
   ft = &level.fireTeams[fireteamNum];
   if (!ft->inuse) {
-    G_ClientPrintAndReturn(entityNum,
-                           "The Fireteam you requested does not exist");
+    G_ClientPrintAndReturn(entityNum, "The Fireteam you requested does not exist");
   }
 
   if (ft->joinOrder[0] < 0 || ft->joinOrder[0] >= MAX_CLIENTS) {
@@ -657,7 +615,7 @@ void G_ApplyToFireTeam(int entityNum, int fireteamNum) {
 
   trap_SendServerCommand(entityNum, va("application -1"));
   trap_SendServerCommand(leader - g_entities, va("application %i", entityNum));
-  leader->client->pers.applicationClient = entityNum;
+  leader->client->pers.applicationClient  = entityNum;
   leader->client->pers.applicationEndTime = level.time + 20000;
 }
 
@@ -669,19 +627,16 @@ void G_ProposeFireTeamPlayer(int entityNum, int otherEntityNum) {
     return; // ok, stop being silly :p
   }
 
-  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) ||
-      !g_entities[entityNum].client) {
+  if ((entityNum < 0 || entityNum >= MAX_CLIENTS) || !g_entities[entityNum].client) {
     G_Error("G_ProposeFireTeamPlayer: invalid client");
   }
 
-  if ((otherEntityNum < 0 || otherEntityNum >= MAX_CLIENTS) ||
-      !g_entities[otherEntityNum].client) {
+  if ((otherEntityNum < 0 || otherEntityNum >= MAX_CLIENTS) || !g_entities[otherEntityNum].client) {
     G_Error("G_ProposeFireTeamPlayer: invalid client");
   }
 
   if (G_IsOnFireteam(otherEntityNum, NULL)) {
-    G_ClientPrintAndReturn(entityNum,
-                           "The other player is already on a fireteam");
+    G_ClientPrintAndReturn(entityNum, "The other player is already on a fireteam");
   }
 
   if (!G_IsOnFireteam(entityNum, &ft)) {
@@ -700,9 +655,8 @@ void G_ProposeFireTeamPlayer(int entityNum, int otherEntityNum) {
   }
 
   trap_SendServerCommand(entityNum, va("proposition -1"));
-  trap_SendServerCommand(leader - g_entities,
-                         va("proposition %i %i", otherEntityNum, entityNum));
-  leader->client->pers.propositionClient = otherEntityNum;
+  trap_SendServerCommand(leader - g_entities, va("proposition %i %i", otherEntityNum, entityNum));
+  leader->client->pers.propositionClient  = otherEntityNum;
   leader->client->pers.propositionClient2 = entityNum;
   leader->client->pers.propositionEndTime = level.time + 20000;
 }
@@ -817,16 +771,14 @@ void setSaveLimitForFTMembers(fireteamData_t *ft, const int limit) {
       continue;
     }
 
-    gentity_t *ent = g_entities + ft->joinOrder[i];
+    gentity_t *ent                = g_entities + ft->joinOrder[i];
     ent->client->sess.saveLimitFt = limit;
-    Printer::popup(ent, StringUtils::format(
-                            "fireteam: ^3savelimit ^7was set to ^3%i", limit));
+    Printer::popup(ent, StringUtils::format("fireteam: ^3savelimit ^7was set to ^3%i", limit));
   }
 }
 
 void setFireTeamGhosting(fireteamData_t *ft, const bool noGhost) {
-  const std::string &msg = StringUtils::format(
-      "fireteam: ^3noghost ^7has been ^3%s", noGhost ? "enabled" : "disabled");
+  const std::string &msg = StringUtils::format("fireteam: ^3noghost ^7has been ^3%s", noGhost ? "enabled" : "disabled");
 
   ft->noGhost = noGhost;
 
@@ -842,8 +794,7 @@ void setFireTeamGhosting(fireteamData_t *ft, const bool noGhost) {
 
       if (ent->client->pers.hideMe) {
         ent->client->pers.hideMe = false;
-        Printer::popup(ent,
-                       "fireteam: disabling ^3etj_hideMe ^7due to ^3noghost\n");
+        Printer::popup(ent, "fireteam: disabling ^3etj_hideMe ^7due to ^3noghost\n");
       }
     }
 
@@ -853,8 +804,7 @@ void setFireTeamGhosting(fireteamData_t *ft, const bool noGhost) {
 
 void setFireteamTeamjumpMode(fireteamData_t *ft, const bool teamjumpMode) {
   const std::string &msg =
-      StringUtils::format("fireteam: ^3teamjump mode ^7has been ^3%s",
-                          teamjumpMode ? "enabled" : "disabled");
+    StringUtils::format("fireteam: ^3teamjump mode ^7has been ^3%s", teamjumpMode ? "enabled" : "disabled");
 
   ft->teamJumpMode = teamjumpMode;
 
@@ -868,8 +818,7 @@ void setFireteamTeamjumpMode(fireteamData_t *ft, const bool teamjumpMode) {
     // sync 'func_static_client' entities for members to match leader's state,
     // if we're enabling teamjump mode
     if (i != 0 && ft->teamJumpMode) {
-      FuncStaticClient::syncToFireteamLeaderState(ft->joinOrder[i],
-                                                  ft->joinOrder[0]);
+      FuncStaticClient::syncToFireteamLeaderState(ft->joinOrder[i], ft->joinOrder[0]);
     }
   }
 }
@@ -883,8 +832,7 @@ static bool fireTeamMemberIsTimerunning(fireteamData_t *ft) {
     const gentity_t *ent = g_entities + ft->joinOrder[i];
 
     if (ent->client->sess.timerunActive &&
-        !(ent->client->sess.runSpawnflags &
-          static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
+        !(ent->client->sess.runSpawnflags & static_cast<int>(TimerunSpawnflags::AllowFTNoGhost))) {
       return true;
     }
   }
@@ -892,8 +840,7 @@ static bool fireTeamMemberIsTimerunning(fireteamData_t *ft) {
   return false;
 }
 
-bool canEnableFtNoGhost(const int clientNum, fireteamData_t *ft,
-                        const gentity_t *ent) {
+bool canEnableFtNoGhost(const int clientNum, fireteamData_t *ft, const gentity_t *ent) {
   if (g_cheats.integer) {
     return true;
   }
@@ -901,8 +848,7 @@ bool canEnableFtNoGhost(const int clientNum, fireteamData_t *ft,
   // 'target_ft_setrules' bypasses worldspawn key restriction
   // so mappers have control of where in the map ghosting will be toggled
   if (game.worldspawn->noFTNoGhost && ent && ent->client) {
-    Printer::popup(clientNum,
-                   "fireteam: ^3noghost ^7cannot be set on this map");
+    Printer::popup(clientNum, "fireteam: ^3noghost ^7cannot be set on this map");
     return false;
   }
 
@@ -925,15 +871,12 @@ bool canSetFtSavelimit(const int clientNum, const gentity_t *ent) {
   // 'target_ft_setrules' bypasses worldspawn key restriction
   // so mappers have control of where in the map savelimit will be set
   if (game.worldspawn->noFTSaveLimit && ent && ent->client) {
-    Printer::popup(clientNum,
-                   "fireteam: ^3savelimit ^7cannot be set on this map");
+    Printer::popup(clientNum, "fireteam: ^3savelimit ^7cannot be set on this map");
     return false;
   }
 
   if (game.worldspawn->limitedSaves > 0) {
-    Printer::popup(
-        clientNum,
-        "fireteam: ^7unable to set ^3savelimit ^7- save is limited by the map");
+    Printer::popup(clientNum, "fireteam: ^7unable to set ^3savelimit ^7- save is limited by the map");
     return false;
   }
 
@@ -948,8 +891,7 @@ bool canSetFtTeamjumpMode(const int clientNum, const gentity_t *ent) {
   // 'target_ft_setrules' bypasses worldspawn key restriction
   // so mappers have control of where in the map teamjump mode will be set
   if (game.worldspawn->noFTTeamjumpMode && ent && ent->client) {
-    Printer::popup(clientNum,
-                   "fireteam: ^3teamjump mode ^7cannot be set on this map");
+    Printer::popup(clientNum, "fireteam: ^3teamjump mode ^7cannot be set on this map");
     return false;
   }
 
@@ -974,9 +916,8 @@ static void setFireTeamRules(const int &clientNum) {
   char arg1[MAX_TOKEN_CHARS];
   char val[MAX_TOKEN_CHARS];
   fireteamData_t *ft;
-  const std::string &usageStr =
-      "^3usage: ^7fireteam rules <rule> <value>\n\nAvailable rules:\nsavelimit "
-      "<value|reset>\nnoghost <on|off>\n";
+  const std::string &usageStr = "^3usage: ^7fireteam rules <rule> <value>\n\nAvailable rules:\nsavelimit "
+                                "<value|reset>\nnoghost <on|off>\n";
 
   if (!canSetFireteamRules(clientNum, &ft)) {
     return;
@@ -1015,10 +956,8 @@ static void setFireTeamRules(const int &clientNum) {
 
   if (!Q_stricmp(arg1, "noghost")) {
     if (g_ghostPlayers.integer != 1) {
-      Printer::popup(
-          clientNum,
-          StringUtils::format("fireteam: ^3noghost ^7is disabled by the %s",
-                              game.worldspawn->noGhost ? "map" : "server"));
+      Printer::popup(clientNum, StringUtils::format("fireteam: ^3noghost ^7is disabled by the %s",
+                                                    game.worldspawn->noGhost ? "map" : "server"));
       return;
     }
 
@@ -1052,8 +991,7 @@ static void setFireTeamRules(const int &clientNum) {
     return;
   }
 
-  Printer::popup(clientNum,
-                 "Failed to set fireteam rules, see console for usage");
+  Printer::popup(clientNum, "Failed to set fireteam rules, see console for usage");
   Printer::console(clientNum, usageStr);
 }
 
@@ -1078,16 +1016,14 @@ void setupTeamJumpMode(const int &clientNum) {
 
   if (!Q_stricmp(arg, "on") || !Q_stricmp(arg, "1")) {
     if (ft->teamJumpMode) {
-      Printer::popup(clientNum,
-                     "fireteam: ^3teamjump mode ^7is already enabled");
+      Printer::popup(clientNum, "fireteam: ^3teamjump mode ^7is already enabled");
       return;
     }
 
     setFireteamTeamjumpMode(ft, true);
   } else if (!Q_stricmp(arg, "off") || !Q_stricmp(arg, "0")) {
     if (!ft->teamJumpMode) {
-      Printer::popup(clientNum,
-                     "fireteam: ^3teamjump mode ^7is already disabled");
+      Printer::popup(clientNum, "fireteam: ^3teamjump mode ^7is already disabled");
       return;
     }
 
@@ -1107,8 +1043,7 @@ static void startFireteamCountdown(gentity_t *ent) {
   // the client should always produce a countdown command with duration,
   // even if it's not manually specified
   if (argc < 3) {
-    Printer::console(
-        ent, "Malformed 'countdown' command - no duration specified!\n");
+    Printer::console(ent, "Malformed 'countdown' command - no duration specified!\n");
     return;
   }
 
@@ -1121,8 +1056,7 @@ static void startFireteamCountdown(gentity_t *ent) {
 
   // sanity check
   if (clientNum < 0 || clientNum >= MAX_CLIENTS) {
-    Printer::console(ent,
-                     "Malformed 'countdown' command - invalid clientNum!\n");
+    Printer::console(ent, "Malformed 'countdown' command - invalid clientNum!\n");
     return;
   }
 
@@ -1164,12 +1098,12 @@ bool validClientForFireteam(gentity_t *ent, int *targetNum, char *numbuffer) {
 void Cmd_FireTeam_MP_f(gentity_t *ent) {
   char command[MAX_NAME_LENGTH]; // more than enough to hold the commands
   const int selfNum = ClientNum(ent);
-  int targetNum = -1;
+  int targetNum     = -1;
 
   if (trap_Argc() < 2) {
-    G_ClientPrintAndReturn(
-        selfNum,
-        "usage: fireteam <create|leave|apply|invite|rules|teamjump|countdown>");
+    G_ClientPrintAndReturn(selfNum, "usage: fireteam "
+                                    "<create|apply|leave|disband|invite|kick|"
+                                    "warn|propose|rules|teamjump|countdown>");
   }
 
   trap_Argv(1, command, sizeof(command));
@@ -1185,17 +1119,14 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     int fireteam;
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(
-          selfNum, "usage: fireteam apply <fireteamname|fireteamnumber>");
+      G_ClientPrintAndReturn(selfNum, "usage: fireteam apply <fireteamname|fireteamnumber>");
     }
 
     trap_Argv(2, namebuffer, sizeof(namebuffer));
-    fireteam =
-        G_FireteamNumberForString(namebuffer, ent->client->sess.sessionTeam);
+    fireteam = G_FireteamNumberForString(namebuffer, ent->client->sess.sessionTeam);
 
     if (fireteam <= 0) {
-      G_ClientPrintAndReturn(
-          selfNum, "usage: fireteam apply <fireteamname|fireteamnumber>");
+      G_ClientPrintAndReturn(selfNum, "usage: fireteam apply <fireteamname|fireteamnumber>");
     }
 
     G_ApplyToFireTeam(selfNum, fireteam - 1);
@@ -1204,17 +1135,15 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
 
     if (trap_Argc() < 3) {
       const size_t pad = std::strlen("spectator/spectators/s");
-      Printer::console(selfNum, StringUtils::format(
-                                    "usage: fireteam invite <clients>\n\n"
-                                    "'clients' may be specified as follows:\n"
-                                    "- %-*s - invite a specific client\n"
-                                    "- %-*s - invite all Axis players\n"
-                                    "- %-*s - invite all Allied players\n"
-                                    "- %-*s - invite all Spectators\n"
-                                    "- %-*s - invite all connected clients\n",
-                                    pad, "client name or number", pad, "axis/r",
-                                    pad, "allies/allied/b", pad,
-                                    "spectator/spectators/s", pad, "all"));
+      Printer::console(selfNum, StringUtils::format("usage: fireteam invite <clients>\n\n"
+                                                    "'clients' may be specified as follows:\n"
+                                                    "- %-*s - invite a specific client\n"
+                                                    "- %-*s - invite all Axis players\n"
+                                                    "- %-*s - invite all Allied players\n"
+                                                    "- %-*s - invite all Spectators\n"
+                                                    "- %-*s - invite all connected clients\n",
+                                                    pad, "client name or number", pad, "axis/r", pad, "allies/allied/b",
+                                                    pad, "spectator/spectators/s", pad, "all"));
       return;
     }
 
@@ -1240,8 +1169,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(selfNum,
-                             "usage: fireteam warn <clientname|clientnumber>");
+      G_ClientPrintAndReturn(selfNum, "usage: fireteam warn <clientname|clientnumber>");
     }
     trap_Argv(2, numbuffer, sizeof(numbuffer));
 
@@ -1255,8 +1183,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(selfNum,
-                             "usage: fireteam kick <clientname|clientnumber>");
+      G_ClientPrintAndReturn(selfNum, "usage: fireteam kick <clientname|clientnumber>");
     }
     trap_Argv(2, numbuffer, sizeof(numbuffer));
 
@@ -1270,8 +1197,7 @@ void Cmd_FireTeam_MP_f(gentity_t *ent) {
     char numbuffer[MAX_NAME_LENGTH];
 
     if (trap_Argc() < 3) {
-      G_ClientPrintAndReturn(
-          selfNum, "usage: fireteam propose <clientname|clientnumber>");
+      G_ClientPrintAndReturn(selfNum, "usage: fireteam propose <clientname|clientnumber>");
     }
     trap_Argv(2, numbuffer, sizeof(numbuffer));
 

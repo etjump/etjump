@@ -40,9 +40,8 @@ public:
     std::vector<std::string> commands;
   };
 
-  AwaitedCommandHandler(
-      const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
-      const std::shared_ptr<PlayerEventsHandler> &playerEvents);
+  AwaitedCommandHandler(const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+                        const std::shared_ptr<PlayerEventsHandler> &playerEvents);
   ~AwaitedCommandHandler();
 
   void runFrame();

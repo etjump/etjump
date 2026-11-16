@@ -34,15 +34,18 @@
   #undef max
 #endif
 
+#include <cstdint>
 #include <functional>
 #include <vector>
-#include <cstdint>
 
 using std::function;
 using std::vector;
 
 namespace ETJump {
-enum class TaskPriorities { Default, Immediate };
+enum class TaskPriorities {
+  Default,
+  Immediate
+};
 
 class EventLoop {
   struct Task {
@@ -53,19 +56,18 @@ class EventLoop {
     bool persistent;
     bool deprecated;
   };
+
   vector<Task> ordinaryTasks;
   vector<Task> importantTasks;
-  int eventCounter = 0;
+  int eventCounter       = 0;
   bool isExecutingEvents = false;
 
 public:
   EventLoop() {};
   ~EventLoop() {};
   void run();
-  int schedule(function<void()> fn, int delay,
-               TaskPriorities priority = TaskPriorities::Default);
-  int schedulePersistent(function<void()> fn, int delay,
-                         TaskPriorities priority = TaskPriorities::Default);
+  int schedule(function<void()> fn, int delay, TaskPriorities priority = TaskPriorities::Default);
+  int schedulePersistent(function<void()> fn, int delay, TaskPriorities priority = TaskPriorities::Default);
   bool unschedule(int taskId);
   void shutdown();
   bool hasPendingEvents();

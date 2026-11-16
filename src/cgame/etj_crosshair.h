@@ -41,12 +41,12 @@ class Crosshair : public IRenderable {
   static bool canSkipDraw();
 
   enum class ETJumpCrosshairs {
-    VerticalLine = 10,
-    Cross = 11,
-    DiagonalCross = 12,
-    V = 13,
-    Triangle = 14,
-    T = 15,
+    VerticalLine     = 10,
+    Cross            = 11,
+    DiagonalCross    = 12,
+    V                = 13,
+    Triangle         = 14,
+    T                = 15,
     TwoVerticalLines = 16
   };
 

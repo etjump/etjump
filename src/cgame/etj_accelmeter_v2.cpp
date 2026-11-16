@@ -23,6 +23,7 @@
  */
 
 #include "etj_accelmeter_v2.h"
+
 #include "cg_local.h"
 #include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
@@ -32,8 +33,7 @@ namespace ETJump {
 inline constexpr float ACCELMETER_SIZE_MIN = 1.0f;
 inline constexpr float ACCELMETER_SIZE_MAX = 10.0f;
 
-AccelMeterV2::AccelMeterV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : cvarUpdate(cvarUpdate) {
+AccelMeterV2::AccelMeterV2(const std::shared_ptr<CvarUpdateHandler> &cvarUpdate) : cvarUpdate(cvarUpdate) {
   parseColor(etj_accelColor.string);
   setAccelColorStyle(etj_accelColorUsesAccel);
   setSize(etj_accelSize);
@@ -56,8 +56,9 @@ void AccelMeterV2::startListeners() {
     parseColor(etj_accelColor.string);
   });
 
-  cvarUpdate->subscribe(&etj_accelSize,
-                        [this](const vmCvar_t *cvar) { setSize(*cvar); });
+  cvarUpdate->subscribe(&etj_accelSize, [this](const vmCvar_t *cvar) {
+    setSize(*cvar);
+  });
 
   cvarUpdate->subscribe(&etj_accelColorUsesAccel, [this](const vmCvar_t *cvar) {
     setAccelColorStyle(*cvar);
@@ -70,18 +71,15 @@ void AccelMeterV2::parseColor(const std::string &colorStr) {
 }
 
 void AccelMeterV2::setSize(const vmCvar_t &cvar) {
-  size = CvarValueParser::parse<CvarValue::Size>(cvar, ACCELMETER_SIZE_MIN,
-                                                 ACCELMETER_SIZE_MAX);
+  size    = CvarValueParser::parse<CvarValue::Size>(cvar, ACCELMETER_SIZE_MIN, ACCELMETER_SIZE_MAX);
   size.x *= 0.1f;
   size.y *= 0.1f;
 
-  halfW = static_cast<float>(
-      CG_Text_Width_Ext("-88 ", size.x, 0, &cgs.media.limboFont1));
+  halfW = static_cast<float>(CG_Text_Width_Ext("-88 ", size.x, 0, &cgs.media.limboFont1));
 }
 
 void AccelMeterV2::setAccelColorStyle(const vmCvar_t &cvar) {
-  accelColorStyle =
-      static_cast<AccelColorV2::Style>(std::clamp(cvar.integer, 0, 2));
+  accelColorStyle = static_cast<AccelColorV2::Style>(std::clamp(cvar.integer, 0, 2));
 
   // re-parse the base color if we're turning off accel-based coloring
   if (accelColorStyle == AccelColorV2::Style::NONE) {
@@ -89,8 +87,7 @@ void AccelMeterV2::setAccelColorStyle(const vmCvar_t &cvar) {
   }
 }
 
-void AccelMeterV2::setupAccelColor(const PmoveUtilsV2::State &s,
-                                   const float speed) {
+void AccelMeterV2::setupAccelColor(const PmoveUtilsV2::State &s, const float speed) {
   if (accelColorStyle == AccelColorV2::Style::NONE) {
     return;
   }
@@ -106,15 +103,13 @@ void AccelMeterV2::setupAccelColor(const PmoveUtilsV2::State &s,
       avgAccel = -avgAccel;
     }
 
-    const float frac =
-        std::min(avgAccel / AccelColorV2::ACCEL_FOR_SOLID_COLOR, 1.0f);
+    const float frac = std::min(avgAccel / AccelColorV2::ACCEL_FOR_SOLID_COLOR, 1.0f);
 
     LerpColor(colorWhite, color, color, frac);
   } else if (accelColorStyle == AccelColorV2::Style::ADVANCED) {
     if (accelVec[0] != 0 || accelVec[1] != 0) {
-      AccelColorV2::calcAdvancedAccelColor(s.pm, s.pml, accelVec, s.wishspeed,
-                                           s.wishvel, s.velAngle, s.optAngle,
-                                           s.a, color);
+      AccelColorV2::calcAdvancedAccelColor(s.pm, s.pml, accelVec, s.wishspeed, s.wishvel, s.velAngle, s.optAngle, s.a,
+                                           color);
     } else {
       Vector4Copy(colorWhite, color);
     }
@@ -128,22 +123,25 @@ bool AccelMeterV2::beforeRender() {
     return false;
   }
 
-  const PmoveUtilsV2::State &s = cgame.utils.pmoveV2->getState();
+  const PmoveUtilsV2::State &s = cgame.hudData.pmoveV2->getState();
 
   // pps must be accurate in order to draw this accurately
   // TODO: revisit with 'g_synchronousClients'
-  if (!PmoveUtilsV2::ppsIsAccurate(s.pm)) {
+  if (!cgame.hudData.pmoveV2->ppsIsAccurate(s.pm)) {
     return false;
   }
 
+  // store last update time so we can get the elapsed time since last update
+  int32_t oldLastUpdateTime = lastUpdateTime;
+
   // never lerp this, we want real acceleration values always
-  if (PmoveUtilsV2::skipUpdate(lastUpdateTime, std::nullopt, s.pm)) {
+  if (cgame.hudData.pmoveV2->skipUpdate(lastUpdateTime, std::nullopt, s.pm)) {
     return true;
   }
 
   if (accelColorStyle == AccelColorV2::Style::SIMPLE ||
-      (accelColorStyle == AccelColorV2::Style::ADVANCED) &&
-          AccelColorV2::lowSpeedOnGround(s.vf, s.pm.ps->groundEntityNum)) {
+      ((accelColorStyle == AccelColorV2::Style::ADVANCED) &&
+       AccelColorV2::lowSpeedOnGround(s.vf, s.pm.ps->groundEntityNum))) {
     storedSpeeds.push_back({lastUpdateTime, s.vf});
     AccelColorV2::popOldStoredSpeeds(storedSpeeds, lastUpdateTime);
   } else if (!storedSpeeds.empty()) {
@@ -161,6 +159,9 @@ bool AccelMeterV2::beforeRender() {
       }
     } else {
       Vector2Subtract(s.pm.ps->velocity, lastSpeed, accelVec);
+      // rescale to a single physics frame, as a sample interval can span
+      // multiple physics frames if FPS dips below 125
+      AccelColorV2::normalizeAccelVec(accelVec, lastUpdateTime - oldLastUpdateTime, s.pm.pmove_msec);
       setupAccelColor(s, s.vf);
     }
   }
@@ -172,8 +173,7 @@ bool AccelMeterV2::beforeRender() {
   ETJump_AdjustPosition(&x);
   y = std::clamp(etj_accelY.value, 0.0f, static_cast<float>(SCREEN_HEIGHT));
 
-  textStyle =
-      etj_accelShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
+  textStyle = etj_accelShadow.integer ? ITEM_TEXTSTYLE_SHADOWED : ITEM_TEXTSTYLE_NORMAL;
 
   accelStr[0] = StringUtils::format("%.0f", accelVec[0]);
   accelStr[1] = StringUtils::format("%.0f", accelVec[1]);
@@ -184,25 +184,19 @@ bool AccelMeterV2::beforeRender() {
 void AccelMeterV2::render() const {
   switch (static_cast<Align>(etj_accelAlign.integer)) {
     case Align::LEFT:
-      CG_Text_Paint_Ext(x, y, size.x, size.y, color, accelStr[0], 0, 0,
-                        textStyle, &cgs.media.limboFont1);
-      CG_Text_Paint_Ext(x + halfW, y, size.x, size.y, color, accelStr[1], 0, 0,
-                        textStyle, &cgs.media.limboFont1);
+      CG_Text_Paint_Ext(x, y, size.x, size.y, color, accelStr[0], 0, 0, textStyle, &cgs.media.limboFont1);
+      CG_Text_Paint_Ext(x + halfW, y, size.x, size.y, color, accelStr[1], 0, 0, textStyle, &cgs.media.limboFont1);
       break;
     case Align::RIGHT:
-      CG_Text_Paint_RightAligned_Ext(x, y, size.x, size.y, color, accelStr[0],
-                                     0, 0, textStyle, &cgs.media.limboFont1);
-      CG_Text_Paint_RightAligned_Ext(x - halfW, y, size.x, size.y, color,
-                                     accelStr[1], 0, 0, textStyle,
+      CG_Text_Paint_RightAligned_Ext(x, y, size.x, size.y, color, accelStr[0], 0, 0, textStyle, &cgs.media.limboFont1);
+      CG_Text_Paint_RightAligned_Ext(x - halfW, y, size.x, size.y, color, accelStr[1], 0, 0, textStyle,
                                      &cgs.media.limboFont1);
       break;
     case Align::CENTER:
     default:
-      CG_Text_Paint_Centred_Ext(x - (halfW * 0.5f), y, size.x, size.y, color,
-                                accelStr[0], 0, 0, textStyle,
+      CG_Text_Paint_Centred_Ext(x - (halfW * 0.5f), y, size.x, size.y, color, accelStr[0], 0, 0, textStyle,
                                 &cgs.media.limboFont1);
-      CG_Text_Paint_Centred_Ext(x + (halfW * 0.5f), y, size.x, size.y, color,
-                                accelStr[1], 0, 0, textStyle,
+      CG_Text_Paint_Centred_Ext(x + (halfW * 0.5f), y, size.x, size.y, color, accelStr[1], 0, 0, textStyle,
                                 &cgs.media.limboFont1);
       break;
   }

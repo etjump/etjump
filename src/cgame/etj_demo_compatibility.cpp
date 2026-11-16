@@ -23,15 +23,15 @@
  */
 
 #include "etj_demo_compatibility.h"
+
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
-DemoCompatibility::DemoCompatibility(
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
-    : consoleCommands(consoleCommands) {
+DemoCompatibility::DemoCompatibility(const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+  : consoleCommands(consoleCommands) {
   if (!cg.demoPlayback) {
     return;
   }
@@ -39,9 +39,9 @@ DemoCompatibility::DemoCompatibility(
   parseDemoVersion();
   setupCompatibilityFlags();
 
-  this->consoleCommands->subscribe(
-      "printDemoCompatInfo",
-      [this](const std::vector<std::string> &) { printCompatibilityInfo(); });
+  this->consoleCommands->subscribe("printDemoCompatInfo", [this](const std::vector<std::string> &) {
+    printCompatibilityInfo();
+  });
 }
 
 DemoCompatibility::~DemoCompatibility() {
@@ -52,7 +52,7 @@ DemoCompatibility::~DemoCompatibility() {
 
 void DemoCompatibility::parseDemoVersion() {
   const char *serverInfoCS = CG_ConfigString(CS_SERVERINFO);
-  std::string versionStr = Info_ValueForKey(serverInfoCS, "mod_version");
+  std::string versionStr   = Info_ValueForKey(serverInfoCS, "mod_version");
 
   // mod_version is present from '2.0.3 Alpha' onwards
   // if not present, look for sv_referencedPakNames as a fallback
@@ -60,7 +60,7 @@ void DemoCompatibility::parseDemoVersion() {
     fillVersionInfo(demoVersion, versionStr, ".");
   } else {
     const char *sysInfoCS = CG_ConfigString(CS_SYSTEMINFO);
-    const char *pakNames = Info_ValueForKey(sysInfoCS, "sv_referencedPakNames");
+    const char *pakNames  = Info_ValueForKey(sysInfoCS, "sv_referencedPakNames");
 
     // sanity check, shouldn't happen
     if (pakNames == nullptr) {
@@ -96,9 +96,7 @@ void DemoCompatibility::parseDemoVersion() {
   }
 }
 
-void DemoCompatibility::fillVersionInfo(Version &version,
-                                        const std::string &versionStr,
-                                        const std::string &delimiter) {
+void DemoCompatibility::fillVersionInfo(Version &version, const std::string &versionStr, const std::string &delimiter) {
   const auto splits = StringUtils::split(versionStr, delimiter);
 
   // bail if we have some weird version without at least 3 digits
@@ -114,43 +112,36 @@ void DemoCompatibility::fillVersionInfo(Version &version,
   // special entity type adjustment for ETJump 2.3.0/2.3.0 RC4
   // this is kinda awkward to do in setupCompatibilityFlags (and we don't
   // parse extra versions anyway), so for simplicity's sake parse this here
-  if (isExactVersion({2, 3, 0}) ||
-      !Q_stricmpn(versionStr.c_str(), "etjump-2_3_0-RC4", 17)) {
+  if (isExactVersion({2, 3, 0}) || !Q_stricmpn(versionStr.c_str(), "etjump-2_3_0-RC4", 17)) {
     flags.adjustEntityTypes = true;
-    compatibilityStrings.emplace_back(
-        "Adjusted entity type order for ET_VELOCITY_PUSH_TRIGGER");
+    compatibilityStrings.emplace_back("Adjusted entity type order for ET_VELOCITY_PUSH_TRIGGER");
   }
 }
 
 void DemoCompatibility::setupCompatibilityFlags() {
   if (!isCompatible({2, 0, 6})) {
     flags.adjustEvTokens = true;
-    compatibilityStrings.emplace_back(
-        "Adjusted event indices for ET_TOKEN_ entities");
+    compatibilityStrings.emplace_back("Adjusted event indices for ET_TOKEN_ entities");
 
     flags.adjustItemlistIndex = true;
-    compatibilityStrings.emplace_back(
-        "Adjusted item indices for removal of duplicate 'weapon_medic_heal'");
+    compatibilityStrings.emplace_back("Adjusted item indices for removal of duplicate 'weapon_medic_heal'");
 
     adjustEventNums = true;
   }
 
   if (!isCompatible({2, 3, 0})) {
     flags.adjustEvGeneralClientSoundVolume = true;
-    compatibilityStrings.emplace_back(
-        "Adjusted event indices for EV_GENERAL_CLIENT_SOUND_VOLUME");
+    compatibilityStrings.emplace_back("Adjusted event indices for EV_GENERAL_CLIENT_SOUND_VOLUME");
 
     flags.adjustEvVelocityPushTrigger = true;
-    compatibilityStrings.emplace_back(
-        "Adjusted event indices for ET_VELOCITY_PUSH_TRIGGER");
+    compatibilityStrings.emplace_back("Adjusted event indices for ET_VELOCITY_PUSH_TRIGGER");
 
     adjustEventNums = true;
   }
 
   if (!isCompatible({2, 5, 0})) {
     flags.predictedJumpSpeeds = true;
-    compatibilityStrings.emplace_back(
-        "Using predicted speeds for jump speeds display");
+    compatibilityStrings.emplace_back("Using predicted speeds for jump speeds display");
   }
 
   if (!isCompatible({3, 2, 0})) {
@@ -158,18 +149,15 @@ void DemoCompatibility::setupCompatibilityFlags() {
     compatibilityStrings.emplace_back("Using fully server-side coronas");
 
     flags.svFpsUnavailable = true;
-    compatibilityStrings.emplace_back(
-        "Unable to determine sv_fps, assuming default");
+    compatibilityStrings.emplace_back("Unable to determine sv_fps, assuming default");
   } else if (!isCompatible({3, 3, 0})) {
     flags.svFpsInSysteminfo = true;
-    compatibilityStrings.emplace_back(
-        "Using systeminfo string to determine sv_fps");
+    compatibilityStrings.emplace_back("Using systeminfo string to determine sv_fps");
   }
 
   if (!isCompatible({3, 3, 0})) {
     flags.noSavePosTimerunInfo = true;
-    compatibilityStrings.emplace_back(
-        "Timerun state unavailable for 'savepos'");
+    compatibilityStrings.emplace_back("Timerun state unavailable for 'savepos'");
 
     flags.adjustEvFakebrushAndClientTeleporter = true;
     compatibilityStrings.emplace_back("Adjusted event indices for ET_FAKEBRUSH "
@@ -183,32 +171,32 @@ void DemoCompatibility::setupCompatibilityFlags() {
     compatibilityStrings.emplace_back("Using fully server-side dlights");
 
     flags.setAttack2FiringFlag = true;
-    compatibilityStrings.emplace_back(
-        "Faking EF_FIRING state for '+attack2' shooting");
+    compatibilityStrings.emplace_back("Faking EF_FIRING state for '+attack2' shooting");
   }
 
   if (!isCompatible({3, 5, 0})) {
     flags.noSpecCountInVoteCs = true;
-    compatibilityStrings.emplace_back(
-        "Vote tally not differentiating players from spectators");
+    compatibilityStrings.emplace_back("Vote tally not differentiating players from spectators");
 
     flags.stripLocalizationMarkers = true;
-    compatibilityStrings.emplace_back(
-        "Stripping localization markers from server commands manually");
+    compatibilityStrings.emplace_back("Stripping localization markers from server commands manually");
 
     flags.noMapCustomizationHashes = true;
-    compatibilityStrings.emplace_back(
-        "Custom mapscript and entity file hashes not available");
+    compatibilityStrings.emplace_back("Custom mapscript and entity file hashes not available");
 
     flags.adjustEvFuncStaticClient = true;
-    compatibilityStrings.emplace_back(
-        "Adjusted event indices for ET_STATIC_CLIENT");
+    compatibilityStrings.emplace_back("Adjusted event indices for ET_STATIC_CLIENT");
 
     flags.oldShaderIndexOrder = true;
     compatibilityStrings.emplace_back("Using old shader configstring indices "
                                       "for game shaders and shaderstate");
 
     adjustEventNums = true;
+  }
+
+  if (!isCompatible({3, 7, 0})) {
+    flags.useSharedCvar = true;
+    compatibilityStrings.emplace_back("Reading shared cvar value from CS_SYSTEMINFO");
   }
 }
 
@@ -288,8 +276,54 @@ int DemoCompatibility::adjustedEventNum(const int event) const {
   }
 }
 
+void DemoCompatibility::parseSharedCvarBits(const int32_t shared) {
+  if (shared & COMPAT_SHARED_NO_OVERBOUNCE) {
+    cgame.sharedWSKeysGlobal.noOverbounce = true;
+  }
+
+  if (shared & COMPAT_SHARED_NO_JUMPDELAY) {
+    cgame.sharedWSKeysGlobal.noJumpDelay = true;
+  }
+
+  if (shared & COMPAT_SHARED_NO_SAVE) {
+    cgame.sharedWSKeysGlobal.noSave = AreaOpts::FORBID_OUTSIDE;
+  }
+
+  if (shared & COMPAT_SHARED_NO_FALLDAMAGE) {
+    cgame.sharedWSKeysGlobal.noFallDamage = NoFallDamageOpts::ON;
+  } else if (shared & COMPAT_SHARED_NO_FALLDAMAGE_FORCE) {
+    cgame.sharedWSKeysGlobal.noFallDamage = NoFallDamageOpts::FORCE_ON;
+  }
+
+  if (shared & COMPAT_SHARED_NO_PRONE) {
+    cgame.sharedWSKeysGlobal.noProne = AreaOpts::FORBID_OUTSIDE;
+  }
+
+  if (shared & COMPAT_SHARED_NO_DROP) {
+    cgame.sharedWSKeysGlobal.noDrop = true;
+  }
+
+  if (shared & COMPAT_SHARED_NO_WALLBUG) {
+    cgame.sharedWSKeysGlobal.noWallbug = true;
+  }
+
+  if (shared & COMPAT_SHARED_NO_NOCLIP) {
+    cgame.sharedWSKeysGlobal.noNoclip = AreaOpts::FORBID_OUTSIDE;
+  }
+
+  if (shared & COMPAT_SHARED_PORTAL_PREDICT) {
+    cgame.sharedWSKeysGlobal.portalPredict = true;
+  }
+
+  if (shared & COMPAT_SHARED_BODY_OB_ALWAYS) {
+    cgame.sharedWSKeysGlobal.overbouncePlayers = OverbouncePlayersOpts::FORCE_ON;
+  } else if (shared & COMPAT_SHARED_BODY_OB_NEVER) {
+    cgame.sharedWSKeysGlobal.overbouncePlayers = OverbouncePlayersOpts::FORCE_OFF;
+  }
+}
+
 void DemoCompatibility::printDemoInformation() const {
-  const char *cs = CG_ConfigString(CS_SERVERINFO);
+  const char *cs     = CG_ConfigString(CS_SERVERINFO);
   const char *server = Info_ValueForKey(cs, "sv_hostname");
 
   if (!server || !*server) {
@@ -301,8 +335,7 @@ void DemoCompatibility::printDemoInformation() const {
   CG_Printf("\n^g========================================\n");
   CG_Printf(" Demo information:\n Mod version: ETJump ^2%i.%i.%i\n ^7Player: "
             "%s\n ^7Map: %s\n ^7Server: %s\n",
-            demoVersion.major, demoVersion.minor, demoVersion.patch, player,
-            cgs.rawmapname, server);
+            demoVersion.major, demoVersion.minor, demoVersion.patch, player, cgs.rawmapname, server);
 
   CG_Printf("^g========================================\n\n");
 }
@@ -320,9 +353,7 @@ bool DemoCompatibility::isCompatible(const Version &minimum) const {
 }
 
 bool DemoCompatibility::isExactVersion(const Version &version) const {
-  return demoVersion.major == version.major &&
-         demoVersion.minor == version.minor &&
-         demoVersion.patch == version.patch;
+  return demoVersion.major == version.major && demoVersion.minor == version.minor && demoVersion.patch == version.patch;
 }
 
 } // namespace ETJump

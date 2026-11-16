@@ -23,6 +23,7 @@
  */
 
 #include "etj_overbounce_watcher.h"
+
 #include "etj_client_commands_handler.h"
 #include "etj_color_parser.h"
 #include "etj_cvar_update_handler.h"
@@ -32,12 +33,9 @@
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
-OverbounceWatcher::OverbounceWatcher(
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
-    const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
-    : shader(cgs.media.voiceChatShader), consoleCommands(consoleCommands),
-      cvarUpdate(cvarUpdate) {
-
+OverbounceWatcher::OverbounceWatcher(const std::shared_ptr<ClientCommandsHandler> &consoleCommands,
+                                     const std::shared_ptr<CvarUpdateHandler> &cvarUpdate)
+  : shader(cgs.media.voiceChatShader), consoleCommands(consoleCommands), cvarUpdate(cvarUpdate) {
   setSize(&etj_obWatcherSize);
   cgame.utils.colorParser->parseColorString(etj_obWatcherColor.string, color);
   startListeners();
@@ -54,28 +52,33 @@ OverbounceWatcher::~OverbounceWatcher() {
 }
 
 void OverbounceWatcher::startListeners() {
-  consoleCommands->subscribe(
-      "ob_save", [this](const std::vector<std::string> &args) { save(args); });
+  consoleCommands->subscribe("ob_save", [this](const std::vector<std::string> &args) {
+    save(args);
+  });
 
-  consoleCommands->subscribe(
-      "ob_load", [this](const std::vector<std::string> &args) { load(args); });
+  consoleCommands->subscribe("ob_load", [this](const std::vector<std::string> &args) {
+    load(args);
+  });
 
-  consoleCommands->subscribe(
-      "ob_reset", [this](const std::vector<std::string> &) { reset(); });
+  consoleCommands->subscribe("ob_reset", [this](const std::vector<std::string> &) {
+    reset();
+  });
 
-  consoleCommands->subscribe(
-      "ob_list", [this](const std::vector<std::string> &) { list(); });
+  consoleCommands->subscribe("ob_list", [this](const std::vector<std::string> &) {
+    list();
+  });
 
   cvarUpdate->subscribe(&etj_obWatcherColor, [this](const vmCvar_t *cvar) {
     cgame.utils.colorParser->parseColorString(cvar->string, color);
   });
 
-  cvarUpdate->subscribe(&etj_obWatcherSize,
-                        [this](const vmCvar_t *cvar) { setSize(cvar); });
+  cvarUpdate->subscribe(&etj_obWatcherSize, [this](const vmCvar_t *cvar) {
+    setSize(cvar);
+  });
 }
 
 void OverbounceWatcher::setSize(const vmCvar_t *cvar) {
-  size = CvarValueParser::parse<CvarValue::Size>(*cvar, 0, 10);
+  size    = CvarValueParser::parse<CvarValue::Size>(*cvar, 0, 10);
   size.x *= 0.1f;
   size.y *= 0.1f;
 }
@@ -85,10 +88,10 @@ bool OverbounceWatcher::beforeRender() {
     return false;
   }
 
-  ps = getValidPlayerState();
-  pmoveSec = static_cast<float>(cgs.pmove_msec) / 1000.f;
-  gravity = ps->gravity;
-  zVel = ps->velocity[2];
+  ps          = getValidPlayerState();
+  pmoveSec    = static_cast<float>(cgs.pmove_msec) / 1000.f;
+  gravity     = ps->gravity;
+  zVel        = ps->velocity[2];
   startHeight = ps->origin[2] + ps->mins[2];
 
   // impossible OB - negative z velocity & below saved coordinate
@@ -114,12 +117,10 @@ bool OverbounceWatcher::beforeRender() {
   VectorCopy(start, end);
   end[2] -= Overbounce::MAX_TRACE_DIST;
 
-  CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum,
-           CONTENTS_SOLID);
+  CG_Trace(&trace, start, vec3_origin, vec3_origin, end, ps->clientNum, CONTENTS_SOLID);
 
   // CG_Printf("startHeight: %f endHeight: %f\n", startHeight, endHeight);
-  if (Overbounce::isOverbounce(zVel, startHeight, endHeight, zVelSnapped,
-                               pmoveSec, gravity) &&
+  if (Overbounce::isOverbounce(zVel, startHeight, endHeight, zVelSnapped, pmoveSec, gravity) &&
       Overbounce::surfaceAllowsOverbounce(&trace)) {
     overbounce = true;
   }
@@ -128,51 +129,38 @@ bool OverbounceWatcher::beforeRender() {
 }
 
 void OverbounceWatcher::render() const {
-  DrawString(x, etj_obWatcherY.value, size.x, size.y, color, qfalse, "OB", 0,
-             ITEM_TEXTSTYLE_SHADOWED);
+  DrawString(x, etj_obWatcherY.value, size.x, size.y, color, qfalse, "OB", 0, ITEM_TEXTSTYLE_SHADOWED);
 }
 
 void OverbounceWatcher::save(const std::vector<std::string> &args) {
-  ps = getValidPlayerState();
-  const std::string name =
-      !args.empty() ? StringUtils::sanitize(args[0], true) : "default";
+  ps                     = getValidPlayerState();
+  const std::string name = !args.empty() ? StringUtils::sanitize(args[0], true) : "default";
 
   VectorCopy(ps->origin, positions[name]);
   // shift z-coordinate to feet level
   positions[name][2] += ps->mins[2];
 
   current = &positions[name];
-  CG_AddPMItem(PM_MESSAGE,
-               va("^3OB watcher: ^7saved coordinate as ^3%s ^7%s\n",
-                  name.c_str(), vtosf(positions[name])),
+  CG_AddPMItem(PM_MESSAGE, va("^3OB watcher: ^7saved coordinate as ^3%s ^7%s\n", name.c_str(), vtosf(positions[name])),
                shader);
 }
 
 void OverbounceWatcher::reset() {
   current = nullptr;
-  CG_AddPMItem(PM_MESSAGE,
-               "^3OB watcher: ^7current coordinates have been reset.\n",
-               shader);
+  CG_AddPMItem(PM_MESSAGE, "^3OB watcher: ^7current coordinates have been reset.\n", shader);
 }
 
 void OverbounceWatcher::load(const std::vector<std::string> &args) {
-  const std::string name =
-      !args.empty() ? StringUtils::sanitize(args[0], true) : "default";
+  const std::string name = !args.empty() ? StringUtils::sanitize(args[0], true) : "default";
 
   if (positions.find(name) == positions.cend()) {
-    CG_AddPMItem(
-        PM_MESSAGE,
-        va("^3OB watcher: ^7coordinate ^3%s ^7was not found.\n", name.c_str()),
-        shader);
+    CG_AddPMItem(PM_MESSAGE, va("^3OB watcher: ^7coordinate ^3%s ^7was not found.\n", name.c_str()), shader);
     return;
   }
 
   current = &positions[name];
 
-  CG_AddPMItem(PM_MESSAGE,
-               va("^3OB watcher: ^7loaded coordinate ^3%s ^7%s\n", name.c_str(),
-                  vtosf(*current)),
-               shader);
+  CG_AddPMItem(PM_MESSAGE, va("^3OB watcher: ^7loaded coordinate ^3%s ^7%s\n", name.c_str(), vtosf(*current)), shader);
 }
 
 void OverbounceWatcher::list() const {

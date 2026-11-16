@@ -4,19 +4,19 @@
 // rhea@OrangeSmoothie.org
 //
 #include "cg_local.h"
+
 #include "../ui/ui_shared.h"
 
 extern pmove_t cg_pmove; // cg_predict.c
 
-vec4_t colorClear = {0.0f, 0.0f, 0.0f, 0.0f};   // Transparent
-vec4_t colorBrown1 = {0.3f, 0.2f, 0.1f, 0.9f};  // Brown
-vec4_t colorGreen1 = {0.21f, 0.3f, 0.0f, 0.9f}; // Greenish (darker)
-vec4_t colorGreen2 = {0.305f, 0.475f, 0.305f,
-                      0.48f}; // Slightly off from default fill
+vec4_t colorClear  = {0.0f, 0.0f, 0.0f, 0.0f};        // Transparent
+vec4_t colorBrown1 = {0.3f, 0.2f, 0.1f, 0.9f};        // Brown
+vec4_t colorGreen1 = {0.21f, 0.3f, 0.0f, 0.9f};       // Greenish (darker)
+vec4_t colorGreen2 = {0.305f, 0.475f, 0.305f, 0.48f}; // Slightly off from default fill
 
 void CG_createStatsWindow(void) {
   cg_window_t *sw = CG_windowAlloc(WFX_TEXTSIZING | WFX_FADEIN |
-                                       /*WFX_SCROLLUP|*/ WFX_TRUETYPE,
+                                     /*WFX_SCROLLUP|*/ WFX_TRUETYPE,
                                    110);
 
   cg.statsWindow = sw;
@@ -25,7 +25,7 @@ void CG_createStatsWindow(void) {
   }
 
   // Window specific
-  sw->id = WID_STATS;
+  sw->id         = WID_STATS;
   sw->fontScaleX = cf_wstats.value * 0.2f;
   sw->fontScaleY = cf_wstats.value * 0.2f;
   //	sw->x = (cg.snap->ps.pm_type == PM_INTERMISSION) ?  10 : 160;
@@ -33,9 +33,7 @@ void CG_createStatsWindow(void) {
   //// Align
   // from bottom minus offset and height
   sw->x = (cg.snap->ps.pm_type == PM_INTERMISSION) ? 10 : 4;
-  sw->y = (cg.snap->ps.pm_type == PM_INTERMISSION)
-              ? -20
-              : -100; // Align from bottom minus offset and height
+  sw->y = (cg.snap->ps.pm_type == PM_INTERMISSION) ? -20 : -100; // Align from bottom minus offset and height
 }
 
 //////////////////////////////////////////////
@@ -55,30 +53,30 @@ void CG_windowInit(void) {
     cg.winHandler.window[i].inuse = qfalse;
   }
 
-  cg.msgWstatsWindow = NULL;
+  cg.msgWstatsWindow    = NULL;
   cg.msgWtopshotsWindow = NULL;
-  cg.statsWindow = NULL;
-  cg.topshotsWindow = NULL;
+  cg.statsWindow        = NULL;
+  cg.topshotsWindow     = NULL;
 }
 
 // Window stuct "constructor" with some common defaults
 void CG_windowReset(cg_window_t *w, int fx, int startupLength) {
   vec4_t colorGeneralBorder = {0.5f, 0.35f, 0.25f, 0.5f};
-  vec4_t colorGeneralFill = {0.3f, 0.45f, 0.3f, 0.5f};
+  vec4_t colorGeneralFill   = {0.3f, 0.45f, 0.3f, 0.5f};
 
-  w->effects = fx;
-  w->fontScaleX = 0.25;
-  w->fontScaleY = 0.25;
-  w->flashPeriod = 1000;
+  w->effects       = fx;
+  w->fontScaleX    = 0.25;
+  w->fontScaleY    = 0.25;
+  w->flashPeriod   = 1000;
   w->flashMidpoint = w->flashPeriod / 2;
-  w->id = WID_NONE;
-  w->inuse = qtrue;
-  w->lineCount = 0;
-  w->state = (fx >= WFX_FADEIN) ? WSTATE_START : WSTATE_COMPLETE;
-  w->targetTime = (startupLength > 0) ? startupLength : 0;
-  w->time = trap_Milliseconds();
-  w->x = 0;
-  w->y = 0;
+  w->id            = WID_NONE;
+  w->inuse         = qtrue;
+  w->lineCount     = 0;
+  w->state         = (fx >= WFX_FADEIN) ? WSTATE_START : WSTATE_COMPLETE;
+  w->targetTime    = (startupLength > 0) ? startupLength : 0;
+  w->time          = trap_Milliseconds();
+  w->x             = 0;
+  w->y             = 0;
 
   memcpy(&w->colorBorder, &colorGeneralBorder, sizeof(vec4_t));
   memcpy(&w->colorBackground, &colorGeneralFill, sizeof(vec4_t));
@@ -118,7 +116,7 @@ void CG_windowFree(cg_window_t *w) {
 
   if (w->effects >= WFX_FADEIN && w->state != WSTATE_OFF && w->inuse == qtrue) {
     w->state = WSTATE_SHUTDOWN;
-    w->time = trap_Milliseconds();
+    w->time  = trap_Milliseconds();
     return;
   }
 
@@ -130,7 +128,7 @@ void CG_windowFree(cg_window_t *w) {
         }
       }
 
-      w->id = WID_NONE;
+      w->id    = WID_NONE;
       w->inuse = qfalse;
       w->state = WSTATE_OFF;
 
@@ -158,32 +156,27 @@ void CG_windowCleanup(void) {
 }
 
 void CG_demoAviFPSDraw(void) {
-  qboolean fKeyDown =
-      (cgs.fKeyPressed[K_F1] | cgs.fKeyPressed[K_F2] | cgs.fKeyPressed[K_F3] |
-       cgs.fKeyPressed[K_F4] | cgs.fKeyPressed[K_F5])
-          ? qtrue
-          : qfalse;
+  qboolean fKeyDown = (cgs.fKeyPressed[K_F1] | cgs.fKeyPressed[K_F2] | cgs.fKeyPressed[K_F3] | cgs.fKeyPressed[K_F4] |
+                       cgs.fKeyPressed[K_F5])
+                        ? qtrue
+                        : qfalse;
 
   if (cg.demoPlayback && fKeyDown && cgs.aviDemoRate >= 0) {
-    CG_DrawStringExt(
-        42, 425,
-        ((cgs.aviDemoRate > 0) ? va("^3Record AVI @ ^7%d^2fps", cgs.aviDemoRate)
-                               : "^1Stop AVI Recording"),
-        colorWhite, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT - 2, 0);
+    CG_DrawStringExt(42, 425,
+                     ((cgs.aviDemoRate > 0) ? va("^3Record AVI @ ^7%d^2fps", cgs.aviDemoRate) : "^1Stop AVI Recording"),
+                     colorWhite, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT - 2, 0);
   }
 }
 
 void CG_demoTimescaleDraw(void) {
-  if (cg.demoPlayback && cgs.timescaleUpdate > cg.time &&
-      demo_drawTimeScale.integer != 0) {
+  if (cg.demoPlayback && cgs.timescaleUpdate > cg.time && demo_drawTimeScale.integer != 0) {
     char *s = va("^3TimeScale: ^7%.1f", cg_timescale.value);
-    int w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
+    int w   = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
 
     CG_FillRect(42 - 2, 400, w + 5, SMALLCHAR_HEIGHT + 3, colorDkGreen);
     CG_DrawRect(42 - 2, 400, w + 5, SMALLCHAR_HEIGHT + 3, 1, colorMdYellow);
 
-    CG_DrawStringExt(42, 400, s, colorWhite, qfalse, qtrue, SMALLCHAR_WIDTH,
-                     SMALLCHAR_HEIGHT, 0);
+    CG_DrawStringExt(42, 400, s, colorWhite, qfalse, qtrue, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 0);
   }
 }
 
@@ -193,11 +186,7 @@ void CG_windowDraw(void) {
   cg_window_t *w;
   qboolean fCleanup = qfalse;
   // Gordon: FIXME, the limbomenu var no longer exists
-  qboolean fAllowMV =
-      (cg.snap != NULL &&
-       cg.snap->ps.pm_type != PM_INTERMISSION /*&& !cg.limboMenu*/)
-          ? qtrue
-          : qfalse;
+  qboolean fAllowMV = (cg.snap != NULL && cg.snap->ps.pm_type != PM_INTERMISSION /*&& !cg.limboMenu*/) ? qtrue : qfalse;
   vec4_t *bg;
   vec4_t textColor, borderColor, bgColor;
 
@@ -239,15 +228,13 @@ void CG_windowDraw(void) {
       w->effects &= ~WFX_TEXTSIZING;
     }
 
-    bg = ((w->effects & WFX_FLASH) &&
-          (milli % w->flashPeriod) > w->flashMidpoint)
-             ? &w->colorBackground2
-             : &w->colorBackground;
+    bg = ((w->effects & WFX_FLASH) && (milli % w->flashPeriod) > w->flashMidpoint) ? &w->colorBackground2
+                                                                                   : &w->colorBackground;
 
-    h = w->h;
-    x = w->x;
-    y = w->y;
-    t_offset = milli - w->time;
+    h            = w->h;
+    x            = w->x;
+    y            = w->y;
+    t_offset     = milli - w->time;
     textColor[3] = 1.0f;
     memcpy(&borderColor, w->colorBorder, sizeof(vec4_t));
     memcpy(&bgColor, bg, sizeof(vec4_t));
@@ -278,9 +265,8 @@ void CG_windowDraw(void) {
       tmp = w->targetTime - t_offset;
       if (w->effects & WFX_SCROLLUP) {
         if (tmp > 0) {
-          y = w->curY + (480 - w->y) * t_offset /
-                            w->targetTime; //(100
-                                           //* t_offset / w->targetTime) / 100;
+          y = w->curY + (480 - w->y) * t_offset / w->targetTime; //(100
+                                                                 //* t_offset / w->targetTime) / 100;
         }
         if (tmp < 0 || y >= 480) {
           w->state = WSTATE_OFF;
@@ -293,13 +279,13 @@ void CG_windowDraw(void) {
           textColor[3] -= (float)((float)t_offset / (float)w->targetTime);
         } else {
           textColor[3] = 0.0f;
-          w->state = WSTATE_OFF;
+          w->state     = WSTATE_OFF;
         }
       }
     }
 
     borderColor[3] *= textColor[3];
-    bgColor[3] *= textColor[3];
+    bgColor[3]     *= textColor[3];
 
     CG_FillRect(x, y, w->w, h, bgColor);
     CG_DrawRect(x, y, w->w, h, 1, borderColor);
@@ -313,16 +299,14 @@ void CG_windowDraw(void) {
         // y + h, w->fontScale,
         // textColor, (char*)w->lineText[j],
         // 0.0f, 0, 0);
-        CG_Text_Paint_Ext(x, y + h, w->fontScaleX, w->fontScaleY, textColor,
-                          (char *)w->lineText[j], 0.0f, 0, 0,
+        CG_Text_Paint_Ext(x, y + h, w->fontScaleX, w->fontScaleY, textColor, (char *)w->lineText[j], 0.0f, 0, 0,
                           &cgs.media.limboFont2);
       }
 
       h -= (w->lineHeight[j] + 3);
 
       if (!(w->effects & WFX_TRUETYPE)) {
-        CG_DrawStringExt2(x, y + h, (char *)w->lineText[j], textColor, qfalse,
-                          qtrue, w->fontWidth, w->fontHeight, 0);
+        CG_DrawStringExt2(x, y + h, (char *)w->lineText[j], textColor, qfalse, qtrue, w->fontWidth, w->fontHeight, 0);
       }
     }
   }
@@ -358,14 +342,13 @@ void CG_windowNormalizeOnText(cg_window_t *w) {
   w->h = 0;
 
   if (!(w->effects & WFX_TRUETYPE)) {
-    w->fontWidth = w->fontScaleX * WINDOW_FONTWIDTH;
+    w->fontWidth  = w->fontScaleX * WINDOW_FONTWIDTH;
     w->fontHeight = w->fontScaleY * WINDOW_FONTHEIGHT;
   }
 
   for (i = 0; i < w->lineCount; i++) {
     if (w->effects & WFX_TRUETYPE) {
-      tmp = CG_Text_Width_Ext((char *)w->lineText[i], w->fontScaleX, 0,
-                              &cgs.media.limboFont2);
+      tmp = CG_Text_Width_Ext((char *)w->lineText[i], w->fontScaleX, 0, &cgs.media.limboFont2);
     } else {
       tmp = CG_DrawStrlen((char *)w->lineText[i]) * w->fontWidth;
     }
@@ -377,8 +360,7 @@ void CG_windowNormalizeOnText(cg_window_t *w) {
 
   for (i = 0; i < w->lineCount; i++) {
     if (w->effects & WFX_TRUETYPE) {
-      w->lineHeight[i] = CG_Text_Height_Ext(
-          (char *)w->lineText[i], w->fontScaleY, 0, &cgs.media.limboFont2);
+      w->lineHeight[i] = CG_Text_Height_Ext((char *)w->lineText[i], w->fontScaleY, 0, &cgs.media.limboFont2);
     } else {
       w->lineHeight[i] = w->fontHeight;
     }
@@ -441,7 +423,7 @@ void CG_initStrings(void) {
 
   for (i = 0; i < MAX_STRINGS; i++) {
     cg.aStringPool[i].fActive = qfalse;
-    cg.aStringPool[i].str[0] = 0;
+    cg.aStringPool[i].str[0]  = 0;
   }
 }
 
@@ -490,9 +472,9 @@ void CG_removeStrings(cg_window_t *w) {
       }
 
       if (ref == (char *)&cg.aStringPool[j].str) {
-        w->lineText[i] = NULL;
+        w->lineText[i]            = NULL;
         cg.aStringPool[j].fActive = qfalse;
-        cg.aStringPool[j].str[0] = 0;
+        cg.aStringPool[j].str[0]  = 0;
 
         break;
       }
@@ -516,14 +498,11 @@ void CG_cursorUpdate(void) {
 
   // Get cursor current position (when connected to a server)
   if (!cg.demoPlayback) {
-
     // Allow for limbo'd updates as well
     trap_GetUserCmd(trap_GetCurrentCmdNumber(), &cg_pmove.cmd);
 
     nx = 640.0 * (65536.0 - cg_pmove.cmd.angles[1]) / 65536.0;
-    ny = 480.0 / 65536.0 *
-         ((int_m_pitch.value < 0.0) ? (65536.0 - cg_pmove.cmd.angles[0])
-                                    : cg_pmove.cmd.angles[0]);
+    ny = 480.0 / 65536.0 * ((int_m_pitch.value < 0.0) ? (65536.0 - cg_pmove.cmd.angles[0]) : cg_pmove.cmd.angles[0]);
 
     fSelect = ((cg_pmove.cmd.buttons & BUTTON_ATTACK) != 0) ? qtrue : qfalse;
 
@@ -534,12 +513,12 @@ void CG_cursorUpdate(void) {
     fResize = ((cg_pmove.cmd.buttons & BUTTON_SPRINT) != 0) ? qtrue : qfalse;
 
     cgs.cursorUpdate = cg.time + 5000;
-    cgs.cursorX = nx;
-    cgs.cursorY = ny;
+    cgs.cursorX      = nx;
+    cgs.cursorY      = ny;
   } else {
     // Already updated in the keycatcher
-    nx = cgs.cursorX;
-    ny = cgs.cursorY;
+    nx      = cgs.cursorX;
+    ny      = cgs.cursorY;
     fSelect = cgs.fSelect;
     fResize = cgs.fResize;
   }
@@ -561,11 +540,10 @@ void CG_cursorUpdate(void) {
       // as quick mouse movements can move it past the
       // window borders
       if (!fFound && (((w->mvInfo & MV_SELECTED) && fSelect) ||
-                      (!fSelect && nx >= w->x && nx < w->x + w->w &&
-                       ny >= w->y && ny < w->y + w->h))) {
+                      (!fSelect && nx >= w->x && nx < w->x + w->w && ny >= w->y && ny < w->y + w->h))) {
         if (!(w->mvInfo & MV_SELECTED)) {
-          w->mvInfo |= MV_SELECTED;
-          nSelectedWindow = i;
+          w->mvInfo       |= MV_SELECTED;
+          nSelectedWindow  = i;
         }
 
         // If not dragging/resizing, prime for
@@ -614,16 +592,16 @@ void CG_cursorUpdate(void) {
           w->m_y = ny;
         }
 
-        fFound = qtrue;
+        fFound             = qtrue;
         cg.mvCurrentActive = w;
 
         // Reset mouse info for window if it
         // loses focuse
       } else if (w->mvInfo & MV_SELECTED) {
-        fUpdateOverlay = qtrue;
-        w->m_x = -1.0f;
-        w->m_y = -1.0f;
-        w->mvInfo &= ~MV_SELECTED;
+        fUpdateOverlay  = qtrue;
+        w->m_x          = -1.0f;
+        w->m_y          = -1.0f;
+        w->mvInfo      &= ~MV_SELECTED;
 
         if (fFound) {
           break; // Small optimization:
@@ -657,8 +635,7 @@ void CG_cursorUpdate(void) {
       if (cg.mvTotalTeam[i] == 0) {
         continue;
       }
-      if (cgs.cursorX >= nx && cgs.cursorY >= ny &&
-          cgs.cursorX < MVINFO_RIGHT &&
+      if (cgs.cursorX >= nx && cgs.cursorY >= ny && cgs.cursorX < MVINFO_RIGHT &&
           cgs.cursorY < ny + (cg.mvTotalTeam[i] * (MVINFO_TEXTSIZE + 1))) {
         int pos = (int)(cgs.cursorY - ny) / (MVINFO_TEXTSIZE + 1);
 
@@ -668,8 +645,7 @@ void CG_cursorUpdate(void) {
 
           // See if we're really over
           // something
-          if (cgs.cursorX >= x && cgs.cursorY >= y &&
-              cgs.cursorX <= MVINFO_RIGHT &&
+          if (cgs.cursorX >= x && cgs.cursorY >= y && cgs.cursorX <= MVINFO_RIGHT &&
               cgs.cursorY <= y + MVINFO_TEXTSIZE) {
             // Perform any other
             // window handling
@@ -692,8 +668,7 @@ void CG_cursorUpdate(void) {
               } else {
                 // Swap non-view with mainview
                 cg.mvCurrentMainview->mvInfo =
-                    (cg.mvCurrentMainview->mvInfo & ~MV_PID) |
-                    (cg.mvOverlay[cg.mvTeamList[i][pos]].pID & MV_PID);
+                  (cg.mvCurrentMainview->mvInfo & ~MV_PID) | (cg.mvOverlay[cg.mvTeamList[i][pos]].pID & MV_PID);
                 fUpdateOverlay = qtrue;
               }
             }
@@ -701,7 +676,7 @@ void CG_cursorUpdate(void) {
         }
       }
       vOffset += (cg.mvTotalTeam[i] + 2) * (MVINFO_TEXTSIZE + 1);
-      ny += vOffset;
+      ny      += vOffset;
     }
   }
 
@@ -709,7 +684,7 @@ void CG_cursorUpdate(void) {
   // drawn last (on top of all other windows)
   if (nSelectedWindow >= 0) {
     fUpdateOverlay = qtrue;
-    x = wh->activeWindows[nSelectedWindow];
+    x              = wh->activeWindows[nSelectedWindow];
 
     for (j = nSelectedWindow; j < wh->numActiveWindows - 1; j++) {
       wh->activeWindows[j] = wh->activeWindows[j + 1];
