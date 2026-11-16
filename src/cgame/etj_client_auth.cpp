@@ -24,32 +24,31 @@
 
 #ifdef NEW_AUTH
   #include "etj_client_auth.h"
+
+  #include <uuid4.h>
+
   #include "cg_local.h"
   #include "etj_client_commands_handler.h"
   #include "etj_operating_system.h"
-  #include "../game/etj_crypto.h"
 
-  #include "../game/etj_shared.h"
+  #include "../game/etj_crypto.h"
   #include "../game/etj_file.h"
   #include "../game/etj_filesystem.h"
+  #include "../game/etj_shared.h"
   #include "../game/etj_string_utilities.h"
   #include "../game/etj_toml_utilities.h"
-
-  #include <uuid4.h>
 
 namespace ETJump {
 inline constexpr char MIGRATE_CMD[] = "migrateGuid";
 
-ClientAuth::ClientAuth(
-    const std::shared_ptr<ClientCommandsHandler> &serverCommands,
-    const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
-    : serverCommands(serverCommands), consoleCommands(consoleCommands) {
+ClientAuth::ClientAuth(const std::shared_ptr<ClientCommandsHandler> &serverCommands,
+                       const std::shared_ptr<ClientCommandsHandler> &consoleCommands)
+  : serverCommands(serverCommands), consoleCommands(consoleCommands) {
   if (!FileSystem::exists(AUTH_FILE)) {
     createAuthFile();
   }
 
-  if (FileSystem::exists(GUID_FILE_OLD) &&
-      getGuid(GUIDVersion::GUID_V1).empty()) {
+  if (FileSystem::exists(GUID_FILE_OLD) && getGuid(GUIDVersion::GUID_V1).empty()) {
     migrateOldGuid();
   }
 
@@ -64,27 +63,25 @@ ClientAuth::~ClientAuth() {
 }
 
 void ClientAuth::startListeners() {
-  serverCommands->subscribe(
-      Constants::Authentication::AUTH_REQUEST,
-      [](const std::vector<std::string> &) { authResponse(); });
+  serverCommands->subscribe(Constants::Authentication::AUTH_REQUEST, [](const std::vector<std::string> &) {
+    authResponse();
+  });
 
-  serverCommands->subscribe(
-      Constants::Authentication::GUID_MIGRATE_REQUEST,
-      [](const std::vector<std::string> &) { migrationResponse(); });
+  serverCommands->subscribe(Constants::Authentication::GUID_MIGRATE_REQUEST, [](const std::vector<std::string> &) {
+    migrationResponse();
+  });
 
-  consoleCommands->subscribe(
-      MIGRATE_CMD, [&](const std::vector<std::string> &args) {
-        if (cg.demoPlayback) {
-          return;
-        }
+  consoleCommands->subscribe(MIGRATE_CMD, [&](const std::vector<std::string> &args) {
+    if (cg.demoPlayback) {
+      return;
+    }
 
-        if (!args.empty() && (args[0] == "-f" || args[0] == "--force")) {
-          manualMigration(
-              Constants::Authentication::MigrationType::MANUAL_FORCE);
-        } else {
-          manualMigration(Constants::Authentication::MigrationType::MANUAL);
-        }
-      });
+    if (!args.empty() && (args[0] == "-f" || args[0] == "--force")) {
+      manualMigration(Constants::Authentication::MigrationType::MANUAL_FORCE);
+    } else {
+      manualMigration(Constants::Authentication::MigrationType::MANUAL);
+    }
+  });
 }
 
 void ClientAuth::authResponse() {
@@ -92,13 +89,12 @@ void ClientAuth::authResponse() {
     return;
   }
 
-  const std::string guid = getGuid(GUIDVersion::GUID_V2);
-  const int os = getOS();
+  const std::string guid              = getGuid(GUIDVersion::GUID_V2);
+  const int os                        = getOS();
   const std::vector<std::string> hwid = getHwid();
 
-  const std::string authMsg = StringUtils::format(
-      "%s %s %i %s", Constants::Authentication::AUTHENTICATE,
-      Crypto::sha2(guid), os, StringUtils::join(hwid, " "));
+  const std::string authMsg = StringUtils::format("%s %s %i %s", Constants::Authentication::AUTHENTICATE,
+                                                  Crypto::sha2(guid), os, StringUtils::join(hwid, " "));
   trap_SendClientCommand(authMsg.c_str());
 }
 
@@ -112,28 +108,22 @@ void ClientAuth::migrationResponse() {
   if (oldGuid.empty()) {
     trap_SendClientCommand(Constants::Authentication::GUID_MIGRATE_FAIL);
   } else {
-    trap_SendClientCommand(
-        va("%s %s %i", Constants::Authentication::GUID_MIGRATE,
-           Crypto::sha1(oldGuid).c_str(),
-           static_cast<int>(Constants::Authentication::MigrationType::AUTO)));
+    trap_SendClientCommand(va("%s %s %i", Constants::Authentication::GUID_MIGRATE, Crypto::sha1(oldGuid).c_str(),
+                              static_cast<int>(Constants::Authentication::MigrationType::AUTO)));
   }
 }
 
-void ClientAuth::manualMigration(
-    const Constants::Authentication::MigrationType type) {
+void ClientAuth::manualMigration(const Constants::Authentication::MigrationType type) {
   if (!FileSystem::exists(GUID_FILE_OLD)) {
-    CG_Printf("Old GUID file not found. Make sure ^3'%s' ^7is present in "
-              "^3'etjump' ^7directory.\n",
-              GUID_FILE_OLD);
+    CG_Printf("Old GUID file not found. Make sure ^3'%s' ^7is present in ^3'etjump' ^7directory.\n", GUID_FILE_OLD);
     return;
   }
 
   // user manually deleted their auth file on runtime...
   if (!FileSystem::exists(AUTH_FILE)) {
     CG_Printf(
-        "Authentication file ^3'etjump/%s' ^7not found. Make sure the file "
-        "exists, or reconnect to create a new one.\n",
-        AUTH_FILE);
+      "Authentication file ^3'etjump/%s' ^7not found. Make sure the file exists, or reconnect to create a new one.\n",
+      AUTH_FILE);
     return;
   }
 
@@ -149,8 +139,7 @@ void ClientAuth::manualMigration(
   // 2. the user manually edited the auth file and erased the old GUID string
   if (!oldGuid.empty()) {
     trap_SendClientCommand(
-        va("%s %s %i", Constants::Authentication::GUID_MIGRATE,
-           Crypto::sha1(oldGuid).c_str(), static_cast<int>(type)));
+      va("%s %s %i", Constants::Authentication::GUID_MIGRATE, Crypto::sha1(oldGuid).c_str(), static_cast<int>(type)));
   } else {
     migrateOldGuid();
     oldGuid = getGuid(GUIDVersion::GUID_V1);
@@ -160,13 +149,14 @@ void ClientAuth::manualMigration(
       CG_Printf("Failed to perform GUID migration.\n");
     } else {
       trap_SendClientCommand(
-          va("%s %s %i", Constants::Authentication::GUID_MIGRATE,
-             Crypto::sha1(oldGuid).c_str(), static_cast<int>(type)));
+        va("%s %s %i", Constants::Authentication::GUID_MIGRATE, Crypto::sha1(oldGuid).c_str(), static_cast<int>(type)));
     }
   }
 }
 
-int ClientAuth::getOS() { return OperatingSystem::getOS(); }
+int ClientAuth::getOS() {
+  return OperatingSystem::getOS();
+}
 
 std::vector<std::string> ClientAuth::getHwid() {
   return OperatingSystem::getHwid();
@@ -188,14 +178,14 @@ std::string ClientAuth::getGuid(const GUIDVersion version) {
   }
 
   if (!root.contains("GUID")) {
-    CG_Printf("Unable to get GUID: auth file 'etjump/%s' does not contain a "
-              "'GUID' table.\nUsing temporary GUID.\n",
+    CG_Printf("Unable to get GUID: auth file 'etjump/%s' does not contain a 'GUID' table.\n"
+              "Using temporary GUID.\n",
               AUTH_FILE);
     return "";
   }
 
-  const auto guid = toml::find<std::optional<std::string>>(
-      root.at("GUID"), version == GUIDVersion::GUID_V2 ? "v2" : "v1");
+  const auto guid =
+    toml::find<std::optional<std::string>>(root.at("GUID"), version == GUIDVersion::GUID_V2 ? "v2" : "v1");
 
   return guid.value_or("");
 }

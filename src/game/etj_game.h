@@ -61,7 +61,7 @@ struct Game {
   std::unique_ptr<ETJump::FireteamCountdown> fireteamCountdown;
   std::unique_ptr<ETJump::Worldspawn> worldspawn;
 
-  #ifdef NEW_AUTH
+#ifdef NEW_AUTH
   std::unique_ptr<ETJump::SessionV2> sessionV2;
-  #endif
+#endif
 };

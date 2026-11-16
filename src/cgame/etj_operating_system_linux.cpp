@@ -33,13 +33,13 @@
 
   #include "etj_operating_system.h"
 
-  #include "../game/etj_string_utilities.h"
   #include "../game/etj_crypto.h"
+  #include "../game/etj_string_utilities.h"
 
   #ifdef NEW_AUTH
     #include <array>
-    #include <filesystem>
     #include <cpuid.h>
+    #include <filesystem>
 
     #include "../game/etj_shared.h"
   #endif
@@ -89,8 +89,7 @@ std::string ETJump::OperatingSystem::getMACAddress() {
 
   const ifreq *it = ifc.ifc_req;
 
-  for (const ifreq *const end = it + ifc.ifc_len / sizeof(struct ifreq);
-       it != end; ++it) {
+  for (const ifreq *const end = it + ifc.ifc_len / sizeof(struct ifreq); it != end; ++it) {
     strcpy(ifr.ifr_name, it->ifr_name);
 
     if (ioctl(sock, SIOCGIFFLAGS, &ifr) == 0) {
@@ -119,9 +118,8 @@ std::string ETJump::OperatingSystem::getMACAddress() {
   // while things like 'ip addr' use colons for separating the components,
   // windows uses dashes, so let's make this consistent
   // so that same NIC will produce the same hash on both
-  const std::string result = StringUtils::format(
-      "%02X-%02X-%02X-%02X-%02X-%02X", mac_address[0], mac_address[1],
-      mac_address[2], mac_address[3], mac_address[4], mac_address[5]);
+  const std::string result = StringUtils::format("%02X-%02X-%02X-%02X-%02X-%02X", mac_address[0], mac_address[1],
+                                                 mac_address[2], mac_address[3], mac_address[4], mac_address[5]);
   return Crypto::sha2(result);
 }
 
@@ -129,16 +127,14 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
   std::array<uint32_t, NUM_CPUID_REGISTERS> cpuInfo{};
 
   // find the CPUID level and short vendor string
-  if (__get_cpuid(0x0, &cpuInfo[EAX], &cpuInfo[EBX], &cpuInfo[ECX],
-                  &cpuInfo[EDX]) == 0) {
+  if (__get_cpuid(0x0, &cpuInfo[EAX], &cpuInfo[EBX], &cpuInfo[ECX], &cpuInfo[EDX]) == 0) {
     return NOHWID_CPUID;
   }
 
   // note: vendor string register order is EBX -> EDX -> ECX
-  const std::string vendor =
-      std::string(reinterpret_cast<const char *>(&cpuInfo[EBX]), 4) +
-      std::string(reinterpret_cast<const char *>(&cpuInfo[EDX]), 4) +
-      std::string(reinterpret_cast<const char *>(&cpuInfo[ECX]), 4);
+  const std::string vendor = std::string(reinterpret_cast<const char *>(&cpuInfo[EBX]), 4) +
+                             std::string(reinterpret_cast<const char *>(&cpuInfo[EDX]), 4) +
+                             std::string(reinterpret_cast<const char *>(&cpuInfo[ECX]), 4);
 
   // get the CPU info and feature bits
   __get_cpuid(0x1, &cpuInfo[EAX], &cpuInfo[EBX], &cpuInfo[ECX], &cpuInfo[EDX]);
@@ -171,8 +167,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
   // find the highest extended CPUID level
   if (!vendor.empty() && __get_cpuid_max(0x80000000, nullptr) >= 0x80000004U) {
     for (uint32_t i = 0x80000002; i <= 0x80000004U; i++) {
-      __get_cpuid(i, &cpuInfo[EAX], &cpuInfo[EBX], &cpuInfo[ECX],
-                  &cpuInfo[EDX]);
+      __get_cpuid(i, &cpuInfo[EAX], &cpuInfo[EBX], &cpuInfo[ECX], &cpuInfo[EDX]);
 
       for (const auto &reg : cpuInfo) {
         vendorExt.append(reinterpret_cast<const char *>(&reg), 4);
@@ -189,8 +184,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
     vendorExt.pop_back();
   }
 
-  const std::string cpuID = StringUtils::format(
-      "%s %u %u %s %u", vendor, cpuFamily, model, vendorExt, stepping);
+  const std::string cpuID = StringUtils::format("%s %u %u %s %u", vendor, cpuFamily, model, vendorExt, stepping);
   return Crypto::sha2(cpuID);
 }
 
@@ -262,12 +256,11 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   // so we can figure out the actual physical device
   std::filesystem::path physicalDevice{};
   std::filesystem::path partitionName = mountPath;
-  std::string partition = partitionName.filename();
+  std::string partition               = partitionName.filename();
 
   try {
     std::filesystem::path physicalDevicePath = "/sys/class/block/" + partition;
-    physicalDevice =
-        std::filesystem::read_symlink(physicalDevicePath).lexically_normal();
+    physicalDevice                           = std::filesystem::read_symlink(physicalDevicePath).lexically_normal();
   } catch (const std::exception &) {
     return NOHWID_DISK;
   }

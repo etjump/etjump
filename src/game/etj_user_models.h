@@ -25,9 +25,9 @@
 #pragma once
 
 #ifdef NEW_AUTH
+  #include <optional>
   #include <string>
   #include <vector>
-  #include <optional>
 
 namespace ETJump::UserModels {
 struct User {

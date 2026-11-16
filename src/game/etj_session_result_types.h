@@ -36,8 +36,7 @@ inline constexpr int32_t CLIENT_NOT_CONNECTED = -1;
 // a successful result will have userID > 0
 class AuthenticationResult final : public SynchronizationContext::ResultBase {
 public:
-  AuthenticationResult(const int userID, const bool isBanned)
-      : userID(userID), isBanned(isBanned) {}
+  AuthenticationResult(const int userID, const bool isBanned) : userID(userID), isBanned(isBanned) {}
 
   int userID;
   bool isBanned;
@@ -45,9 +44,8 @@ public:
 
 class GuidMigrationResult final : public SynchronizationContext::ResultBase {
 public:
-  GuidMigrationResult(const int userID, const bool isBanned,
-                      std::string message)
-      : userID(userID), isBanned(isBanned), message(std::move(message)) {}
+  GuidMigrationResult(const int userID, const bool isBanned, std::string message)
+    : userID(userID), isBanned(isBanned), message(std::move(message)) {}
 
   int userID;
   bool isBanned;
@@ -56,8 +54,7 @@ public:
 
 class AddUserResult final : public SynchronizationContext::ResultBase {
 public:
-  AddUserResult(const int userID, std::string message)
-      : userID(userID), message(std::move(message)) {}
+  AddUserResult(const int userID, std::string message) : userID(userID), message(std::move(message)) {}
 
   int userID;
   std::string message;
@@ -65,8 +62,7 @@ public:
 
 class IPBanResult final : public SynchronizationContext::ResultBase {
 public:
-  IPBanResult(const bool isBanned, std::string ip)
-      : isBanned(isBanned), ip(std::move(ip)) {}
+  IPBanResult(const bool isBanned, std::string ip) : isBanned(isBanned), ip(std::move(ip)) {}
 
   bool isBanned;
   std::string ip;
@@ -74,10 +70,8 @@ public:
 
 class GetUserDataResult final : public SynchronizationContext::ResultBase {
 public:
-  explicit GetUserDataResult(
-      UserModels::User user,
-      std::optional<UserModels::LegacyAuth> legacyAuth = std::nullopt)
-      : user(std::move(user)), legacyAuth(std::move(legacyAuth)) {}
+  explicit GetUserDataResult(UserModels::User user, std::optional<UserModels::LegacyAuth> legacyAuth = std::nullopt)
+    : user(std::move(user)), legacyAuth(std::move(legacyAuth)) {}
 
   UserModels::User user;
   std::optional<UserModels::LegacyAuth> legacyAuth;
@@ -85,49 +79,42 @@ public:
 
 class UpdateLastSeenResult final : public SynchronizationContext::ResultBase {
 public:
-  explicit UpdateLastSeenResult(std::string message)
-      : message(std::move(message)) {}
+  explicit UpdateLastSeenResult(std::string message) : message(std::move(message)) {}
 
   std::string message;
 };
 
 class AddNewNameResult final : public SynchronizationContext::ResultBase {
 public:
-  explicit AddNewNameResult(std::string message)
-      : message(std::move(message)) {}
+  explicit AddNewNameResult(std::string message) : message(std::move(message)) {}
 
   std::string message;
 };
 
 class GetUsersResult final : public SynchronizationContext::ResultBase {
 public:
-  explicit GetUsersResult(std::vector<UserModels::User> users)
-      : users(std::move(users)) {}
+  explicit GetUsersResult(std::vector<UserModels::User> users) : users(std::move(users)) {}
 
   std::vector<UserModels::User> users;
 };
 
 class GetUserNamesResult final : public SynchronizationContext::ResultBase {
 public:
-  explicit GetUserNamesResult(std::vector<std::string> usernames)
-      : usernames(std::move(usernames)) {}
+  explicit GetUserNamesResult(std::vector<std::string> usernames) : usernames(std::move(usernames)) {}
 
   std::vector<std::string> usernames;
 };
 
 class GetUsersByNameResult final : public SynchronizationContext::ResultBase {
 public:
-  explicit GetUsersByNameResult(
-      std::vector<std::pair<int32_t, std::string>> users)
-      : users(std::move(users)) {}
+  explicit GetUsersByNameResult(std::vector<std::pair<int32_t, std::string>> users) : users(std::move(users)) {}
 
   std::vector<std::pair<int32_t, std::string>> users;
 };
 
 class EditUserResult final : public SynchronizationContext::ResultBase {
 public:
-  EditUserResult(std::string message, int32_t clientNum)
-      : message(std::move(message)), clientNum(clientNum) {}
+  EditUserResult(std::string message, int32_t clientNum) : message(std::move(message)), clientNum(clientNum) {}
 
   std::string message;
   // clientNum of the edited user, if they are currently connected.
@@ -137,19 +124,15 @@ public:
 
 class GetBansResult final : public SynchronizationContext::ResultBase {
 public:
-  explicit GetBansResult(std::vector<UserModels::Ban> bans)
-      : bans(std::move(bans)) {}
+  explicit GetBansResult(std::vector<UserModels::Ban> bans) : bans(std::move(bans)) {}
 
   std::vector<UserModels::Ban> bans;
 };
 
 class SetLevelResult final : public SynchronizationContext::ResultBase {
 public:
-  explicit SetLevelResult(
-      std::string messageSelf,
-      std::optional<std::string> messageOther = std::nullopt)
-      : messageSelf(std::move(messageSelf)),
-        messageOther(std::move(messageOther)) {}
+  explicit SetLevelResult(std::string messageSelf, std::optional<std::string> messageOther = std::nullopt)
+    : messageSelf(std::move(messageSelf)), messageOther(std::move(messageOther)) {}
 
   std::string messageSelf;
   std::optional<std::string> messageOther;
@@ -157,10 +140,8 @@ public:
 
 class DeleteLevelResult final : public SynchronizationContext::ResultBase {
 public:
-  DeleteLevelResult(int32_t numAffectedClients,
-                    std::vector<int32_t> connectedClients)
-      : numAffectedClients(numAffectedClients),
-        connectedClients(std::move(connectedClients)) {}
+  DeleteLevelResult(int32_t numAffectedClients, std::vector<int32_t> connectedClients)
+    : numAffectedClients(numAffectedClients), connectedClients(std::move(connectedClients)) {}
 
   int32_t numAffectedClients;
   // clientNums of any connected players who's level was deleted
@@ -169,10 +150,8 @@ public:
 
 class BanResult final : public SynchronizationContext::ResultBase {
 public:
-  BanResult(std::string message, int32_t banId, int64_t expires,
-            std::optional<int32_t> clientNum = std::nullopt)
-      : message(std::move(message)), banId(banId), expires(expires),
-        clientNum(clientNum) {}
+  BanResult(std::string message, int32_t banId, int64_t expires, std::optional<int32_t> clientNum = std::nullopt)
+    : message(std::move(message)), banId(banId), expires(expires), clientNum(clientNum) {}
 
   std::string message;
   int32_t banId; // 0 if no ban was made
@@ -182,8 +161,7 @@ public:
 
 class UnbanResult final : public SynchronizationContext::ResultBase {
 public:
-  UnbanResult(std::string message, int32_t banId)
-      : message(std::move(message)), banId(banId) {}
+  UnbanResult(std::string message, int32_t banId) : message(std::move(message)), banId(banId) {}
 
   std::string message;
   int32_t banId;
@@ -192,7 +170,7 @@ public:
 class BanExpiryResult final : public SynchronizationContext::ResultBase {
 public:
   BanExpiryResult(std::string message, std::vector<int32_t> expiredBans)
-      : message(std::move(message)), expiredBans(std::move(expiredBans)) {}
+    : message(std::move(message)), expiredBans(std::move(expiredBans)) {}
 
   std::string message;
   std::vector<int32_t> expiredBans;

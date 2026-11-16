@@ -1322,7 +1322,7 @@ gitem_t bg_itemlist[] = {
    "models/multiplayer/kar98/v_kar98.md3",
    "models/multiplayer/mauser/kar98_pickup.md3"
    },
-
+   
    "icons/iconw_kar98_1",	// icon
    "icons/ammo3",			// ammo icon*/
     {"models/multiplayer/kar98/kar98_3rd.md3", "models/multiplayer/kar98/v_kar98.md3",

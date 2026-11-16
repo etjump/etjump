@@ -42,7 +42,7 @@ public:
 
 private:
   static constexpr char GUID_FILE_OLD[] = "etguid.dat";
-  static constexpr char AUTH_FILE[] = "auth/auth.dat";
+  static constexpr char AUTH_FILE[]     = "auth/auth.dat";
 
   enum class GUIDVersion {
     GUID_V1 = 1,

@@ -25,14 +25,14 @@
 #pragma once
 
 #ifdef NEW_AUTH
-  #include <memory>
   #include <bitset>
+  #include <memory>
 
-  #include "etj_user_repository.h"
-  #include "etj_user_v2.h"
   #include "etj_levels.h"
   #include "etj_log.h"
   #include "etj_synchronization_context.h"
+  #include "etj_user_repository.h"
+  #include "etj_user_v2.h"
   #include "q_shared.h"
 
 namespace ETJump {
@@ -40,8 +40,7 @@ inline constexpr int32_t MAX_COMMANDS = 256;
 
 class SessionV2 {
 public:
-  SessionV2(std::unique_ptr<UserRepository> userRepository,
-            std::unique_ptr<Log> log,
+  SessionV2(std::unique_ptr<UserRepository> userRepository, std::unique_ptr<Log> log,
             std::unique_ptr<SynchronizationContext> synchronizationContext);
   ~SessionV2();
 
@@ -113,13 +112,11 @@ private:
 
   [[nodiscard]] std::string getIP(int32_t clientNum) const;
   void checkIPBan(int clientNum) const;
-  [[nodiscard]] bool isBanned(int clientNum, int userID,
-                              const std::string &legacyGuid = "") const;
+  [[nodiscard]] bool isBanned(int clientNum, int userID, const std::string &legacyGuid = "") const;
   void dropBannedClient(int clientNum) const;
 
   void printGreeting(int32_t clientNum) const;
-  std::string formatGreeting(const gentity_t *ent,
-                             const std::string &greeting) const;
+  std::string formatGreeting(const gentity_t *ent, const std::string &greeting) const;
 
   // -1 if the user is not connected
   [[nodiscard]] int32_t clientNumFromID(int32_t id) const;

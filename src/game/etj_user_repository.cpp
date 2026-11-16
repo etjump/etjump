@@ -25,19 +25,19 @@
 #ifdef NEW_AUTH
 
   #include "etj_user_repository.h"
+
   #include "etj_crypto.h"
-  #include "etj_time_utilities.h"
   #include "etj_shared.h"
+  #include "etj_time_utilities.h"
 
 namespace ETJump {
-UserRepository::UserRepository(std::unique_ptr<DatabaseV2> database,
-                               std::unique_ptr<DatabaseV2> oldDatabase)
-    : db(std::move(database)), oldDb(std::move(oldDatabase)) {
+UserRepository::UserRepository(std::unique_ptr<DatabaseV2> database, std::unique_ptr<DatabaseV2> oldDatabase)
+  : db(std::move(database)), oldDb(std::move(oldDatabase)) {
   migrate();
 }
 
 UserRepository::~UserRepository() {
-  db = nullptr;
+  db    = nullptr;
   oldDb = nullptr;
 }
 
@@ -46,8 +46,7 @@ void UserRepository::insertUser(const UserModels::User &user) const {
   // there are no GUIDs on the new format, so we must make them null
   // in order to not violate uniqueness constrain
   // realistically this is the only scenario where guid can be empty
-  const std::optional<std::string> guid =
-      user.guid.empty() ? std::nullopt : std::optional(user.guid);
+  const std::optional<std::string> guid = user.guid.empty() ? std::nullopt : std::optional(user.guid);
 
   db->sql << R"(
     insert into users (
@@ -74,8 +73,8 @@ void UserRepository::insertUser(const UserModels::User &user) const {
       ?
     );
   )" << user.id
-          << user.name << guid << user.ipv4 << user.ipv6 << user.level
-          << user.lastSeen << user.title << user.commands << user.greeting;
+          << user.name << guid << user.ipv4 << user.ipv6 << user.level << user.lastSeen << user.title << user.commands
+          << user.greeting;
 }
 
 void UserRepository::insertName(const UserModels::Name &name) const {
@@ -123,9 +122,8 @@ void UserRepository::insertBan(const UserModels::Ban &ban) const {
       ?
     );
   )" << ban.banID
-          << ban.name << ban.bannedBy << ban.banDate << ban.expires
-          << ban.reason << ban.parentBanID << ban.guid << ban.ipv4 << ban.ipv6
-          << ban.legacyGUID << ban.legacyHWID;
+          << ban.name << ban.bannedBy << ban.banDate << ban.expires << ban.reason << ban.parentBanID << ban.guid
+          << ban.ipv4 << ban.ipv6 << ban.legacyGUID << ban.legacyHWID;
 }
 
 void UserRepository::addNewUser(const UserModels::User &userParams) const {
@@ -152,9 +150,8 @@ void UserRepository::addNewUser(const UserModels::User &userParams) const {
       ?
     );
   )" << userParams.name
-          << userParams.guid << userParams.ipv4 << userParams.ipv6
-          << userParams.level << userParams.lastSeen << userParams.title
-          << userParams.commands << userParams.greeting;
+          << userParams.guid << userParams.ipv4 << userParams.ipv6 << userParams.level << userParams.lastSeen
+          << userParams.title << userParams.commands << userParams.greeting;
 }
 
 bool UserRepository::userExists(const int32_t userID) const {
@@ -167,7 +164,7 @@ bool UserRepository::userExists(const int32_t userID) const {
     where
       id=?;
   )" << userID >>
-      count;
+    count;
 
   return count > 0;
 }
@@ -183,25 +180,24 @@ UserModels::User UserRepository::getUserData(const std::string &guid) const {
     where
       guid=?;
   )" << guid >>
-      [&user](const int id, const std::string &name, const std::string &dbGuid,
-              const std::string &ipv4, const std::string &ipv6, const int level,
-              const int64_t lastSeen, const std::string &title,
-              const std::string &commands, const std::string &greeting) {
-        // since we're fetching data by GUID, ensure it's not empty,
-        // which is true while user is migrating from old GUID
-        if (!dbGuid.empty()) {
-          user.id = id;
-          user.name = name;
-          user.guid = dbGuid;
-          user.ipv4 = ipv4;
-          user.ipv6 = ipv6;
-          user.level = level;
-          user.lastSeen = lastSeen;
-          user.title = title;
-          user.commands = commands;
-          user.greeting = greeting;
-        }
-      };
+    [&user](const int id, const std::string &name, const std::string &dbGuid, const std::string &ipv4,
+            const std::string &ipv6, const int level, const int64_t lastSeen, const std::string &title,
+            const std::string &commands, const std::string &greeting) {
+      // since we're fetching data by GUID, ensure it's not empty,
+      // which is true while user is migrating from old GUID
+      if (!dbGuid.empty()) {
+        user.id       = id;
+        user.name     = name;
+        user.guid     = dbGuid;
+        user.ipv4     = ipv4;
+        user.ipv6     = ipv6;
+        user.level    = level;
+        user.lastSeen = lastSeen;
+        user.title    = title;
+        user.commands = commands;
+        user.greeting = greeting;
+      }
+    };
 
   return user;
 }
@@ -216,21 +212,20 @@ UserModels::User UserRepository::getUserData(const int userID) const {
     where
       id=?;
   )" << userID >>
-      [&user](const int id, const std::string &name, const std::string &dbGuid,
-              const std::string &ipv4, const std::string &ipv6, const int level,
-              const int64_t lastSeen, const std::string &title,
-              const std::string &commands, const std::string &greeting) {
-        user.id = id;
-        user.name = name;
-        user.guid = dbGuid;
-        user.ipv4 = ipv4;
-        user.ipv6 = ipv6;
-        user.level = level;
-        user.lastSeen = lastSeen;
-        user.title = title;
-        user.commands = commands;
-        user.greeting = greeting;
-      };
+    [&user](const int id, const std::string &name, const std::string &dbGuid, const std::string &ipv4,
+            const std::string &ipv6, const int level, const int64_t lastSeen, const std::string &title,
+            const std::string &commands, const std::string &greeting) {
+      user.id       = id;
+      user.name     = name;
+      user.guid     = dbGuid;
+      user.ipv4     = ipv4;
+      user.ipv6     = ipv6;
+      user.level    = level;
+      user.lastSeen = lastSeen;
+      user.title    = title;
+      user.commands = commands;
+      user.greeting = greeting;
+    };
 
   return user;
 }
@@ -245,13 +240,12 @@ int UserRepository::getUserID(const std::string &guid) const {
     from users where
       guid=?;
   )" << guid >>
-      userID;
+    userID;
 
   return userID;
 }
 
-UserModels::LegacyAuth
-UserRepository::getLegacyAuthData(const std::string &oldGuid) const {
+UserModels::LegacyAuth UserRepository::getLegacyAuthData(const std::string &oldGuid) const {
   UserModels::LegacyAuth legacyAuth{};
 
   db->sql << R"(
@@ -261,18 +255,16 @@ UserRepository::getLegacyAuthData(const std::string &oldGuid) const {
     where
       guid=?;
   )" << oldGuid >>
-      [&legacyAuth](const int user_id, const std::string &guid,
-                    const std::string &hwid) {
-        legacyAuth.userID = user_id;
-        legacyAuth.guid = guid;
-        legacyAuth.hwid = hwid;
-      };
+    [&legacyAuth](const int user_id, const std::string &guid, const std::string &hwid) {
+      legacyAuth.userID = user_id;
+      legacyAuth.guid   = guid;
+      legacyAuth.hwid   = hwid;
+    };
 
   return legacyAuth;
 }
 
-UserModels::LegacyAuth
-UserRepository::getLegacyAuthData(const int32_t userID) const {
+UserModels::LegacyAuth UserRepository::getLegacyAuthData(const int32_t userID) const {
   UserModels::LegacyAuth legacyAuth{};
 
   db->sql << R"(
@@ -282,18 +274,16 @@ UserRepository::getLegacyAuthData(const int32_t userID) const {
     where
       user_id=?;
   )" << userID >>
-      [&legacyAuth](const int user_id, const std::string &guid,
-                    const std::string &hwid) {
-        legacyAuth.userID = user_id;
-        legacyAuth.guid = guid;
-        legacyAuth.hwid = hwid;
-      };
+    [&legacyAuth](const int user_id, const std::string &guid, const std::string &hwid) {
+      legacyAuth.userID = user_id;
+      legacyAuth.guid   = guid;
+      legacyAuth.hwid   = hwid;
+    };
 
   return legacyAuth;
 }
 
-void UserRepository::migrateGuid(const int oldID,
-                                 const std::string &newGUID) const {
+void UserRepository::migrateGuid(const int oldID, const std::string &newGUID) const {
   int count = 0;
   db->sql << R"(select count(*) from users where guid=?;)" << newGUID >> count;
 
@@ -309,11 +299,10 @@ void UserRepository::migrateGuid(const int oldID,
       where
         guid=?;
     )" << newGUID >>
-        userID;
+      userID;
 
     if (userID == oldID) {
-      throw std::runtime_error(
-          "Current GUID is already associated with your current user ID");
+      throw std::runtime_error("Current GUID is already associated with your current user ID");
     }
 
     // TODO: this should probably also erase timerun records for the user?
@@ -332,8 +321,7 @@ void UserRepository::migrateGuid(const int oldID,
           << oldID;
 }
 
-std::vector<UserModels::UserHWID>
-UserRepository::getHWIDsForUser(const int userID) const {
+std::vector<UserModels::UserHWID> UserRepository::getHWIDsForUser(const int userID) const {
   std::vector<UserModels::UserHWID> userHwids{};
 
   db->sql << R"(
@@ -345,22 +333,20 @@ UserRepository::getHWIDsForUser(const int userID) const {
     where
       user_id=?;
   )" << userID >>
-      [&userHwids](const int id, const std::string &platform,
-                   const std::string &hwid) {
-        UserModels::UserHWID userHwid{};
-        userHwid.userID = id;
-        userHwid.platform = getPlatformId(platform);
-        userHwid.hwid = hwid;
+    [&userHwids](const int id, const std::string &platform, const std::string &hwid) {
+      UserModels::UserHWID userHwid{};
+      userHwid.userID   = id;
+      userHwid.platform = getPlatformId(platform);
+      userHwid.hwid     = hwid;
 
-        userHwids.emplace_back(userHwid);
-      };
+      userHwids.emplace_back(userHwid);
+    };
 
   return userHwids;
 }
 
-std::vector<UserModels::UserHWID>
-UserRepository::getHWIDsForUsersPlatform(const int userID,
-                                         const int userPlatform) const {
+std::vector<UserModels::UserHWID> UserRepository::getHWIDsForUsersPlatform(const int userID,
+                                                                           const int userPlatform) const {
   std::vector<UserModels::UserHWID> userHwids{};
   const std::string platformStr = getPlatformString(userPlatform);
 
@@ -376,15 +362,14 @@ UserRepository::getHWIDsForUsersPlatform(const int userID,
     collate nocase;
   )" << userID
           << platformStr >>
-      [&userHwids](const int id, const std::string &platform,
-                   const std::string &hwid) {
-        UserModels::UserHWID userHwid{};
-        userHwid.userID = id;
-        userHwid.platform = getPlatformId(platform);
-        userHwid.hwid = hwid;
+    [&userHwids](const int id, const std::string &platform, const std::string &hwid) {
+      UserModels::UserHWID userHwid{};
+      userHwid.userID   = id;
+      userHwid.platform = getPlatformId(platform);
+      userHwid.hwid     = hwid;
 
-        userHwids.emplace_back(userHwid);
-      };
+      userHwids.emplace_back(userHwid);
+    };
 
   return userHwids;
 }
@@ -428,8 +413,7 @@ void UserRepository::updateIPv6(const int userID, const std::string &ip) const {
   )" << ip << userID;
 }
 
-void UserRepository::updateLastSeen(const int32_t userID,
-                                    const int64_t time) const {
+void UserRepository::updateLastSeen(const int32_t userID, const int64_t time) const {
   db->sql << R"(
     update
       users
@@ -483,9 +467,11 @@ void UserRepository::editUser(const UserModels::EditUserParams &params) const {
     return;
   }
 
-  const auto updateFieldsStr = StringUtils::join(
-      Container::map(updateColumns, [](const auto &s) { return s + "=?"; }),
-      ", ");
+  const auto updateFieldsStr = StringUtils::join(Container::map(updateColumns,
+                                                                [](const auto &s) {
+                                                                  return s + "=?";
+                                                                }),
+                                                 ", ");
 
   const std::string query = StringUtils::format(R"(
     update
@@ -562,9 +548,8 @@ int32_t UserRepository::banUser(const UserModels::BanUserParams &params) const {
       ?
     );
   )" << params.name
-            << params.bannedBy << params.banDate << params.expires
-            << params.reason << params.parentBanId << params.guid << params.ipv4
-            << params.ipv6 << params.legacyGUID << params.legacyHWID;
+            << params.bannedBy << params.banDate << params.expires << params.reason << params.parentBanId << params.guid
+            << params.ipv4 << params.ipv6 << params.legacyGUID << params.legacyHWID;
 
     const auto banId = db->sql.last_insert_rowid();
 
@@ -599,9 +584,7 @@ int32_t UserRepository::unbanUser(const int32_t banId) const {
     db->sql << "begin;";
 
     int32_t id = 0;
-    db->sql << "select coalesce((select id from bans where id=?), -1);"
-            << banId >>
-        id;
+    db->sql << "select coalesce((select id from bans where id=?), -1);" << banId >> id;
 
     if (id < 0) {
       db->sql << "rollback;";
@@ -619,8 +602,7 @@ int32_t UserRepository::unbanUser(const int32_t banId) const {
   }
 }
 
-std::vector<int32_t>
-UserRepository::unbanUsers(const std::vector<int32_t> &banIds) const {
+std::vector<int32_t> UserRepository::unbanUsers(const std::vector<int32_t> &banIds) const {
   std::vector<int32_t> unbans;
 
   for (const auto &banId : banIds) {
@@ -642,26 +624,24 @@ std::vector<UserModels::User> UserRepository::getUsers() const {
       *
     from users;
     )" >>
-      [&users](const int32_t id, const std::string &name,
-               const std::string &guid, const std::string &ipv4,
-               const std::string &ipv6, const int32_t level,
-               const int64_t lastSeen, const std::string &title,
-               const std::string &commands, const std::string &greeting) {
-        UserModels::User user{};
+    [&users](const int32_t id, const std::string &name, const std::string &guid, const std::string &ipv4,
+             const std::string &ipv6, const int32_t level, const int64_t lastSeen, const std::string &title,
+             const std::string &commands, const std::string &greeting) {
+      UserModels::User user{};
 
-        user.id = id;
-        user.name = name;
-        user.guid = guid;
-        user.ipv4 = ipv4;
-        user.ipv6 = ipv6;
-        user.level = level;
-        user.lastSeen = lastSeen;
-        user.title = title;
-        user.commands = commands;
-        user.greeting = greeting;
+      user.id       = id;
+      user.name     = name;
+      user.guid     = guid;
+      user.ipv4     = ipv4;
+      user.ipv6     = ipv6;
+      user.level    = level;
+      user.lastSeen = lastSeen;
+      user.title    = title;
+      user.commands = commands;
+      user.greeting = greeting;
 
-        users.emplace_back(user);
-      };
+      users.emplace_back(user);
+    };
 
   return users;
 }
@@ -669,8 +649,7 @@ std::vector<UserModels::User> UserRepository::getUsers() const {
 // TODO: make this configurable in the admin command?
 inline constexpr int8_t MAX_USERS_FROM_NAME_QUERY = 20;
 
-std::vector<std::pair<int32_t, std::string>>
-UserRepository::getUsersByName(const std::string &cleanName) const {
+std::vector<std::pair<int32_t, std::string>> UserRepository::getUsersByName(const std::string &cleanName) const {
   std::vector<std::pair<int32_t, std::string>> users;
   users.reserve(MAX_USERS_FROM_NAME_QUERY);
 
@@ -684,15 +663,14 @@ UserRepository::getUsersByName(const std::string &cleanName) const {
     limit ?;
   )" << cleanName
           << MAX_USERS_FROM_NAME_QUERY >>
-      [&users](const std::string &name, const int32_t user_id) {
-        users.emplace_back(user_id, name);
-      };
+    [&users](const std::string &name, const int32_t user_id) {
+      users.emplace_back(user_id, name);
+    };
 
   return users;
 }
 
-std::vector<std::string>
-UserRepository::getUserNames(const int32_t userID) const {
+std::vector<std::string> UserRepository::getUserNames(const int32_t userID) const {
   std::vector<std::string> usernames;
 
   db->sql << R"(
@@ -702,13 +680,14 @@ UserRepository::getUserNames(const int32_t userID) const {
     where
       user_id=?;
     )" << userID >>
-      [&usernames](const std::string &name) { usernames.emplace_back(name); };
+    [&usernames](const std::string &name) {
+      usernames.emplace_back(name);
+    };
 
   return usernames;
 }
 
-std::vector<UserModels::BannedIPAddresses>
-UserRepository::getBannedIPAddresses() const {
+std::vector<UserModels::BannedIPAddresses> UserRepository::getBannedIPAddresses() const {
   std::vector<UserModels::BannedIPAddresses> bannedIPAddresses{};
 
   db->sql << R"(
@@ -717,13 +696,13 @@ UserRepository::getBannedIPAddresses() const {
       ipv6
     from bans;
   )" >>
-      [&bannedIPAddresses](const std::string &ipv4, const std::string &ipv6) {
-        UserModels::BannedIPAddresses bannedIP{};
-        bannedIP.ipv4 = ipv4;
-        bannedIP.ipv6 = ipv6;
+    [&bannedIPAddresses](const std::string &ipv4, const std::string &ipv6) {
+      UserModels::BannedIPAddresses bannedIP{};
+      bannedIP.ipv4 = ipv4;
+      bannedIP.ipv6 = ipv6;
 
-        bannedIPAddresses.emplace_back(bannedIP);
-      };
+      bannedIPAddresses.emplace_back(bannedIP);
+    };
 
   return bannedIPAddresses;
 }
@@ -743,25 +722,24 @@ std::vector<UserModels::BanData> UserRepository::getBanData() const {
       hwid_bans
     on hwid_bans.ban_id == bans.id;
   )" >>
-      [&banMap](const int id, const std::string &guid,
-                const std::string &legacyGuid, const std::string &legacyHwid,
-                const std::string &hwid) {
-        const auto [it, inserted] = banMap.try_emplace(id);
-        auto &ban = it->second;
+    [&banMap](const int id, const std::string &guid, const std::string &legacyGuid, const std::string &legacyHwid,
+              const std::string &hwid) {
+      const auto [it, inserted] = banMap.try_emplace(id);
+      auto &ban                 = it->second;
 
-        // because one ban can have multiple HWID entries
-        // (or none in case of old bans), only insert other data once
-        if (inserted) {
-          ban.banID = id;
-          ban.guid = guid;
-          ban.legacyGUID = legacyGuid;
-          ban.legacyHWID = legacyHwid;
-        }
+      // because one ban can have multiple HWID entries
+      // (or none in case of old bans), only insert other data once
+      if (inserted) {
+        ban.banID      = id;
+        ban.guid       = guid;
+        ban.legacyGUID = legacyGuid;
+        ban.legacyHWID = legacyHwid;
+      }
 
-        if (!hwid.empty()) {
-          ban.hwids.emplace_back(hwid);
-        }
-      };
+      if (!hwid.empty()) {
+        ban.hwids.emplace_back(hwid);
+      }
+    };
 
   std::vector<UserModels::BanData> bans{};
   bans.reserve(banMap.size());
@@ -782,29 +760,27 @@ std::vector<UserModels::Ban> UserRepository::getBans() const {
     from bans
     order by ban_date desc;
   )" >>
-      [&bans](const int32_t banID, const std::string &name,
-              const std::string &bannedBy, const std::string &banDate,
-              const int64_t expires, const std::string &reason,
-              const int32_t parentBanID, const std::string &guid,
-              const std::string &ipv4, const std::string &ipv6,
-              const std::string &legacyGUID, const std::string &legacyHWID) {
-        UserModels::Ban ban{};
+    [&bans](const int32_t banID, const std::string &name, const std::string &bannedBy, const std::string &banDate,
+            const int64_t expires, const std::string &reason, const int32_t parentBanID, const std::string &guid,
+            const std::string &ipv4, const std::string &ipv6, const std::string &legacyGUID,
+            const std::string &legacyHWID) {
+      UserModels::Ban ban{};
 
-        ban.banID = banID;
-        ban.name = name;
-        ban.bannedBy = bannedBy;
-        ban.banDate = banDate;
-        ban.expires = expires;
-        ban.reason = reason;
-        ban.parentBanID = parentBanID;
-        ban.guid = guid;
-        ban.ipv4 = ipv4;
-        ban.ipv6 = ipv6;
-        ban.legacyGUID = legacyGUID;
-        ban.legacyHWID = legacyHWID;
+      ban.banID       = banID;
+      ban.name        = name;
+      ban.bannedBy    = bannedBy;
+      ban.banDate     = banDate;
+      ban.expires     = expires;
+      ban.reason      = reason;
+      ban.parentBanID = parentBanID;
+      ban.guid        = guid;
+      ban.ipv4        = ipv4;
+      ban.ipv6        = ipv6;
+      ban.legacyGUID  = legacyGUID;
+      ban.legacyHWID  = legacyHWID;
 
-        bans.emplace_back(ban);
-      };
+      bans.emplace_back(ban);
+    };
 
   return bans;
 }
@@ -851,41 +827,39 @@ void UserRepository::migrateUsers() const {
   //  but we cannot change user IDs without having a logic to update
   //  the timerun database entries to reflect the updates user IDs.
   oldDb->sql << "select * from users;" >>
-      [&oldUsers,
-       &oldAuth](const int id, const std::string &guid, const int level,
-                 const int64_t lastSeen, const std::string &name,
-                 const std::string &hwid, const std::string &title,
-                 const std::string &commands, const std::string &greeting) {
-        // it's possible that there are entries with an invalid id
-        if (id > 0) {
-          UserModels::User user{};
-          UserModels::LegacyAuth legacyAuth{};
+    [&oldUsers, &oldAuth](const int id, const std::string &guid, const int level, const int64_t lastSeen,
+                          const std::string &name, const std::string &hwid, const std::string &title,
+                          const std::string &commands, const std::string &greeting) {
+      // it's possible that there are entries with an invalid id
+      if (id > 0) {
+        UserModels::User user{};
+        UserModels::LegacyAuth legacyAuth{};
 
-          if (!Crypto::isValidSHA1(guid)) {
-            user.id = id;
-            user.name = "MALFORMED_ENTRY";
+        if (!Crypto::isValidSHA1(guid)) {
+          user.id   = id;
+          user.name = "MALFORMED_ENTRY";
 
-            legacyAuth.userID = id;
-            legacyAuth.guid = "MALFORMED_ENTRY";
-            legacyAuth.hwid = "MALFORMED_ENTRY";
-          } else {
-            user.id = id;
-            user.name = name;
-            user.level = level;
-            user.lastSeen = lastSeen;
-            user.title = title;
-            user.commands = commands;
-            user.greeting = greeting;
+          legacyAuth.userID = id;
+          legacyAuth.guid   = "MALFORMED_ENTRY";
+          legacyAuth.hwid   = "MALFORMED_ENTRY";
+        } else {
+          user.id       = id;
+          user.name     = name;
+          user.level    = level;
+          user.lastSeen = lastSeen;
+          user.title    = title;
+          user.commands = commands;
+          user.greeting = greeting;
 
-            legacyAuth.userID = id;
-            legacyAuth.guid = guid;
-            legacyAuth.hwid = hwid;
-          }
-
-          oldUsers.emplace_back(user);
-          oldAuth.emplace_back(legacyAuth);
+          legacyAuth.userID = id;
+          legacyAuth.guid   = guid;
+          legacyAuth.hwid   = hwid;
         }
-      };
+
+        oldUsers.emplace_back(user);
+        oldAuth.emplace_back(legacyAuth);
+      }
+    };
 
   db->sql << "begin;";
 
@@ -914,16 +888,15 @@ void UserRepository::migrateNames() const {
       user_id
     from name;
   )" >>
-      [&oldNames](const std::string &cleanName, const std::string &name,
-                  const int id) {
-        UserModels::Name names{};
+    [&oldNames](const std::string &cleanName, const std::string &name, const int id) {
+      UserModels::Name names{};
 
-        names.name = name;
-        names.cleanName = cleanName;
-        names.userID = id;
+      names.name      = name;
+      names.cleanName = cleanName;
+      names.userID    = id;
 
-        oldNames.emplace_back(names);
-      };
+      oldNames.emplace_back(names);
+    };
 
   db->sql << "begin;";
 
@@ -941,28 +914,26 @@ void UserRepository::migrateBans() const {
 
   std::vector<UserModels::Ban> oldBans{};
 
-  oldDb->sql << "select * from bans;" >>
-      [&oldBans](const int id, const std::string &name, const std::string &guid,
-                 const std::string &hwid, const std::string &ip,
-                 const std::string &bannedBy, const std::string &banDate,
-                 const int64_t expires, const std::string &reason) {
-        UserModels::Ban ban{};
+  oldDb->sql << "select * from bans;" >> [&oldBans](const int id, const std::string &name, const std::string &guid,
+                                                    const std::string &hwid, const std::string &ip,
+                                                    const std::string &bannedBy, const std::string &banDate,
+                                                    const int64_t expires, const std::string &reason) {
+    UserModels::Ban ban{};
 
-        ban.banID = id;
-        ban.name = name;
-        ban.bannedBy = bannedBy;
-        // old bans use a custom datetime format, we want to convert it to
-        // ISO-8601, so SQLite can sort by date automatically
-        ban.banDate = TimeUtils::Time::fromString(banDate, "%d/%m/%y %H:%M:%S")
-                          .toDateTimeString();
-        ban.expires = expires;
-        ban.reason = reason;
-        ban.ipv4 = ip;
-        ban.legacyGUID = guid;
-        ban.legacyHWID = hwid;
+    ban.banID    = id;
+    ban.name     = name;
+    ban.bannedBy = bannedBy;
+    // old bans use a custom datetime format, we want to convert it to
+    // ISO-8601, so SQLite can sort by date automatically
+    ban.banDate    = TimeUtils::Time::fromString(banDate, "%d/%m/%y %H:%M:%S").toDateTimeString();
+    ban.expires    = expires;
+    ban.reason     = reason;
+    ban.ipv4       = ip;
+    ban.legacyGUID = guid;
+    ban.legacyHWID = hwid;
 
-        oldBans.emplace_back(ban);
-      };
+    oldBans.emplace_back(ban);
+  };
 
   db->sql << "begin;";
 
@@ -973,8 +944,7 @@ void UserRepository::migrateBans() const {
   db->sql << "commit;";
 }
 
-void UserRepository::insertLegacyAuth(
-    const UserModels::LegacyAuth &auth) const {
+void UserRepository::insertLegacyAuth(const UserModels::LegacyAuth &auth) const {
   db->sql << R"(
     insert into legacy_auth (
       user_id,
@@ -990,17 +960,15 @@ void UserRepository::insertLegacyAuth(
 }
 
 bool UserRepository::oldTableHasData(const std::string &table) const {
-  const std::string stmt =
-      "select count(*) from sqlite_master where tbl_name='" + table + "'";
-  int count = 0;
+  const std::string stmt = "select count(*) from sqlite_master where tbl_name='" + table + "'";
+  int count              = 0;
   oldDb->sql << stmt >> count;
 
   return count != 0;
 }
 
 std::string UserRepository::getPlatformString(const int32_t platform) {
-  if (Constants::operatingSystemStrings.find(platform) ==
-      Constants::operatingSystemStrings.cend()) {
+  if (Constants::operatingSystemStrings.find(platform) == Constants::operatingSystemStrings.cend()) {
     return Constants::operatingSystemStrings.at(Constants::OS_DEFAULT);
   }
 
@@ -1091,8 +1059,7 @@ std::vector<std::string> UserRepository::createInitialMigration() {
     );
   )";
 
-  return {usersStmt, namesStmt,    hwidStmt,
-          bansStmt,  hwidBansStmt, legacyAuthStmt};
+  return {usersStmt, namesStmt, hwidStmt, bansStmt, hwidBansStmt, legacyAuthStmt};
 }
 } // namespace ETJump
 #endif

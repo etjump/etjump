@@ -25,33 +25,32 @@
 #ifdef NEW_AUTH
 
   #include "etj_session_v2.h"
-  #include "etj_session_result_types.h"
-  #include "g_local.h"
-  #include "etj_printer.h"
+
   #include "etj_crypto.h"
   #include "etj_filesystem.h"
   #include "etj_game.h"
-  #include "etj_local.h"
-  #include "etj_timerun_v2.h"
-  #include "etj_motd.h"
-  #include "utilities.hpp"
   #include "etj_json_utilities.h"
+  #include "etj_local.h"
+  #include "etj_motd.h"
+  #include "etj_printer.h"
+  #include "etj_session_result_types.h"
+  #include "etj_timerun_v2.h"
+  #include "g_local.h"
+  #include "utilities.hpp"
 
 namespace ETJump {
 inline constexpr char SESSION_FILE[] = "session/client_%02i.json";
 
-SessionV2::SessionV2(
-    std::unique_ptr<UserRepository> userRepository, std::unique_ptr<Log> log,
-    std::unique_ptr<SynchronizationContext> synchronizationContext)
-    : repository(std::move(userRepository)), logger(std::move(log)),
-      sc(std::move(synchronizationContext)) {
+SessionV2::SessionV2(std::unique_ptr<UserRepository> userRepository, std::unique_ptr<Log> log,
+                     std::unique_ptr<SynchronizationContext> synchronizationContext)
+  : repository(std::move(userRepository)), logger(std::move(log)), sc(std::move(synchronizationContext)) {
   sc->startWorkerThreads(1);
   getExpiringBansForSession();
 }
 
 SessionV2::~SessionV2() {
   repository = nullptr;
-  logger = nullptr;
+  logger     = nullptr;
   sc->stopWorkerThreads();
   sc = nullptr;
 }
@@ -70,8 +69,7 @@ void SessionV2::initClientSession(const int clientNum) {
 
   char userinfo[MAX_INFO_STRING]{};
   trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
-  const std::string ip =
-      Utilities::stripIPAddressPort(Info_ValueForKey(userinfo, "ip"));
+  const std::string ip = Utilities::stripIPAddressPort(Info_ValueForKey(userinfo, "ip"));
 
   // treat listen servers as IPv4, as that's more likely correct
   // there's no way to know for sure whether localhost is IPv4 or IPv6,
@@ -83,7 +81,7 @@ void SessionV2::initClientSession(const int clientNum) {
   }
 
   time_t t;
-  t = std::time(&t);
+  t                                   = std::time(&t);
   clients[clientNum].sessionStartTime = t;
 }
 
@@ -97,7 +95,7 @@ void SessionV2::resetClient(const int clientNum) {
   clients[clientNum].sessionStartTime = 0;
   clients[clientNum].permissions.reset();
 
-  clients[clientNum].user = nullptr;
+  clients[clientNum].user  = nullptr;
   clients[clientNum].level = nullptr;
 }
 
@@ -146,76 +144,69 @@ void SessionV2::onClientBegin(const gentity_t *ent) {
 }
 
 void SessionV2::onAuthSuccess(const int32_t clientNum) {
-  const gentity_t *ent = g_entities + clientNum;
+  const gentity_t *ent   = g_entities + clientNum;
   const std::string guid = clients[clientNum].guid;
-  const bool firstTime = ent->client->sess.firstTime;
+  const bool firstTime   = ent->client->sess.firstTime;
   const std::string func = __func__;
 
   sc->postTask(
-      [this, clientNum, guid] {
-        const auto user = repository->getUserData(clients[clientNum].guid);
+    [this, clientNum, guid] {
+      const auto user = repository->getUserData(clients[clientNum].guid);
 
-        // this should never happen, because we have authenticated already
-        if (user.id == 0) {
-          throw std::runtime_error(
-              StringUtils::format("Failed to get user data for GUID %s", guid));
+      // this should never happen, because we have authenticated already
+      if (user.id == 0) {
+        throw std::runtime_error(StringUtils::format("Failed to get user data for GUID %s", guid));
+      }
+
+      return std::make_unique<GetUserDataResult>(user);
+    },
+    [this, clientNum, ent, firstTime](std::unique_ptr<SynchronizationContext::ResultBase> userData) {
+      auto *const r = dynamic_cast<GetUserDataResult *>(userData.get());
+
+      if (r == nullptr) {
+        throw std::runtime_error("GetUserDataResult is null.");
+      }
+
+      clients[clientNum].user           = std::make_unique<UserV2>();
+      clients[clientNum].user->id       = r->user.id;
+      clients[clientNum].user->name     = r->user.name;
+      clients[clientNum].user->greeting = r->user.greeting;
+      clients[clientNum].user->title    = r->user.title;
+      clients[clientNum].user->lastSeen = r->user.lastSeen;
+      clients[clientNum].user->commands = r->user.commands;
+
+      clients[clientNum].level = game.levels->GetLevel(r->user.level);
+
+      if (firstTime) {
+        printGreeting(clientNum);
+        storeNewName(ent);
+
+        if (r->user.lastSeen > 0) {
+          Printer::popup(clientNum, StringUtils::format("^5Your last visit was on %s.",
+                                                        TimeUtils::Time::fromInt(r->user.lastSeen).toDateTimeString()));
         }
 
-        return std::make_unique<GetUserDataResult>(user);
-      },
-      [this, clientNum, ent, firstTime](
-          std::unique_ptr<SynchronizationContext::ResultBase> userData) {
-        auto *const r = dynamic_cast<GetUserDataResult *>(userData.get());
-
-        if (r == nullptr) {
-          throw std::runtime_error("GetUserDataResult is null.");
+        // mutes expire once map changes, so it only makes sense to check
+        // this if the client is connecting for the first time
+        if (isMuted(clientNum)) {
+          ent->client->sess.muted = qtrue;
         }
+      }
 
-        clients[clientNum].user = std::make_unique<UserV2>();
-        clients[clientNum].user->id = r->user.id;
-        clients[clientNum].user->name = r->user.name;
-        clients[clientNum].user->greeting = r->user.greeting;
-        clients[clientNum].user->title = r->user.title;
-        clients[clientNum].user->lastSeen = r->user.lastSeen;
-        clients[clientNum].user->commands = r->user.commands;
-
-        clients[clientNum].level = game.levels->GetLevel(r->user.level);
-
-        if (firstTime) {
-          printGreeting(clientNum);
-          storeNewName(ent);
-
-          if (r->user.lastSeen > 0) {
-            Printer::popup(
-                clientNum,
-                StringUtils::format("^5Your last visit was on %s.",
-                                    TimeUtils::Time::fromInt(r->user.lastSeen)
-                                        .toDateTimeString()));
-          }
-
-          // mutes expire once map changes, so it only makes sense to check
-          // this if the client is connecting for the first time
-          if (isMuted(clientNum)) {
-            ent->client->sess.muted = qtrue;
-          }
-        }
-
-        parsePermissions(clientNum);
-        game.timerunV2->clientConnect(clientNum, r->user.id);
-      },
-      [this, clientNum, func](const std::runtime_error &e) {
-        logger->error("%s failed: %s", func, e.what());
-      });
+      parsePermissions(clientNum);
+      game.timerunV2->clientConnect(clientNum, r->user.id);
+    },
+    [this, clientNum, func](const std::runtime_error &e) {
+      logger->error("%s failed: %s", func, e.what());
+    });
 }
 
 bool SessionV2::authenticate(const gentity_t *ent) {
-  const int argc = trap_Argc();
-  const int clientNum = ClientNum(ent);
-  const std::string cleanName =
-      StringUtils::sanitize(ent->client->pers.netname);
+  const int argc              = trap_Argc();
+  const int clientNum         = ClientNum(ent);
+  const std::string cleanName = StringUtils::sanitize(ent->client->pers.netname);
   const std::string invalidResponse =
-      StringUtils::format("authentication: Invalid response from %i %s (%s)",
-                          clientNum, cleanName, getIP(clientNum));
+    StringUtils::format("authentication: Invalid response from %i %s (%s)", clientNum, cleanName, getIP(clientNum));
 
   // auth response is 'auth <GUID> <OS> <HWIDs>'
   // the amount of HWIDs is dependent on OS
@@ -261,7 +252,7 @@ bool SessionV2::authenticate(const gentity_t *ent) {
     bool currentValid = true;
 
     if (!Crypto::isValidSHA2(hwidBuf)) {
-      hwidValid = false;
+      hwidValid    = false;
       currentValid = false;
     }
 
@@ -276,24 +267,21 @@ bool SessionV2::authenticate(const gentity_t *ent) {
     // tested on larger variety of hardware, and we're confident that
     // it produces valid results
     if (g_allowInvalidHWID.integer) {
-      Printer::logAdminLn(StringUtils::format(
-          "authentication: Allowing bad HWID response due to server settings "
-          "from client %i %s: %s",
-          clientNum, cleanName, StringUtils::join(hwid, " ")));
+      Printer::logAdminLn(
+        StringUtils::format("authentication: Allowing bad HWID response due to server settings from client %i %s: %s",
+                            clientNum, cleanName, StringUtils::join(hwid, " ")));
     } else {
       Printer::logAdminLn(invalidResponse);
-      Printer::logAdminLn(StringUtils::format(
-          "authentication: Bad HWID response from client %i %s: %s", clientNum,
-          cleanName, StringUtils::join(hwid, " ")));
+      Printer::logAdminLn(StringUtils::format("authentication: Bad HWID response from client %i %s: %s", clientNum,
+                                              cleanName, StringUtils::join(hwid, " ")));
       return false;
     }
   }
 
   if (!Crypto::isValidSHA2(guidBuf)) {
     Printer::logAdminLn(invalidResponse);
-    Printer::logAdminLn(StringUtils::format(
-        "authentication: Bad GUID response from client %i %s: %s", clientNum,
-        cleanName, (guidBuf[0] == '\0' ? "empty guid" : guidBuf)));
+    Printer::logAdminLn(StringUtils::format("authentication: Bad GUID response from client %i %s: %s", clientNum,
+                                            cleanName, (guidBuf[0] == '\0' ? "empty guid" : guidBuf)));
     return false;
   }
 
@@ -303,66 +291,60 @@ bool SessionV2::authenticate(const gentity_t *ent) {
   const std::string func = __func__;
 
   sc->postTask(
-      [this, clientNum] {
-        const auto user = repository->getUserData(clients[clientNum].guid);
+    [this, clientNum] {
+      const auto user = repository->getUserData(clients[clientNum].guid);
 
-        if (user.guid.empty()) {
-          // user.id will be 0 here as it returns an empty user
-          return std::make_unique<AuthenticationResult>(user.id, false);
-        }
-
-        // check after user data is successfully fetched so we have valid GUID
-        if (isBanned(clientNum, user.id)) {
-          return std::make_unique<AuthenticationResult>(0, true);
-        }
-
-        updateHWID(clientNum, user.id);
-        updateLastKnownIP(clientNum, user.id);
-
+      if (user.guid.empty()) {
+        // user.id will be 0 here as it returns an empty user
         return std::make_unique<AuthenticationResult>(user.id, false);
-      },
-      [this, clientNum, cleanName,
-       func](std::unique_ptr<SynchronizationContext::ResultBase> userData) {
-        const auto result =
-            dynamic_cast<AuthenticationResult *>(userData.get());
+      }
 
-        if (result == nullptr) {
-          throw std::runtime_error("AuthenticationResult is null.");
-        }
+      // check after user data is successfully fetched so we have valid GUID
+      if (isBanned(clientNum, user.id)) {
+        return std::make_unique<AuthenticationResult>(0, true);
+      }
 
-        if (result->isBanned) {
-          dropBannedClient(clientNum);
-          return;
-        }
+      updateHWID(clientNum, user.id);
+      updateLastKnownIP(clientNum, user.id);
 
-        if (result->userID == 0) {
-          logger->info("Client %i %s with GUID %s not found in the database, "
-                       "sending migration request",
-                       clientNum, cleanName, clients[clientNum].guid);
+      return std::make_unique<AuthenticationResult>(user.id, false);
+    },
+    [this, clientNum, cleanName, func](std::unique_ptr<SynchronizationContext::ResultBase> userData) {
+      const auto result = dynamic_cast<AuthenticationResult *>(userData.get());
 
-          Printer::command(clientNum,
-                           Constants::Authentication::GUID_MIGRATE_REQUEST);
-        } else {
-          onAuthSuccess(clientNum);
-        }
-      },
-      [this, clientNum, cleanName](const std::runtime_error &e) {
-        logger->error("Failed to get data for user %i %s - %s", clientNum,
-                      cleanName, e.what());
-      });
+      if (result == nullptr) {
+        throw std::runtime_error("AuthenticationResult is null.");
+      }
+
+      if (result->isBanned) {
+        dropBannedClient(clientNum);
+        return;
+      }
+
+      if (result->userID == 0) {
+        logger->info("Client %i %s with GUID %s not found in the database, sending migration request", clientNum,
+                     cleanName, clients[clientNum].guid);
+
+        Printer::command(clientNum, Constants::Authentication::GUID_MIGRATE_REQUEST);
+      } else {
+        onAuthSuccess(clientNum);
+      }
+    },
+    [this, clientNum, cleanName](const std::runtime_error &e) {
+      logger->error("Failed to get data for user %i %s - %s", clientNum, cleanName, e.what());
+    });
 
   return true;
 }
 
 bool SessionV2::migrateGuid(const gentity_t *ent) {
-  const int argc = trap_Argc();
+  const int argc                  = trap_Argc();
   constexpr int NUM_EXPECTED_ARGS = 3;
-  const int clientNum = ClientNum(ent);
-  const std::string cleanName =
-      StringUtils::sanitize(ent->client->pers.netname);
-  const std::string spoofAttempt = StringUtils::format(
-      "authentication: Potential GUID migration spoof attempt by %i %s (%s)",
-      clientNum, cleanName.c_str(), getIP(clientNum));
+  const int clientNum             = ClientNum(ent);
+  const std::string cleanName     = StringUtils::sanitize(ent->client->pers.netname);
+  const std::string spoofAttempt =
+    StringUtils::format("authentication: Potential GUID migration spoof attempt by %i %s (%s)", clientNum,
+                        cleanName.c_str(), getIP(clientNum));
 
   // client sends 'guid_migrate <oldGuid> <migrationType>'
   if (argc != NUM_EXPECTED_ARGS) {
@@ -382,77 +364,65 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
 
   char typeBuf[2]{};
   trap_Argv(2, typeBuf, sizeof(typeBuf));
-  const auto migrationType =
-      static_cast<Constants::Authentication::MigrationType>(Q_atoi(typeBuf));
+  const auto migrationType = static_cast<Constants::Authentication::MigrationType>(Q_atoi(typeBuf));
 
   sc->postTask(
-      [this, oldGuid, clientNum, migrationType] {
-        const auto legacyAuth = repository->getLegacyAuthData(oldGuid);
-        const auto user = repository->getUserData(legacyAuth.userID);
+    [this, oldGuid, clientNum, migrationType] {
+      const auto legacyAuth = repository->getLegacyAuthData(oldGuid);
+      const auto user       = repository->getUserData(legacyAuth.userID);
 
-        // this can happen if the user tries to authenticate using
-        // an old GUID that has never been registered on the server,
-        // and is also visiting for the first time (new GUID not in the db)
-        if (user.id == 0) {
-          return std::make_unique<GuidMigrationResult>(user.id, false, "");
-        }
+      // this can happen if the user tries to authenticate using
+      // an old GUID that has never been registered on the server,
+      // and is also visiting for the first time (new GUID not in the db)
+      if (user.id == 0) {
+        return std::make_unique<GuidMigrationResult>(user.id, false, "");
+      }
 
-        if (isBanned(clientNum, user.id, oldGuid)) {
-          return std::make_unique<GuidMigrationResult>(user.id, true, "");
-        }
+      if (isBanned(clientNum, user.id, oldGuid)) {
+        return std::make_unique<GuidMigrationResult>(user.id, true, "");
+      }
 
-        // forced manual migration overrides the GUID in the database,
-        // otherwise we only perform migration if the GUID in database is empty
-        if (migrationType !=
-                Constants::Authentication::MigrationType::MANUAL_FORCE &&
-            !user.guid.empty()) {
-          return std::make_unique<GuidMigrationResult>(
-              user.id, false,
-              "Already authenticated with new GUID. You may force a migration "
-              "with 'migrateGuid -f'.\nNote that this will delete the data "
-              "associated with your current GUID.\n");
-        }
-
-        repository->migrateGuid(user.id, clients[clientNum].guid);
-
-        // update HWID + last know IP, since we didn't do this during auth
-        updateHWID(clientNum, user.id);
-        updateLastKnownIP(clientNum, user.id);
-
+      // forced manual migration overrides the GUID in the database,
+      // otherwise we only perform migration if the GUID in database is empty
+      if (migrationType != Constants::Authentication::MigrationType::MANUAL_FORCE && !user.guid.empty()) {
         return std::make_unique<GuidMigrationResult>(
-            user.id, false, "Successfully migrated old GUID.\n");
-      },
-      [this, clientNum, cleanName](
-          std::unique_ptr<SynchronizationContext::ResultBase> legacyAuthData) {
-        const auto result =
-            dynamic_cast<GuidMigrationResult *>(legacyAuthData.get());
+          user.id, false,
+          "Already authenticated with new GUID. You may force a migration with 'migrateGuid -f'.\n"
+          "Note that this will delete the data associated with your current GUID.\n");
+      }
 
-        if (result == nullptr) {
-          throw std::runtime_error("GuidMigrationResults is null.");
-        }
+      repository->migrateGuid(user.id, clients[clientNum].guid);
 
-        if (result->isBanned) {
-          dropBannedClient(clientNum);
-          return;
-        }
+      // update HWID + last know IP, since we didn't do this during auth
+      updateHWID(clientNum, user.id);
+      updateLastKnownIP(clientNum, user.id);
 
-        if (result->userID == 0) {
-          addNewUser(clientNum);
-        } else {
-          logger->info(
-              "GUID migration successfully performed for client %i %s.",
-              clientNum, cleanName);
-          Printer::console(clientNum, result->message);
-          onAuthSuccess(clientNum);
-        }
-      },
-      [this, clientNum, cleanName](const std::runtime_error &e) {
-        Printer::console(
-            clientNum,
-            StringUtils::format("Failed to migrate GUID: %s\n", e.what()));
-        logger->error("GUID migration failed for client %i %s: %s", clientNum,
-                      cleanName, e.what());
-      });
+      return std::make_unique<GuidMigrationResult>(user.id, false, "Successfully migrated old GUID.\n");
+    },
+    [this, clientNum, cleanName](std::unique_ptr<SynchronizationContext::ResultBase> legacyAuthData) {
+      const auto result = dynamic_cast<GuidMigrationResult *>(legacyAuthData.get());
+
+      if (result == nullptr) {
+        throw std::runtime_error("GuidMigrationResults is null.");
+      }
+
+      if (result->isBanned) {
+        dropBannedClient(clientNum);
+        return;
+      }
+
+      if (result->userID == 0) {
+        addNewUser(clientNum);
+      } else {
+        logger->info("GUID migration successfully performed for client %i %s.", clientNum, cleanName);
+        Printer::console(clientNum, result->message);
+        onAuthSuccess(clientNum);
+      }
+    },
+    [this, clientNum, cleanName](const std::runtime_error &e) {
+      Printer::console(clientNum, StringUtils::format("Failed to migrate GUID: %s\n", e.what()));
+      logger->error("GUID migration failed for client %i %s: %s", clientNum, cleanName, e.what());
+    });
 
   return true;
 }
@@ -464,45 +434,42 @@ void SessionV2::addNewUser(const int32_t clientNum) {
   const std::string ipv6 = clients[clientNum].ipv6;
 
   sc->postTask(
-      [this, clientNum, name, guid, ipv4, ipv6] {
-        UserModels::User user{};
-        user.name = name;
-        user.guid = guid;
-        user.ipv4 = ipv4;
-        user.ipv6 = ipv6;
+    [this, clientNum, name, guid, ipv4, ipv6] {
+      UserModels::User user{};
+      user.name = name;
+      user.guid = guid;
+      user.ipv4 = ipv4;
+      user.ipv6 = ipv6;
 
-        repository->addNewUser(user);
+      repository->addNewUser(user);
 
-        // now that the user is in the db, we have a valid ID,
-        // so we can store the HWIDs for the current user ID
-        const int userID = repository->getUserID(guid);
+      // now that the user is in the db, we have a valid ID,
+      // so we can store the HWIDs for the current user ID
+      const int userID = repository->getUserID(guid);
 
-        // TODO: remove the entry from DB if this fails?
-        if (userID == 0) {
-          throw std::runtime_error(StringUtils::format(
-              "Failed to get user id for GUID '%s'.", guid));
-        }
+      // TODO: remove the entry from DB if this fails?
+      if (userID == 0) {
+        throw std::runtime_error(StringUtils::format("Failed to get user id for GUID '%s'.", guid));
+      }
 
-        updateHWID(clientNum, userID);
-        updateLastKnownIP(clientNum, userID);
+      updateHWID(clientNum, userID);
+      updateLastKnownIP(clientNum, userID);
 
-        return std::make_unique<AddUserResult>(
-            userID, "Successfully added new user to the database.");
-      },
-      [this, clientNum](
-          std::unique_ptr<SynchronizationContext::ResultBase> addUserResult) {
-        const auto result = dynamic_cast<AddUserResult *>(addUserResult.get());
+      return std::make_unique<AddUserResult>(userID, "Successfully added new user to the database.");
+    },
+    [this, clientNum](std::unique_ptr<SynchronizationContext::ResultBase> addUserResult) {
+      const auto result = dynamic_cast<AddUserResult *>(addUserResult.get());
 
-        if (result == nullptr) {
-          throw std::runtime_error("AddUserResult is null.");
-        }
+      if (result == nullptr) {
+        throw std::runtime_error("AddUserResult is null.");
+      }
 
-        logger->info(result->message);
-        onAuthSuccess(clientNum);
-      },
-      [this](const std::runtime_error &e) {
-        logger->error("Failed to add new user: %s", e.what());
-      });
+      logger->info(result->message);
+      onAuthSuccess(clientNum);
+    },
+    [this](const std::runtime_error &e) {
+      logger->error("Failed to add new user: %s", e.what());
+    });
 }
 
 // NOTE: this performs database operations, don't call this on the main thread!
@@ -519,15 +486,14 @@ void SessionV2::updateHWID(const int clientNum, const int userID) const {
   const int platform = clients[clientNum].platform;
   // since we're potentially updating HWID, we only need to check
   // the existing ones for the users current platform
-  const auto userHWIDs = repository->getHWIDsForUsersPlatform(userID, platform);
-  const std::string currentHWID =
-      StringUtils::join(clients[clientNum].hwid, ",");
+  const auto userHWIDs          = repository->getHWIDsForUsersPlatform(userID, platform);
+  const std::string currentHWID = StringUtils::join(clients[clientNum].hwid, ",");
 
   const auto addHWID = [&] {
     UserModels::UserHWID hwid{};
-    hwid.userID = userID;
+    hwid.userID   = userID;
     hwid.platform = platform;
-    hwid.hwid = currentHWID;
+    hwid.hwid     = currentHWID;
     repository->addHwid(hwid);
   };
 
@@ -565,41 +531,37 @@ void SessionV2::updateLastSeen(const int32_t clientNum) {
   }
 
   time_t t = 0;
-  t = std::time(&t);
+  t        = std::time(&t);
 
   // capture this in the lambdas, as we reset the client right after calling
   // this, so the id might not be valid if we try to use it directly
-  const int32_t id = clients[clientNum].user->id;
+  const int32_t id       = clients[clientNum].user->id;
   const std::string func = __func__;
 
   sc->postTask(
-      [this, clientNum, id, t] {
-        repository->updateLastSeen(id, t);
-        return std::make_unique<UpdateLastSeenResult>(
-            StringUtils::format("Updated last seen timestamp for user %i", id));
-      },
-      [this, id](std::unique_ptr<SynchronizationContext::ResultBase>
-                     updateLastSeenResult) {
-        auto *const r =
-            dynamic_cast<UpdateLastSeenResult *>(updateLastSeenResult.get());
+    [this, clientNum, id, t] {
+      repository->updateLastSeen(id, t);
+      return std::make_unique<UpdateLastSeenResult>(StringUtils::format("Updated last seen timestamp for user %i", id));
+    },
+    [this, id](std::unique_ptr<SynchronizationContext::ResultBase> updateLastSeenResult) {
+      auto *const r = dynamic_cast<UpdateLastSeenResult *>(updateLastSeenResult.get());
 
-        if (r == nullptr) {
-          throw std::runtime_error("UpdateLastSeenResult is null.");
-        }
+      if (r == nullptr) {
+        throw std::runtime_error("UpdateLastSeenResult is null.");
+      }
 
-        logger->info(r->message);
-      },
-      [this, id, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      logger->info(r->message);
+    },
+    [this, id, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::parsePermissions(const int32_t clientNum) {
   clients[clientNum].permissions.reset();
   // any per-user commands will override the commands defined by the level
-  std::string commands =
-      clients[clientNum].level->commands + clients[clientNum].user->commands;
-  bool allow = true;
+  std::string commands = clients[clientNum].level->commands + clients[clientNum].user->commands;
+  bool allow           = true;
 
   for (size_t i = 0; i < commands.length(); i++) {
     char c = commands.at(i);
@@ -631,8 +593,7 @@ void SessionV2::parsePermissions(const int32_t clientNum) {
   }
 }
 
-std::bitset<MAX_COMMANDS>
-SessionV2::getPermissions(const gentity_t *ent) const {
+std::bitset<MAX_COMMANDS> SessionV2::getPermissions(const gentity_t *ent) const {
   // null 'ent' means console, give all permissions
   if (!ent) {
     return std::bitset<MAX_COMMANDS>().set();
@@ -674,388 +635,333 @@ int64_t SessionV2::getSessionStartTime(const int32_t clientNum) const {
 }
 
 void SessionV2::storeNewName(const gentity_t *ent) const {
-  const int32_t clientNum = ClientNum(ent);
-  const int32_t id = clients[clientNum].user->id;
+  const int32_t clientNum      = ClientNum(ent);
+  const int32_t id             = clients[clientNum].user->id;
   const std::string clientName = ent->client->pers.netname;
-  const std::string func = __func__;
+  const std::string func       = __func__;
 
   sc->postTask(
-      [this, id, clientName] {
-        UserModels::Name name{};
-        name.name = clientName;
-        name.cleanName = StringUtils::sanitize(clientName, true);
-        name.userID = id;
+    [this, id, clientName] {
+      UserModels::Name name{};
+      name.name      = clientName;
+      name.cleanName = StringUtils::sanitize(clientName, true);
+      name.userID    = id;
 
-        std::string message;
+      std::string message;
 
-        if (repository->addNewName(name)) {
-          message = StringUtils::format("Added new nickname '%s' for user %i",
-                                        name.name, name.userID);
-        }
+      if (repository->addNewName(name)) {
+        message = StringUtils::format("Added new nickname '%s' for user %i", name.name, name.userID);
+      }
 
-        return std::make_unique<AddNewNameResult>(message);
-      },
-      [this](std::unique_ptr<SynchronizationContext::ResultBase>
-                 addNewNameResult) {
-        auto *const r =
-            dynamic_cast<AddNewNameResult *>(addNewNameResult.get());
+      return std::make_unique<AddNewNameResult>(message);
+    },
+    [this](std::unique_ptr<SynchronizationContext::ResultBase> addNewNameResult) {
+      auto *const r = dynamic_cast<AddNewNameResult *>(addNewNameResult.get());
 
-        if (r == nullptr) {
-          throw std::runtime_error("AddNewNameResult is null");
-        }
+      if (r == nullptr) {
+        throw std::runtime_error("AddNewNameResult is null");
+      }
 
-        if (!r->message.empty()) {
-          logger->info(r->message);
-        }
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      if (!r->message.empty()) {
+        logger->info(r->message);
+      }
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::listUsers(const gentity_t *ent, const int32_t page) const {
-  const int32_t clientNum =
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string func = __func__;
+  const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func  = __func__;
 
   sc->postTask(
-      [this] {
-        const auto users = repository->getUsers();
-        return std::make_unique<GetUsersResult>(users);
-      },
-      [this, clientNum, page](
-          std::unique_ptr<SynchronizationContext::ResultBase> getUsersResult) {
-        auto *const r = dynamic_cast<GetUsersResult *>(getUsersResult.get());
+    [this] {
+      const auto users = repository->getUsers();
+      return std::make_unique<GetUsersResult>(users);
+    },
+    [this, clientNum, page](std::unique_ptr<SynchronizationContext::ResultBase> getUsersResult) {
+      auto *const r = dynamic_cast<GetUsersResult *>(getUsersResult.get());
 
-        if (r == nullptr) {
-          throw std::runtime_error("GetUsersResult is null.");
-        }
+      if (r == nullptr) {
+        throw std::runtime_error("GetUsersResult is null.");
+      }
 
-        constexpr int32_t USERS_PER_PAGE = 20;
-        const auto size = static_cast<uint32_t>(r->users.size());
-        const uint32_t pages = (size / USERS_PER_PAGE) + 1;
+      constexpr int32_t USERS_PER_PAGE = 20;
+      const auto size                  = static_cast<uint32_t>(r->users.size());
+      const uint32_t pages             = (size / USERS_PER_PAGE) + 1;
 
-        if (page < 1 || page > pages) {
-          Printer::chat(clientNum, "^3listusers: ^7invalid page.");
-          return;
-        }
+      if (page < 1 || page > pages) {
+        Printer::chat(clientNum, "^3listusers: ^7invalid page.");
+        return;
+      }
 
-        Printer::chat(clientNum,
-                      "^3listusers: ^7check console for more information.");
+      Printer::chat(clientNum, "^3listusers: ^7check console for more information.");
 
-        time_t t = std::time(&t);
-        const uint32_t start = (page - 1) * USERS_PER_PAGE;
-        const uint32_t end = std::min(start + USERS_PER_PAGE, size);
+      time_t t             = std::time(&t);
+      const uint32_t start = (page - 1) * USERS_PER_PAGE;
+      const uint32_t end   = std::min(start + USERS_PER_PAGE, size);
 
-        std::string msg =
-            StringUtils::format("Listing page ^3%i ^7of ^3%i\n", page, pages);
-        msg += StringUtils::format("^7%-6s %-10s %-15s %-36s\n", "ID", "Level",
-                                   "Last seen", "Name");
+      std::string msg  = StringUtils::format("Listing page ^3%i ^7of ^3%i\n", page, pages);
+      msg             += StringUtils::format("^7%-6s %-10s %-15s %-36s\n", "ID", "Level", "Last seen", "Name");
 
-        for (uint32_t i = start; i < end; i++) {
-          msg += StringUtils::format(
-              "^7%-6i %-10i %-15s %-36s\n", r->users[i].id, r->users[i].level,
-              r->users[i].lastSeen > 0
-                  ? TimeStampDifferenceToString(
-                        static_cast<int32_t>(t - r->users[i].lastSeen)) +
-                        " ago"
-                  : "N/A",
-              r->users[i].name);
-        }
+      for (uint32_t i = start; i < end; i++) {
+        msg +=
+          StringUtils::format("^7%-6i %-10i %-15s %-36s\n", r->users[i].id, r->users[i].level,
+                              r->users[i].lastSeen > 0
+                                ? TimeStampDifferenceToString(static_cast<int32_t>(t - r->users[i].lastSeen)) + " ago"
+                                : "N/A",
+                              r->users[i].name);
+      }
 
-        Printer::console(clientNum, msg);
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      Printer::console(clientNum, msg);
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::listUsernames(const gentity_t *ent, const int32_t id) const {
-  const int32_t clientNum =
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string func = __func__;
+  const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func  = __func__;
 
   sc->postTask(
-      [this, id] {
-        const auto usernames = repository->getUserNames(id);
-        return std::make_unique<GetUserNamesResult>(usernames);
-      },
-      [this, clientNum, id](std::unique_ptr<SynchronizationContext::ResultBase>
-                                getUserNamesResult) {
-        auto *const r =
-            dynamic_cast<GetUserNamesResult *>(getUserNamesResult.get());
+    [this, id] {
+      const auto usernames = repository->getUserNames(id);
+      return std::make_unique<GetUserNamesResult>(usernames);
+    },
+    [this, clientNum, id](std::unique_ptr<SynchronizationContext::ResultBase> getUserNamesResult) {
+      auto *const r = dynamic_cast<GetUserNamesResult *>(getUserNamesResult.get());
 
-        if (r == nullptr) {
-          throw std::runtime_error("GetUserNamesResult is null.");
-        }
+      if (r == nullptr) {
+        throw std::runtime_error("GetUserNamesResult is null.");
+      }
 
-        if (r->usernames.empty()) {
-          Printer::chat(
-              clientNum,
-              StringUtils::format(
-                  "^3listusernames: ^7couldn't find any names with id ^3%i",
-                  id));
-          return;
-        }
+      if (r->usernames.empty()) {
+        Printer::chat(clientNum, StringUtils::format("^3listusernames: ^7couldn't find any names with id ^3%i", id));
+        return;
+      }
 
-        Printer::chat(clientNum,
-                      "^3listusernames: ^7check console for more information.");
+      Printer::chat(clientNum, "^3listusernames: ^7check console for more information.");
 
-        std::string msg =
-            StringUtils::format("Found ^3%i ^7usernames for ID ^3%i^7:\n",
-                                static_cast<int32_t>(r->usernames.size()), id);
+      std::string msg =
+        StringUtils::format("Found ^3%i ^7usernames for ID ^3%i^7:\n", static_cast<int32_t>(r->usernames.size()), id);
 
-        for (const auto &name : r->usernames) {
-          msg += name + "\n^7";
-        }
+      for (const auto &name : r->usernames) {
+        msg += name + "\n^7";
+      }
 
-        Printer::console(clientNum, msg);
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      Printer::console(clientNum, msg);
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::findUser(const gentity_t *ent, const std::string &name) const {
   // query is case-insensitive, so we just need to strip color codes
   const std::string cleanName = StringUtils::sanitize(name);
-  const int32_t clientNum =
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string func = __func__;
+  const int32_t clientNum     = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func      = __func__;
 
   sc->postTask(
-      [this, cleanName] {
-        const auto users = repository->getUsersByName(cleanName);
-        return std::make_unique<GetUsersByNameResult>(users);
-      },
-      [this, clientNum,
-       cleanName](std::unique_ptr<SynchronizationContext::ResultBase>
-                      getUsersByNameResult) {
-        auto *const r =
-            dynamic_cast<GetUsersByNameResult *>(getUsersByNameResult.get());
+    [this, cleanName] {
+      const auto users = repository->getUsersByName(cleanName);
+      return std::make_unique<GetUsersByNameResult>(users);
+    },
+    [this, clientNum, cleanName](std::unique_ptr<SynchronizationContext::ResultBase> getUsersByNameResult) {
+      auto *const r = dynamic_cast<GetUsersByNameResult *>(getUsersByNameResult.get());
 
-        if (r == nullptr) {
-          throw std::runtime_error("GetUsersByNameResult is null.");
-        }
+      if (r == nullptr) {
+        throw std::runtime_error("GetUsersByNameResult is null.");
+      }
 
-        if (r->users.empty()) {
-          Printer::chat(clientNum,
-                        StringUtils::format(
-                            "^3finduser: ^7no users found with name ^3'%s'^7.",
-                            cleanName));
-          return;
-        }
+      if (r->users.empty()) {
+        Printer::chat(clientNum, StringUtils::format("^3finduser: ^7no users found with name ^3'%s'^7.", cleanName));
+        return;
+      }
 
-        Printer::chat(clientNum,
-                      "^3finduser: ^7check console for more information.");
-        std::string msg =
-            StringUtils::format("Listing users matching the name ^3'%s' "
-                                "^7(max 20 results)\n\nID       Name\n",
-                                cleanName);
+      Printer::chat(clientNum, "^3finduser: ^7check console for more information.");
+      std::string msg = StringUtils::format("Listing users matching the name ^3'%s' ^7(max 20 results)\n\n"
+                                            "ID       Name\n",
+                                            cleanName);
 
-        for (const auto &[id, name] : r->users) {
-          msg += StringUtils::format("%-8d %-36s^7\n", id, name);
-        }
+      for (const auto &[id, name] : r->users) {
+        msg += StringUtils::format("%-8d %-36s^7\n", id, name);
+      }
 
-        Printer::console(clientNum, msg);
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      Printer::console(clientNum, msg);
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::userInfo(const gentity_t *ent, const int32_t id) const {
-  const int32_t clientNum =
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string func = __func__;
+  const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func  = __func__;
 
   sc->postTask(
-      [this, id] {
-        const UserModels::User user = repository->getUserData(id);
+    [this, id] {
+      const UserModels::User user = repository->getUserData(id);
 
-        // if this user hasn't migrated from old GUID yet,
-        // grab legacy auth data as well so we can display the old GUID
-        std::optional<UserModels::LegacyAuth> legacyAuth;
+      // if this user hasn't migrated from old GUID yet,
+      // grab legacy auth data as well so we can display the old GUID
+      std::optional<UserModels::LegacyAuth> legacyAuth;
 
-        if (user.guid.empty()) {
-          legacyAuth = repository->getLegacyAuthData(id);
-        }
+      if (user.guid.empty()) {
+        legacyAuth = repository->getLegacyAuthData(id);
+      }
 
-        return std::make_unique<GetUserDataResult>(user, legacyAuth);
-      },
-      [this, clientNum, id](std::unique_ptr<SynchronizationContext::ResultBase>
-                                getUserDataResult) {
-        auto *const r =
-            dynamic_cast<GetUserDataResult *>(getUserDataResult.get());
+      return std::make_unique<GetUserDataResult>(user, legacyAuth);
+    },
+    [this, clientNum, id](std::unique_ptr<SynchronizationContext::ResultBase> getUserDataResult) {
+      auto *const r = dynamic_cast<GetUserDataResult *>(getUserDataResult.get());
 
-        if (r == nullptr) {
-          throw std::runtime_error("GetUserDataResult is null.");
-        }
+      if (r == nullptr) {
+        throw std::runtime_error("GetUserDataResult is null.");
+      }
 
-        if (r->user.id == 0) {
+      if (r->user.id == 0) {
+        Printer::chat(clientNum, "^3userinfo: ^7no user found with id ^3" + std::to_string(id));
+        return;
+      }
 
-          Printer::chat(clientNum, "^3userinfo: ^7no user found with id ^3" +
-                                       std::to_string(id));
-          return;
-        }
+      Printer::chat(clientNum, "^3userinfo: ^7check console for more information.");
 
-        Printer::chat(clientNum,
-                      "^3userinfo: ^7check console for more information.");
+      std::string guid = r->user.guid;
 
-        std::string guid = r->user.guid;
+      if (guid.empty() && r->legacyAuth.has_value()) {
+        guid = !r->legacyAuth.value().guid.empty() ? r->legacyAuth.value().guid : "N/A";
+      }
 
-        if (guid.empty() && r->legacyAuth.has_value()) {
-          guid = !r->legacyAuth.value().guid.empty()
-                     ? r->legacyAuth.value().guid
-                     : "N/A";
-        }
+      const std::string ipv4 = !r->user.ipv4.empty() ? r->user.ipv4 : "N/A";
+      const std::string ipv6 = !r->user.ipv6.empty() ? r->user.ipv6 : "N/A";
+      const std::string lastSeen =
+        r->user.lastSeen > 0 ? TimeUtils::Time::fromInt(r->user.lastSeen).toDateTimeString() : "N/A";
 
-        const std::string ipv4 = !r->user.ipv4.empty() ? r->user.ipv4 : "N/A";
-        const std::string ipv6 = !r->user.ipv6.empty() ? r->user.ipv6 : "N/A";
-        const std::string lastSeen =
-            r->user.lastSeen > 0
-                ? TimeUtils::Time::fromInt(r->user.lastSeen).toDateTimeString()
-                : "N/A";
+      std::string msg = StringUtils::format("^5ID: ^7%d\n"
+                                            "^5GUID: ^7%s\n"
+                                            "^5Last IPv4: ^7%s\n"
+                                            "^5Last IPv6: ^7%s\n"
+                                            "^5Level: ^7%d\n"
+                                            "^5Last seen:^7 %s\n"
+                                            "^5Name: ^7%s\n"
+                                            "^5Title: ^7%s\n"
+                                            "^5Commands: ^7%s\n"
+                                            "^5Greeting: ^7%s\n",
+                                            r->user.id, guid, ipv4, ipv6, r->user.level, lastSeen, r->user.name,
+                                            r->user.title, r->user.commands, r->user.greeting);
 
-        std::string msg = StringUtils::format(
-            "^5ID: ^7%d\n"
-            "^5GUID: ^7%s\n"
-            "^5Last IPv4: ^7%s\n"
-            "^5Last IPv6: ^7%s\n"
-            "^5Level: ^7%d\n"
-            "^5Last seen:^7 %s\n"
-            "^5Name: ^7%s\n"
-            "^5Title: ^7%s\n"
-            "^5Commands: ^7%s\n"
-            "^5Greeting: ^7%s\n",
-            r->user.id, guid, ipv4, ipv6, r->user.level, lastSeen, r->user.name,
-            r->user.title, r->user.commands, r->user.greeting);
-
-        Printer::console(clientNum, msg);
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      Printer::console(clientNum, msg);
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
-void SessionV2::editUser(const gentity_t *ent,
-                         const UserModels::EditUserParams &params) {
-  const int32_t clientNum =
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string func = __func__;
+void SessionV2::editUser(const gentity_t *ent, const UserModels::EditUserParams &params) {
+  const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func  = __func__;
 
   sc->postTask(
-      [this, params] {
-        if (!repository->userExists(params.id)) {
-          return std::make_unique<EditUserResult>(
-              StringUtils::format("^3edituser: ^7no user found with id ^3%i",
-                                  params.id),
-              CLIENT_NOT_CONNECTED);
-        }
-
-        repository->editUser(params);
-
+    [this, params] {
+      if (!repository->userExists(params.id)) {
         return std::make_unique<EditUserResult>(
-            StringUtils::format("^3edituser: ^7successfully updated user ^3%i",
-                                params.id),
-            clientNumFromID(params.id));
-      },
-      [this, clientNum, params](
-          std::unique_ptr<SynchronizationContext::ResultBase> editUserResult) {
-        auto *const r = dynamic_cast<EditUserResult *>(editUserResult.get());
+          StringUtils::format("^3edituser: ^7no user found with id ^3%i", params.id), CLIENT_NOT_CONNECTED);
+      }
 
-        if (r == nullptr) {
-          throw std::runtime_error("EditUserResult is null.");
+      repository->editUser(params);
+
+      return std::make_unique<EditUserResult>(
+        StringUtils::format("^3edituser: ^7successfully updated user ^3%i", params.id), clientNumFromID(params.id));
+    },
+    [this, clientNum, params](std::unique_ptr<SynchronizationContext::ResultBase> editUserResult) {
+      auto *const r = dynamic_cast<EditUserResult *>(editUserResult.get());
+
+      if (r == nullptr) {
+        throw std::runtime_error("EditUserResult is null.");
+      }
+
+      Printer::chat(clientNum, r->message);
+
+      // update the client's in-memory data
+      if (r->clientNum != CLIENT_NOT_CONNECTED) {
+        if (params.commands.has_value()) {
+          clients[r->clientNum].user->commands = params.commands.value();
+          parsePermissions(r->clientNum);
         }
 
-        Printer::chat(clientNum, r->message);
-
-        // update the client's in-memory data
-        if (r->clientNum != CLIENT_NOT_CONNECTED) {
-          if (params.commands.has_value()) {
-            clients[r->clientNum].user->commands = params.commands.value();
-            parsePermissions(r->clientNum);
-          }
-
-          if (params.greeting.has_value()) {
-            clients[r->clientNum].user->greeting = params.greeting.value();
-          }
-
-          if (params.title.has_value()) {
-            clients[r->clientNum].user->title = params.title.value();
-          }
+        if (params.greeting.has_value()) {
+          clients[r->clientNum].user->greeting = params.greeting.value();
         }
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+
+        if (params.title.has_value()) {
+          clients[r->clientNum].user->title = params.title.value();
+        }
+      }
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::listBans(const gentity_t *ent, const int32_t page) const {
-  const int32_t clientNum =
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string func = __func__;
+  const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func  = __func__;
 
   sc->postTask(
-      [this] {
-        // this returns a lot of unneeded data for now, but in the future
-        // we probably want to use it for better output
-        const auto bans = repository->getBans();
-        return std::make_unique<GetBansResult>(bans);
-      },
-      [this, clientNum, page](
-          std::unique_ptr<SynchronizationContext::ResultBase> getBansResult) {
-        auto *const r = dynamic_cast<GetBansResult *>(getBansResult.get());
+    [this] {
+      // this returns a lot of unneeded data for now, but in the future
+      // we probably want to use it for better output
+      const auto bans = repository->getBans();
+      return std::make_unique<GetBansResult>(bans);
+    },
+    [this, clientNum, page](std::unique_ptr<SynchronizationContext::ResultBase> getBansResult) {
+      auto *const r = dynamic_cast<GetBansResult *>(getBansResult.get());
 
-        if (r == nullptr) {
-          throw std::runtime_error("GetBanResult is null.");
-        }
+      if (r == nullptr) {
+        throw std::runtime_error("GetBanResult is null.");
+      }
 
-        if (r->bans.empty()) {
-          Printer::chat(clientNum,
-                        "^3listbans: ^7no bans found in the database.");
-          return;
-        }
+      if (r->bans.empty()) {
+        Printer::chat(clientNum, "^3listbans: ^7no bans found in the database.");
+        return;
+      }
 
-        constexpr int32_t BANS_PER_PAGE = 10;
-        const auto size = static_cast<uint32_t>(r->bans.size());
-        const uint32_t pages = (size / BANS_PER_PAGE) + 1;
+      constexpr int32_t BANS_PER_PAGE = 10;
+      const auto size                 = static_cast<uint32_t>(r->bans.size());
+      const uint32_t pages            = (size / BANS_PER_PAGE) + 1;
 
-        if (page < 1 || page > pages) {
-          Printer::chat(clientNum, "^3listbans: ^7invalid page.");
-          return;
-        }
+      if (page < 1 || page > pages) {
+        Printer::chat(clientNum, "^3listbans: ^7invalid page.");
+        return;
+      }
 
-        const uint32_t start = (page - 1) * BANS_PER_PAGE;
-        const uint32_t end = std::min(start + BANS_PER_PAGE, size);
+      const uint32_t start = (page - 1) * BANS_PER_PAGE;
+      const uint32_t end   = std::min(start + BANS_PER_PAGE, size);
 
-        Printer::chat(clientNum,
-                      "^3listbans: ^7check console for more information.");
+      Printer::chat(clientNum, "^3listbans: ^7check console for more information.");
 
-        std::string msg =
-            StringUtils::format("^7Showing page ^3%i ^7of ^3%i\n", page, pages);
+      std::string msg = StringUtils::format("^7Showing page ^3%i ^7of ^3%i\n", page, pages);
 
-        // FIXME: this formatting is terrible, but it cannot really be fixed
-        // properly because we run out of space on a single line.
-        // We should display a bit less information here, and have a separate
-        // '!baninfo <id>' command to display more detailed information
-        // about a specific ban.
-        for (uint32_t i = start; i < end; i++) {
-          msg += StringUtils::format(
-              "^7%-3i %s ^7%s %s ^7%s %s\n", r->bans[i].banID, r->bans[i].name,
-              r->bans[i].banDate, r->bans[i].bannedBy,
-              r->bans[i].expires > 0
-                  ? TimeUtils::Time::fromInt(r->bans[i].expires)
-                        .toDateTimeString()
-                  : "Never",
-              r->bans[i].reason);
-        }
+      // FIXME: this formatting is terrible, but it cannot really be fixed
+      // properly because we run out of space on a single line.
+      // We should display a bit less information here, and have a separate
+      // '!baninfo <id>' command to display more detailed information
+      // about a specific ban.
+      for (uint32_t i = start; i < end; i++) {
+        msg += StringUtils::format(
+          "^7%-3i %s ^7%s %s ^7%s %s\n", r->bans[i].banID, r->bans[i].name, r->bans[i].banDate, r->bans[i].bannedBy,
+          r->bans[i].expires > 0 ? TimeUtils::Time::fromInt(r->bans[i].expires).toDateTimeString() : "Never",
+          r->bans[i].reason);
+      }
 
-        Printer::console(clientNum, msg);
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      Printer::console(clientNum, msg);
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 /*
@@ -1068,371 +974,310 @@ void SessionV2::listBans(const gentity_t *ent, const int32_t page) const {
  * - if executing this as a client (not console),
  *   'params.level' isn't higher than your current level
  */
-void SessionV2::setLevel(const gentity_t *ent,
-                         const UserModels::SetLevelParams &params) {
-  const int32_t clientNum =
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string func = __func__;
+void SessionV2::setLevel(const gentity_t *ent, const UserModels::SetLevelParams &params) {
+  const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func  = __func__;
 
   sc->postTask(
-      [this, clientNum, params] {
-        int32_t targetUserLevel = 0;
-        int32_t targetClientNum = CLIENT_NOT_CONNECTED;
+    [this, clientNum, params] {
+      int32_t targetUserLevel = 0;
+      int32_t targetClientNum = CLIENT_NOT_CONNECTED;
 
-        // if 'id' is set, ensure it's a valid user
-        if (params.id.has_value()) {
-          // if the user is connected, we don't need to check the database
-          targetClientNum = clientNumFromID(params.id.value());
+      // if 'id' is set, ensure it's a valid user
+      if (params.id.has_value()) {
+        // if the user is connected, we don't need to check the database
+        targetClientNum = clientNumFromID(params.id.value());
 
-          if (targetClientNum == CLIENT_NOT_CONNECTED) {
-            const auto targetUser = repository->getUserData(params.id.value());
+        if (targetClientNum == CLIENT_NOT_CONNECTED) {
+          const auto targetUser = repository->getUserData(params.id.value());
 
-            if (targetUser.id == 0) {
-              return std::make_unique<SetLevelResult>(StringUtils::format(
-                  "^3setlevel: user with id ^3%i ^7does not exist.",
-                  params.id.value()));
-            }
-
-            targetUserLevel = targetUser.level;
-          } else {
-            targetUserLevel = clients[targetClientNum].level->level;
+          if (targetUser.id == 0) {
+            return std::make_unique<SetLevelResult>(
+              StringUtils::format("^3setlevel: user with id ^3%i ^7does not exist.", params.id.value()));
           }
-        } else if (params.targetClientNum.has_value()) {
-          targetClientNum = params.targetClientNum.value();
-          targetUserLevel = clients[targetClientNum].level->level;
+
+          targetUserLevel = targetUser.level;
         } else {
-          // shouldn't happen, 'id' or 'targetClientNum' should always be set
-          Printer::chat(
-              clientNum,
-              "^3setlevel: ^7no valid target found. This is a bug, please "
-              "report this to the developers.");
-          throw std::runtime_error(StringUtils::format(
-              "called by client %i with no valid target! (id: %s "
-              "targetClientNum: %s)",
-              clientNum,
-              params.id.has_value() ? std::to_string(params.id.value())
-                                    : "null",
-              params.targetClientNum.has_value()
-                  ? std::to_string(params.targetClientNum.value())
-                  : "null"));
+          targetUserLevel = clients[targetClientNum].level->level;
         }
+      } else if (params.targetClientNum.has_value()) {
+        targetClientNum = params.targetClientNum.value();
+        targetUserLevel = clients[targetClientNum].level->level;
+      } else {
+        // shouldn't happen, 'id' or 'targetClientNum' should always be set
+        Printer::chat(clientNum,
+                      "^3setlevel: ^7no valid target found. This is a bug, please report this to the developers.");
+        throw std::runtime_error(StringUtils::format(
+          "called by client %i with no valid target! (id: %s targetClientNum: %s)", clientNum,
+          params.id.has_value() ? std::to_string(params.id.value()) : "null",
+          params.targetClientNum.has_value() ? std::to_string(params.targetClientNum.value()) : "null"));
+      }
 
-        if (params.level == targetUserLevel) {
-          return std::make_unique<SetLevelResult>(StringUtils::format(
-              "^3setlevel: ^7targeted user is already a level ^3%i ^7user.",
-              params.level));
+      if (params.level == targetUserLevel) {
+        return std::make_unique<SetLevelResult>(
+          StringUtils::format("^3setlevel: ^7targeted user is already a level ^3%i ^7user.", params.level));
+      }
+
+      // server can set any level to anyone
+      if (clientNum != Printer::CONSOLE_CLIENT_NUMBER) {
+        if (targetUserLevel > clients[clientNum].level->level) {
+          return (std::make_unique<SetLevelResult>("^3setlevel: ^7you can't set the level of a fellow admin."));
         }
+      }
 
-        // server can set any level to anyone
-        if (clientNum != Printer::CONSOLE_CLIENT_NUMBER) {
-          if (targetUserLevel > clients[clientNum].level->level) {
-            return (std::make_unique<SetLevelResult>(
-                "^3setlevel: ^7you can't set the level of a fellow admin."));
-          }
+      if (params.id.has_value()) {
+        repository->setLevel(params.id.value(), params.level);
+        std::optional<std::string> messageOther;
+
+        // if the targeted user is online, update their in-memory
+        // level and permissions, and send a message to them
+        if (targetClientNum != CLIENT_NOT_CONNECTED) {
+          clients[targetClientNum].level = game.levels->GetLevel(params.level);
+          parsePermissions(targetClientNum);
+
+          messageOther = StringUtils::format("^3setlevel: ^7you are now a level ^3%i ^7user (%s^7).", params.level,
+                                             clients[targetClientNum].level->name);
         }
-
-        if (params.id.has_value()) {
-          repository->setLevel(params.id.value(), params.level);
-          std::optional<std::string> messageOther;
-
-          // if the targeted user is online, update their in-memory
-          // level and permissions, and send a message to them
-          if (targetClientNum != CLIENT_NOT_CONNECTED) {
-            clients[targetClientNum].level =
-                game.levels->GetLevel(params.level);
-            parsePermissions(targetClientNum);
-
-            messageOther = StringUtils::format(
-                "^3setlevel: ^7you are now a level ^3%i ^7user (%s^7).",
-                params.level, clients[targetClientNum].level->name);
-          }
-
-          return std::make_unique<SetLevelResult>(
-              StringUtils::format(
-                  "^3setlevel: ^7user with id ^3%i ^7is now a level "
-                  "^3%i ^7user.",
-                  params.id.value(), params.level),
-              messageOther.has_value() ? messageOther : std::nullopt);
-        }
-
-        repository->setLevel(clients[targetClientNum].user->id, params.level);
-
-        clients[targetClientNum].level = game.levels->GetLevel(params.level);
-        parsePermissions(targetClientNum);
 
         return std::make_unique<SetLevelResult>(
-            StringUtils::format(
-                "^3setlevel: ^7%s^7 is now a level ^3%i ^7user.",
-                (g_entities + targetClientNum)->client->pers.netname,
-                params.level),
-            StringUtils::format(
-                "^3setlevel: ^7you are now a level ^3%i ^7user (%s^7).",
-                params.level, clients[targetClientNum].level->name));
-      },
-      [this, clientNum, params, func](
-          std::unique_ptr<SynchronizationContext::ResultBase> setLevelResult) {
-        const auto *const r =
-            dynamic_cast<SetLevelResult *>(setLevelResult.get());
+          StringUtils::format("^3setlevel: ^7user with id ^3%i ^7is now a level ^3%i ^7user.", params.id.value(),
+                              params.level),
+          messageOther.has_value() ? messageOther : std::nullopt);
+      }
 
-        if (r == nullptr) {
-          throw std::runtime_error("SetLevelResult is null.");
+      repository->setLevel(clients[targetClientNum].user->id, params.level);
+
+      clients[targetClientNum].level = game.levels->GetLevel(params.level);
+      parsePermissions(targetClientNum);
+
+      return std::make_unique<SetLevelResult>(
+        StringUtils::format("^3setlevel: ^7%s^7 is now a level ^3%i ^7user.",
+                            (g_entities + targetClientNum)->client->pers.netname, params.level),
+        StringUtils::format("^3setlevel: ^7you are now a level ^3%i ^7user (%s^7).", params.level,
+                            clients[targetClientNum].level->name));
+    },
+    [this, clientNum, params, func](std::unique_ptr<SynchronizationContext::ResultBase> setLevelResult) {
+      const auto *const r = dynamic_cast<SetLevelResult *>(setLevelResult.get());
+
+      if (r == nullptr) {
+        throw std::runtime_error("SetLevelResult is null.");
+      }
+
+      Printer::chat(clientNum, r->messageSelf);
+
+      if (r->messageOther.has_value()) {
+        // this shouldn't happen, but let's not crash the server in case
+        // there's a logic bug somewhere in the task, as it is quite complex
+        if (!params.id.has_value() && !params.targetClientNum.has_value()) {
+          logger->error("%s: callback reached with no valid 'id' or 'targetClientNum'!", func);
+        } else {
+          // NOTE: don't use .value_or() here!
+          // either 'params.targetClientNum' or 'params.id' is always null
+          Printer::chat(params.targetClientNum.has_value() ? params.targetClientNum.value()
+                                                           : clientNumFromID(params.id.value()),
+                        r->messageOther.value());
         }
-
-        Printer::chat(clientNum, r->messageSelf);
-
-        if (r->messageOther.has_value()) {
-          // this shouldn't happen, but let's not crash the server in case
-          // there's a logic bug somewhere in the task, as it is quite complex
-          if (!params.id.has_value() && !params.targetClientNum.has_value()) {
-            logger->error("%s: callback reached with no valid 'id' or "
-                          "'targetClientNum'!",
-                          func);
-          } else {
-            // NOTE: don't use .value_or() here!
-            // either 'params.targetClientNum' or 'params.id' is always null
-            Printer::chat(params.targetClientNum.has_value()
-                              ? params.targetClientNum.value()
-                              : clientNumFromID(params.id.value()),
-                          r->messageOther.value());
-          }
-        }
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      }
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::deleteLevel(const gentity_t *ent, const int32_t deletedLevel) {
-  const int32_t clientNum =
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string func = __func__;
+  const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func  = __func__;
 
   sc->postTask(
-      [this, clientNum, deletedLevel] {
-        std::vector<int32_t> connectedClients;
-        connectedClients.reserve(level.numConnectedClients);
+    [this, clientNum, deletedLevel] {
+      std::vector<int32_t> connectedClients;
+      connectedClients.reserve(level.numConnectedClients);
 
-        // store any connected clients who's level is getting deleted
-        for (int32_t i = 0; i < level.numConnectedClients; i++) {
-          const int32_t cnum = level.sortedClients[i];
+      // store any connected clients who's level is getting deleted
+      for (int32_t i = 0; i < level.numConnectedClients; i++) {
+        const int32_t cnum = level.sortedClients[i];
 
-          if (clients[cnum].level &&
-              clients[cnum].level->level == deletedLevel) {
-            connectedClients.emplace_back(cnum);
-          }
+        if (clients[cnum].level && clients[cnum].level->level == deletedLevel) {
+          connectedClients.emplace_back(cnum);
         }
+      }
 
-        // this should never fail, we've already checked that the level exists
-        if (!game.levels->Delete(deletedLevel)) {
-          Printer::chat(clientNum,
-                        StringUtils::format(
-                            "^3deletelevel: ^7level ^3%i ^7doesn't exist. This "
-                            "is a bug, please report this to the developers.",
-                            deletedLevel));
-          throw std::runtime_error(StringUtils::format(
-              "client %i tried to delete level %i that doesn't exist, but the "
-              "level was already verified to exist earlier!",
-              clientNum, deletedLevel));
-        }
+      // this should never fail, we've already checked that the level exists
+      if (!game.levels->Delete(deletedLevel)) {
+        Printer::chat(
+          clientNum,
+          StringUtils::format(
+            "^3deletelevel: ^7level ^3%i ^7doesn't exist. This is a bug, please report this to the developers.",
+            deletedLevel));
+        throw std::runtime_error(StringUtils::format(
+          "client %i tried to delete level %i that doesn't exist, but the level was already verified to exist earlier!",
+          clientNum, deletedLevel));
+      }
 
-        const int32_t affectedUsers = repository->deleteLevel(deletedLevel);
+      const int32_t affectedUsers = repository->deleteLevel(deletedLevel);
 
-        return std::make_unique<DeleteLevelResult>(affectedUsers,
-                                                   connectedClients);
-      },
-      [this, clientNum,
-       deletedLevel](std::unique_ptr<SynchronizationContext::ResultBase>
-                         deleteLevelResult) {
-        const auto *const r =
-            dynamic_cast<DeleteLevelResult *>(deleteLevelResult.get());
+      return std::make_unique<DeleteLevelResult>(affectedUsers, connectedClients);
+    },
+    [this, clientNum, deletedLevel](std::unique_ptr<SynchronizationContext::ResultBase> deleteLevelResult) {
+      const auto *const r = dynamic_cast<DeleteLevelResult *>(deleteLevelResult.get());
 
-        if (r == nullptr) {
-          throw std::runtime_error("DeleteLevelResult is null.");
-        }
+      if (r == nullptr) {
+        throw std::runtime_error("DeleteLevelResult is null.");
+      }
+
+      Printer::chat(clientNum,
+                    StringUtils::format("^3deletelevel: ^7level ^3%i ^7was deleted. ^3%i ^7%s been set to level 0.",
+                                        deletedLevel, r->numAffectedClients,
+                                        r->numAffectedClients == 1 ? "user has" : "users have"));
+
+      for (const auto &cl : r->connectedClients) {
+        clients[cl].level = game.levels->GetLevel(0);
+        parsePermissions(cl);
 
         Printer::chat(
-            clientNum,
-            StringUtils::format("^3deletelevel: ^7level ^3%i ^7was deleted. "
-                                "^3%i ^7%s been set to level 0.",
-                                deletedLevel, r->numAffectedClients,
-                                r->numAffectedClients == 1 ? "user has"
-                                                           : "users have"));
-
-        for (const auto &cl : r->connectedClients) {
-          clients[cl].level = game.levels->GetLevel(0);
-          parsePermissions(cl);
-
-          Printer::chat(
-              cl, StringUtils::format(
-                      "^3deletelevel: ^7your previous level ^3%i ^7has "
-                      "been deleted. You are now a level ^30 ^7user (%s^7).",
-                      deletedLevel, clients[cl].level->name));
-        }
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+          cl, StringUtils::format(
+                "^3deletelevel: ^7your previous level ^3%i ^7has been deleted. You are now a level ^30 ^7user (%s^7).",
+                deletedLevel, clients[cl].level->name));
+      }
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
-  const int32_t clientNum =
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string func = __func__;
+  const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string func  = __func__;
 
   sc->postTask(
-      [this, params, clientNum]() {
-        const auto target = repository->getUserData(params.id);
+    [this, params, clientNum]() {
+      const auto target = repository->getUserData(params.id);
 
-        if (target.id == 0) {
-          return std::make_unique<BanResult>(
-              StringUtils::format(
-                  "^3ban: ^7user with ID ^3%i ^7does not exist.", params.id),
-              0, 0);
-        }
+      if (target.id == 0) {
+        return std::make_unique<BanResult>(
+          StringUtils::format("^3ban: ^7user with ID ^3%i ^7does not exist.", params.id), 0, 0);
+      }
 
-        if (clientNum != Printer::CONSOLE_CLIENT_NUMBER &&
-            clients[clientNum].level->level <= target.level) {
-          return std::make_unique<BanResult>(
-              "^3ban: ^7you cannot ban a fellow admin.", 0, 0);
-        }
+      if (clientNum != Printer::CONSOLE_CLIENT_NUMBER && clients[clientNum].level->level <= target.level) {
+        return std::make_unique<BanResult>("^3ban: ^7you cannot ban a fellow admin.", 0, 0);
+      }
 
-        const auto legacyAuth = repository->getLegacyAuthData(target.id);
-        const auto hwidData = repository->getHWIDsForUser(target.id);
+      const auto legacyAuth = repository->getLegacyAuthData(target.id);
+      const auto hwidData   = repository->getHWIDsForUser(target.id);
 
-        std::time_t t = std::time(nullptr);
+      std::time_t t = std::time(nullptr);
 
-        UserModels::BanUserParams ban;
-        ban.id = params.id;
-        ban.name = params.targetClientNum.has_value()
-                       ? (g_entities + params.targetClientNum.value())
-                             ->client->pers.netname
-                       : target.name;
-        ban.bannedBy = params.bannedBy;
-        ban.banDate = TimeUtils::Time::fromInt(t).toDateTimeString();
-        ban.expires = params.expires == 0 ? params.expires : params.expires + t;
-        ban.reason = params.reason;
-        ban.parentBanId = 0; // FIXME: actually handle this in the command
-        ban.guid = target.guid;
-        ban.ipv4 = target.ipv4;
-        ban.ipv6 = target.ipv6;
-        ban.legacyGUID =
-            legacyAuth.guid != "MALFORMED_ENTRY" ? legacyAuth.guid : "";
-        ban.legacyHWID =
-            legacyAuth.hwid != "MALFORMED_ENTRY" ? legacyAuth.hwid : "";
+      UserModels::BanUserParams ban;
+      ban.id          = params.id;
+      ban.name        = params.targetClientNum.has_value()
+                          ? (g_entities + params.targetClientNum.value())->client->pers.netname
+                          : target.name;
+      ban.bannedBy    = params.bannedBy;
+      ban.banDate     = TimeUtils::Time::fromInt(t).toDateTimeString();
+      ban.expires     = params.expires == 0 ? params.expires : params.expires + t;
+      ban.reason      = params.reason;
+      ban.parentBanId = 0; // FIXME: actually handle this in the command
+      ban.guid        = target.guid;
+      ban.ipv4        = target.ipv4;
+      ban.ipv6        = target.ipv6;
+      ban.legacyGUID  = legacyAuth.guid != "MALFORMED_ENTRY" ? legacyAuth.guid : "";
+      ban.legacyHWID  = legacyAuth.hwid != "MALFORMED_ENTRY" ? legacyAuth.hwid : "";
 
-        for (const auto &data : hwidData) {
-          UserModels::HWIDBanParams hwidBan;
+      for (const auto &data : hwidData) {
+        UserModels::HWIDBanParams hwidBan;
 
-          hwidBan.platform = data.platform;
-          hwidBan.hwid = data.hwid;
+        hwidBan.platform = data.platform;
+        hwidBan.hwid     = data.hwid;
 
-          ban.hwidBan.emplace_back(hwidBan);
-        }
+        ban.hwidBan.emplace_back(hwidBan);
+      }
 
-        try {
-          const int32_t banId = repository->banUser(ban);
+      try {
+        const int32_t banId = repository->banUser(ban);
 
-          std::string msg;
-          std::string banDuration =
-              ban.expires == 0 ? "permanently"
-                               : "for " + StringUtils::getPluralizedString(
-                                              params.expires, "second");
+        std::string msg;
+        std::string banDuration =
+          ban.expires == 0 ? "permanently" : "for " + StringUtils::getPluralizedString(params.expires, "second");
 
-          if (params.targetClientNum.has_value()) {
-            msg = StringUtils::format(
-                "^3ban: ^7player %s ^7(user ID ^3%i^7) was banned %s.",
-                ban.name, ban.id, banDuration);
-            return std::make_unique<BanResult>(msg, banId, ban.expires,
-                                               params.targetClientNum);
-          }
-
+        if (params.targetClientNum.has_value()) {
           msg =
-              StringUtils::format("^3ban: ^7user with ID ^3%i ^7was banned %s.",
-                                  ban.id, banDuration);
-          return std::make_unique<BanResult>(msg, banId, ban.expires);
-
-        } catch (const std::exception &e) {
-          Printer::chat(clientNum,
-                        StringUtils::format(
-                            "^3ban: ^7failed to add ban for user ID ^3%i^7.\n",
-                            target.id));
-          throw std::runtime_error(StringUtils::format(
-              "Command executed by %s failed: %s", params.bannedBy, e.what()));
-        }
-      },
-      [this, clientNum](const auto result) {
-        const auto *const r = dynamic_cast<BanResult *>(result.get());
-
-        if (r == nullptr) {
-          throw std::runtime_error("BanResult is NULL.");
+            StringUtils::format("^3ban: ^7player %s ^7(user ID ^3%i^7) was banned %s.", ban.name, ban.id, banDuration);
+          return std::make_unique<BanResult>(msg, banId, ban.expires, params.targetClientNum);
         }
 
-        Printer::chat(clientNum, r->message);
+        msg = StringUtils::format("^3ban: ^7user with ID ^3%i ^7was banned %s.", ban.id, banDuration);
+        return std::make_unique<BanResult>(msg, banId, ban.expires);
 
-        if (r->clientNum.has_value()) {
-          trap_DropClient(r->clientNum.value(), "You are banned.", 0);
-        }
+      } catch (const std::exception &e) {
+        Printer::chat(clientNum, StringUtils::format("^3ban: ^7failed to add ban for user ID ^3%i^7.\n", target.id));
+        throw std::runtime_error(StringUtils::format("Command executed by %s failed: %s", params.bannedBy, e.what()));
+      }
+    },
+    [this, clientNum](const auto result) {
+      const auto *const r = dynamic_cast<BanResult *>(result.get());
 
-        // if the ban isn't permanent, add to expiring bans so we can
-        // potentially unban the user during this session automatically
-        if (r->banId > 0 && r->expires > 0) {
-          expiringBans.emplace_back(r->banId, r->expires);
-        }
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      if (r == nullptr) {
+        throw std::runtime_error("BanResult is NULL.");
+      }
+
+      Printer::chat(clientNum, r->message);
+
+      if (r->clientNum.has_value()) {
+        trap_DropClient(r->clientNum.value(), "You are banned.", 0);
+      }
+
+      // if the ban isn't permanent, add to expiring bans so we can
+      // potentially unban the user during this session automatically
+      if (r->banId > 0 && r->expires > 0) {
+        expiringBans.emplace_back(r->banId, r->expires);
+      }
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::unban(const gentity_t *ent, const int32_t banId) {
-  const int32_t clientNum =
-      ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string name = ent ? ent->client->pers.netname : "Server console";
-  const std::string func = __func__;
+  const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
+  const std::string name  = ent ? ent->client->pers.netname : "Server console";
+  const std::string func  = __func__;
 
   sc->postTask(
-      [this, banId, clientNum, name]() {
-        try {
-          const int32_t id = repository->unbanUser(banId);
-          const std::string msg =
-              (id == 0) ? StringUtils::format(
-                              "^3unban: ^7no ban found with ID ^3%i^7.", banId)
-                        : StringUtils::format(
-                              "^3unban: ^7removed ban with ID ^3%i^7.", id);
+    [this, banId, clientNum, name]() {
+      try {
+        const int32_t id      = repository->unbanUser(banId);
+        const std::string msg = (id == 0) ? StringUtils::format("^3unban: ^7no ban found with ID ^3%i^7.", banId)
+                                          : StringUtils::format("^3unban: ^7removed ban with ID ^3%i^7.", id);
 
-          return std::make_unique<UnbanResult>(msg, id);
-        } catch (const std::exception &e) {
-          Printer::chat(clientNum, StringUtils::format(
-                                       "^3unban: ^7failed to execute unban "
-                                       "operation for ban ID ^3%i^7.",
-                                       banId));
-          throw std::runtime_error(StringUtils::format(
-              "Command executed by %s failed: %s", name, e.what()));
-        }
-      },
-      [this, clientNum](const auto result) {
-        const auto *const r = dynamic_cast<UnbanResult *>(result.get());
+        return std::make_unique<UnbanResult>(msg, id);
+      } catch (const std::exception &e) {
+        Printer::chat(clientNum,
+                      StringUtils::format("^3unban: ^7failed to execute unban operation for ban ID ^3%i^7.", banId));
+        throw std::runtime_error(StringUtils::format("Command executed by %s failed: %s", name, e.what()));
+      }
+    },
+    [this, clientNum](const auto result) {
+      const auto *const r = dynamic_cast<UnbanResult *>(result.get());
 
-        if (r == nullptr) {
-          throw std::runtime_error("UnbanResult is NULL.");
-        }
+      if (r == nullptr) {
+        throw std::runtime_error("UnbanResult is NULL.");
+      }
 
-        Printer::chat(clientNum, r->message);
+      Printer::chat(clientNum, r->message);
 
-        // make sure the ban is removed from 'expiringBans'
-        // in case this was a temporary ban
-        if (r->banId > 0) {
-          expiringBans.erase(std::remove_if(expiringBans.begin(),
-                                            expiringBans.end(),
-                                            [&r](const auto &pair) {
-                                              return pair.first == r->banId;
-                                            }),
-                             expiringBans.end());
-        }
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      // make sure the ban is removed from 'expiringBans'
+      // in case this was a temporary ban
+      if (r->banId > 0) {
+        expiringBans.erase(std::remove_if(expiringBans.begin(), expiringBans.end(),
+                                          [&r](const auto &pair) {
+                                            return pair.first == r->banId;
+                                          }),
+                           expiringBans.end());
+      }
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::addMute(const int32_t clientNum) {
@@ -1441,34 +1286,28 @@ void SessionV2::addMute(const int32_t clientNum) {
     return;
   }
 
-  if (std::find(mutedClients.cbegin(), mutedClients.cend(),
-                clients[clientNum].guid) == mutedClients.cend()) {
+  if (std::find(mutedClients.cbegin(), mutedClients.cend(), clients[clientNum].guid) == mutedClients.cend()) {
     mutedClients.emplace_back(clients[clientNum].guid);
-    logger->info("Added mute for client %i with GUID %s", clientNum,
-                 clients[clientNum].guid);
+    logger->info("Added mute for client %i with GUID %s", clientNum, clients[clientNum].guid);
   }
 }
 
 void SessionV2::removeMute(const int32_t clientNum) {
   if (clients[clientNum].guid.empty()) {
-    logger->error("Unable to remove mute from client %i - empty GUID!",
-                  clientNum);
+    logger->error("Unable to remove mute from client %i - empty GUID!", clientNum);
     return;
   }
 
-  const auto it = std::find(mutedClients.cbegin(), mutedClients.cend(),
-                            clients[clientNum].guid);
+  const auto it = std::find(mutedClients.cbegin(), mutedClients.cend(), clients[clientNum].guid);
 
   if (it != mutedClients.cend()) {
     mutedClients.erase(it);
-    logger->info("Removed mute from client %i with GUID %s", clientNum,
-                 clients[clientNum].guid);
+    logger->info("Removed mute from client %i with GUID %s", clientNum, clients[clientNum].guid);
   }
 }
 
 bool SessionV2::isMuted(const int32_t clientNum) const {
-  return std::find(mutedClients.cbegin(), mutedClients.cend(),
-                   clients[clientNum].guid) != mutedClients.cend();
+  return std::find(mutedClients.cbegin(), mutedClients.cend(), clients[clientNum].guid) != mutedClients.cend();
 }
 
 bool SessionV2::readSessionData(const int clientNum) {
@@ -1476,8 +1315,7 @@ bool SessionV2::readSessionData(const int clientNum) {
   std::string err;
 
   const auto parsingFailed = [&] {
-    logger->error("Failed to read session data for client %i: %s", clientNum,
-                  err);
+    logger->error("Failed to read session data for client %i: %s", clientNum, err);
 
     // re-initialize the session completely
     initClientSession(clientNum);
@@ -1485,14 +1323,12 @@ bool SessionV2::readSessionData(const int clientNum) {
   };
 
   // if we can't read the data for some reason, send authentication request
-  if (!JsonUtils::readFile(StringUtils::format(SESSION_FILE, clientNum), root,
-                           &err)) {
+  if (!JsonUtils::readFile(StringUtils::format(SESSION_FILE, clientNum), root, &err)) {
     parsingFailed();
     return false;
   }
 
-  if (!JsonUtils::parseValue(clients[clientNum].guid, root["guid"], &err,
-                             "guid")) {
+  if (!JsonUtils::parseValue(clients[clientNum].guid, root["guid"], &err, "guid")) {
     parsingFailed();
     return false;
   }
@@ -1510,9 +1346,7 @@ bool SessionV2::readSessionData(const int clientNum) {
     clients[clientNum].hwid.emplace_back(std::move(value));
   }
 
-  if (!JsonUtils::parseValue(clients[clientNum].sessionStartTime,
-                             root["sessionStartTime"], &err,
-                             "sessionStartTime")) {
+  if (!JsonUtils::parseValue(clients[clientNum].sessionStartTime, root["sessionStartTime"], &err, "sessionStartTime")) {
     parsingFailed();
     return false;
   }
@@ -1540,10 +1374,8 @@ void SessionV2::writeSessionData() const {
 
     std::string err;
 
-    if (!JsonUtils::writeFile(StringUtils::format(SESSION_FILE, clientNum),
-                              root, &err)) {
-      logger->error("Failed to write session data for client %i: %s", clientNum,
-                    err);
+    if (!JsonUtils::writeFile(StringUtils::format(SESSION_FILE, clientNum), root, &err)) {
+      logger->error("Failed to write session data for client %i: %s", clientNum, err);
     }
   }
 }
@@ -1552,29 +1384,29 @@ void SessionV2::getExpiringBansForSession() {
   const std::string func = __func__;
 
   sc->postTask(
-      [this]() {
-        const auto bans = repository->getBans();
-        return std::make_unique<GetBansResult>(bans);
-      },
-      [this](const auto result) {
-        const auto *const r = dynamic_cast<GetBansResult *>(result.get());
+    [this]() {
+      const auto bans = repository->getBans();
+      return std::make_unique<GetBansResult>(bans);
+    },
+    [this](const auto result) {
+      const auto *const r = dynamic_cast<GetBansResult *>(result.get());
 
-        if (r == nullptr) {
-          throw std::runtime_error("GetBanResult is NULL.");
+      if (r == nullptr) {
+        throw std::runtime_error("GetBanResult is NULL.");
+      }
+
+      std::time_t t = std::time(nullptr);
+      expiringBans.clear();
+
+      for (const auto &ban : r->bans) {
+        if (ban.expires > t) {
+          expiringBans.emplace_back(ban.banID, ban.expires);
         }
-
-        std::time_t t = std::time(nullptr);
-        expiringBans.clear();
-
-        for (const auto &ban : r->bans) {
-          if (ban.expires > t) {
-            expiringBans.emplace_back(ban.banID, ban.expires);
-          }
-        }
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      }
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 void SessionV2::removeExpiredBans() {
@@ -1594,57 +1426,49 @@ void SessionV2::removeExpiredBans() {
   const std::string func = __func__;
 
   sc->postTask(
-      [this, banIds]() {
-        try {
-          const auto unbans = repository->unbanUsers(banIds);
+    [this, banIds]() {
+      try {
+        const auto unbans = repository->unbanUsers(banIds);
 
-          // we shouldn't be here if the query returns no results
-          if (unbans.empty()) {
-            throw std::runtime_error(
-                "Trying to remove non-existent expiring ban(s). This is a bug, "
-                "please report this to the developers.");
-          }
+        // we shouldn't be here if the query returns no results
+        if (unbans.empty()) {
+          throw std::runtime_error(
+            "Trying to remove non-existent expiring ban(s). This is a bug, please report this to the developers.");
+        }
 
-          if (unbans.size() == 1) {
-            return std::make_unique<BanExpiryResult>(
-                StringUtils::format(
-                    "Ban with ID %i has been automatically removed "
-                    "due to expiring.",
-                    unbans[0]),
-                unbans);
-          }
-
+        if (unbans.size() == 1) {
           return std::make_unique<BanExpiryResult>(
-              StringUtils::format(
-                  "Bans with IDs %s have been automatically removed "
-                  "due to expiring.",
-                  StringUtils::join(unbans, ", ")),
-              unbans);
-        } catch (const std::exception &e) {
-          throw std::runtime_error(e.what());
-        }
-      },
-      [this](const auto result) {
-        const auto *const r = dynamic_cast<BanExpiryResult *>(result.get());
-
-        if (r == nullptr) {
-          throw std::runtime_error("BanExpiryResult is NULL.");
+            StringUtils::format("Ban with ID %i has been automatically removed due to expiring.", unbans[0]), unbans);
         }
 
-        for (const auto &ban : r->expiredBans) {
-          expiringBans.erase(std::remove_if(expiringBans.begin(),
-                                            expiringBans.end(),
-                                            [ban](const auto &pair) {
-                                              return pair.first == ban;
-                                            }),
-                             expiringBans.end());
-        }
+        return std::make_unique<BanExpiryResult>(
+          StringUtils::format("Bans with IDs %s have been automatically removed due to expiring.",
+                              StringUtils::join(unbans, ", ")),
+          unbans);
+      } catch (const std::exception &e) {
+        throw std::runtime_error(e.what());
+      }
+    },
+    [this](const auto result) {
+      const auto *const r = dynamic_cast<BanExpiryResult *>(result.get());
 
-        logger->info(r->message);
-      },
-      [this, func](const std::runtime_error &e) {
-        logger->error("%s: %s", func, e.what());
-      });
+      if (r == nullptr) {
+        throw std::runtime_error("BanExpiryResult is NULL.");
+      }
+
+      for (const auto &ban : r->expiredBans) {
+        expiringBans.erase(std::remove_if(expiringBans.begin(), expiringBans.end(),
+                                          [ban](const auto &pair) {
+                                            return pair.first == ban;
+                                          }),
+                           expiringBans.end());
+      }
+
+      logger->info(r->message);
+    },
+    [this, func](const std::runtime_error &e) {
+      logger->error("%s: %s", func, e.what());
+    });
 }
 
 std::string SessionV2::getIP(const int32_t clientNum) const {
@@ -1661,55 +1485,49 @@ std::string SessionV2::getIP(const int32_t clientNum) const {
 
 void SessionV2::checkIPBan(const int clientNum) const {
   sc->postTask(
-      [this, clientNum] {
-        const std::vector<UserModels::BannedIPAddresses> bannedIPs =
-            repository->getBannedIPAddresses();
+    [this, clientNum] {
+      const std::vector<UserModels::BannedIPAddresses> bannedIPs = repository->getBannedIPAddresses();
 
-        if (bannedIPs.empty()) {
-          return std::make_unique<IPBanResult>(false, "");
-        }
-
-        // we check for both IP addresses as we ban both last known
-        // IP address (old bans won't have any IPv6 addresses though)
-        for (const auto &ban : bannedIPs) {
-          if (!ban.ipv4.empty() && ban.ipv4 == clients[clientNum].ipv4) {
-            return std::make_unique<IPBanResult>(true, ban.ipv4);
-          }
-
-          if (!ban.ipv6.empty() && ban.ipv6 == clients[clientNum].ipv6) {
-            return std::make_unique<IPBanResult>(true, ban.ipv6);
-          }
-        }
-
+      if (bannedIPs.empty()) {
         return std::make_unique<IPBanResult>(false, "");
-      },
-      [clientNum](
-          std::unique_ptr<SynchronizationContext::ResultBase> ipBanResult) {
-        const auto result = dynamic_cast<IPBanResult *>(ipBanResult.get());
+      }
 
-        if (result == nullptr) {
-          throw std::runtime_error("IPBanResult is null.");
+      // we check for both IP addresses as we ban both last known
+      // IP address (old bans won't have any IPv6 addresses though)
+      for (const auto &ban : bannedIPs) {
+        if (!ban.ipv4.empty() && ban.ipv4 == clients[clientNum].ipv4) {
+          return std::make_unique<IPBanResult>(true, ban.ipv4);
         }
 
-        if (result->isBanned) {
-          const std::string cleanName =
-              StringUtils::sanitize(g_entities[clientNum].client->pers.netname);
-          Printer::logAdminLn(StringUtils::format(
-              "authentication: Rejected connection from IP banned "
-              "client %i %s (%s)",
-              clientNum, cleanName, result->ip));
-          trap_DropClient(clientNum, "You are banned.", 0);
+        if (!ban.ipv6.empty() && ban.ipv6 == clients[clientNum].ipv6) {
+          return std::make_unique<IPBanResult>(true, ban.ipv6);
         }
-      },
-      [this](const std::exception &e) {
-        logger->error("Failed to check IPBanResult: %s", e.what());
-      });
+      }
+
+      return std::make_unique<IPBanResult>(false, "");
+    },
+    [clientNum](std::unique_ptr<SynchronizationContext::ResultBase> ipBanResult) {
+      const auto result = dynamic_cast<IPBanResult *>(ipBanResult.get());
+
+      if (result == nullptr) {
+        throw std::runtime_error("IPBanResult is null.");
+      }
+
+      if (result->isBanned) {
+        const std::string cleanName = StringUtils::sanitize(g_entities[clientNum].client->pers.netname);
+        Printer::logAdminLn(StringUtils::format("authentication: Rejected connection from IP banned client %i %s (%s)",
+                                                clientNum, cleanName, result->ip));
+        trap_DropClient(clientNum, "You are banned.", 0);
+      }
+    },
+    [this](const std::exception &e) {
+      logger->error("Failed to check IPBanResult: %s", e.what());
+    });
 }
 
 // NOTE: this performs database operations, don't call this on the main thread!
-bool SessionV2::isBanned(const int clientNum, const int userID,
-                         const std::string &legacyGuid) const {
-  const auto bans = repository->getBanData();
+bool SessionV2::isBanned(const int clientNum, const int userID, const std::string &legacyGuid) const {
+  const auto bans            = repository->getBanData();
   const std::string userHwid = StringUtils::join(clients[clientNum].hwid, ",");
 
   UserModels::LegacyAuth legacyAuth{};
@@ -1756,17 +1574,13 @@ bool SessionV2::isBanned(const int clientNum, const int userID,
 }
 
 void SessionV2::dropBannedClient(const int clientNum) const {
-  const std::string cleanName =
-      StringUtils::sanitize(g_entities[clientNum].client->pers.netname);
+  const std::string cleanName = StringUtils::sanitize(g_entities[clientNum].client->pers.netname);
 
-  Printer::logAdminLn(StringUtils::format(
-      "authentication: Banned player %s tried to connect with "
-      "GUID '%s' and HWID '%s'",
-      cleanName, clients[clientNum].guid,
-      StringUtils::join(clients[clientNum].hwid, ",")));
+  Printer::logAdminLn(
+    StringUtils::format("authentication: Banned player %s tried to connect with GUID '%s' and HWID '%s'", cleanName,
+                        clients[clientNum].guid, StringUtils::join(clients[clientNum].hwid, ",")));
   Printer::popupAll(
-      StringUtils::format("Banned player %s ^7tried to connect.",
-                          g_entities[clientNum].client->pers.netname));
+    StringUtils::format("Banned player %s ^7tried to connect.", g_entities[clientNum].client->pers.netname));
   trap_DropClient(clientNum, "You are banned.", 0);
 }
 
@@ -1779,8 +1593,7 @@ void SessionV2::printGreeting(const int32_t clientNum) const {
   } else {
     // see if the clients admin level has a greeting associated with it
     if (!clients[clientNum].level) {
-      logger->error("No level associated with user %i",
-                    clients[clientNum].user->id);
+      logger->error("No level associated with user %i", clients[clientNum].user->id);
       return;
     }
 
@@ -1792,22 +1605,17 @@ void SessionV2::printGreeting(const int32_t clientNum) const {
   }
 }
 
-std::string SessionV2::formatGreeting(const gentity_t *ent,
-                                      const std::string &greeting) const {
+std::string SessionV2::formatGreeting(const gentity_t *ent, const std::string &greeting) const {
   std::string s = greeting;
   StringUtils::replaceAll(s, "[n]", ent->client->pers.netname);
   const auto lastSeen = clients[ClientNum(ent)].user->lastSeen;
 
-  const std::string lastSeenStr =
-      lastSeen > 0 ? TimeUtils::Time::fromInt(lastSeen).toDateTimeString()
-                   : "never";
+  const std::string lastSeenStr = lastSeen > 0 ? TimeUtils::Time::fromInt(lastSeen).toDateTimeString() : "never";
   StringUtils::replaceAll(s, "[t]", lastSeenStr);
 
   time_t t = 0;
-  t = std::time(&t);
-  StringUtils::replaceAll(
-      s, "[d]",
-      TimeStampDifferenceToString(static_cast<int32_t>(t - lastSeen)));
+  t        = std::time(&t);
+  StringUtils::replaceAll(s, "[d]", TimeStampDifferenceToString(static_cast<int32_t>(t - lastSeen)));
 
   return s;
 }

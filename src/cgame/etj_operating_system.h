@@ -42,12 +42,12 @@ public:
   static void minimize();
 
 #ifdef NEW_AUTH
-  static constexpr char NOHWID[] = "NOHWID";
-  static constexpr char NOHWID_MAC_ADDR[] = "NOHWID_MAC_ADDR";
-  static constexpr char NOHWID_CPUID[] = "NOHWID_CPUID";
-  static constexpr char NOHWID_DISK[] = "NOHWID_DISK";
-  static constexpr char NOHWID_SID[] = "NOHWID_SID";
-  static constexpr char NOHWID_SYS_UUID[] = "NOHWID_SYS_UUID";
+  static constexpr char NOHWID[]           = "NOHWID";
+  static constexpr char NOHWID_MAC_ADDR[]  = "NOHWID_MAC_ADDR";
+  static constexpr char NOHWID_CPUID[]     = "NOHWID_CPUID";
+  static constexpr char NOHWID_DISK[]      = "NOHWID_DISK";
+  static constexpr char NOHWID_SID[]       = "NOHWID_SID";
+  static constexpr char NOHWID_SYS_UUID[]  = "NOHWID_SYS_UUID";
   static constexpr char NOHWID_MB_SERIAL[] = "NOHWID_MB_SERIAL";
 
   static int getOS();
@@ -87,8 +87,7 @@ private:
   // if the queried WMI class returns multiple objects,
   // only the properties of the first result are read
   // return value is *NOT* hashed!
-  static std::string getWMIProperty(const std::wstring &wmiClass,
-                                    const std::wstring &propName);
+  static std::string getWMIProperty(const std::wstring &wmiClass, const std::wstring &propName);
 
   // sets up WMI connection
   static IWbemServices *getWMIService();

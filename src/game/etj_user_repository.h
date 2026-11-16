@@ -25,16 +25,15 @@
 #pragma once
 
 #ifdef NEW_AUTH
+  #include <memory>
+
   #include "etj_database_v2.h"
   #include "etj_user_models.h"
-
-  #include <memory>
 
 namespace ETJump {
 class UserRepository {
 public:
-  UserRepository(std::unique_ptr<DatabaseV2> database,
-                 std::unique_ptr<DatabaseV2> oldDatabase);
+  UserRepository(std::unique_ptr<DatabaseV2> database, std::unique_ptr<DatabaseV2> oldDatabase);
   ~UserRepository();
 
   void insertUser(const UserModels::User &user) const;
@@ -48,15 +47,12 @@ public:
   [[nodiscard]] UserModels::User getUserData(const std::string &guid) const;
   [[nodiscard]] UserModels::User getUserData(int userID) const;
   [[nodiscard]] int getUserID(const std::string &guid) const;
-  [[nodiscard]] UserModels::LegacyAuth
-  getLegacyAuthData(const std::string &oldGuid) const;
+  [[nodiscard]] UserModels::LegacyAuth getLegacyAuthData(const std::string &oldGuid) const;
   [[nodiscard]] UserModels::LegacyAuth getLegacyAuthData(int32_t userID) const;
   void migrateGuid(int oldID, const std::string &newGUID) const;
 
-  [[nodiscard]] std::vector<UserModels::UserHWID>
-  getHWIDsForUser(int userID) const;
-  [[nodiscard]] std::vector<UserModels::UserHWID>
-  getHWIDsForUsersPlatform(int userID, int userPlatform) const;
+  [[nodiscard]] std::vector<UserModels::UserHWID> getHWIDsForUser(int userID) const;
+  [[nodiscard]] std::vector<UserModels::UserHWID> getHWIDsForUsersPlatform(int userID, int userPlatform) const;
   void addHwid(const UserModels::UserHWID &params) const;
 
   void updateIPv4(int userID, const std::string &ip) const;
@@ -78,16 +74,13 @@ public:
   [[nodiscard]] int32_t banUser(const UserModels::BanUserParams &params) const;
   // returns the ban ID on successful unban, 0 on fail
   [[nodiscard]] int32_t unbanUser(int32_t banId) const;
-  [[nodiscard]] std::vector<int32_t>
-  unbanUsers(const std::vector<int32_t> &banIds) const;
+  [[nodiscard]] std::vector<int32_t> unbanUsers(const std::vector<int32_t> &banIds) const;
 
   [[nodiscard]] std::vector<UserModels::User> getUsers() const;
-  [[nodiscard]] std::vector<std::pair<int32_t, std::string>>
-  getUsersByName(const std::string &name) const;
+  [[nodiscard]] std::vector<std::pair<int32_t, std::string>> getUsersByName(const std::string &name) const;
   [[nodiscard]] std::vector<std::string> getUserNames(int32_t userID) const;
 
-  [[nodiscard]] std::vector<UserModels::BannedIPAddresses>
-  getBannedIPAddresses() const;
+  [[nodiscard]] std::vector<UserModels::BannedIPAddresses> getBannedIPAddresses() const;
   [[nodiscard]] std::vector<UserModels::BanData> getBanData() const;
   [[nodiscard]] std::vector<UserModels::Ban> getBans() const;
 
