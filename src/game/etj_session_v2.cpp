@@ -517,43 +517,51 @@ void SessionV2::updateHWID(const int userID, const std::vector<std::string> &hwi
     }
   }
 
-  // since we're potentially updating HWID, we only need to check
-  // the existing ones for the users current platform
-  const auto userHWIDs          = repository->getHWIDsForUsersPlatform(userID, platform);
-  const std::string currentHWID = StringUtils::join(hwid, ",");
+  // Since we're potentially updating HWID, we only need to check the existing ones for the users current platform.
+  // HWID updates are best-effort, a failure here shouldn't fail authentication.
+  try {
+    const auto userHWIDs          = repository->getHWIDsForUsersPlatform(userID, platform);
+    const std::string currentHWID = StringUtils::join(hwid, ",");
 
-  const auto addHWID = [&] {
-    UserModels::UserHWID hwid{};
-    hwid.userID   = userID;
-    hwid.platform = platform;
-    hwid.hwid     = currentHWID;
-    repository->addHwid(hwid);
-  };
+    const auto addHWID = [&] {
+      UserModels::UserHWID hwid{};
+      hwid.userID   = userID;
+      hwid.platform = platform;
+      hwid.hwid     = currentHWID;
+      repository->addHwid(hwid);
+    };
 
-  // nothing in the database, add the current one
-  if (userHWIDs.empty()) {
-    addHWID();
-    return;
-  }
-
-  // add the current one if it's not found in the database
-  for (const auto &hwid : userHWIDs) {
-    if (hwid.hwid != currentHWID) {
+    // nothing in the database, add the current one
+    if (userHWIDs.empty()) {
       addHWID();
-      break;
+      return;
     }
+
+    // add the current one if it's not found in the database
+    for (const auto &hwid : userHWIDs) {
+      if (hwid.hwid != currentHWID) {
+        addHWID();
+        break;
+      }
+    }
+  } catch (const std::exception &e) {
+    logger->error("Failed to update HWID for user %i: %s", userID, e.what());
   }
 }
 
 // NOTE: this performs database operations, don't call this on the main thread!
 void SessionV2::updateLastKnownIP(const int32_t userID, const std::string &ipv4, const std::string &ipv6) const {
-  // a client connects using either IPv4 or IPv6,
-  // so only one of these is filled during a session
-  // TODO: do we want to exclude 'localhost' here?
-  if (!ipv4.empty()) {
-    repository->updateIPv4(userID, ipv4);
-  } else {
-    repository->updateIPv6(userID, ipv6);
+  // IP updates are best-effort, a failure here shouldn't fail authentication
+  try {
+    // a client connects using either IPv4 or IPv6, so only one of these is filled during a session
+    // TODO: do we want to exclude 'localhost' here?
+    if (!ipv4.empty()) {
+      repository->updateIPv4(userID, ipv4);
+    } else {
+      repository->updateIPv6(userID, ipv6);
+    }
+  } catch (const std::exception &e) {
+    logger->error("Failed to update last known IP for user %i: %s", userID, e.what());
   }
 }
 
