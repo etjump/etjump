@@ -1190,8 +1190,31 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
   const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
   const std::string func  = __func__;
 
+  // snapshot the target's live data so a ban doesn't depend on the database
+  // metadata being up to date, and so the worker task doesn't read client
+  // state that might have changed by the time it runs
+  std::vector<std::string> liveHwid;
+  int32_t livePlatform = Constants::OS_DEFAULT;
+  std::string liveIpv4;
+  std::string liveIpv6;
+  std::string liveName;
+
+  if (params.targetClientNum.has_value()) {
+    const int32_t targetNum = params.targetClientNum.value();
+
+    if (g_entities[targetNum].client) {
+      const auto &target = clients[targetNum];
+
+      liveHwid     = target.hwid;
+      livePlatform = target.platform;
+      liveIpv4     = target.ipv4;
+      liveIpv6     = target.ipv6;
+      liveName     = g_entities[targetNum].client->pers.netname;
+    }
+  }
+
   sc->postTask(
-    [this, params, clientNum]() {
+    [this, params, clientNum, liveHwid, livePlatform, liveIpv4, liveIpv6, liveName]() {
       const auto target = repository->getUserData(params.id);
 
       if (target.id == 0) {
@@ -1210,17 +1233,15 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
 
       UserModels::BanUserParams ban;
       ban.id          = params.id;
-      ban.name        = params.targetClientNum.has_value()
-                          ? (g_entities + params.targetClientNum.value())->client->pers.netname
-                          : target.name;
+      ban.name        = params.targetClientNum.has_value() && !liveName.empty() ? liveName : target.name;
       ban.bannedBy    = params.bannedBy;
       ban.banDate     = TimeUtils::Time::fromInt(t).toDateTimeString();
       ban.expires     = params.expires == 0 ? params.expires : params.expires + t;
       ban.reason      = params.reason;
       ban.parentBanId = 0; // FIXME: actually handle this in the command
       ban.guid        = target.guid;
-      ban.ipv4        = target.ipv4;
-      ban.ipv6        = target.ipv6;
+      ban.ipv4        = !liveIpv4.empty() ? liveIpv4 : target.ipv4;
+      ban.ipv6        = !liveIpv6.empty() ? liveIpv6 : target.ipv6;
       ban.legacyGUID  = legacyAuth.guid != "MALFORMED_ENTRY" ? legacyAuth.guid : "";
       ban.legacyHWID  = legacyAuth.hwid != "MALFORMED_ENTRY" ? legacyAuth.hwid : "";
 
@@ -1231,6 +1252,25 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
         hwidBan.hwid     = data.hwid;
 
         ban.hwidBan.emplace_back(hwidBan);
+      }
+
+      // make sure the HWID used by the connected client is included, even if
+      // the database metadata hasn't been updated for some reason
+      if (!liveHwid.empty()) {
+        const std::string currentHWID = StringUtils::join(liveHwid, ",");
+
+        const bool alreadyBanned = std::any_of(ban.hwidBan.cbegin(), ban.hwidBan.cend(), [&](const auto &hwidBan) {
+          return hwidBan.platform == livePlatform && hwidBan.hwid == currentHWID;
+        });
+
+        if (!alreadyBanned) {
+          UserModels::HWIDBanParams hwidBan;
+
+          hwidBan.platform = livePlatform;
+          hwidBan.hwid     = currentHWID;
+
+          ban.hwidBan.emplace_back(hwidBan);
+        }
       }
 
       try {
