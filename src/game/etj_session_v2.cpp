@@ -350,6 +350,12 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
     StringUtils::format("authentication: Potential GUID migration spoof attempt by %i %s (%s)", clientNum,
                         cleanName.c_str(), getIP(clientNum));
 
+  // clients must authenticate before they can migrate a GUID
+  if (clients[clientNum].guid.empty()) {
+    Printer::logAdminLn(spoofAttempt);
+    return false;
+  }
+
   // client sends 'guid_migrate <oldGuid> <migrationType>'
   if (argc != NUM_EXPECTED_ARGS) {
     Printer::logAdminLn(spoofAttempt);
@@ -458,6 +464,12 @@ bool SessionV2::migrateGuid(const gentity_t *ent) {
 }
 
 void SessionV2::addNewUser(const int32_t clientNum) {
+  // a client must authenticate before it can be added to the database
+  if (clients[clientNum].guid.empty()) {
+    logger->info("Refusing to add a new user for client %i with an empty GUID.", clientNum);
+    return;
+  }
+
   const std::string &name              = (g_entities + clientNum)->client->pers.netname;
   const std::string &guid              = clients[clientNum].guid;
   const std::string &ipv4              = clients[clientNum].ipv4;
