@@ -1199,8 +1199,14 @@ void SessionV2::deleteLevel(const gentity_t *ent, const int32_t deletedLevel) {
 }
 
 void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
-  const int32_t clientNum = ent ? ClientNum(ent) : Printer::CONSOLE_CLIENT_NUMBER;
-  const std::string func  = __func__;
+  const std::string func   = __func__;
+  int32_t clientNum        = Printer::CONSOLE_CLIENT_NUMBER;
+  int32_t clientAdminLevel = 0;
+
+  if (ent) {
+    clientNum        = ClientNum(ent);
+    clientAdminLevel = clients[clientNum].level->level;
+  }
 
   // snapshot the target's live data so a ban doesn't depend on the database
   // metadata being up to date, and so the worker task doesn't read client
@@ -1226,7 +1232,7 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
   }
 
   sc->postTask(
-    [this, params, clientNum, liveHwid, livePlatform, liveIpv4, liveIpv6, liveName]() {
+    [this, params, clientNum, clientAdminLevel, liveHwid, livePlatform, liveIpv4, liveIpv6, liveName]() {
       const auto target = repository->getUserData(params.id);
 
       if (target.id == 0) {
@@ -1234,7 +1240,7 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
           StringUtils::format("^3ban: ^7user with ID ^3%i ^7does not exist.", params.id), 0, 0);
       }
 
-      if (clientNum != Printer::CONSOLE_CLIENT_NUMBER && clients[clientNum].level->level <= target.level) {
+      if (clientNum != Printer::CONSOLE_CLIENT_NUMBER && clientAdminLevel <= target.level) {
         return std::make_unique<BanResult>("^3ban: ^7you cannot ban a fellow admin.", 0, 0);
       }
 
