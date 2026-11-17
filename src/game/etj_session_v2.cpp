@@ -1285,26 +1285,20 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
         }
       }
 
-      try {
-        const int32_t banId = repository->banUser(ban);
+      const int32_t banId = repository->banUser(ban);
 
-        std::string msg;
-        std::string banDuration =
-          ban.expires == 0 ? "permanently" : "for " + StringUtils::getPluralizedString(params.expires, "second");
+      std::string msg;
+      std::string banDuration =
+        ban.expires == 0 ? "permanently" : "for " + StringUtils::getPluralizedString(params.expires, "second");
 
-        if (params.targetClientNum.has_value()) {
-          msg =
-            StringUtils::format("^3ban: ^7player %s ^7(user ID ^3%i^7) was banned %s.", ban.name, ban.id, banDuration);
-          return std::make_unique<BanResult>(msg, banId, ban.expires, params.targetClientNum);
-        }
-
-        msg = StringUtils::format("^3ban: ^7user with ID ^3%i ^7was banned %s.", ban.id, banDuration);
-        return std::make_unique<BanResult>(msg, banId, ban.expires);
-
-      } catch (const std::exception &e) {
-        Printer::chat(clientNum, StringUtils::format("^3ban: ^7failed to add ban for user ID ^3%i^7.\n", target.id));
-        throw std::runtime_error(StringUtils::format("Command executed by %s failed: %s", params.bannedBy, e.what()));
+      if (params.targetClientNum.has_value()) {
+        msg =
+          StringUtils::format("^3ban: ^7player %s ^7(user ID ^3%i^7) was banned %s.", ban.name, ban.id, banDuration);
+        return std::make_unique<BanResult>(msg, banId, ban.expires, params.targetClientNum);
       }
+
+      msg = StringUtils::format("^3ban: ^7user with ID ^3%i ^7was banned %s.", ban.id, banDuration);
+      return std::make_unique<BanResult>(msg, banId, ban.expires);
     },
     [this, clientNum](const auto result) {
       const auto *const r = dynamic_cast<BanResult *>(result.get());
@@ -1325,8 +1319,9 @@ void SessionV2::ban(const gentity_t *ent, const UserModels::BanParams &params) {
         expiringBans.emplace_back(r->banId, r->expires);
       }
     },
-    [this, func](const std::runtime_error &e) {
-      logger->error("%s: %s", func, e.what());
+    [this, clientNum, params, func](const std::runtime_error &e) {
+      Printer::chat(clientNum, StringUtils::format("^3ban: ^7failed to add ban for user ID ^3%i^7.\n", params.id));
+      logger->error("%s: command executed by %s failed: %s", func, params.bannedBy, e.what());
     });
 }
 
@@ -1336,18 +1331,12 @@ void SessionV2::unban(const gentity_t *ent, const int32_t banId) {
   const std::string func  = __func__;
 
   sc->postTask(
-    [this, banId, clientNum, name]() {
-      try {
-        const int32_t id      = repository->unbanUser(banId);
-        const std::string msg = (id == 0) ? StringUtils::format("^3unban: ^7no ban found with ID ^3%i^7.", banId)
-                                          : StringUtils::format("^3unban: ^7removed ban with ID ^3%i^7.", id);
+    [this, banId]() {
+      const int32_t id      = repository->unbanUser(banId);
+      const std::string msg = (id == 0) ? StringUtils::format("^3unban: ^7no ban found with ID ^3%i^7.", banId)
+                                        : StringUtils::format("^3unban: ^7removed ban with ID ^3%i^7.", id);
 
-        return std::make_unique<UnbanResult>(msg, id);
-      } catch (const std::exception &e) {
-        Printer::chat(clientNum,
-                      StringUtils::format("^3unban: ^7failed to execute unban operation for ban ID ^3%i^7.", banId));
-        throw std::runtime_error(StringUtils::format("Command executed by %s failed: %s", name, e.what()));
-      }
+      return std::make_unique<UnbanResult>(msg, id);
     },
     [this, clientNum](const auto result) {
       const auto *const r = dynamic_cast<UnbanResult *>(result.get());
@@ -1368,8 +1357,10 @@ void SessionV2::unban(const gentity_t *ent, const int32_t banId) {
                            expiringBans.end());
       }
     },
-    [this, func](const std::runtime_error &e) {
-      logger->error("%s: %s", func, e.what());
+    [this, clientNum, banId, name, func](const std::runtime_error &e) {
+      Printer::chat(clientNum,
+                    StringUtils::format("^3unban: ^7failed to execute unban operation for ban ID ^3%i^7.", banId));
+      logger->error("%s: command executed by %s failed: %s", func, name, e.what());
     });
 }
 
@@ -1520,27 +1511,23 @@ void SessionV2::removeExpiredBans() {
 
   sc->postTask(
     [this, banIds]() {
-      try {
-        const auto unbans = repository->unbanUsers(banIds);
+      const auto unbans = repository->unbanUsers(banIds);
 
-        // we shouldn't be here if the query returns no results
-        if (unbans.empty()) {
-          throw std::runtime_error(
-            "Trying to remove non-existent expiring ban(s). This is a bug, please report this to the developers.");
-        }
-
-        if (unbans.size() == 1) {
-          return std::make_unique<BanExpiryResult>(
-            StringUtils::format("Ban with ID %i has been automatically removed due to expiring.", unbans[0]), unbans);
-        }
-
-        return std::make_unique<BanExpiryResult>(
-          StringUtils::format("Bans with IDs %s have been automatically removed due to expiring.",
-                              StringUtils::join(unbans, ", ")),
-          unbans);
-      } catch (const std::exception &e) {
-        throw std::runtime_error(e.what());
+      // we shouldn't be here if the query returns no results
+      if (unbans.empty()) {
+        throw std::runtime_error(
+          "Trying to remove non-existent expiring ban(s). This is a bug, please report this to the developers.");
       }
+
+      if (unbans.size() == 1) {
+        return std::make_unique<BanExpiryResult>(
+          StringUtils::format("Ban with ID %i has been automatically removed due to expiring.", unbans[0]), unbans);
+      }
+
+      return std::make_unique<BanExpiryResult>(
+        StringUtils::format("Bans with IDs %s have been automatically removed due to expiring.",
+                            StringUtils::join(unbans, ", ")),
+        unbans);
     },
     [this](const auto result) {
       const auto *const r = dynamic_cast<BanExpiryResult *>(result.get());
