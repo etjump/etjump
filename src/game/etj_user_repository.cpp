@@ -284,6 +284,8 @@ UserModels::LegacyAuth UserRepository::getLegacyAuthData(const int32_t userID) c
 }
 
 void UserRepository::migrateGuid(const int oldID, const std::string &newGUID) const {
+  DatabaseV2::TransactionGuard txn(*db);
+
   int count = 0;
   db->sql << R"(select count(*) from users where guid=?;)" << newGUID >> count;
 
@@ -320,6 +322,8 @@ void UserRepository::migrateGuid(const int oldID, const std::string &newGUID) co
       id=?;
     )" << newGUID
           << oldID;
+
+  txn.commit();
 }
 
 std::vector<UserModels::UserHWID> UserRepository::getHWIDsForUser(const int userID) const {
@@ -519,10 +523,9 @@ int32_t UserRepository::deleteLevel(const int32_t level) const {
 }
 
 int32_t UserRepository::banUser(const UserModels::BanUserParams &params) const {
-  try {
-    db->sql << "begin;";
+  DatabaseV2::TransactionGuard txn(*db);
 
-    db->sql << R"(
+  db->sql << R"(
     insert into bans (
       name,
       banned_by,
@@ -549,15 +552,15 @@ int32_t UserRepository::banUser(const UserModels::BanUserParams &params) const {
       ?
     );
   )" << params.name
-            << params.bannedBy << params.banDate << params.expires << params.reason << params.parentBanId << params.guid
-            << params.ipv4 << params.ipv6 << params.legacyGUID << params.legacyHWID;
+          << params.bannedBy << params.banDate << params.expires << params.reason << params.parentBanId << params.guid
+          << params.ipv4 << params.ipv6 << params.legacyGUID << params.legacyHWID;
 
-    const auto banId = db->sql.last_insert_rowid();
+  const auto banId = db->sql.last_insert_rowid();
 
-    for (const auto &hwid : params.hwidBan) {
-      const std::string platform = getPlatformString(hwid.platform);
+  for (const auto &hwid : params.hwidBan) {
+    const std::string platform = getPlatformString(hwid.platform);
 
-      db->sql << R"(
+    db->sql << R"(
       insert into hwid_bans (
         ban_id,
         platform,
@@ -568,39 +571,29 @@ int32_t UserRepository::banUser(const UserModels::BanUserParams &params) const {
         ?
       );
     )" << banId
-              << platform << hwid.hwid;
-    }
-
-    db->sql << "commit";
-
-    return static_cast<int32_t>(banId);
-  } catch (const std::exception &e) {
-    db->sql << "rollback;";
-    throw;
+            << platform << hwid.hwid;
   }
+
+  txn.commit();
+
+  return static_cast<int32_t>(banId);
 }
 
 int32_t UserRepository::unbanUser(const int32_t banId) const {
-  try {
-    db->sql << "begin;";
+  DatabaseV2::TransactionGuard txn(*db);
 
-    int32_t id = 0;
-    db->sql << "select coalesce((select id from bans where id=?), -1);" << banId >> id;
+  int32_t id = 0;
+  db->sql << "select coalesce((select id from bans where id=?), -1);" << banId >> id;
 
-    if (id < 0) {
-      db->sql << "rollback;";
-      return 0;
-    }
-
-    db->sql << "delete from hwid_bans where ban_id=?;" << banId;
-    db->sql << "delete from bans where id=?;" << banId;
-
-    db->sql << "commit;";
-    return banId;
-  } catch (...) {
-    db->sql << "rollback;";
-    throw;
+  if (id < 0) {
+    return 0;
   }
+
+  db->sql << "delete from hwid_bans where ban_id=?;" << banId;
+  db->sql << "delete from bans where id=?;" << banId;
+
+  txn.commit();
+  return banId;
 }
 
 std::vector<int32_t> UserRepository::unbanUsers(const std::vector<int32_t> &banIds) const {
@@ -862,7 +855,7 @@ void UserRepository::migrateUsers() const {
       }
     };
 
-  db->sql << "begin;";
+  DatabaseV2::TransactionGuard txn(*db);
 
   for (const auto &user : oldUsers) {
     insertUser(user);
@@ -872,7 +865,7 @@ void UserRepository::migrateUsers() const {
     insertLegacyAuth(auth);
   }
 
-  db->sql << "commit;";
+  txn.commit();
 }
 
 void UserRepository::migrateNames() const {
@@ -899,13 +892,13 @@ void UserRepository::migrateNames() const {
       oldNames.emplace_back(names);
     };
 
-  db->sql << "begin;";
+  DatabaseV2::TransactionGuard txn(*db);
 
   for (const auto &name : oldNames) {
     insertName(name);
   }
 
-  db->sql << "commit;";
+  txn.commit();
 }
 
 void UserRepository::migrateBans() const {
@@ -936,13 +929,13 @@ void UserRepository::migrateBans() const {
     oldBans.emplace_back(ban);
   };
 
-  db->sql << "begin;";
+  DatabaseV2::TransactionGuard txn(*db);
 
   for (const auto &ban : oldBans) {
     insertBan(ban);
   }
 
-  db->sql << "commit;";
+  txn.commit();
 }
 
 void UserRepository::insertLegacyAuth(const UserModels::LegacyAuth &auth) const {
