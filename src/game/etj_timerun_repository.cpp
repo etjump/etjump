@@ -24,6 +24,7 @@
 
 #include "etj_timerun_repository.h"
 
+#include <cstdlib>
 #include <iterator>
 #include <set>
 #include <tuple>
@@ -206,10 +207,6 @@ std::vector<Timerun::Record> TimerunRepository::getRecordsForPlayer(const std::v
     };
 
   return records;
-}
-
-std::vector<Timerun::Record> TimerunRepository::getRecordsForRun(const std::string &map, const std::string &run) const {
-  throw std::runtime_error("Not implemented");
 }
 
 // assembles (run, segment, time) rows into a run -> segment durations map;
@@ -718,40 +715,6 @@ void TimerunRepository::recomputeAffectedSegments(const AffectedSegments &affect
 
     recomputeGlobalSegments(seasonId, map, run, std::vector<int32_t>(segments.begin(), segments.end()));
   }
-}
-
-std::optional<Timerun::Record> TimerunRepository::getTopRecord(int seasonId, const std::string &map,
-                                                               const std::string &run) {
-  std::optional<Timerun::Record> record;
-
-  _database->sql << R"(
-    select
-      season_id,
-      map,
-      run,
-      user_id,
-      time,
-      checkpoints,
-      record_date,
-      player_name,
-      metadata
-    from record
-    where
-      season_id=? and
-      map=? and
-      run=?
-    order by time asc
-    limit 1
-    )" << seasonId
-                 << map << run >>
-    [&record](int seasonId, std::string map, std::string runName, int userId, int time, std::string checkpointsString,
-              std::string recordDate, std::string playerName, std::string metadataString) {
-      record = Timerun::Record(getRecordFromStandardQueryResult(
-        seasonId, std::move(map), std::move(runName), userId, time, std::move(checkpointsString), std::move(recordDate),
-        std::move(playerName), std::move(metadataString)));
-    };
-
-  return record;
 }
 
 std::vector<Timerun::Record> TimerunRepository::getTopRecords(const std::vector<int> &seasonIds, const std::string &map,
@@ -2569,7 +2532,8 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(const Timeru
     cp.runTime  = runTime;
 
     for (const auto &time : StringUtils::split(checkpointsStr, ",")) {
-      cp.checkpoints.emplace_back(Q_atoi(time));
+      // not Q_atoi(), so that the repository does not depend on q_shared.cpp
+      cp.checkpoints.emplace_back(static_cast<int32_t>(std::strtol(time.c_str(), nullptr, 10)));
     }
 
     cp.playerName = playerName;

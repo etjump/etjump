@@ -79,3 +79,26 @@ To add new test:
     1. Add to `add_executable` file list your own class.
     2. Add to `add_executable` file list your own test file.
 * Upon invoking tests next time, cmake will automatically reconfigure itself to include your test suite.
+
+## Testing database code
+
+The SQLite-backed modules (`TimerunRepository`, `DatabaseV2`) are compiled into the test binary and run against real SQLite, not mocks.
+`DatabaseV2` takes a filename, so a test fixture can hand out a private in-memory database per test:
+
+```cpp
+class TimerunRepositoryTests : public testing::Test {
+protected:
+    void SetUp() override {
+        repository = std::make_unique<ETJump::TimerunRepository>(
+            std::make_unique<ETJump::DatabaseV2>("tests", ":memory:"),
+            std::make_unique<ETJump::DatabaseV2>("tests-legacy", ":memory:"));
+        repository->initialize(); // runs migrations
+    }
+
+    std::unique_ptr<ETJump::TimerunRepository> repository;
+};
+```
+
+Most tests can be performed with `":memory:"`, for things that need persistence across connections or WAL behaviour,
+the `TempDatabase` class can be used. It writes the database to a temp directory, using gtest's `testing::TempDir()` function to pick the path.
+The temporary files are automatically cleaned up afterwards.

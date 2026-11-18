@@ -207,8 +207,11 @@ struct Time {
                                                   __func__, input, format);
 #ifdef GAMEDLL
       G_LogPrintf("%s\n", err.c_str());
-#else
+#elif defined(CGAMEDLL) || defined(UIDLL)
       Com_Printf("%s\n", err.c_str());
+#else
+      // unit tests have no engine print sink to report to
+      (void)err;
 #endif
 
       t = {};
