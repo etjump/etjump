@@ -26,7 +26,10 @@
 
 #include <string>
 
-#include "etj_printer.h"
+// ignore for tests
+#ifdef GAMEDLL
+  #include "etj_printer.h"
+#endif
 
 namespace ETJump {
 std::mutex Log::_messagesLock;
@@ -37,6 +40,7 @@ void Log::println(const std::string &level, const std::string &message) const {
   _messages.push_back(StringUtils::format("%s [%s]: %s", _name, level, message));
 }
 
+#ifdef GAMEDLL
 void Log::processMessages() {
   std::lock_guard<std::mutex> lock(Log::_messagesLock);
   for (const auto &msg : _messages) {
@@ -44,4 +48,5 @@ void Log::processMessages() {
   }
   _messages.clear();
 }
+#endif
 } // namespace ETJump
