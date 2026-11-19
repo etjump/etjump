@@ -1156,7 +1156,8 @@ std::optional<Timerun::Record> TimerunRepository::getRecord(const std::string &m
           record_date,
           player_name,
           metadata,
-          rank() over (partition by season_id, map, run order by time asc) as rank
+          row_number() over (partition by season_id, map, run
+                             order by time asc, record_date asc, user_id asc) as rank
         FROM record
         where season_id=1 and map=? and lsanitize(run)=?
       ) as ranked_records
@@ -1196,7 +1197,8 @@ std::vector<Timerun::Record> TimerunRepository::getRecordFromSeason(const int32_
         record_date,
         player_name,
         metadata,
-        rank() over (partition by season_id, map, run order by time asc) as record_rank
+        row_number() over (partition by season_id, map, run
+                           order by time asc, record_date asc, user_id asc) as record_rank
       FROM record
       where
         season_id=? and map=? and %s
@@ -2538,7 +2540,8 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(const Timeru
           time,
           checkpoints,
           player_name,
-          rank() over (partition by season_id, map, run order by time asc) as rank
+          row_number() over (partition by season_id, map, run
+                             order by time asc, record_date asc, user_id asc) as rank
         FROM record
         where (%s) and map=? %s
       ) as ranked_records
