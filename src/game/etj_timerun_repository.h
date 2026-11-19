@@ -158,7 +158,8 @@ private:
   std::string resolveMapName(const std::string &map, bool exact, const std::string &commandPrefix,
                              bool fromHistory = false);
   std::string resolveRunName(const std::string &map, const std::string &run, bool exact, bool fromHistory = false);
-  std::string resolveSegmentRunName(const std::string &map, const std::string &run, const std::string &commandPrefix);
+  std::string resolveSegmentRunName(const std::string &map, const std::string &run, const std::string &commandPrefix,
+                                    bool allowPartial = true);
   int32_t resolveSeasonForRemoval(const std::string &season, const std::string &commandPrefix);
 
   static std::string serializeMetadata(const std::map<std::string, std::string> &metadata);

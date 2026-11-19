@@ -946,7 +946,7 @@ std::string TimerunRepository::resolveRunName(const std::string &map, const std:
 // Searches the segment tables rather than 'record', since a run can hold a
 // best segment without holding a record or appearing in record history
 std::string TimerunRepository::resolveSegmentRunName(const std::string &map, const std::string &run,
-                                                     const std::string &commandPrefix) {
+                                                     const std::string &commandPrefix, const bool allowPartial) {
   const std::string sanitizedRun = StringUtils::sanitize(run, true);
 
   const auto findRuns = [this, &map, &sanitizedRun](bool exact) {
@@ -987,6 +987,13 @@ std::string TimerunRepository::resolveSegmentRunName(const std::string &map, con
 
   if (!runs.empty()) {
     return runs[0];
+  }
+
+  // removal commands require the run to match exactly,
+  // partial matches are only used to list what the user could have meant
+  if (!allowPartial) {
+    throw std::runtime_error(
+      StringUtils::format("^3%s: ^7no run found matching ^3'%s'^7 on map ^3'%s'^7.", commandPrefix, run, map));
   }
 
   runs = findRuns(false);
@@ -2073,8 +2080,21 @@ Timerun::RemovedRecordsPage TimerunRepository::getRemovedRecords(const Timerun::
 
 std::vector<Timerun::RemovedSegment> TimerunRepository::removeSegment(const Timerun::RemoveSegmentParams &params,
                                                                       const TimeUtils::Time &removedAt) {
-  const std::string resolvedMap = resolveMapName(params.map, params.exactMap, "remove-segment");
-  const std::string resolvedRun = resolveSegmentRunName(resolvedMap, params.run, "remove-segment");
+  // removal commands require exact matches,
+  // partial matches only provide suggestions in the error message
+  const std::string resolvedMap = StringUtils::sanitize(params.map, true);
+
+  if (getMapsForName(resolvedMap, true).empty()) {
+    const auto maps = getMapsForName(resolvedMap, false);
+
+    if (maps.size() <= 1) {
+      throw std::runtime_error(StringUtils::format("^3remove-segment: ^7no map found matching ^3'%s'^7.", params.map));
+    }
+
+    throw std::runtime_error(buildMatchSuggestionsError("remove-segment", "map", params.map, maps));
+  }
+
+  const std::string resolvedRun = resolveSegmentRunName(resolvedMap, params.run, "remove-segment", false);
 
   int32_t targetSeasonId = Timerun::DEFAULT_SEASON_ID;
 
