@@ -1372,8 +1372,8 @@ static bool removeSegment(gentity_t *ent, Arguments argv) {
     /remove-segment --season <season name> --map <map name> --run <run name> --segment <segment>
     --user <user ID> --reason <reason>
 
-    Map and run names are matched exactly when possible. A partial name is
-    accepted when it resolves to a single map or run.
+    Map, run and season names must match exactly. Partially matching the
+    parameters is not supported.
 
     Has a shorthand format of:
     /remove-segment <run name> <segment>
@@ -1448,11 +1448,8 @@ static bool removeSegment(gentity_t *ent, Arguments argv) {
     season = optSeason.has_value() ? optSeason.value().text : "";
   }
 
-  bool exactMap{};
-
   if (map.empty()) {
-    map      = optMap.has_value() ? optMap.value().text : level.rawmapname;
-    exactMap = !optMap.has_value();
+    map = optMap.has_value() ? optMap.value().text : level.rawmapname;
   }
 
   if (run.empty() && optRun.has_value()) {
@@ -1526,7 +1523,7 @@ static bool removeSegment(gentity_t *ent, Arguments argv) {
   }
 
   game.timerunV2->removeSegment({clientNum, std::move(season), std::move(map), std::move(run), userId, segment.value(),
-                                 callerId, std::move(reason), exactMap});
+                                 callerId, std::move(reason)});
 
   return true;
 }
