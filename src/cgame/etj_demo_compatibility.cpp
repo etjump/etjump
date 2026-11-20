@@ -27,6 +27,7 @@
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 
+#include "../game/etj_portalgun_shared.h"
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
@@ -177,6 +178,9 @@ void DemoCompatibility::setupCompatibilityFlags() {
 
     flags.setAttack2FiringFlag = true;
     compatibilityStrings.emplace_back("Faking EF_FIRING state for '+attack2' shooting");
+
+    flags.oldPortalSize = true;
+    compatibilityStrings.emplace_back("Using old portal size encoding");
   }
 
   if (!isCompatible({3, 5, 0})) {
@@ -301,6 +305,19 @@ int32_t DemoCompatibility::adjustedWeaponAnim(const int32_t weapAnim, const int3
   }
 
   return evPortal2FireAnim;
+}
+
+float DemoCompatibility::adjustedPortalScale(const int32_t onFireStart) const {
+  // no size set, use the default portal size
+  if (!onFireStart) {
+    return 1.0f;
+  }
+
+  // 3.3.4 and older stored the portal shader draw radius (48 = default size) in 'onFireStart',
+  // while 3.4.0 changed it to store the bbox diameter (60 = default size).
+  // The same value therefore needs a different divisor.
+  const float size = flags.oldPortalSize ? PORTAL_DRAW_RADIUS : PORTAL_BBOX_RADIUS * 2;
+  return static_cast<float>(onFireStart) / size;
 }
 
 void DemoCompatibility::parseSharedCvarBits(const int32_t shared) {
