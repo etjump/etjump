@@ -98,6 +98,7 @@ public:
     bool adjustEvFuncStaticClient             = false;
     bool oldShaderIndexOrder                  = false;
     bool useSharedCvar                        = false;
+    bool adjustEvPortal2Fire                  = false;
   };
 
   // everything in here will be set to false unless we're on demo playback
