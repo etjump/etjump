@@ -299,7 +299,6 @@ struct RemoveSegmentParams {
   int32_t segment{};
   int32_t removedBy{};
   std::optional<std::string> reason; // required when removing others' splits
-  bool exactMap{};
 };
 
 struct RemovedSegment {

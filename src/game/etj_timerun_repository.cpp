@@ -24,6 +24,7 @@
 
 #include "etj_timerun_repository.h"
 
+#include <cstdlib>
 #include <iterator>
 #include <set>
 #include <tuple>
@@ -206,10 +207,6 @@ std::vector<Timerun::Record> TimerunRepository::getRecordsForPlayer(const std::v
     };
 
   return records;
-}
-
-std::vector<Timerun::Record> TimerunRepository::getRecordsForRun(const std::string &map, const std::string &run) const {
-  throw std::runtime_error("Not implemented");
 }
 
 // assembles (run, segment, time) rows into a run -> segment durations map;
@@ -720,40 +717,6 @@ void TimerunRepository::recomputeAffectedSegments(const AffectedSegments &affect
   }
 }
 
-std::optional<Timerun::Record> TimerunRepository::getTopRecord(int seasonId, const std::string &map,
-                                                               const std::string &run) {
-  std::optional<Timerun::Record> record;
-
-  _database->sql << R"(
-    select
-      season_id,
-      map,
-      run,
-      user_id,
-      time,
-      checkpoints,
-      record_date,
-      player_name,
-      metadata
-    from record
-    where
-      season_id=? and
-      map=? and
-      run=?
-    order by time asc
-    limit 1
-    )" << seasonId
-                 << map << run >>
-    [&record](int seasonId, std::string map, std::string runName, int userId, int time, std::string checkpointsString,
-              std::string recordDate, std::string playerName, std::string metadataString) {
-      record = Timerun::Record(getRecordFromStandardQueryResult(
-        seasonId, std::move(map), std::move(runName), userId, time, std::move(checkpointsString), std::move(recordDate),
-        std::move(playerName), std::move(metadataString)));
-    };
-
-  return record;
-}
-
 std::vector<Timerun::Record> TimerunRepository::getTopRecords(const std::vector<int> &seasonIds, const std::string &map,
                                                               const std::string &run) const {
   auto seasonIdsPlaceholder = DatabaseV2::createPlaceholderString(seasonIds);
@@ -946,7 +909,7 @@ std::string TimerunRepository::resolveRunName(const std::string &map, const std:
 // Searches the segment tables rather than 'record', since a run can hold a
 // best segment without holding a record or appearing in record history
 std::string TimerunRepository::resolveSegmentRunName(const std::string &map, const std::string &run,
-                                                     const std::string &commandPrefix) {
+                                                     const std::string &commandPrefix, const bool allowPartial) {
   const std::string sanitizedRun = StringUtils::sanitize(run, true);
 
   const auto findRuns = [this, &map, &sanitizedRun](bool exact) {
@@ -987,6 +950,13 @@ std::string TimerunRepository::resolveSegmentRunName(const std::string &map, con
 
   if (!runs.empty()) {
     return runs[0];
+  }
+
+  // removal commands require the run to match exactly,
+  // partial matches are only used to list what the user could have meant
+  if (!allowPartial) {
+    throw std::runtime_error(
+      StringUtils::format("^3%s: ^7no run found matching ^3'%s'^7 on map ^3'%s'^7.", commandPrefix, run, map));
   }
 
   runs = findRuns(false);
@@ -1149,7 +1119,8 @@ std::optional<Timerun::Record> TimerunRepository::getRecord(const std::string &m
           record_date,
           player_name,
           metadata,
-          rank() over (partition by season_id, map, run order by time asc) as rank
+          row_number() over (partition by season_id, map, run
+                             order by time asc, record_date asc, user_id asc) as rank
         FROM record
         where season_id=1 and map=? and lsanitize(run)=?
       ) as ranked_records
@@ -1189,7 +1160,8 @@ std::vector<Timerun::Record> TimerunRepository::getRecordFromSeason(const int32_
         record_date,
         player_name,
         metadata,
-        rank() over (partition by season_id, map, run order by time asc) as record_rank
+        row_number() over (partition by season_id, map, run
+                           order by time asc, record_date asc, user_id asc) as record_rank
       FROM record
       where
         season_id=? and map=? and %s
@@ -2073,8 +2045,21 @@ Timerun::RemovedRecordsPage TimerunRepository::getRemovedRecords(const Timerun::
 
 std::vector<Timerun::RemovedSegment> TimerunRepository::removeSegment(const Timerun::RemoveSegmentParams &params,
                                                                       const TimeUtils::Time &removedAt) {
-  const std::string resolvedMap = resolveMapName(params.map, params.exactMap, "remove-segment");
-  const std::string resolvedRun = resolveSegmentRunName(resolvedMap, params.run, "remove-segment");
+  // removal commands require exact matches,
+  // partial matches only provide suggestions in the error message
+  const std::string resolvedMap = StringUtils::sanitize(params.map, true);
+
+  if (getMapsForName(resolvedMap, true).empty()) {
+    const auto maps = getMapsForName(resolvedMap, false);
+
+    if (maps.size() <= 1) {
+      throw std::runtime_error(StringUtils::format("^3remove-segment: ^7no map found matching ^3'%s'^7.", params.map));
+    }
+
+    throw std::runtime_error(buildMatchSuggestionsError("remove-segment", "map", params.map, maps));
+  }
+
+  const std::string resolvedRun = resolveSegmentRunName(resolvedMap, params.run, "remove-segment", false);
 
   int32_t targetSeasonId = Timerun::DEFAULT_SEASON_ID;
 
@@ -2518,7 +2503,8 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(const Timeru
           time,
           checkpoints,
           player_name,
-          rank() over (partition by season_id, map, run order by time asc) as rank
+          row_number() over (partition by season_id, map, run
+                             order by time asc, record_date asc, user_id asc) as rank
         FROM record
         where (%s) and map=? %s
       ) as ranked_records
@@ -2546,7 +2532,8 @@ std::vector<Timerun::Checkpoints> TimerunRepository::getCheckpoints(const Timeru
     cp.runTime  = runTime;
 
     for (const auto &time : StringUtils::split(checkpointsStr, ",")) {
-      cp.checkpoints.emplace_back(Q_atoi(time));
+      // not Q_atoi(), so that the repository does not depend on q_shared.cpp
+      cp.checkpoints.emplace_back(static_cast<int32_t>(std::strtol(time.c_str(), nullptr, 10)));
     }
 
     cp.playerName = playerName;

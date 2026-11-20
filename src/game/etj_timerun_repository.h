@@ -49,7 +49,6 @@ public:
   Timerun::Season addSeason(Timerun::AddSeasonParams params);
   std::vector<Timerun::Record> getRecordsForPlayer(const std::vector<int> &activeSeasons, const std::string &map,
                                                    const std::string &run, int userId);
-  std::vector<Timerun::Record> getRecordsForRun(const std::string &map, const std::string &run) const;
   std::map<std::string, std::vector<int32_t>> getBestSegments(int32_t seasonId, const std::string &map) const;
   std::map<std::string, std::vector<int32_t>> getPlayerBestSegments(int32_t seasonId, const std::string &map,
                                                                     int userId) const;
@@ -58,7 +57,6 @@ public:
   // grouped by season
   std::map<int32_t, std::vector<Timerun::BestSegmentUpdate>>
   recordCompletion(const std::vector<Timerun::RecordCompletion> &completions);
-  std::optional<Timerun::Record> getTopRecord(int seasonId, const std::string &map, const std::string &run);
   std::vector<Timerun::Record> getTopRecords(const std::vector<int> &seasonIds, const std::string &map,
                                              const std::string &run) const;
   void editSeason(const Timerun::EditSeasonParams &params);
@@ -158,7 +156,8 @@ private:
   std::string resolveMapName(const std::string &map, bool exact, const std::string &commandPrefix,
                              bool fromHistory = false);
   std::string resolveRunName(const std::string &map, const std::string &run, bool exact, bool fromHistory = false);
-  std::string resolveSegmentRunName(const std::string &map, const std::string &run, const std::string &commandPrefix);
+  std::string resolveSegmentRunName(const std::string &map, const std::string &run, const std::string &commandPrefix,
+                                    bool allowPartial = true);
   int32_t resolveSeasonForRemoval(const std::string &season, const std::string &commandPrefix);
 
   static std::string serializeMetadata(const std::map<std::string, std::string> &metadata);
