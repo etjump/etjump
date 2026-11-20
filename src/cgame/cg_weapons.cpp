@@ -1935,7 +1935,17 @@ static void CG_WeaponAnimation(playerState_t *ps, weaponInfo_t *weapon, int *wea
     return;
   }
 
-  CG_RunWeapLerpFrame(ci, weapon, &cent->pe.weap, ps->weapAnim, 1);
+  int32_t weaponAnim = ps->weapAnim;
+
+  // pre-2.2.0 demos carry no weapon animation for the secondary portal gun fire,
+  // so synthesize one from the adjusted 'EV_PORTAL2_FIRE' events
+  if (ETJump::cgame.demo.compatibility->flags.adjustEvPortal2Fire && ps->weapon == WP_PORTAL_GUN) {
+    const animation_t &attackAnim = weapon->weapAnimations[WEAP_ATTACK_LASTSHOT];
+    weaponAnim =
+      ETJump::cgame.demo.compatibility->adjustedWeaponAnim(weaponAnim, attackAnim.numFrames * attackAnim.frameLerp);
+  }
+
+  CG_RunWeapLerpFrame(ci, weapon, &cent->pe.weap, weaponAnim, 1);
 
   *weapOld      = cent->pe.weap.oldFrame;
   *weap         = cent->pe.weap.frame;

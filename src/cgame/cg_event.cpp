@@ -1464,6 +1464,12 @@ static int32_t adjustedEventNum(const entityState_t &es, const int32_t event) {
   // From 'EV_PORTAL_TELEPORT' onwards, the insertion and the removal cancel out.
   if (ETJump::cgame.demo.compatibility->flags.adjustEvPortal2Fire) {
     if (adjustedEvent == EV_PORTAL_TELEPORT) {
+      // pre-2.2.0 demos never set 'ps->weapAnim' for the secondary portal gun fire,
+      // so the viewmodel animation is synthesized from this event
+      if (es.number == cg.snap->ps.clientNum) {
+        ETJump::cgame.demo.compatibility->noteEvPortal2Fire();
+      }
+
       adjustedEvent = EV_FIRE_WEAPON_LASTSHOT;
     } else if (adjustedEvent > EV_PORTAL_TELEPORT) {
       adjustedEvent--;

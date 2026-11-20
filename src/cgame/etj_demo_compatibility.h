@@ -75,6 +75,10 @@ class DemoCompatibility {
   // stores the strings to print for compatibility info
   std::vector<std::string> compatibilityStrings;
 
+  // synthesized viewmodel animation for pre-2.2.0 'EV_PORTAL2_FIRE' events
+  int32_t evPortal2FireAnimStart = -1;
+  int32_t evPortal2FireAnim      = 0;
+
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
 
 public:
@@ -112,6 +116,15 @@ public:
   // performs event number adjustments for events that are added freestanding
   // by setting event num to ET_EVENTS + event due to additional entity types
   [[nodiscard]] int adjustedEventNum(int event) const;
+
+  // Pre-2.2.0 demos only carry 'EV_PORTAL2_FIRE' for the secondary portal gun fire,
+  // and never set 'ps->weapAnim' for it, so the viewmodel animation is synthesized from the events instead.
+  void noteEvPortal2Fire();
+
+  // Returns the weapon animation to use for the local player's viewmodel,
+  // or 'weapAnim' if no synthesized animation is running.
+  // 'animDuration' is the length of a single attack animation in milliseconds.
+  [[nodiscard]] int32_t adjustedWeaponAnim(int32_t weapAnim, int32_t animDuration) const;
 
   // maps old shared cvar bits to 'cgame.sharedWSKeysGlobal'
   static void parseSharedCvarBits(int32_t shared);
