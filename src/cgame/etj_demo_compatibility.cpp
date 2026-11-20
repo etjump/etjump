@@ -281,6 +281,28 @@ int DemoCompatibility::adjustedEventNum(const int event) const {
   }
 }
 
+void DemoCompatibility::noteEvPortal2Fire() {
+  // 2.1.0 and older never reached the regular fire path with '+attack2',
+  // so 'ps->weapAnim' was never updated for the secondary portal gun fire.
+  // Start the attack animation here instead, toggling the bit to restart it exactly like 'PM_StartWeaponAnim'
+  // does on every shot - a shot arriving before the previous animation finished simply restarts it.
+  // The portal gun is always out of clip, so the regular fire path picks 'WEAP_ATTACK_LASTSHOT' for it.
+  evPortal2FireAnimStart = cg.time;
+  evPortal2FireAnim      = ((evPortal2FireAnim & ANIM_TOGGLEBIT) ^ ANIM_TOGGLEBIT) | WEAP_ATTACK_LASTSHOT;
+}
+
+int32_t DemoCompatibility::adjustedWeaponAnim(const int32_t weapAnim, const int32_t animDuration) const {
+  // Hold the synthesized animation for the duration of a single attack animation,
+  // after which the demo's own weapon animation state takes over.
+  // This approximates the idle animation that the server would have set on releasing the fire button.
+  // 'animDuration' can be 0, which disables this.
+  if (!flags.adjustEvPortal2Fire || evPortal2FireAnimStart < 0 || cg.time - evPortal2FireAnimStart >= animDuration) {
+    return weapAnim;
+  }
+
+  return evPortal2FireAnim;
+}
+
 void DemoCompatibility::parseSharedCvarBits(const int32_t shared) {
   if (shared & COMPAT_SHARED_NO_OVERBOUNCE) {
     cgame.sharedWSKeysGlobal.noOverbounce = true;
