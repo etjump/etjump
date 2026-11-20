@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_demo_compatibility.h"
 #include "etj_portal_prediction.h"
 #include "etj_utilities.h"
 
@@ -2297,8 +2298,7 @@ void CG_DrawPortalGate(const entityState_t *es, const int spawnTime) {
   /* push the origin out a bit */
   VectorMA(es->origin, (-5.0f + 1.0f) /*(-12.0f + 1)*/, axis[0], pushedOrigin);
 
-  float radius =
-    !es->onFireStart ? ETJump::PORTAL_DRAW_RADIUS : static_cast<float>(es->onFireStart) * ETJump::PORTAL_DRAW_SCALAR;
+  float radius = ETJump::PORTAL_DRAW_RADIUS * ETJump::cgame.demo.compatibility->adjustedPortalScale(es->onFireStart);
 
   if (spawnTime && spawnTime + ETJump::PORTAL_SPAWN_ANIM_DURATION >= cg.time) {
     const auto elapsedTime = static_cast<float>(cg.time - spawnTime);
