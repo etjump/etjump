@@ -1442,6 +1442,44 @@ void CG_MortarMiss(centity_t *cent, vec3_t origin) {
   }
 }
 
+namespace ETJump {
+static int32_t adjustedEventNum(const entityState_t &es, const int32_t event) {
+  int32_t adjustedEvent = event;
+
+  // shift event numbers following the insertion of
+  // 'EV_GENERAL_CLIENT_SOUND_VOLUME' in the middle of entity_events_t in 2.3.0
+  if (ETJump::cgame.demo.compatibility->flags.adjustEvGeneralClientSoundVolume) {
+    if (adjustedEvent == EV_GENERAL_CLIENT_SOUND_VOLUME) {
+      adjustedEvent = EV_GLOBAL_SOUND;
+    } else if (adjustedEvent > EV_GENERAL_CLIENT_SOUND_VOLUME) {
+      adjustedEvent++;
+    }
+  }
+
+  // ETJump 2.2.0 removed 'EV_PORTAL2_FIRE', shifting every following event down by one.
+  // This must run after the shift above, which has already moved pre-2.2.0 demo events up by one:
+  // the removed event now lands exactly on 'EV_PORTAL_TELEPORT' (a no-op),
+  // while the events that followed it are one too high. Replay the removed event as a shot
+  // so that old secondary portal gun fire still plays a fire sound, and shift the rest back down.
+  // From 'EV_PORTAL_TELEPORT' onwards, the insertion and the removal cancel out.
+  if (ETJump::cgame.demo.compatibility->flags.adjustEvPortal2Fire) {
+    if (adjustedEvent == EV_PORTAL_TELEPORT) {
+      adjustedEvent = EV_FIRE_WEAPON_LASTSHOT;
+    } else if (adjustedEvent > EV_PORTAL_TELEPORT) {
+      adjustedEvent--;
+    }
+  }
+
+  // adjust freestanding events to account for any added entity types
+  // freestanding events always have an eType > ET_EVENTS
+  if (ETJump::cgame.demo.compatibility->adjustEventNums && es.eType > ET_EVENTS) {
+    adjustedEvent = ETJump::cgame.demo.compatibility->adjustedEventNum(adjustedEvent);
+  }
+
+  return adjustedEvent;
+}
+} // namespace ETJump
+
 /*
 ==============
 CG_EntityEvent
@@ -1496,20 +1534,9 @@ void CG_EntityEvent(centity_t *cent, vec3_t position) {
     clientNum = 0;
   }
 
-  // shift event numbers for 'EV_GENERAL_CLIENT_SOUND_VOLUME' due to it
-  // getting placed in the middle of entity_events_t enum in 2.3.0
-  if (ETJump::cgame.demo.compatibility->flags.adjustEvGeneralClientSoundVolume) {
-    if (event == EV_GENERAL_CLIENT_SOUND_VOLUME) {
-      event = EV_GLOBAL_SOUND;
-    } else if (event > EV_GENERAL_CLIENT_SOUND_VOLUME) {
-      event++;
-    }
-  }
-
-  // adjust freestanding events to account for any added entity types
-  // freestanding events always have an eType > ET_EVENTS
-  if (ETJump::cgame.demo.compatibility->adjustEventNums && es->eType > ET_EVENTS) {
-    event = ETJump::cgame.demo.compatibility->adjustedEventNum(event);
+  // apply any demo compatibility adjustments required
+  if (cg.demoPlayback) {
+    event = ETJump::adjustedEventNum(*es, event);
   }
 
   if (event == EV_CUSHIONFALLSTEP) {

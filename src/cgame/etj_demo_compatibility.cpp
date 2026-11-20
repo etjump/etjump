@@ -129,6 +129,11 @@ void DemoCompatibility::setupCompatibilityFlags() {
     adjustEventNums = true;
   }
 
+  if (!isCompatible({2, 2, 0})) {
+    flags.adjustEvPortal2Fire = true;
+    compatibilityStrings.emplace_back("Adjusted event indices for removal of EV_PORTAL2_FIRE");
+  }
+
   if (!isCompatible({2, 3, 0})) {
     flags.adjustEvGeneralClientSoundVolume = true;
     compatibilityStrings.emplace_back("Adjusted event indices for EV_GENERAL_CLIENT_SOUND_VOLUME");
