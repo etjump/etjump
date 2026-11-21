@@ -1,3 +1,11 @@
+# ETJump 3.7.1
+
+## Fixed
+* portalgun could sometimes fire first portal when trying to fire second portal [#2051](https://github.com/etjump/etjump/pull/2051)
+* `record-details`, `listcheckpoints` and `comparecheckpoints` could not target runs that were tied with another run [#2054](https://github.com/etjump/etjump/pull/2054)
+* `remove-segment` command allowed partial matching of parameters [#2053](https://github.com/etjump/etjump/pull/2053)
+* several demo compatibility issues with portalgun [#2055](https://github.com/etjump/etjump/pull/2055)
+
 # ETJump 3.7.0
 
 ## Added
