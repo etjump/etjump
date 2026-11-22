@@ -2664,12 +2664,14 @@ void BG_CalculateSpline_r(splinePath_t *spline, vec3_t out1, vec3_t out2, float 
   for (i = 0; i < spline->numControls; i++) {
     VectorCopy(spline->controls[i].origin, points[i + 1]);
   }
+
   if (!spline->next) {
+    // spline end point or a broken spline - copy point's own origin so callers don't read uninitialized values
+    VectorCopy(spline->point.origin, out1);
+    VectorCopy(spline->point.origin, out2);
     return;
-    //		Com_Error( ERR_DROP, "Spline (%s) with no target
-    // referenced",
-    // spline->point.name );
   }
+
   VectorCopy(spline->next->point.origin, points[i + 1]);
 
   while (count > 2) {
