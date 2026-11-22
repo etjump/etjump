@@ -140,12 +140,16 @@ void FuncStaticClient::pain(gentity_t *self, gentity_t *attacker, [[maybe_unused
   G_UseTargets(self, self->activator);
 }
 
-void FuncStaticClient::turnOn(gentity_t *self, const int32_t clientNum) {
-  if (clientNum < MAX_CLIENTS / 2) {
-    COM_BitClear(&self->s.effect1Time, clientNum);
+void FuncStaticClient::reset(gentity_t *self, const int32_t clientNum) {
+  if (self->spawnflags & Spawnflags::START_INVIS) {
+    turnOffForClient(self, clientNum);
   } else {
-    COM_BitClear(&self->s.effect2Time, clientNum);
+    turnOnForClient(self, clientNum);
   }
+}
+
+void FuncStaticClient::turnOn(gentity_t *self, const int32_t clientNum) {
+  turnOnForClient(self, clientNum);
 
   if (self->spawnflags & Spawnflags::GIB_INSIDE && activatorIsInsideEnt(self, clientNum)) {
     G_Damage(g_entities + clientNum, self, self, nullptr, nullptr, 9999, DAMAGE_NO_PROTECTION, MOD_CRUSH);
@@ -161,14 +165,26 @@ void FuncStaticClient::turnOn(gentity_t *self, const int32_t clientNum) {
 }
 
 void FuncStaticClient::turnOff(gentity_t *self, const int32_t clientNum) {
+  turnOffForClient(self, clientNum);
+
+  if (self->scriptName) {
+    scriptEvent(self, "disabled");
+  }
+}
+
+void FuncStaticClient::turnOffForClient(gentity_t *self, int32_t clientNum) {
   if (clientNum < MAX_CLIENTS / 2) {
     COM_BitSet(&self->s.effect1Time, clientNum);
   } else {
     COM_BitSet(&self->s.effect2Time, clientNum);
   }
+}
 
-  if (self->scriptName) {
-    scriptEvent(self, "disabled");
+void FuncStaticClient::turnOnForClient(gentity_t *self, int32_t clientNum) {
+  if (clientNum < MAX_CLIENTS / 2) {
+    COM_BitClear(&self->s.effect1Time, clientNum);
+  } else {
+    COM_BitClear(&self->s.effect2Time, clientNum);
   }
 }
 

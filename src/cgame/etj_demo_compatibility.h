@@ -75,6 +75,10 @@ class DemoCompatibility {
   // stores the strings to print for compatibility info
   std::vector<std::string> compatibilityStrings;
 
+  // synthesized viewmodel animation for pre-2.2.0 'EV_PORTAL2_FIRE' events
+  int32_t evPortal2FireAnimStart = -1;
+  int32_t evPortal2FireAnim      = 0;
+
   std::shared_ptr<ClientCommandsHandler> consoleCommands;
 
 public:
@@ -98,6 +102,8 @@ public:
     bool adjustEvFuncStaticClient             = false;
     bool oldShaderIndexOrder                  = false;
     bool useSharedCvar                        = false;
+    bool adjustEvPortal2Fire                  = false;
+    bool oldPortalSize                        = false;
   };
 
   // everything in here will be set to false unless we're on demo playback
@@ -111,6 +117,20 @@ public:
   // performs event number adjustments for events that are added freestanding
   // by setting event num to ET_EVENTS + event due to additional entity types
   [[nodiscard]] int adjustedEventNum(int event) const;
+
+  // Pre-2.2.0 demos only carry 'EV_PORTAL2_FIRE' for the secondary portal gun fire,
+  // and never set 'ps->weapAnim' for it, so the viewmodel animation is synthesized from the events instead.
+  void noteEvPortal2Fire();
+
+  // Returns the weapon animation to use for the local player's viewmodel,
+  // or 'weapAnim' if no synthesized animation is running.
+  // 'animDuration' is the length of a single attack animation in milliseconds.
+  [[nodiscard]] int32_t adjustedWeaponAnim(int32_t weapAnim, int32_t animDuration) const;
+
+  // Portal entities store their size in 'onFireStart', but the encoding changed in 3.4.0,
+  // so derive the scale using the encoding the demo was recorded with.
+  // Returns 1.0 if no size is set.
+  [[nodiscard]] float adjustedPortalScale(int32_t onFireStart) const;
 
   // maps old shared cvar bits to 'cgame.sharedWSKeysGlobal'
   static void parseSharedCvarBits(int32_t shared);

@@ -1,3 +1,13 @@
+# ETJump 3.7.1
+
+## Fixed
+* portalgun could sometimes fire first portal when trying to fire second portal [#2051](https://github.com/etjump/etjump/pull/2051)
+* `func_static_client` state could persist to unrelated players after another player disconnected [#2057](https://github.com/etjump/etjump/pull/2057)
+* `record-details`, `listcheckpoints` and `comparecheckpoints` could not target runs that were tied with another run [#2054](https://github.com/etjump/etjump/pull/2054)
+* `remove-segment` command allowed partial matching of parameters [#2053](https://github.com/etjump/etjump/pull/2053)
+* several demo compatibility issues with portalgun [#2055](https://github.com/etjump/etjump/pull/2055)
+* unpredictable behavior when targeting a spline point with no target using `followspline` [#2056](https://github.com/etjump/etjump/pull/2056)
+
 # ETJump 3.7.0
 
 ## Added

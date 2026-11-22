@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "cg_local.h"
+#include "etj_demo_compatibility.h"
 #include "etj_portal_prediction.h"
 #include "etj_trace_utils.h"
 #include "etj_utilities.h"
@@ -602,7 +603,7 @@ static void touchPortal(const entityState_t &es, const vec3_t origin, int &lastR
   // fields which we could use to transmit mins/maxs
   // 'onFireStart' contains the portal size, which might be adjusted
   // by 'func_portaltarget', so derive scale from that
-  const float scale = PortalgunShared::scaleFromSize(es.onFireStart);
+  const float scale = ETJump::cgame.demo.compatibility->adjustedPortalScale(es.onFireStart);
   EntityUtilsShared::setPortalBBox(mins, maxs, es.angles, scale);
 
   VectorAdd(origin, mins, mins);

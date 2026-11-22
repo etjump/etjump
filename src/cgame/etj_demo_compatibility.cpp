@@ -27,6 +27,7 @@
 #include "cg_local.h"
 #include "etj_client_commands_handler.h"
 
+#include "../game/etj_portalgun_shared.h"
 #include "../game/etj_string_utilities.h"
 
 namespace ETJump {
@@ -129,6 +130,11 @@ void DemoCompatibility::setupCompatibilityFlags() {
     adjustEventNums = true;
   }
 
+  if (!isCompatible({2, 2, 0})) {
+    flags.adjustEvPortal2Fire = true;
+    compatibilityStrings.emplace_back("Adjusted event indices for removal of EV_PORTAL2_FIRE");
+  }
+
   if (!isCompatible({2, 3, 0})) {
     flags.adjustEvGeneralClientSoundVolume = true;
     compatibilityStrings.emplace_back("Adjusted event indices for EV_GENERAL_CLIENT_SOUND_VOLUME");
@@ -172,6 +178,9 @@ void DemoCompatibility::setupCompatibilityFlags() {
 
     flags.setAttack2FiringFlag = true;
     compatibilityStrings.emplace_back("Faking EF_FIRING state for '+attack2' shooting");
+
+    flags.oldPortalSize = true;
+    compatibilityStrings.emplace_back("Using old portal size encoding");
   }
 
   if (!isCompatible({3, 5, 0})) {
@@ -274,6 +283,41 @@ int DemoCompatibility::adjustedEventNum(const int event) const {
     default:
       return event;
   }
+}
+
+void DemoCompatibility::noteEvPortal2Fire() {
+  // 2.1.0 and older never reached the regular fire path with '+attack2',
+  // so 'ps->weapAnim' was never updated for the secondary portal gun fire.
+  // Start the attack animation here instead, toggling the bit to restart it exactly like 'PM_StartWeaponAnim'
+  // does on every shot - a shot arriving before the previous animation finished simply restarts it.
+  // The portal gun is always out of clip, so the regular fire path picks 'WEAP_ATTACK_LASTSHOT' for it.
+  evPortal2FireAnimStart = cg.time;
+  evPortal2FireAnim      = ((evPortal2FireAnim & ANIM_TOGGLEBIT) ^ ANIM_TOGGLEBIT) | WEAP_ATTACK_LASTSHOT;
+}
+
+int32_t DemoCompatibility::adjustedWeaponAnim(const int32_t weapAnim, const int32_t animDuration) const {
+  // Hold the synthesized animation for the duration of a single attack animation,
+  // after which the demo's own weapon animation state takes over.
+  // This approximates the idle animation that the server would have set on releasing the fire button.
+  // 'animDuration' can be 0, which disables this.
+  if (!flags.adjustEvPortal2Fire || evPortal2FireAnimStart < 0 || cg.time - evPortal2FireAnimStart >= animDuration) {
+    return weapAnim;
+  }
+
+  return evPortal2FireAnim;
+}
+
+float DemoCompatibility::adjustedPortalScale(const int32_t onFireStart) const {
+  // no size set, use the default portal size
+  if (!onFireStart) {
+    return 1.0f;
+  }
+
+  // 3.3.4 and older stored the portal shader draw radius (48 = default size) in 'onFireStart',
+  // while 3.4.0 changed it to store the bbox diameter (60 = default size).
+  // The same value therefore needs a different divisor.
+  const float size = flags.oldPortalSize ? PORTAL_DRAW_RADIUS : PORTAL_BBOX_RADIUS * 2;
+  return static_cast<float>(onFireStart) / size;
 }
 
 void DemoCompatibility::parseSharedCvarBits(const int32_t shared) {
