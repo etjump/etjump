@@ -5,6 +5,7 @@
 #include "etj_deathrun_system.h"
 #include "etj_entity_utilities.h"
 #include "etj_fatal_error_shared.h"
+#include "etj_func_static_client.h"
 #include "etj_game_failure.h"
 #include "etj_printer.h"
 #include "etj_progression_tracker.h"
@@ -2006,6 +2007,8 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   // Reset the amount of timerun timers
   level.timerunNamesCount = 0;
   ETJump::TimerunEntity::resetTimerunIndices();
+
+  ETJump::FuncStaticClient::clearSavedStates();
 
   // before mapscript is loaded, so remapshaders from mapscripts work properly
   ETJump::shaderConfigHandler = std::make_unique<ETJump::ShaderConfigHandler>();

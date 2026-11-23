@@ -2621,15 +2621,6 @@ void ClientDisconnect(int clientNum) {
 
   ETJump::EntityUtilities::clearPortals(ent);
 
-  // reset 'func_static_client' entities back to their original state for this clientNum,
-  // so the state does not potentially carry over to other clients who may reuse this client slot
-  for (i = MAX_CLIENTS; i < level.num_entities; i++) {
-    gentity_t *e = &g_entities[i];
-
-    if (!e || e->s.eType != ET_STATIC_CLIENT) {
-      continue;
-    }
-
-    ETJump::FuncStaticClient::reset(e, clientNum);
-  }
+  ETJump::FuncStaticClient::saveStatesForClient(ent);
+  ETJump::FuncStaticClient::resetEntsForClient(clientNum);
 }

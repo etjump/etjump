@@ -28,6 +28,7 @@
 #include <iostream>
 #include <utility>
 
+#include "etj_func_static_client.h"
 #include "etj_levels.h"
 #include "etj_printer.h"
 #include "etj_progression_tracker.h"
@@ -144,6 +145,7 @@ void Session::OnGuidReceived(gentity_t *ent) {
   }
 
   ETJump::progressionTrackers->restoreClientProgression(ent);
+  ETJump::FuncStaticClient::restoreStatesForClient(ent);
 }
 
 bool Session::GuidReceived(gentity_t *ent) {
