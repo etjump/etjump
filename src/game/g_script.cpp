@@ -129,6 +129,8 @@ qboolean wmAnnouncePrivate(gentity_t *ent, char *params);
 qboolean tracker(gentity_t *ent, char *params);
 qboolean changeSkin(gentity_t *ent, char *params);
 qboolean editEntity(gentity_t *ent, char *params);
+
+qboolean setVisibility(gentity_t *ent, char *params);
 } // namespace ETJump::ScriptActions
 
 // these are the actions that each event can call
@@ -246,6 +248,8 @@ g_script_stack_action_t gScriptActions[] = {
   {"tracker",                        ETJump::ScriptActions::tracker              },
   {"changeskin",                     ETJump::ScriptActions::changeSkin           },
   {"editentity",                     ETJump::ScriptActions::editEntity           },
+
+  {"setvisibility",                  ETJump::ScriptActions::setVisibility        },
   {nullptr,                          nullptr                                     }
 };
 

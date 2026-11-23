@@ -7,6 +7,7 @@
 //===========================================================================
 
 #include "etj_entity_utilities.h"
+#include "etj_func_static_client.h"
 #include "etj_printer.h"
 #include "etj_progression_tracker.h"
 #include "etj_shader_config_handler.h"
@@ -4366,6 +4367,7 @@ inline constexpr char useTargetUsage[]  = "usetarget <targetname>";
 inline constexpr char wmAnnouncePrivateUsage[] = "wm_announce_private <message>";
 inline constexpr char trackerUsage[]           = "tracker [index] <command> <value>";
 inline constexpr char changeSkinUsage[]        = "changeskin <skinfile>";
+inline constexpr char setVisibilityUsage[]     = "setvisibility <targetname> <on|off>";
 
 #define FORMAT_FUNC_NAME(x) StringUtils::format("ScriptActions::%s", x).c_str()
 
@@ -4952,6 +4954,72 @@ qboolean editEntity([[maybe_unused]] gentity_t *ent, char *params) {
   // did we actually change anything?
   if (!numChanged) {
     G_Printf("%s: no entities found matching params ^3'%s'\n", FORMAT_FUNC_NAME(__func__), matchParams.c_str());
+  }
+
+  return qtrue;
+}
+
+// this is currently used only for 'func_static_client', but the naming is generic so it may be expanded
+// in the future to work on other entities, should we add support for more entities with per-client state
+// NOTE: this is strictly different from 'setstate', as that links/unlinks the entity - this only calls
+// an entity-specific function that handles its own internal state, not a global state
+qboolean setVisibility(gentity_t *ent, char *params) {
+  if (!ent->activator || !ent->activator->client) {
+    G_Error(S_COLOR_RED "%s: activator must be a client\n", FORMAT_FUNC_NAME(__func__));
+  }
+
+  const char *pString = params;
+  const char *token   = COM_ParseExt(&pString, qfalse);
+
+  if (!token[0]) {
+    G_Error("%s: required parameter 'targetname' was not provided\n\n%s\n", FORMAT_FUNC_NAME(__func__),
+            setVisibilityUsage);
+  }
+
+  // save the targetname now before the parser stomps on it
+  const std::string targetName = token;
+  const auto hash              = static_cast<int32_t>(BG_StringHashValue(targetName.c_str()));
+
+  token = COM_ParseExt(&pString, qfalse);
+  if (!token[0]) {
+    G_Error("%s: no state provided\n\n%s\n", FORMAT_FUNC_NAME(__func__), setVisibilityUsage);
+  }
+
+  bool hide{};
+
+  if (!Q_stricmp(token, "on")) {
+    hide = false;
+  } else if (!Q_stricmp(token, "off")) {
+    hide = true;
+  } else {
+    G_Error("%s: invalid state '%s'\n\n%s\n", FORMAT_FUNC_NAME(__func__), token, setVisibilityUsage);
+  }
+
+  gentity_t *target{};
+  bool found = false;
+
+  while (true) {
+    target = G_FindByTargetnameFast(target, targetName.c_str(), hash);
+
+    if (!target) {
+      if (!found) {
+        G_Printf(S_COLOR_YELLOW "WARNING: 'setvisibility' called but no entities found with targetname '%s'\n",
+                 targetName.c_str());
+      }
+
+      break;
+    }
+
+    found = true;
+
+    if (target->s.eType != ET_STATIC_CLIENT) {
+      G_Printf(S_COLOR_YELLOW "WARNING: 'setvisibility' on '%s' is not supported\n", target->classname);
+      continue;
+    }
+
+    // forward the activator to the entity since we're not directly activating it
+    target->activator = ent->activator;
+    FuncStaticClient::forceVisibility(target, target->activator, hide);
   }
 
   return qtrue;
