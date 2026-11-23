@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "g_local.h"
 
 namespace ETJump {
@@ -37,6 +39,7 @@ public:
     static constexpr int32_t FT_TEAMJUMP_SYNC = 1 << 3;
     static constexpr int32_t CONSUME_PORTALS  = 1 << 4;
     static constexpr int32_t PORTAL_TARGET    = 1 << 5;
+    static constexpr int32_t RETAIN_STATE     = 1 << 6;
   };
 
   static void spawn(gentity_t *ent);
@@ -46,7 +49,17 @@ public:
   static void reset(gentity_t *self, int32_t clientNum);
   static void syncToFireteamLeaderState(int32_t clientNum, int32_t leaderNum);
 
+  static void saveStatesForClient(const gentity_t *client);
+  static void resetEntsForClient(int32_t clientNum);
+  static void restoreStatesForClient(const gentity_t *client);
+  static void clearSavedStates();
+
 private:
+  struct State {
+    int32_t entityNum;
+    bool hidden;
+  };
+
   static void turnOn(gentity_t *self, int32_t clientNum);
   static void turnOff(gentity_t *self, int32_t clientNum);
   static void turnOffForClient(gentity_t *self, int32_t clientNum);
@@ -54,5 +67,8 @@ private:
   static bool activatorIsInsideEnt(const gentity_t *self, int32_t clientNum);
   static void deleteTouchingPortals(const gentity_t *self, int32_t clientNum);
   static void scriptEvent(gentity_t *self, const char *trigger);
+
+  // stores the state for each entity on client disconnect, if 'RETAIN_STATE' spawnflag is set
+  static std::unordered_map<std::string, std::vector<State>> funcStaticClientSessionState;
 };
 } // namespace ETJump

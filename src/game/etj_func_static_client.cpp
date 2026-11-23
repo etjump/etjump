@@ -25,12 +25,16 @@
 #include "etj_func_static_client.h"
 
 #include <algorithm>
+#include <stdexcept>
 
 #include "etj_entity_utilities.h"
 #include "etj_entity_utilities_shared.h"
 #include "etj_portalgun_shared.h"
+#include "etj_session.h"
 
 namespace ETJump {
+std::unordered_map<std::string, std::vector<FuncStaticClient::State>> FuncStaticClient::funcStaticClientSessionState;
+
 /*
  * 'ent->s.effect1Time' and 'ent->s.effect2Time' are treated as boolean
  * bitsets by this entity. Clients 0-31 map to 'effect1Time',
@@ -255,5 +259,82 @@ void FuncStaticClient::scriptEvent(gentity_t *self, const char *trigger) {
   } else {
     G_Script_ScriptEvent(self, trigger, nullptr);
   }
+}
+
+void FuncStaticClient::saveStatesForClient(const gentity_t *client) {
+  const int32_t clientNum = ClientNum(client);
+  const std::string guid  = session->Guid(client);
+
+  // shouldn't happen
+  if (guid.empty()) {
+    G_Printf(S_COLOR_YELLOW "Failed to save 'func_static_client' state for client %i - empty GUID\n", clientNum);
+    return;
+  }
+
+  // clear existing states from this map, if any are present
+  funcStaticClientSessionState[guid].clear();
+
+  gentity_t *ent = &g_entities[MAX_CLIENTS + BODY_QUEUE_SIZE];
+
+  for (int32_t i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; i++, ent++) {
+    if (ent->s.eType != ET_STATIC_CLIENT) {
+      continue;
+    }
+
+    if (!(ent->spawnflags & Spawnflags::RETAIN_STATE)) {
+      continue;
+    }
+
+    funcStaticClientSessionState[guid].push_back(
+      {ent->s.number, EntityUtilsShared::funcStaticClientIsHidden(&ent->s, clientNum)});
+  }
+}
+
+void FuncStaticClient::resetEntsForClient(int32_t clientNum) {
+  gentity_t *ent = &g_entities[MAX_CLIENTS + BODY_QUEUE_SIZE];
+
+  for (int32_t i = MAX_CLIENTS + BODY_QUEUE_SIZE; i < level.num_entities; i++, ent++) {
+    if (ent->s.eType != ET_STATIC_CLIENT) {
+      continue;
+    }
+
+    reset(ent, clientNum);
+  }
+}
+
+void FuncStaticClient::restoreStatesForClient(const gentity_t *client) {
+  const int32_t clientNum = ClientNum(client);
+  const std::string guid  = session->Guid(client);
+
+  // shouldn't happen
+  if (guid.empty()) {
+    G_Printf(S_COLOR_YELLOW "Failed to restore 'func_static_client' state for client %i - empty GUID\n", clientNum);
+    return;
+  }
+
+  try {
+    const auto &states = funcStaticClientSessionState.at(guid);
+
+    for (const auto &state : states) {
+      gentity_t *ent = &g_entities[state.entityNum];
+
+      if (ent->s.eType != ET_STATIC_CLIENT) {
+        continue;
+      }
+
+      if (state.hidden) {
+        turnOffForClient(ent, clientNum);
+      } else {
+        turnOnForClient(ent, clientNum);
+      }
+    }
+  } catch (std::out_of_range &) {
+    // client has no saved states (no-op)
+    return;
+  }
+}
+
+void FuncStaticClient::clearSavedStates() {
+  funcStaticClientSessionState.clear();
 }
 } // namespace ETJump
