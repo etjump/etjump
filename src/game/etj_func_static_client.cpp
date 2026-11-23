@@ -140,6 +140,23 @@ void FuncStaticClient::pain(gentity_t *self, gentity_t *attacker, [[maybe_unused
   G_UseTargets(self, self->activator);
 }
 
+void FuncStaticClient::forceVisibility(gentity_t *self, gentity_t *activator, bool hide) {
+  const int32_t clientNum = ClientNum(activator);
+  const bool hidden       = EntityUtilsShared::funcStaticClientIsHidden(&self->s, clientNum);
+
+  // make sure this is a no-op if the entity is already in the requested state,
+  // so we don't re-trigger script events for example
+  if (hide) {
+    if (!hidden) {
+      turnOff(self, clientNum);
+    }
+  } else {
+    if (hidden) {
+      turnOn(self, clientNum);
+    }
+  }
+}
+
 void FuncStaticClient::reset(gentity_t *self, const int32_t clientNum) {
   if (self->spawnflags & Spawnflags::START_INVIS) {
     turnOffForClient(self, clientNum);
