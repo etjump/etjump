@@ -221,7 +221,7 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
   }
 
   // it's very likely that vendorExt contains trailing null bytes
-  while (vendorExt.back() == '\0') {
+  while (!vendorExt.empty() && vendorExt.back() == '\0') {
     vendorExt.pop_back();
   }
 

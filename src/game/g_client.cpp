@@ -1732,7 +1732,8 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
   gentity_t *ent;
   int connPerIP = 1, i = 0;
   int clientNum2 = -1;
-  char ip[20] = "\0", ip2[20] = "\0";
+  // large enough for IPv6 addresses (INET6_ADDRSTRLEN is 46)
+  char ip[64] = "\0", ip2[64] = "\0";
   char userinfo2[MAX_INFO_STRING] = "\0";
 
   ent = &g_entities[clientNum];
@@ -1741,9 +1742,7 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
 
 // Zero: has to be here because else it'll reset the ip we'll
 // set a bit later
-#ifdef NEW_AUTH
-  game.sessionV2->onClientConnect(clientNum, firstTime);
-#else
+#ifndef NEW_AUTH
   OnClientConnect(clientNum, firstTime, isBot);
 #endif
 
@@ -1823,6 +1822,13 @@ const char *ClientConnect(int clientNum, qboolean firstTime, qboolean isBot) {
     // disconnect
     ClientDisconnect(clientNum);
   }
+
+#ifdef NEW_AUTH
+  // after the forced disconnect above, which would otherwise reset the
+  // session state we set here, and after any rejection, so no session
+  // work gets queued for connections that never happen
+  game.sessionV2->onClientConnect(clientNum, firstTime);
+#endif
 
   // they can connect
   ent->client = level.clients + clientNum;

@@ -49,10 +49,11 @@ SessionV2::SessionV2(std::unique_ptr<UserRepository> userRepository, std::unique
 }
 
 SessionV2::~SessionV2() {
+  // stop the workers first, queued tasks still use the repository and logger
+  sc->stopWorkerThreads();
+  sc         = nullptr;
   repository = nullptr;
   logger     = nullptr;
-  sc->stopWorkerThreads();
-  sc = nullptr;
 }
 
 void SessionV2::runFrame() {
@@ -80,9 +81,7 @@ void SessionV2::initClientSession(const int clientNum) {
     clients[clientNum].ipv6 = ip;
   }
 
-  time_t t;
-  t                                   = std::time(&t);
-  clients[clientNum].sessionStartTime = t;
+  clients[clientNum].sessionStartTime = std::time(nullptr);
 }
 
 void SessionV2::resetClient(const int clientNum) {
@@ -208,6 +207,11 @@ bool SessionV2::authenticate(const gentity_t *ent) {
   const std::string invalidResponse =
     StringUtils::format("authentication: Invalid response from %i %s (%s)", clientNum, cleanName, getIP(clientNum));
 
+  // already authenticated (or in progress), don't let the identity be swapped mid-session
+  if (!clients[clientNum].guid.empty()) {
+    return true;
+  }
+
   // auth response is 'auth <GUID> <OS> <HWIDs>'
   // the amount of HWIDs is dependent on OS
   char osBuf[8]{};
@@ -230,7 +234,11 @@ bool SessionV2::authenticate(const gentity_t *ent) {
       numHWIDs = Constants::Authentication::HWID_SIZE_MAC;
       break;
     default:
-      break;
+      // would otherwise authenticate with no HWID at all
+      Printer::logAdminLn(invalidResponse);
+      Printer::logAdminLn(
+        StringUtils::format("authentication: Unknown platform '%s' from client %i %s", osBuf, clientNum, cleanName));
+      return false;
   }
 
   const int NUM_EXPECTED_ARGS = 3 + numHWIDs;
@@ -485,6 +493,11 @@ void SessionV2::addNewUser(const int32_t clientNum) {
       user.ipv4 = ipv4;
       user.ipv6 = ipv6;
 
+      // repeated 'guid_migrate_fail', the user was already added
+      if (repository->getUserID(guid) != 0) {
+        return std::make_unique<AddUserResult>(0, "User already exists in the database, not adding again.");
+      }
+
       repository->addNewUser(user);
 
       // now that the user is in the db, we have a valid ID,
@@ -509,7 +522,10 @@ void SessionV2::addNewUser(const int32_t clientNum) {
       }
 
       logger->info(result->message);
-      onAuthSuccess(clientNum);
+
+      if (result->userID != 0) {
+        onAuthSuccess(clientNum);
+      }
     },
     [this, clientNum](const std::runtime_error &e) {
       logger->error("Failed to add new user: %s", e.what());
@@ -574,8 +590,7 @@ void SessionV2::updateLastSeen(const int32_t clientNum) {
     return;
   }
 
-  time_t t = 0;
-  t        = std::time(&t);
+  const time_t t = std::time(nullptr);
 
   // capture this in the lambdas, as we reset the client right after calling
   // this, so the id might not be valid if we try to use it directly
@@ -603,6 +618,12 @@ void SessionV2::updateLastSeen(const int32_t clientNum) {
 
 void SessionV2::parsePermissions(const int32_t clientNum) {
   clients[clientNum].permissions.reset();
+
+  // not authenticated yet, no permissions until onAuthSuccess sets these
+  if (!clients[clientNum].level || !clients[clientNum].user) {
+    return;
+  }
+
   // any per-user commands will override the commands defined by the level
   std::string commands = clients[clientNum].level->commands + clients[clientNum].user->commands;
   bool allow           = true;
@@ -647,6 +668,11 @@ std::bitset<MAX_COMMANDS> SessionV2::getPermissions(const gentity_t *ent) const 
 }
 
 bool SessionV2::hasPermission(const gentity_t *ent, const char flag) const {
+  // null 'ent' means console, same as getPermissions
+  if (!ent) {
+    return true;
+  }
+
   return clients[ClientNum(ent)].permissions[flag];
 }
 
@@ -731,9 +757,14 @@ void SessionV2::listUsers(const gentity_t *ent, const int32_t page) const {
         throw std::runtime_error("GetUsersResult is null.");
       }
 
+      if (r->users.empty()) {
+        Printer::chat(clientNum, "^3listusers: ^7no users found in the database.");
+        return;
+      }
+
       constexpr int32_t USERS_PER_PAGE = 20;
       const auto size                  = static_cast<uint32_t>(r->users.size());
-      const uint32_t pages             = (size / USERS_PER_PAGE) + 1;
+      const uint32_t pages             = (size + USERS_PER_PAGE - 1) / USERS_PER_PAGE;
 
       if (page < 1 || page > pages) {
         Printer::chat(clientNum, "^3listusers: ^7invalid page.");
@@ -742,7 +773,7 @@ void SessionV2::listUsers(const gentity_t *ent, const int32_t page) const {
 
       Printer::chat(clientNum, "^3listusers: ^7check console for more information.");
 
-      time_t t             = std::time(&t);
+      const time_t t       = std::time(nullptr);
       const uint32_t start = (page - 1) * USERS_PER_PAGE;
       const uint32_t end   = std::min(start + USERS_PER_PAGE, size);
 
@@ -975,7 +1006,7 @@ void SessionV2::listBans(const gentity_t *ent, const int32_t page) const {
 
       constexpr int32_t BANS_PER_PAGE = 10;
       const auto size                 = static_cast<uint32_t>(r->bans.size());
-      const uint32_t pages            = (size / BANS_PER_PAGE) + 1;
+      const uint32_t pages            = (size + BANS_PER_PAGE - 1) / BANS_PER_PAGE;
 
       if (page < 1 || page > pages) {
         Printer::chat(clientNum, "^3listbans: ^7invalid page.");
@@ -1026,6 +1057,15 @@ void SessionV2::setLevel(const gentity_t *ent, const UserModels::SetLevelParams 
     [this, clientNum, params] {
       int32_t targetUserLevel = 0;
       int32_t targetClientNum = CLIENT_NOT_CONNECTED;
+
+      // e.g. the target is still connecting, or ignored the auth request
+      if (params.targetClientNum.has_value()) {
+        const auto &target = clients[params.targetClientNum.value()];
+
+        if (!target.level || !target.user) {
+          return std::make_unique<SetLevelResult>("^3setlevel: ^7target has not finished authenticating yet.");
+        }
+      }
 
       // if 'id' is set, ensure it's a valid user
       if (params.id.has_value()) {
@@ -1414,6 +1454,13 @@ bool SessionV2::readSessionData(const int clientNum) {
     return false;
   }
 
+  // the client never authenticated before the map change (written as ""),
+  // start over so onClientBegin requests authentication
+  if (!Crypto::isValidSHA2(clients[clientNum].guid)) {
+    initClientSession(clientNum);
+    return false;
+  }
+
   const Json::Value hwid = root["hwid"];
 
   for (int i = 0; i < hwid.size(); ++i) {
@@ -1428,6 +1475,13 @@ bool SessionV2::readSessionData(const int clientNum) {
   }
 
   if (!JsonUtils::parseValue(clients[clientNum].sessionStartTime, root["sessionStartTime"], &err, "sessionStartTime")) {
+    parsingFailed();
+    return false;
+  }
+
+  // optional, session files written before this was stored don't have it
+  if (root.isMember("platform") &&
+      !JsonUtils::parseValue(clients[clientNum].platform, root["platform"], &err, "platform")) {
     parsingFailed();
     return false;
   }
@@ -1452,6 +1506,7 @@ void SessionV2::writeSessionData() const {
     }
 
     root["sessionStartTime"] = clients[clientNum].sessionStartTime;
+    root["platform"]         = clients[clientNum].platform;
 
     std::string err;
 
@@ -1562,8 +1617,12 @@ std::string SessionV2::getIP(const int32_t clientNum) const {
 }
 
 void SessionV2::checkIPBan(const int clientNum) const {
+  // copy these, the worker must not read 'clients' while the main thread changes it
+  const std::string ipv4 = clients[clientNum].ipv4;
+  const std::string ipv6 = clients[clientNum].ipv6;
+
   sc->postTask(
-    [this, clientNum] {
+    [this, ipv4, ipv6] {
       const std::vector<UserModels::BannedIPAddresses> bannedIPs = repository->getBannedIPAddresses();
 
       if (bannedIPs.empty()) {
@@ -1573,26 +1632,35 @@ void SessionV2::checkIPBan(const int clientNum) const {
       // we check for both IP addresses as we ban both last known
       // IP address (old bans won't have any IPv6 addresses though)
       for (const auto &ban : bannedIPs) {
-        if (!ban.ipv4.empty() && ban.ipv4 == clients[clientNum].ipv4) {
+        if (!ban.ipv4.empty() && ban.ipv4 == ipv4) {
           return std::make_unique<IPBanResult>(true, ban.ipv4);
         }
 
-        if (!ban.ipv6.empty() && ban.ipv6 == clients[clientNum].ipv6) {
+        if (!ban.ipv6.empty() && ban.ipv6 == ipv6) {
           return std::make_unique<IPBanResult>(true, ban.ipv6);
         }
       }
 
       return std::make_unique<IPBanResult>(false, "");
     },
-    [clientNum](std::unique_ptr<SynchronizationContext::ResultBase> ipBanResult) {
+    [this, clientNum, ipv4, ipv6](std::unique_ptr<SynchronizationContext::ResultBase> ipBanResult) {
       const auto result = dynamic_cast<IPBanResult *>(ipBanResult.get());
 
       if (result == nullptr) {
         throw std::runtime_error("IPBanResult is null.");
       }
 
+      // the client may have disconnected or been rejected while the query ran,
+      // and the slot may now belong to someone else
+      const gclient_t *client = g_entities[clientNum].client;
+
+      if (!client || client->pers.connected == CON_DISCONNECTED || clients[clientNum].ipv4 != ipv4 ||
+          clients[clientNum].ipv6 != ipv6) {
+        return;
+      }
+
       if (result->isBanned) {
-        const std::string cleanName = StringUtils::sanitize(g_entities[clientNum].client->pers.netname);
+        const std::string cleanName = StringUtils::sanitize(client->pers.netname);
         Printer::logAdminLn(StringUtils::format("authentication: Rejected connection from IP banned client %i %s (%s)",
                                                 clientNum, cleanName, result->ip));
         trap_DropClient(clientNum, "You are banned.", 0);
@@ -1625,10 +1693,10 @@ bool SessionV2::isBanned(const std::string &guid, const std::vector<std::string>
       return true;
     }
 
-    for (const auto &hwid : ban.hwids) {
+    for (const auto &bannedHwid : ban.hwids) {
       // TODO: this should not be a boolean operation
       //  https://github.com/etjump/etjump/issues/1559
-      if (userHwid == hwid) {
+      if (userHwid == bannedHwid) {
         return true;
       }
     }
@@ -1692,8 +1760,7 @@ std::string SessionV2::formatGreeting(const gentity_t *ent, const std::string &g
   const std::string lastSeenStr = lastSeen > 0 ? TimeUtils::Time::fromInt(lastSeen).toDateTimeString() : "never";
   StringUtils::replaceAll(s, "[t]", lastSeenStr);
 
-  time_t t = 0;
-  t        = std::time(&t);
+  const time_t t = std::time(nullptr);
   StringUtils::replaceAll(s, "[d]", TimeStampDifferenceToString(static_cast<int32_t>(t - lastSeen)));
 
   return s;
