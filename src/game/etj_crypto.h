@@ -73,8 +73,9 @@ private:
       return false;
     }
 
+    // hashes are always uppercase hex
     for (const auto &c : hash) {
-      if (c < '0' || c > 'F') {
+      if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F'))) {
         return false;
       }
     }

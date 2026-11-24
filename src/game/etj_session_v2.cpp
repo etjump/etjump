@@ -535,26 +535,17 @@ void SessionV2::updateHWID(const int userID, const std::vector<std::string> &hwi
     const auto userHWIDs          = repository->getHWIDsForUsersPlatform(userID, platform);
     const std::string currentHWID = StringUtils::join(hwid, ",");
 
-    const auto addHWID = [&] {
-      UserModels::UserHWID hwid{};
-      hwid.userID   = userID;
-      hwid.platform = platform;
-      hwid.hwid     = currentHWID;
-      repository->addHwid(hwid);
-    };
-
-    // nothing in the database, add the current one
-    if (userHWIDs.empty()) {
-      addHWID();
-      return;
-    }
-
     // add the current one if it's not found in the database
-    for (const auto &hwid : userHWIDs) {
-      if (hwid.hwid != currentHWID) {
-        addHWID();
-        break;
-      }
+    const bool known = std::any_of(userHWIDs.cbegin(), userHWIDs.cend(), [&currentHWID](const auto &userHWID) {
+      return userHWID.hwid == currentHWID;
+    });
+
+    if (!known) {
+      UserModels::UserHWID newHWID{};
+      newHWID.userID   = userID;
+      newHWID.platform = platform;
+      newHWID.hwid     = currentHWID;
+      repository->addHwid(newHWID);
     }
   } catch (const std::exception &e) {
     logger->error("Failed to update HWID for user %i: %s", userID, e.what());
@@ -1485,11 +1476,12 @@ void SessionV2::getExpiringBansForSession() {
         throw std::runtime_error("GetBanResult is NULL.");
       }
 
-      std::time_t t = std::time(nullptr);
       expiringBans.clear();
 
+      // include bans that already expired (e.g. while the server was down),
+      // so removeExpiredBans deletes them on the next frame
       for (const auto &ban : r->bans) {
-        if (ban.expires > t) {
+        if (ban.expires > 0) {
           expiringBans.emplace_back(ban.banID, ban.expires);
         }
       }

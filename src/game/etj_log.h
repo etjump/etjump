@@ -46,7 +46,10 @@ public:
     println("error", StringUtils::format(format, fargs...));
   }
 
+// only for qagame, so tests can run without linking with q_shared.cpp
+#ifdef GAMEDLL
   static void processMessages();
+#endif
 
 private:
   std::string _name;
