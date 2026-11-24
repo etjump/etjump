@@ -40,13 +40,13 @@ void GameFailure::activate(const char *errorMessage, const bool unexpected, cons
   std::snprintf(denialMessage.data(), denialMessage.size(), "%s",
                 unexpected ? GAME_FAILURE_GENERIC_DENIAL : errorMessage);
 
-  // the engine sends the reason as 'disconnect "<reason>"', so quotes and
-  // line breaks would cut it short, and some clients use it as a format
-  // string, so a '%' could crash them
+  // the engine sends the reason as 'disconnect "<reason>"', so a quote would truncate it,
+  // and vanilla ET clients pass the reason back to 'Com_Error' as the format string,
+  // so a '%' could crash them.
   for (char *c = denialMessage.data(); *c; ++c) {
     if (*c == '"') {
       *c = '\'';
-    } else if (*c == '\n' || *c == '\r' || *c == '%') {
+    } else if (*c == '%') {
       *c = ' ';
     }
   }
