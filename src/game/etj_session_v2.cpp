@@ -498,6 +498,12 @@ void SessionV2::addNewUser(const int32_t clientNum) {
         return std::make_unique<AddUserResult>(0, "User already exists in the database, not adding again.");
       }
 
+      // a new GUID is the first thing a banned player gets by deleting their
+      // auth files, so the HWID must be checked before registering it
+      if (isBanned(guid, hwid, 0)) {
+        return std::make_unique<AddUserResult>(0, "Refusing to add a banned client as a new user.", true);
+      }
+
       repository->addNewUser(user);
 
       // now that the user is in the db, we have a valid ID,
@@ -522,6 +528,11 @@ void SessionV2::addNewUser(const int32_t clientNum) {
       }
 
       logger->info(result->message);
+
+      if (result->isBanned) {
+        dropBannedClient(clientNum);
+        return;
+      }
 
       if (result->userID != 0) {
         onAuthSuccess(clientNum);
