@@ -35,6 +35,7 @@
 
   #ifdef NEW_AUTH
     #include <array>
+    #include <intrin.h>
     #include <iphlpapi.h>
     #pragma comment(lib, "IPHLPAPI.lib")
 
@@ -438,7 +439,7 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
 std::string ETJump::OperatingSystem::getSystemUUID() {
   const auto uuid = getWMIProperty(L"Win32_ComputerSystemProduct", L"UUID");
 
-  if (StringUtils::iEqual(uuid, NO_HWID)) {
+  if (StringUtils::iEqual(uuid, NOHWID)) {
     return NOHWID_SYS_UUID;
   }
 
@@ -448,7 +449,7 @@ std::string ETJump::OperatingSystem::getSystemUUID() {
 std::string ETJump::OperatingSystem::getMBSerial() {
   const auto mbSerial = getWMIProperty(L"Win32_BaseBoard", L"SerialNumber");
 
-  if (StringUtils::iEqual(mbSerial, NO_HWID)) {
+  if (StringUtils::iEqual(mbSerial, NOHWID)) {
     return NOHWID_MB_SERIAL;
   }
 
@@ -466,7 +467,7 @@ std::string ETJump::OperatingSystem::getWMIProperty(const std::wstring &wmiClass
   IEnumWbemClassObject *pEnum = nullptr;
 
   const std::wstring wmiQuery = L"SELECT * FROM " + wmiClass;
-  hr = pServices->ExecQuery(bstr_t("WQL"), bstr_t(wmiQuery.c_str()),
+  hr = pServices->ExecQuery(_bstr_t(L"WQL"), _bstr_t(wmiQuery.c_str()),
                             WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum);
 
   if (FAILED(hr)) {

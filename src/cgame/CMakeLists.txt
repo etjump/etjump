@@ -170,3 +170,8 @@ if(APPLE)
 	find_library(COREF_FRAMEWORK CoreFoundation REQUIRED)
 	target_link_libraries(cgame PRIVATE ${IOKIT_FRAMEWORK} ${COREF_FRAMEWORK})
 endif()
+
+if (WIN32 AND NEW_AUTH)
+	# hardware id (adapter info + WMI); MinGW ignores '#pragma comment(lib)'
+	target_link_libraries(cgame PRIVATE iphlpapi wbemuuid ole32 oleaut32)
+endif ()
