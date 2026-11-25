@@ -559,6 +559,8 @@ public:
 };
 
 void TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
+  const int32_t clientNum = params.clientNum;
+
   _sc->postTask(
     [this, params]() {
       ensureInitialized();
@@ -571,12 +573,12 @@ void TimerunV2::editSeason(const Timerun::EditSeasonParams &params) {
         return std::make_unique<EditSeasonResult>(e.what());
       }
     },
-    [params](auto r) {
+    [clientNum](auto r) {
       auto editSeasonResult = dynamic_cast<EditSeasonResult *>(r.get());
-      Printer::console(params.clientNum, editSeasonResult->message + "\n");
+      Printer::console(clientNum, editSeasonResult->message + "\n");
     },
-    [params](const std::runtime_error &e) {
-      Printer::console(params.clientNum, StringUtils::format("Unable to edit season: %s\n", e.what()));
+    [clientNum](const std::runtime_error &e) {
+      Printer::console(clientNum, StringUtils::format("Unable to edit season: %s\n", e.what()));
     });
 }
 
@@ -1015,6 +1017,8 @@ std::string TimerunV2::getRankingsStringFor(const std::vector<Ranking> *rankings
 }
 
 void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
+  const int32_t clientNum = params.clientNum;
+
   _sc->postTask(
     [this, params] {
       ensureInitialized();
@@ -1059,21 +1063,21 @@ void TimerunV2::printRankings(const Timerun::PrintRankingsParams &params) {
 
       return std::make_unique<PrintResult>(message);
     },
-    [this, params](auto r) {
+    [this, clientNum](auto r) {
       auto result = dynamic_cast<PrintResult *>(r.get());
 
       if (!result) {
         _logger->info("Unable to fetch timerun rankings for client '%d': "
                       "PrintResult is NULL",
-                      params.clientNum);
+                      clientNum);
         throw std::runtime_error("Fetching rankings failed. If the problem persists after a map "
                                  "change, please report the bug at github.com/etjump/etjump");
       }
 
-      Printer::console(params.clientNum, result->message);
+      Printer::console(clientNum, result->message);
     },
-    [params](auto e) {
-      Printer::console(params.clientNum, StringUtils::format("Unable to print rankings: %s\n", e.what()));
+    [clientNum](auto e) {
+      Printer::console(clientNum, StringUtils::format("Unable to print rankings: %s\n", e.what()));
     });
 }
 
@@ -1966,9 +1970,11 @@ public:
 
 void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
   const int32_t clientNum = params.clientNum;
+  const int32_t page      = params.page;
+  const int32_t pageSize  = params.pageSize;
   const std::string func  = __func__;
 
-  const auto task = [this, params]() {
+  const auto task = [this, params, page, pageSize]() {
     ensureInitialized();
 
     auto records = _repository->getHistoricalRecords(params);
@@ -1979,7 +1985,7 @@ void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
     for (auto &season : seasons) {
       for (auto &run : season.runs) {
         const auto total  = static_cast<int32_t>(run.records.size());
-        const auto window = getPageWindow(total, params.page, params.pageSize);
+        const auto window = getPageWindow(total, page, pageSize);
 
         run.numHidden = total - (window.end - window.start);
         run.records.erase(run.records.begin() + window.end, run.records.end());
@@ -1996,20 +2002,21 @@ void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
     return std::make_unique<RecordHistoryResult>(std::move(seasons), std::move(seasonNames));
   };
 
-  const auto callback = [this, func, params](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+  const auto callback = [this, clientNum, page, pageSize,
+                         func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
     const auto *const r = dynamic_cast<RecordHistoryResult *>(result.get());
 
     if (r == nullptr) {
       _logger->error("%s: failed to fetch historical records for client "
                      "%i: RecordHistoryResult is NULL",
-                     func, params.clientNum);
+                     func, clientNum);
       throw std::runtime_error(StringUtils::format("%s: unable to fetch historical records. This is a bug, please "
                                                    "report this to the developers.",
                                                    func));
     }
 
     if (r->seasons.empty()) {
-      Printer::console(params.clientNum, "^7No historical records found matching given parameters.\n");
+      Printer::console(clientNum, "^7No historical records found matching given parameters.\n");
       return;
     }
 
@@ -2067,8 +2074,8 @@ void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
 
         const auto total = static_cast<int32_t>(run.records.size()) + run.numHidden;
 
-        if (total > std::max(params.pageSize, 1)) {
-          const auto window = getPageWindow(total, params.page, params.pageSize);
+        if (total > std::max(pageSize, 1)) {
+          const auto window = getPageWindow(total, page, pageSize);
 
           msg += StringUtils::format("\n ^7Showing ^2%i-%i ^7of ^2%i ^7total records\n", window.start + 1, window.end,
                                      total);
@@ -2078,7 +2085,7 @@ void TimerunV2::recordHistory(const Timerun::RecordHistoryParams &params) {
       }
     }
 
-    Printer::console(params.clientNum, msg);
+    Printer::console(clientNum, msg);
   };
 
   const auto error = [clientNum](const std::runtime_error &e) {
@@ -2120,10 +2127,8 @@ void TimerunV2::removeRecord(const Timerun::RemoveRecordParams &params) {
       seasonNames[season.id] = season.name;
     }
 
-    // re-read the segment caches rather than trying to patch them, since the
-    // removal can cascade across seasons
-    const auto map     = removedRecords.empty() ? std::string{} : removedRecords.front().map;
-    auto segmentCaches = readSegmentCaches(map, params.userId);
+    // re-read the segment caches rather than trying to patch them, since the removal can cascade across seasons
+    auto segmentCaches = readSegmentCaches(removedRecords.empty() ? "" : removedRecords.front().map, params.userId);
 
     return std::make_unique<RemoveRecordResult>(std::move(removedRecords), std::move(seasonNames),
                                                 std::move(segmentCaches));
@@ -2251,7 +2256,9 @@ public:
 } // namespace
 
 void TimerunV2::listRemovedRecords(const Timerun::ListRemovedRecordsParams &params) {
-  const std::string func = __func__;
+  const int32_t clientNum = params.clientNum;
+  const int32_t callerId  = params.callerId;
+  const std::string func  = __func__;
 
   const auto task = [this, params]() {
     ensureInitialized();
@@ -2264,20 +2271,21 @@ void TimerunV2::listRemovedRecords(const Timerun::ListRemovedRecordsParams &para
     return std::make_unique<ListRemovedRecordsResult>(_repository->getRemovedRecords(params), seasonNames);
   };
 
-  const auto callback = [this, params, func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+  const auto callback = [this, clientNum, callerId,
+                         func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
     const auto *const r = dynamic_cast<ListRemovedRecordsResult *>(result.get());
 
     if (r == nullptr) {
       _logger->error("%s: failed to list removed records for client %i: "
                      "ListRemovedRecordsResult is NULL",
-                     func, params.clientNum);
+                     func, clientNum);
       throw std::runtime_error(StringUtils::format("%s: unable to list removed records. This is a bug, please "
                                                    "report this to the developers.",
                                                    func));
     }
 
     if (r->entries.empty()) {
-      Printer::console(params.clientNum, "^3list-removed-records: ^7no removed records found.\n");
+      Printer::console(clientNum, "^3list-removed-records: ^7no removed records found.\n");
       return;
     }
 
@@ -2327,7 +2335,7 @@ void TimerunV2::listRemovedRecords(const Timerun::ListRemovedRecordsParams &para
       const std::string reason = StringUtils::sanitize(base.reason.value_or("-"));
       std::string userId       = std::to_string(base.record.userId);
 
-      if (base.record.userId == params.callerId) {
+      if (base.record.userId == callerId) {
         userId += "^3*";
       }
 
@@ -2342,8 +2350,8 @@ void TimerunV2::listRemovedRecords(const Timerun::ListRemovedRecordsParams &para
         });
 
       const bool callerIsRemover =
-        std::any_of(entry.records.begin(), entry.records.end(), [&params](const Timerun::RemovedRecord &dr) {
-          return dr.removedBy == params.callerId;
+        std::any_of(entry.records.begin(), entry.records.end(), [callerId](const Timerun::RemovedRecord &dr) {
+          return dr.removedBy == callerId;
         });
 
       std::string removedById = mixedRemovedBy ? "Mixed" : std::to_string(base.removedBy);
@@ -2364,11 +2372,11 @@ void TimerunV2::listRemovedRecords(const Timerun::ListRemovedRecordsParams &para
       message += divider;
     }
 
-    Printer::console(params.clientNum, message + "\n");
+    Printer::console(clientNum, message + "\n");
   };
 
-  const auto error = [params](const std::runtime_error &e) {
-    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  const auto error = [clientNum](const std::runtime_error &e) {
+    Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
   };
 
   _sc->postTask(task, callback, error);
@@ -2388,7 +2396,9 @@ public:
 } // namespace
 
 void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
-  const std::string func = __func__;
+  const int32_t clientNum = params.clientNum;
+  const int32_t callerId  = params.callerId;
+  const std::string func  = __func__;
 
   const auto task = [this, params]() {
     ensureInitialized();
@@ -2414,13 +2424,14 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
                                                  std::move(segmentCaches));
   };
 
-  const auto callback = [this, params, func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+  const auto callback = [this, clientNum, callerId,
+                         func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
     const auto *const r = dynamic_cast<RestoreRecordResult *>(result.get());
 
     if (r == nullptr) {
       _logger->error("%s: failed to restore removed record(s) for client "
                      "%i: RestoreRecordResult is NULL",
-                     func, params.clientNum);
+                     func, clientNum);
       throw std::runtime_error(StringUtils::format("%s: unable to restore removed record(s). This is a bug, please "
                                                    "report this to the developers.",
                                                    func));
@@ -2429,11 +2440,11 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
     // any conflict will result in no changes to the database,
     // so just print an error and exit
     if (!r->result.conflicts.empty()) {
-      Printer::chat(params.clientNum,
+      Printer::chat(clientNum,
                     "^3restore-record: ^7conflicts found while trying to "
                     "restore the record%s, see console for details",
                     r->result.numTargeted == 1 ? "" : "s");
-      Printer::console(params.clientNum, buildRestoreRecordConflictMessage(r->result.conflicts, r->seasonNames));
+      Printer::console(clientNum, buildRestoreRecordConflictMessage(r->result.conflicts, r->seasonNames));
       return;
     }
 
@@ -2444,9 +2455,9 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
     const int32_t targetId = r->result.restored[0].userId;
     // because we target a single record, the ID is always the same between
     // them
-    const bool isSelfRestore = targetId == params.callerId;
+    const bool isSelfRestore = targetId == callerId;
 
-    Printer::chat(params.clientNum,
+    Printer::chat(clientNum,
                   "^3restore-record: ^7restored ^3%i ^7of ^3%i ^7requested "
                   "records%s, see console for details",
                   static_cast<int32_t>(r->result.restored.size()), r->result.numTargeted,
@@ -2454,7 +2465,7 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
 
     const std::string consoleMsg =
       buildRestoreRecordSummary(r->result.restored, r->result.swapped, r->result.skipped, r->seasonNames);
-    Printer::console(params.clientNum, consoleMsg);
+    Printer::console(clientNum, consoleMsg);
 
     // update the loaded records for the player whose record was restored,
     // if the record is from the current map
@@ -2492,8 +2503,8 @@ void TimerunV2::restoreRecord(const Timerun::RestoreRecordParams &params) {
     }
   };
 
-  const auto error = [params](const std::runtime_error &e) {
-    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  const auto error = [clientNum](const std::runtime_error &e) {
+    Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
   };
 
   _sc->postTask(task, callback, error);
@@ -2514,10 +2525,12 @@ public:
 } // namespace
 
 void TimerunV2::removeSegment(const Timerun::RemoveSegmentParams &params) {
-  const int32_t clientNum      = params.clientNum;
-  const std::string func       = __func__;
-  const bool isSelfRemoval     = params.removedBy == params.userId;
-  const std::string callerName = (g_entities + clientNum)->client->pers.netname;
+  const int32_t clientNum                 = params.clientNum;
+  const int32_t userId                    = params.userId;
+  const std::optional<std::string> reason = params.reason;
+  const std::string func                  = __func__;
+  const bool isSelfRemoval                = params.removedBy == params.userId;
+  const std::string callerName            = (g_entities + clientNum)->client->pers.netname;
 
   const auto task = [this, params]() {
     ensureInitialized();
@@ -2530,14 +2543,13 @@ void TimerunV2::removeSegment(const Timerun::RemoveSegmentParams &params) {
       seasonNames[season.id] = season.name;
     }
 
-    const auto map     = removedSegments.empty() ? std::string{} : removedSegments.front().map;
-    auto segmentCaches = readSegmentCaches(map, params.userId);
+    auto segmentCaches = readSegmentCaches(removedSegments.empty() ? "" : removedSegments.front().map, params.userId);
 
     return std::make_unique<RemoveSegmentResult>(std::move(removedSegments), std::move(seasonNames),
                                                  std::move(segmentCaches));
   };
 
-  const auto callback = [this, params, func, clientNum, isSelfRemoval,
+  const auto callback = [this, func, clientNum, userId, reason, isSelfRemoval,
                          callerName](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
     const auto *const r = dynamic_cast<RemoveSegmentResult *>(result.get());
 
@@ -2550,7 +2562,7 @@ void TimerunV2::removeSegment(const Timerun::RemoveSegmentParams &params) {
                                                    func));
     }
 
-    const int32_t targetClientNum = applySegmentCaches(r->segmentCaches, params.userId);
+    const int32_t targetClientNum = applySegmentCaches(r->segmentCaches, userId);
 
     const auto numRemoved = static_cast<int32_t>(r->removedSegments.size());
     const auto segment    = r->removedSegments.front().segment;
@@ -2559,7 +2571,7 @@ void TimerunV2::removeSegment(const Timerun::RemoveSegmentParams &params) {
       StringUtils::format("^3remove-segment: ^7removed segment ^3%i^7 from ^3%i^7 "
                           "season%s%s^7, see console for details",
                           segment, numRemoved, numRemoved == 1 ? "" : "s",
-                          isSelfRemoval ? "" : StringUtils::format(" for user ^3%i", params.userId).c_str());
+                          isSelfRemoval ? "" : StringUtils::format(" for user ^3%i", userId).c_str());
     Printer::chat(clientNum, chatMsg);
 
     std::string consoleMsg  = StringUtils::format("The following segment%s removed%s^7:\n",
@@ -2572,8 +2584,8 @@ void TimerunV2::removeSegment(const Timerun::RemoveSegmentParams &params) {
                                                   "best segments, see console for details",
                                                   numRemoved);
 
-      if (params.reason.has_value()) {
-        targetMsg += StringUtils::format(". Reason: %s", params.reason.value().c_str());
+      if (reason.has_value()) {
+        targetMsg += StringUtils::format(". Reason: %s", reason.value().c_str());
       }
 
       Printer::chat(targetClientNum, targetMsg);
@@ -2606,7 +2618,9 @@ public:
 } // namespace
 
 void TimerunV2::restoreSegment(const Timerun::RestoreSegmentParams &params) {
-  const std::string func = __func__;
+  const int32_t clientNum = params.clientNum;
+  const int32_t callerId  = params.callerId;
+  const std::string func  = __func__;
 
   const auto task = [this, params]() {
     ensureInitialized();
@@ -2630,37 +2644,38 @@ void TimerunV2::restoreSegment(const Timerun::RestoreSegmentParams &params) {
                                                   std::move(segmentCaches));
   };
 
-  const auto callback = [this, params, func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+  const auto callback = [this, clientNum, callerId,
+                         func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
     const auto *const r = dynamic_cast<RestoreSegmentResult *>(result.get());
 
     if (r == nullptr) {
       _logger->error("%s: failed to restore segment(s) for client %i: "
                      "RestoreSegmentResult is NULL",
-                     func, params.clientNum);
+                     func, clientNum);
       throw std::runtime_error(StringUtils::format("%s: unable to restore segment(s). This is a bug, please report "
                                                    "this to the developers.",
                                                    func));
     }
 
     if (!r->result.conflicts.empty()) {
-      Printer::chat(params.clientNum, StringUtils::format("^3restore-segment: ^7conflicts found while "
-                                                          "trying to restore the segment%s, see console "
-                                                          "for details",
-                                                          r->result.numTargeted == 1 ? "" : "s"));
+      Printer::chat(clientNum, StringUtils::format("^3restore-segment: ^7conflicts found while "
+                                                   "trying to restore the segment%s, see console "
+                                                   "for details",
+                                                   r->result.numTargeted == 1 ? "" : "s"));
 
-      Printer::console(params.clientNum, buildRestoreSegmentConflictMessage(r->result.conflicts, r->seasonNames));
+      Printer::console(clientNum, buildRestoreSegmentConflictMessage(r->result.conflicts, r->seasonNames));
       return;
     }
 
     if (r->result.restored.empty()) {
-      Printer::console(params.clientNum, "^3restore-segment: ^7nothing was restored.\n");
+      Printer::console(clientNum, "^3restore-segment: ^7nothing was restored.\n");
       return;
     }
 
     const auto &target       = r->result.restored.front();
     const auto numRestored   = static_cast<int32_t>(r->result.restored.size());
     const auto numSwapped    = static_cast<int32_t>(r->result.swapped.size());
-    const bool isSelfRestore = target.userId == params.callerId;
+    const bool isSelfRestore = target.userId == callerId;
 
     const int32_t targetClientNum = applySegmentCaches(r->segmentCaches, target.userId);
 
@@ -2677,11 +2692,11 @@ void TimerunV2::restoreSegment(const Timerun::RestoreSegmentParams &params) {
     }
 
     chatMsg += "^7, see console for details";
-    Printer::chat(params.clientNum, chatMsg);
+    Printer::chat(clientNum, chatMsg);
 
     const std::string consoleMsg =
       buildRestoreSegmentSummary(r->result.restored, r->result.swapped, r->result.skipped, r->seasonNames);
-    Printer::console(params.clientNum, consoleMsg);
+    Printer::console(clientNum, consoleMsg);
 
     if (!isSelfRestore && targetClientNum >= 0) {
       Printer::chat(targetClientNum, StringUtils::format("^3restore-segment: ^7an administrator has "
@@ -2692,8 +2707,8 @@ void TimerunV2::restoreSegment(const Timerun::RestoreSegmentParams &params) {
     }
   };
 
-  const auto error = [params](const std::runtime_error &e) {
-    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  const auto error = [clientNum](const std::runtime_error &e) {
+    Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
   };
 
   _sc->postTask(task, callback, error);
@@ -2711,7 +2726,9 @@ public:
 } // namespace
 
 void TimerunV2::listRemovedSegments(const Timerun::ListRemovedSegmentsParams &params) {
-  const std::string func = __func__;
+  const int32_t clientNum = params.clientNum;
+  const int32_t callerId  = params.callerId;
+  const std::string func  = __func__;
 
   const auto task = [this, params]() {
     ensureInitialized();
@@ -2724,20 +2741,21 @@ void TimerunV2::listRemovedSegments(const Timerun::ListRemovedSegmentsParams &pa
     return std::make_unique<ListRemovedSegmentsResult>(_repository->getRemovedSegments(params), std::move(seasonNames));
   };
 
-  const auto callback = [this, params, func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
+  const auto callback = [this, clientNum, callerId,
+                         func](const std::unique_ptr<SynchronizationContext::ResultBase> result) {
     const auto *const r = dynamic_cast<ListRemovedSegmentsResult *>(result.get());
 
     if (r == nullptr) {
       _logger->error("%s: failed to list removed segments for client %i: "
                      "ListRemovedSegmentsResult is NULL",
-                     func, params.clientNum);
+                     func, clientNum);
       throw std::runtime_error(StringUtils::format("%s: unable to list removed segments. This is a bug, please report "
                                                    "this to the developers.",
                                                    func));
     }
 
     if (r->page.entries.empty()) {
-      Printer::console(params.clientNum, "^3list-removed-segments: ^7no removed segments found.\n");
+      Printer::console(clientNum, "^3list-removed-segments: ^7no removed segments found.\n");
       return;
     }
 
@@ -2770,7 +2788,7 @@ void TimerunV2::listRemovedSegments(const Timerun::ListRemovedSegmentsParams &pa
 
       std::string userId = std::to_string(base.userId);
 
-      if (base.userId == params.callerId) {
+      if (base.userId == callerId) {
         userId += "^3*";
       }
 
@@ -2780,8 +2798,8 @@ void TimerunV2::listRemovedSegments(const Timerun::ListRemovedSegmentsParams &pa
         });
 
       const bool callerIsRemover =
-        std::any_of(entry.segments.begin(), entry.segments.end(), [&params](const Timerun::RemovedSegment &s) {
-          return s.removedBy == params.callerId;
+        std::any_of(entry.segments.begin(), entry.segments.end(), [callerId](const Timerun::RemovedSegment &s) {
+          return s.removedBy == callerId;
         });
 
       std::string removedById = mixedRemovedBy ? "Mixed" : std::to_string(base.removedBy);
@@ -2813,11 +2831,11 @@ void TimerunV2::listRemovedSegments(const Timerun::ListRemovedSegmentsParams &pa
       message += DIVIDER;
     }
 
-    Printer::console(params.clientNum, message + "\n");
+    Printer::console(clientNum, message + "\n");
   };
 
-  const auto error = [params](const std::runtime_error &e) {
-    Printer::console(params.clientNum, StringUtils::format("%s\n", e.what()));
+  const auto error = [clientNum](const std::runtime_error &e) {
+    Printer::console(clientNum, StringUtils::format("%s\n", e.what()));
   };
 
   _sc->postTask(task, callback, error);
@@ -2998,13 +3016,13 @@ std::string TimerunV2::buildRestoreRecordConflictMessage(const std::vector<Timer
   std::vector<std::vector<ConflictComparisonRow>> groups;
 
   for (const auto &[existing, toRestore] : conflicts) {
-    const auto [timeCurrent, timeRestore] = annotateConflictTime(existing.time, toRestore.time);
-    const auto [dateCurrent, dateRestore] = annotateConflictDate(existing.recordDate, toRestore.recordDate);
+    auto [timeCurrent, timeRestore] = annotateConflictTime(existing.time, toRestore.time);
+    auto [dateCurrent, dateRestore] = annotateConflictDate(existing.recordDate, toRestore.recordDate);
 
     groups.push_back({
       {"Season", getSeasonName(seasonNames, existing.seasonId), getSeasonName(seasonNames, toRestore.seasonId)},
-      {"Time", timeCurrent, timeRestore},
-      {"Record date", dateCurrent, dateRestore},
+      {"Time", std::move(timeCurrent), std::move(timeRestore)},
+      {"Record date", std::move(dateCurrent), std::move(dateRestore)},
     });
   }
 
@@ -3102,15 +3120,15 @@ std::string TimerunV2::buildRestoreSegmentConflictMessage(const std::vector<Time
   std::vector<std::vector<ConflictComparisonRow>> groups;
 
   for (const auto &conflict : conflicts) {
-    const auto &current                   = conflict.occupant;
-    const auto &restore                   = conflict.toRestore;
-    const auto [timeCurrent, timeRestore] = annotateConflictTime(current.time, restore.time);
-    const auto [dateCurrent, dateRestore] = annotateConflictDate(current.recordDate, restore.recordDate);
+    const auto &current             = conflict.occupant;
+    const auto &restore             = conflict.toRestore;
+    auto [timeCurrent, timeRestore] = annotateConflictTime(current.time, restore.time);
+    auto [dateCurrent, dateRestore] = annotateConflictDate(current.recordDate, restore.recordDate);
 
     groups.push_back({
       {"Season", getSeasonName(seasonNames, current.seasonId), getSeasonName(seasonNames, restore.seasonId)},
-      {"Time", timeCurrent, timeRestore},
-      {"Record date", dateCurrent, dateRestore},
+      {"Time", std::move(timeCurrent), std::move(timeRestore)},
+      {"Record date", std::move(dateCurrent), std::move(dateRestore)},
     });
   }
 
