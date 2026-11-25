@@ -39,7 +39,7 @@ TEST(GameFailureTests, Activate_SanitizesDenialMessage) {
   GameFailure failure;
   failure.activate("Tracker error on line: \"1\"\nat 100%s", false, false, 0);
 
-  EXPECT_STREQ(failure.getDenialMessage(), "Tracker error on line: '1' at 100 s");
+  EXPECT_STREQ(failure.getDenialMessage(), "Tracker error on line: '1'\nat 100 s");
 }
 
 TEST(GameFailureTests, Activate_TruncatesDenialMessage) {
