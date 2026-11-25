@@ -1,3 +1,10 @@
+# ETJump 3.8.0
+
+## Added
+* `spawnflag 64` for `func_static_client` to retain state for a disconnected client [#2058](https://github.com/etjump/etjump/pull/2058)
+* `setvisibility` script action to set "visibility" of a entity for a client [#2059](https://github.com/etjump/etjump/pull/2059)
+  * currently only works with `func_static_client` entities to force their state to on/off
+
 # ETJump 3.7.1
 
 ## Fixed
