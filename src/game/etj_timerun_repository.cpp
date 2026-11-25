@@ -2332,6 +2332,9 @@ Timerun::RestoreSegmentResult TimerunRepository::restoreSegment(const Timerun::R
       StringUtils::format("^3restore-segment: ^7no removed segment found with ID ^3%i^7.", params.segmentId));
   }
 
+  // 'removedSegments' is replaced below when the removal cascades to other seasons,
+  // so this is a copy rather than a reference into the vector.
+  // Reference would be safe here today as this was written, but a future footgun waiting to fire.
   const auto base = removedSegments[0];
 
   // only a default-season copy cascades to every season holding the same
