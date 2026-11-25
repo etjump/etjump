@@ -55,10 +55,12 @@ public:
 
 class AddUserResult final : public SynchronizationContext::ResultBase {
 public:
-  AddUserResult(const int userID, std::string message) : userID(userID), message(std::move(message)) {}
+  AddUserResult(const int userID, std::string message, const bool isBanned = false)
+    : userID(userID), message(std::move(message)), isBanned(isBanned) {}
 
   int userID;
   std::string message;
+  bool isBanned;
 };
 
 class IPBanResult final : public SynchronizationContext::ResultBase {

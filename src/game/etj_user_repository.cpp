@@ -240,7 +240,9 @@ int UserRepository::getUserID(const std::string &guid) const {
     from users where
       guid=?;
   )" << guid >>
-    userID;
+    [&userID](const int id) {
+      userID = id;
+    };
 
   return userID;
 }
@@ -688,7 +690,9 @@ std::vector<UserModels::BannedIPAddresses> UserRepository::getBannedIPAddresses(
     select
       ipv4,
       ipv6
-    from bans;
+    from bans
+    where
+      expires = 0 or expires > cast(strftime('%s', 'now') as integer);
   )" >>
     [&bannedIPAddresses](const std::string &ipv4, const std::string &ipv6) {
       UserModels::BannedIPAddresses bannedIP{};
@@ -714,7 +718,9 @@ std::vector<UserModels::BanData> UserRepository::getBanData() const {
     from bans
     left join
       hwid_bans
-    on hwid_bans.ban_id == bans.id;
+    on hwid_bans.ban_id == bans.id
+    where
+      bans.expires = 0 or bans.expires > cast(strftime('%s', 'now') as integer);
   )" >>
     [&banMap](const int id, const std::string &guid, const std::string &legacyGuid, const std::string &legacyHwid,
               const std::string &hwid) {

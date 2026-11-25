@@ -35,6 +35,7 @@
 
   #ifdef NEW_AUTH
     #include <array>
+    #include <intrin.h>
     #include <iphlpapi.h>
     #pragma comment(lib, "IPHLPAPI.lib")
 
@@ -76,6 +77,11 @@ void ETJump::OperatingSystem::minimize() {
 
   #ifdef NEW_AUTH
 std::vector<std::string> ETJump::OperatingSystem::getHwid() {
+  // WMI needs COM on this thread, and whether the engine has already
+  // initialized it depends on the engine. RPC_E_CHANGED_MODE means it's
+  // already initialized in another mode, which is still usable.
+  const HRESULT comInit = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+
   std::vector<std::string> hwid{};
 
   hwid.emplace_back(getMACAddress());
@@ -84,6 +90,11 @@ std::vector<std::string> ETJump::OperatingSystem::getHwid() {
   hwid.emplace_back(getCurrentUserSID());
   hwid.emplace_back(getSystemUUID());
   hwid.emplace_back(getMBSerial());
+
+  // every successful CoInitializeEx (including S_FALSE) needs a matching call
+  if (SUCCEEDED(comInit)) {
+    CoUninitialize();
+  }
 
   assert(hwid.size() == Constants::Authentication::HWID_SIZE_WIN);
 
@@ -210,12 +221,39 @@ std::string ETJump::OperatingSystem::getCPUInfo() {
   }
 
   // it's very likely that vendorExt contains trailing null bytes
-  while (vendorExt.back() == '\0') {
+  while (!vendorExt.empty() && vendorExt.back() == '\0') {
     vendorExt.pop_back();
   }
 
   const std::string cpuID = StringUtils::format("%s %u %u %s %u", vendor, cpuFamily, model, vendorExt, stepping);
   return Crypto::sha2(cpuID);
+}
+
+// returns an empty string if the property can't be read or isn't a string
+static std::wstring getStringProperty(IWbemClassObject *pClsObj, const wchar_t *name) {
+  VARIANT vt;
+  VariantInit(&vt);
+  std::wstring value;
+
+  if (SUCCEEDED(pClsObj->Get(name, 0, &vt, nullptr, nullptr)) && vt.vt == VT_BSTR && vt.bstrVal != nullptr) {
+    value = vt.bstrVal;
+  }
+
+  VariantClear(&vt);
+  return value;
+}
+
+// returns an empty string if the conversion fails
+static std::string toUTF8(const std::wstring &str) {
+  const int size = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), -1, nullptr, 0, nullptr, nullptr);
+
+  if (size <= 1) {
+    return "";
+  }
+
+  std::string result(size - 1, 0); // -1 to discard null terminator
+  WideCharToMultiByte(CP_UTF8, 0, str.c_str(), -1, &result[0], size, nullptr, nullptr);
+  return result;
 }
 
 // largely based on Microsoft's documentation examples
@@ -239,7 +277,7 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
 
   if (FAILED(hr)) {
     pServices->Release();
-    return NOHWID;
+    return NOHWID_DISK;
   }
 
   // find matching partition for the drive letter
@@ -248,14 +286,10 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   std::wstring partitionDeviceID;
 
   while (pEnum->Next(WBEM_INFINITE, 1, &pClsObj, &ret) == S_OK) {
-    VARIANT vtAntecedent, vtDependent;
-    pClsObj->Get(L"Antecedent", 0, &vtAntecedent, nullptr, nullptr);
-    pClsObj->Get(L"Dependent", 0, &vtDependent, nullptr, nullptr);
-
-    const std::wstring dependent = vtDependent.bstrVal;
+    const std::wstring dependent = getStringProperty(pClsObj, L"Dependent");
 
     if (dependent.find(driveLetter) != std::wstring::npos) {
-      std::wstring antecedent = vtAntecedent.bstrVal;
+      std::wstring antecedent = getStringProperty(pClsObj, L"Antecedent");
       size_t start            = antecedent.find(L"DeviceID=\"");
 
       if (start != std::wstring::npos) {
@@ -267,14 +301,10 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
         }
       }
 
-      VariantClear(&vtAntecedent);
-      VariantClear(&vtDependent);
       pClsObj->Release();
       break;
     }
 
-    VariantClear(&vtAntecedent);
-    VariantClear(&vtDependent);
     pClsObj->Release();
   }
 
@@ -297,14 +327,10 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   std::wstring diskDeviceID;
 
   while (pEnum->Next(WBEM_INFINITE, 1, &pClsObj, &ret) == S_OK) {
-    VARIANT vtAntecedent, vtDependent;
-    pClsObj->Get(L"Antecedent", 0, &vtAntecedent, nullptr, nullptr);
-    pClsObj->Get(L"Dependent", 0, &vtDependent, nullptr, nullptr);
-
-    const std::wstring dependent = vtDependent.bstrVal;
+    const std::wstring dependent = getStringProperty(pClsObj, L"Dependent");
 
     if (dependent.find(partitionDeviceID) != std::wstring::npos) {
-      std::wstring antecedent = vtAntecedent.bstrVal;
+      std::wstring antecedent = getStringProperty(pClsObj, L"Antecedent");
       size_t start            = antecedent.find(LR"(DeviceID=")");
 
       if (start != std::wstring::npos) {
@@ -320,14 +346,10 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
         }
       }
 
-      VariantClear(&vtAntecedent);
-      VariantClear(&vtDependent);
       pClsObj->Release();
       break;
     }
 
-    VariantClear(&vtAntecedent);
-    VariantClear(&vtDependent);
     pClsObj->Release();
   }
 
@@ -350,20 +372,8 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   std::wstring serial;
 
   while (pEnum->Next(WBEM_INFINITE, 1, &pClsObj, &ret) == S_OK) {
-    VARIANT vtDeviceID;
-    pClsObj->Get(L"Tag", 0, &vtDeviceID, nullptr, nullptr);
-
-    std::wstring tag = vtDeviceID.bstrVal;
-    VariantClear(&vtDeviceID);
-
-    if (tag == diskDeviceID) {
-      VARIANT vtSerial;
-
-      if (SUCCEEDED(pClsObj->Get(L"SerialNumber", 0, &vtSerial, nullptr, nullptr)) && vtSerial.vt == VT_BSTR) {
-        serial = vtSerial.bstrVal;
-        VariantClear(&vtSerial);
-      }
-
+    if (getStringProperty(pClsObj, L"Tag") == diskDeviceID) {
+      serial = getStringProperty(pClsObj, L"SerialNumber");
       pClsObj->Release();
       break;
     }
@@ -374,10 +384,12 @@ std::string ETJump::OperatingSystem::getDiskInfo() {
   pEnum->Release();
   pServices->Release();
 
-  // convert from wide string for hashing
-  const int size = WideCharToMultiByte(CP_UTF8, 0, serial.c_str(), -1, nullptr, 0, nullptr, nullptr);
-  std::string result(size - 1, 0); // -1 to discard null terminator
-  WideCharToMultiByte(CP_UTF8, 0, serial.c_str(), -1, &result[0], size, nullptr, nullptr);
+  // an unreadable serial would otherwise hash to the same value for everyone
+  const std::string result = toUTF8(serial);
+
+  if (result.empty()) {
+    return NOHWID_DISK;
+  }
 
   return Crypto::sha2(result);
 }
@@ -438,7 +450,7 @@ std::string ETJump::OperatingSystem::getCurrentUserSID() {
 std::string ETJump::OperatingSystem::getSystemUUID() {
   const auto uuid = getWMIProperty(L"Win32_ComputerSystemProduct", L"UUID");
 
-  if (StringUtils::iEqual(uuid, NO_HWID)) {
+  if (StringUtils::iEqual(uuid, NOHWID)) {
     return NOHWID_SYS_UUID;
   }
 
@@ -448,7 +460,7 @@ std::string ETJump::OperatingSystem::getSystemUUID() {
 std::string ETJump::OperatingSystem::getMBSerial() {
   const auto mbSerial = getWMIProperty(L"Win32_BaseBoard", L"SerialNumber");
 
-  if (StringUtils::iEqual(mbSerial, NO_HWID)) {
+  if (StringUtils::iEqual(mbSerial, NOHWID)) {
     return NOHWID_MB_SERIAL;
   }
 
@@ -466,7 +478,7 @@ std::string ETJump::OperatingSystem::getWMIProperty(const std::wstring &wmiClass
   IEnumWbemClassObject *pEnum = nullptr;
 
   const std::wstring wmiQuery = L"SELECT * FROM " + wmiClass;
-  hr = pServices->ExecQuery(bstr_t("WQL"), bstr_t(wmiQuery.c_str()),
+  hr = pServices->ExecQuery(_bstr_t(L"WQL"), _bstr_t(wmiQuery.c_str()),
                             WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum);
 
   if (FAILED(hr)) {
@@ -505,11 +517,8 @@ std::string ETJump::OperatingSystem::getWMIProperty(const std::wstring &wmiClass
   }
 
   // convert from wide string for hashing
-  const int size = WideCharToMultiByte(CP_UTF8, 0, prop.c_str(), -1, nullptr, 0, nullptr, nullptr);
-  std::string result(size - 1, 0); // -1 to discard null terminator
-  WideCharToMultiByte(CP_UTF8, 0, prop.c_str(), -1, &result[0], size, nullptr, nullptr);
-
-  return result;
+  const std::string result = toUTF8(prop);
+  return result.empty() ? NOHWID : result;
 }
 
 IWbemServices *ETJump::OperatingSystem::getWMIService() {

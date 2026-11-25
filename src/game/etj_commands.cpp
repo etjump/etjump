@@ -1937,6 +1937,8 @@ static bool IsTargetHigherLevel(gentity_t *ent, gentity_t *target, bool equalIsH
 #endif
 }
 
+#ifndef NEW_AUTH
+// only used by the old auth system's commands
 bool IsTargetHigherLevel(gentity_t *ent, unsigned id, bool equalIsHigher) {
   if (equalIsHigher) {
     return ETJump::session->GetLevel(ent) <= ETJump::session->GetLevelById(id);
@@ -1944,6 +1946,7 @@ bool IsTargetHigherLevel(gentity_t *ent, unsigned id, bool equalIsHigher) {
 
   return ETJump::session->GetLevel(ent) < ETJump::session->GetLevelById(id);
 }
+#endif
 
 namespace AdminCommands {
 const int CMDS_OPEN     = 1;
