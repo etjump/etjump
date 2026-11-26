@@ -165,17 +165,17 @@ TEST_F(PortalgunSharedTests, PortalTargetEncoding) {
   es.eType = ET_MOVER;
   EXPECT_FALSE(PortalgunShared::isPortalTarget(es));
 
-  es.frame = 100;
+  es.powerups = 100;
   EXPECT_FALSE(PortalgunShared::isPortalTarget(es));
 
-  es.frame = PortalgunShared::encodePortalTarget(0);
+  es.powerups = PortalgunShared::encodePortalTarget(0);
   EXPECT_TRUE(PortalgunShared::isPortalTarget(es));
   EXPECT_EQ(PortalgunShared::portalTargetSize(es), 0);
 
-  es.frame = PortalgunShared::encodePortalTarget(256);
+  es.powerups = PortalgunShared::encodePortalTarget(256);
   EXPECT_EQ(PortalgunShared::portalTargetSize(es), 256);
 
-  es.frame = PortalgunShared::encodePortalTarget(10000);
+  es.powerups = PortalgunShared::encodePortalTarget(10000);
   EXPECT_EQ(PortalgunShared::portalTargetSize(es), MAX_PORTAL_TARGET_SIZE);
 
   EXPECT_LE(PortalgunShared::encodePortalTarget(MAX_PORTAL_TARGET_SIZE), 0xFFFF);
@@ -186,15 +186,33 @@ TEST_F(PortalgunSharedTests, PortalTargetEncoding) {
   // other entity types never count as portal targets
   es.eType = ET_GENERAL;
   EXPECT_FALSE(PortalgunShared::isPortalTarget(es));
+
+  // pre-3.8.0 demos store the same info in 'frame'
+  entityState_t legacy{};
+  legacy.eType = ET_MOVER;
+  legacy.frame = PortalgunShared::encodePortalTarget(128);
+
+  EXPECT_FALSE(PortalgunShared::isPortalTarget(legacy));
+  EXPECT_TRUE(PortalgunShared::isPortalTarget(legacy, true));
+  EXPECT_EQ(PortalgunShared::portalTargetSize(legacy, true), 128);
+
+  legacy.eType = ET_STATIC_CLIENT;
+  EXPECT_TRUE(PortalgunShared::isPortalTarget(legacy, true));
 }
 
 TEST_F(PortalgunSharedTests, PortalTargetState) {
   entityState_t es{};
   es.eType = ET_STATIC_CLIENT;
 
+  // 'frame' is reserved for the animation start offset on 'func_static_client',
+  // portal target info must not touch it
+  es.frame = 42;
+
   const vec3_t center = {10, 20, 30};
   PortalgunShared::setPortalTarget(es, 64, center);
   EXPECT_TRUE(PortalgunShared::isPortalTarget(es));
+  EXPECT_EQ(es.frame, 42);
+  EXPECT_EQ(es.powerups, PortalgunShared::encodePortalTarget(64));
 
   PortalgunShared::PortalTarget target{};
   PortalgunShared::getPortalTarget(es, target);

@@ -34,6 +34,7 @@
 
 namespace ETJump {
 std::unordered_map<std::string, std::vector<FuncStaticClient::State>> FuncStaticClient::funcStaticClientSessionState;
+static constexpr const char *DEFAULT_ANIM_FPS = "20";
 
 /*
  * 'ent->s.effect1Time' and 'ent->s.effect2Time' are treated as boolean
@@ -45,6 +46,13 @@ std::unordered_map<std::string, std::vector<FuncStaticClient::State>> FuncStatic
  * completely invisible to the client.
  *
  * If 'model2' is set, the entity's brushmodel will be used for collision.
+ *
+ * 'model2' can optionally be animated with the 'ANIMATE' spawnflag, configured
+ * with the 'frames', 'start' and 'fps' keys. The 'animtype' key selects the
+ * animation type: 'loop' (default), 'on', 'off' or 'both', the last of which
+ * plays the same clip once on both state transitions. One-off animations play
+ * when the entity is turned on or off for a client, and hold on their last
+ * frame. The 'offModel' shares the animation parameters with 'model2'.
  */
 void FuncStaticClient::spawn(gentity_t *ent) {
   trap_SetBrushModel(ent, ent->model);
@@ -95,7 +103,16 @@ void FuncStaticClient::spawn(gentity_t *ent) {
       modelscale[2] = modelscale[0];
       VectorCopy(modelscale, ent->s.angles2);
     }
+
+    if (ent->spawnflags & Spawnflags::ANIMATE) {
+      setupAnimations(ent);
+    }
   } else {
+    // animations are only supported for 'model2/offModel'
+    if (ent->spawnflags & Spawnflags::ANIMATE) {
+      G_Printf(S_COLOR_YELLOW "WARNING: 'ANIMATE' spawnflag on '%s' requires 'model2', ignoring\n", ent->classname);
+    }
+
     // custom shader when the brush is in "off" state
     if (G_SpawnString("offShader", "", &s)) {
       ent->s.density = G_ShaderIndex(s);
@@ -167,6 +184,60 @@ void FuncStaticClient::reset(gentity_t *self, const int32_t clientNum) {
   } else {
     turnOnForClient(self, clientNum);
   }
+}
+
+void FuncStaticClient::setupAnimations(gentity_t *self) {
+  int32_t numFrames  = 0;
+  int32_t startFrame = 0;
+  int32_t fps        = 0;
+  char *animtype     = nullptr;
+
+  // 'frames' has no sensible default, so it will error if the user forgets to set it
+  G_SpawnInt("frames", "0", &numFrames);
+  G_SpawnInt("start", "0", &startFrame);
+  G_SpawnInt("fps", DEFAULT_ANIM_FPS, &fps);
+  G_SpawnString("animtype", "loop", &animtype);
+
+  if (numFrames <= 0 || numFrames > 1023) {
+    G_Error("%s: value %i for 'frames' is outside of allowed range (1-1023)", self->classname, numFrames);
+  }
+
+  if (startFrame < 0 || startFrame > 1022) {
+    G_Error("%s: value %i for 'start' is outside of allowed range (0-1022)", self->classname, startFrame);
+  }
+
+  // we can reasonably fall back to default here
+  // 4 is the lower boundary for fps, as we transmit the duration as a 8-bit unsigned int (1000 / 3 = ~333)
+  if (fps < 4 || fps > 1000) {
+    G_Printf(S_COLOR_YELLOW
+             "WARNING: value %i for 'fps' on '%s' is outside of allowed range (4-1000), setting to default (%s)\n",
+             fps, self->classname, DEFAULT_ANIM_FPS);
+    fps = Q_atoi(DEFAULT_ANIM_FPS);
+  }
+
+  FuncStaticClientAnimType type = FuncStaticClientAnimType::ANIM_LOOP;
+
+  if (!Q_stricmp(animtype, "loop")) {
+    type = FuncStaticClientAnimType::ANIM_LOOP;
+  } else if (!Q_stricmp(animtype, "on")) {
+    type = FuncStaticClientAnimType::ANIM_ON;
+  } else if (!Q_stricmp(animtype, "off")) {
+    type = FuncStaticClientAnimType::ANIM_OFF;
+  } else if (!Q_stricmp(animtype, "both")) {
+    type = FuncStaticClientAnimType::ANIM_BOTH;
+  } else {
+    G_Printf(
+      S_COLOR_YELLOW
+      "WARNING: unknown 'animtype' value '%s' in '%s', expected 'loop', 'on', 'off' or 'both' - setting to default ('loop')\n",
+      animtype, self->classname);
+    type = FuncStaticClientAnimType::ANIM_LOOP;
+  }
+
+  self->s.torsoAnim  = numFrames;
+  self->s.frame      = rand() % self->s.torsoAnim;
+  self->s.legsAnim   = startFrame + 1;
+  self->s.weapon     = static_cast<int32_t>(1000.f / static_cast<float>(fps));
+  self->s.nextWeapon = static_cast<int32_t>(type);
 }
 
 void FuncStaticClient::turnOn(gentity_t *self, const int32_t clientNum) {

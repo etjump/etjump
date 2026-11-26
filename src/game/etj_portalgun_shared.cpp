@@ -25,9 +25,15 @@
 #include "etj_portalgun_shared.h"
 
 #include <algorithm>
-#include <cmath>
 
 namespace ETJump::PortalgunShared {
+namespace {
+// 'frame' holds the portal target info on pre-3.8.0 demos, 'powerups' from 3.8.0 onwards
+[[nodiscard]] int32_t portalTargetBits(const entityState_t &es, const bool legacyEncoding) {
+  return legacyEncoding ? es.frame : es.powerups;
+}
+} // namespace
+
 void traceEndpoints(const vec3_t origin, const int32_t viewheight, const vec3_t viewangles, vec3_t start, vec3_t end) {
   vec3_t forward;
 
@@ -108,24 +114,25 @@ float scaleFromSize(const int32_t size) {
 }
 
 void setPortalTarget(entityState_t &es, const int32_t size, const vec3_t center) {
-  es.frame = encodePortalTarget(size);
+  es.powerups = encodePortalTarget(size);
   VectorCopy(center, es.origin2);
 }
 
-void getPortalTarget(const entityState_t &es, PortalTarget &out) {
+void getPortalTarget(const entityState_t &es, PortalTarget &out, const bool legacyEncoding) {
   VectorCopy(es.origin2, out.center);
-  out.size = portalTargetSize(es);
+  out.size = portalTargetSize(es, legacyEncoding);
 }
 
 int32_t encodePortalTarget(const int32_t size) {
   return PORTAL_TARGET_FLAG | std::clamp(size, 0, MAX_PORTAL_TARGET_SIZE);
 }
 
-bool isPortalTarget(const entityState_t &es) {
-  return (es.eType == ET_MOVER || es.eType == ET_STATIC_CLIENT) && (es.frame & PORTAL_TARGET_FLAG);
+bool isPortalTarget(const entityState_t &es, const bool legacyEncoding) {
+  return (es.eType == ET_MOVER || es.eType == ET_STATIC_CLIENT) &&
+         (portalTargetBits(es, legacyEncoding) & PORTAL_TARGET_FLAG);
 }
 
-int32_t portalTargetSize(const entityState_t &es) {
-  return std::clamp(es.frame & ~PORTAL_TARGET_FLAG, 0, MAX_PORTAL_TARGET_SIZE);
+int32_t portalTargetSize(const entityState_t &es, const bool legacyEncoding) {
+  return std::clamp(portalTargetBits(es, legacyEncoding) & ~PORTAL_TARGET_FLAG, 0, MAX_PORTAL_TARGET_SIZE);
 }
 } // namespace ETJump::PortalgunShared

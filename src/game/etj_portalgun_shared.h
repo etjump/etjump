@@ -109,18 +109,19 @@ void computePlacement(const trace_t &tr, const PortalTarget *target, Placement &
 [[nodiscard]] int32_t sizeFromScale(float scale);
 [[nodiscard]] float scaleFromSize(int32_t size);
 
-// Portal target entities ('func_portaltarget' and 'func_static_client' with
-// portal target spawnflag) network their info in the entity state:
-// - 'frame' - 'PORTAL_TARGET_FLAG' | 'portalsize'
+// Portal target entities ('func_portaltarget' and 'func_static_client' with portal target spawnflag)
+// network their info in the entity state:
+// - 'powerups' - 'PORTAL_TARGET_FLAG' | 'portalsize'
 // - 'origin2' - origin or bmodel center of the entity
-// This is only used by the client for prediction,
-// server uses the entity itself to determine portal targets.
+// This is only used by the client for prediction, server uses the entity itself to determine portal targets.
+// Prior to 3.8.0 this was stored in 'frame', which is now the animation start offset for 'func_static_client'.
+// 'legacyEncoding' picks the old field when reading state from pre-3.8.0 demos.
 inline constexpr int32_t PORTAL_TARGET_FLAG = 1 << 15;
 
 void setPortalTarget(entityState_t &es, int32_t size, const vec3_t center);
-[[nodiscard]] bool isPortalTarget(const entityState_t &es);
-void getPortalTarget(const entityState_t &es, PortalTarget &out);
+[[nodiscard]] bool isPortalTarget(const entityState_t &es, bool legacyEncoding = false);
+void getPortalTarget(const entityState_t &es, PortalTarget &out, bool legacyEncoding = false);
 [[nodiscard]] int32_t encodePortalTarget(int32_t size);
-[[nodiscard]] int32_t portalTargetSize(const entityState_t &es);
+[[nodiscard]] int32_t portalTargetSize(const entityState_t &es, bool legacyEncoding = false);
 } // namespace PortalgunShared
 } // namespace ETJump

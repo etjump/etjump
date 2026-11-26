@@ -259,6 +259,17 @@ typedef struct tag_s {
   vec3_t axis[3];
 } tag_t;
 
+namespace ETJump {
+// tracks the animation state for 'func_static_client' with one-off animations
+struct FuncStaticClientAnim {
+  int32_t clientNum; // observed client the state belongs to, changes when spectating
+  int32_t startTime; // start time of the currently active one-off animation
+  bool valid;        // true if the state has been initialized for 'clientNum'
+  bool lastHidden;   // hidden state observed on the previous frame
+  bool started;      // true if a one-off animation has been triggered for 'clientNum'
+};
+} // namespace ETJump
+
 // centity_t have a direct corespondence with gentity_t in the game, but
 // only the entityState_t is directly communicated to the cgame
 typedef struct centity_s {
@@ -360,6 +371,8 @@ typedef struct centity_s {
   // we don't want to add a new railbox each frame,
   // otherwise we just fill up localents array in few frames
   int lastRailboxTime;
+
+  ETJump::FuncStaticClientAnim funcStaticClientAnim;
 } centity_t;
 
 //======================================================================

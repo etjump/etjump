@@ -207,6 +207,11 @@ void DemoCompatibility::setupCompatibilityFlags() {
     flags.useSharedCvar = true;
     compatibilityStrings.emplace_back("Reading shared cvar value from CS_SYSTEMINFO");
   }
+
+  if (!isCompatible({3, 8, 0})) {
+    flags.oldPortalTargetField = true;
+    compatibilityStrings.emplace_back("Reading portal target info from 'frame' instead of 'powerups'");
+  }
 }
 
 void DemoCompatibility::printCompatibilityInfo() {

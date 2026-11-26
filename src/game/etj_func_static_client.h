@@ -40,6 +40,7 @@ public:
     static constexpr int32_t CONSUME_PORTALS  = 1 << 4;
     static constexpr int32_t PORTAL_TARGET    = 1 << 5;
     static constexpr int32_t RETAIN_STATE     = 1 << 6;
+    static constexpr int32_t ANIMATE          = 1 << 7;
   };
 
   static void spawn(gentity_t *ent);
@@ -61,6 +62,8 @@ private:
     int32_t entityNum;
     bool hidden;
   };
+
+  static void setupAnimations(gentity_t *self);
 
   static void turnOn(gentity_t *self, int32_t clientNum);
   static void turnOff(gentity_t *self, int32_t clientNum);
