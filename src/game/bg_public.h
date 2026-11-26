@@ -2913,6 +2913,13 @@ enum class PlayerStance {
   Crouch = 1,
   Prone  = 2,
 };
+
+enum class FuncStaticClientAnimType {
+  ANIM_LOOP = 0,
+  ANIM_ON   = 1,
+  ANIM_OFF  = 2,
+  ANIM_BOTH = 3,
+};
 } // namespace ETJump
 
 inline constexpr int32_t G_GRAVITY = 800;

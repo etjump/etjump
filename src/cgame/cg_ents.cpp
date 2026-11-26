@@ -2460,9 +2460,123 @@ static void CG_TokenMarker(centity_t *cent, int difficulty) {
 }
 
 namespace ETJump {
+namespace {
+// One-off animations play on the model the entity switches to,
+// i.e. the visible model when turning on and the 'offModel' when turning off.
+// 'ANIM_BOTH' plays the same clip on both transitions.
+[[nodiscard]] bool isTransitionModel(const FuncStaticClientAnimType type, const bool hidden) {
+  return type == FuncStaticClientAnimType::ANIM_BOTH || (hidden && type == FuncStaticClientAnimType::ANIM_OFF) ||
+         (!hidden && type == FuncStaticClientAnimType::ANIM_ON);
+}
+
+void updateStaticClientAnim(centity_t *cent, const int32_t clientNum, const bool hidden) {
+  const entityState_t *es = &cent->currentState;
+
+  if (!es->torsoAnim) {
+    return;
+  }
+
+  const auto type = static_cast<FuncStaticClientAnimType>(es->nextWeapon);
+
+  if (type == FuncStaticClientAnimType::ANIM_LOOP) {
+    return;
+  }
+
+  auto &anim = cent->funcStaticClientAnim;
+
+  // current animation state isn't valid anymore, re-init
+  // we must do this on clientNum changes, as we only track one animation state,
+  // so carrying over the animation to a different spectated client is wrong
+  if (!anim.valid || anim.clientNum != clientNum) {
+    anim = {clientNum, 0, true, hidden, false};
+    return;
+  }
+
+  if (hidden == anim.lastHidden) {
+    return;
+  }
+
+  anim.lastHidden = hidden;
+  anim.started    = isTransitionModel(type, hidden);
+
+  if (anim.started) {
+    anim.startTime = cg.time;
+  }
+}
+
+// Sets the frames for a one-off animation. The animation plays once and holds on its last frame,
+// matching what 'startanimation ... noloop' and non-looping 'playanim' script actions do.
+void setOneOffAnimFrames(const entityState_t *es, const int32_t startTime, refEntity_t &ent) {
+  const int32_t frameDuration = std::max(es->weapon, 1);
+  const float framePos        = static_cast<float>(cg.time - startTime) / static_cast<float>(frameDuration);
+  const int32_t index         = std::clamp(static_cast<int32_t>(framePos), 0, es->torsoAnim - 1);
+
+  ent.frame = es->legsAnim + index;
+
+  if (index > 0) {
+    ent.oldframe = ent.frame - 1;
+    ent.backlerp = 1.0f - std::clamp(framePos - static_cast<float>(index), 0.0f, 1.0f);
+  } else {
+    ent.oldframe = ent.frame;
+    ent.backlerp = 0.0f;
+  }
+}
+
+// Sets the frames for the looped animation, driven locally from 'cg.time'.
+void setLoopAnimFrames(centity_t *cent, const entityState_t *es, refEntity_t &ent) {
+  lerpFrame_t &lf = cent->lerpFrame;
+
+  const int32_t frameDuration = std::max(es->weapon, 1);
+  const int32_t firstFrame    = es->legsAnim;
+  const int32_t lastFrame     = es->legsAnim + es->torsoAnim - 1;
+  const int32_t frameOffset   = es->frame;
+
+  if (cg.time >= lf.frameTime) {
+    lf.oldFrameTime = lf.frameTime;
+    lf.oldFrame     = lf.frame;
+
+    while (cg.time >= lf.frameTime) {
+      lf.frameTime += frameDuration;
+      lf.frame++;
+
+      if (lf.frame > lastFrame) {
+        lf.frame = firstFrame;
+      }
+    }
+  }
+
+  if (lf.frameTime == lf.oldFrameTime) {
+    lf.backlerp = 0;
+  } else {
+    lf.backlerp =
+      1.0f - (static_cast<float>(cg.time - lf.oldFrameTime) / static_cast<float>(lf.frameTime - lf.oldFrameTime));
+  }
+
+  // apply the start offset on top of the locally driven frames
+  ent.frame    = lf.frame + frameOffset;
+  ent.oldframe = lf.oldFrame + frameOffset;
+
+  // wrap the offset frames around the animation range
+  if (ent.frame > lastFrame) {
+    ent.frame -= es->torsoAnim;
+  }
+
+  if (ent.oldframe > lastFrame) {
+    ent.oldframe -= es->torsoAnim;
+  }
+
+  ent.backlerp = lf.backlerp;
+}
+} // namespace
+
 static void funcStaticClient(centity_t *cent) {
   const entityState_t *es = &cent->currentState;
-  const bool hidden       = ETJump::EntityUtilsShared::funcStaticClientIsHidden(es, cg.snap->ps.clientNum);
+  const int32_t clientNum = cg.snap->ps.clientNum;
+  const bool hidden       = ETJump::EntityUtilsShared::funcStaticClientIsHidden(es, clientNum);
+
+  // this must run before the early return below, so that transitions
+  // are tracked even when the entity is not drawn for this client
+  updateStaticClientAnim(cent, clientNum, hidden);
 
   // not visible, no 'offShader' or 'offModel' set -> don't draw at all
   if (hidden && !es->density) {
@@ -2496,6 +2610,31 @@ static void funcStaticClient(centity_t *cent) {
       VectorScale(ent.axis[1], es->angles2[1], ent.axis[1]);
       VectorScale(ent.axis[2], es->angles2[2], ent.axis[2]);
       ent.nonNormalizedAxes = qtrue;
+    }
+
+    // play animation if set
+    if (es->torsoAnim) {
+      const auto type = static_cast<FuncStaticClientAnimType>(es->nextWeapon);
+
+      if (type == FuncStaticClientAnimType::ANIM_LOOP) {
+        setLoopAnimFrames(cent, es, ent);
+      } else {
+        // one-off animations only apply to the model they belong to,
+        // i.e. the visible model when turning on, the 'offModel' when turning off
+        const bool transitionModel = isTransitionModel(type, hidden);
+
+        if (transitionModel) {
+          if (cent->funcStaticClientAnim.started) {
+            setOneOffAnimFrames(es, cent->funcStaticClientAnim.startTime, ent);
+          } else {
+            // no transition has been observed (e.g. the entity was already in this state
+            // when we started observing it), so hold the last frame
+            ent.frame    = es->legsAnim + es->torsoAnim - 1;
+            ent.oldframe = ent.frame;
+            ent.backlerp = 0.0f;
+          }
+        }
+      }
     }
   } else {
     ent.hModel = cgs.inlineDrawModel[es->modelindex];

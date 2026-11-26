@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 
+#include "etj_portalgun_shared.h"
 #include "etj_printer.h"
 #include "etj_shader_config_handler.h"
 #include "etj_string_utilities.h"
@@ -940,6 +941,16 @@ int DebugLine(vec3_t start, vec3_t end, int color) {
   return trap_DebugPolygonCreate(color, 4, points);
 }
 
+// Skips setting 'es->powerups' for 'func_portaltarget' and 'func_static_client' since they use this
+// for different purpose (portal size encoding), and it's not needed for these entities to function.
+static void setEntStatePowerups(gentity_t *ent, const entState_t state) {
+  if (ent->s.eType == ET_STATIC_CLIENT || ETJump::PortalgunShared::isPortalTarget(ent->s)) {
+    return;
+  }
+
+  ent->s.powerups = state;
+}
+
 /*
 ================
 G_SetEntState
@@ -963,8 +974,8 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
         }
       }
 
-      ent->entstate   = STATE_DEFAULT;
-      ent->s.powerups = STATE_DEFAULT;
+      ent->entstate = STATE_DEFAULT;
+      setEntStatePowerups(ent, STATE_DEFAULT);
 
       if (ent->s.eType == ET_WOLF_OBJECTIVE) {
         char cs[MAX_STRING_CHARS];
@@ -1048,8 +1059,8 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
 
       break;
     case STATE_UNDERCONSTRUCTION:
-      ent->entstate     = STATE_UNDERCONSTRUCTION;
-      ent->s.powerups   = STATE_UNDERCONSTRUCTION;
+      ent->entstate = STATE_UNDERCONSTRUCTION;
+      setEntStatePowerups(ent, STATE_UNDERCONSTRUCTION);
       ent->realClipmask = ent->clipmask;
       if (ent->s.eType != ET_CONSTRUCTIBLE) // don't make nonsolid as we
                                             // want to make them
@@ -1095,8 +1106,8 @@ void G_SetEntState(gentity_t *ent, entState_t state) {
         }
       }
 
-      ent->entstate   = STATE_INVISIBLE;
-      ent->s.powerups = STATE_INVISIBLE;
+      ent->entstate = STATE_INVISIBLE;
+      setEntStatePowerups(ent, STATE_INVISIBLE);
 
       if (!Q_stricmp(ent->classname, "misc_mg42")) {
         mg42_stopusing(ent);

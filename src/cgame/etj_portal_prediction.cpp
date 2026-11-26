@@ -28,6 +28,7 @@
 
 #include "cg_local.h"
 #include "etj_cgame.h"
+#include "etj_demo_compatibility.h"
 #include "etj_trace_utils.h"
 
 #include "../game/etj_entity_utilities_shared.h"
@@ -327,9 +328,10 @@ bool PortalPrediction::tryPlacePortal(const playerState_t &ps, const int32_t eTy
 
   if (tr.entityNum >= 0 && tr.entityNum < ENTITYNUM_MAX_NORMAL) {
     const entityState_t &hitEs = cg_entities[tr.entityNum].currentState;
+    const bool legacyField     = cgame.demo.compatibility->flags.oldPortalTargetField;
 
-    if (PortalgunShared::isPortalTarget(hitEs)) {
-      PortalgunShared::getPortalTarget(hitEs, target);
+    if (PortalgunShared::isPortalTarget(hitEs, legacyField)) {
+      PortalgunShared::getPortalTarget(hitEs, target, legacyField);
       hitTarget = true;
     }
   }

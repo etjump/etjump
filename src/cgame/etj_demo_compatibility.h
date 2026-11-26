@@ -104,6 +104,7 @@ public:
     bool useSharedCvar                        = false;
     bool adjustEvPortal2Fire                  = false;
     bool oldPortalSize                        = false;
+    bool oldPortalTargetField                 = false;
   };
 
   // everything in here will be set to false unless we're on demo playback
