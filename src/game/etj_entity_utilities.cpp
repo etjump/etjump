@@ -47,9 +47,18 @@ const std::vector<std::pair<std::string, std::vector<float>>> railBoxEnts{
 };
 
 void EntityUtilities::checkForRailBox(gentity_t *ent) {
+  // a box lasts cg_railTrailTime (400 by default) on the client, sending one
+  // every frame floods the client's local entities and the server's entity slots
+  static constexpr int RAILBOX_INTERVAL = 400;
+
+  if (level.time - ent->lastRailBoxTime < RAILBOX_INTERVAL) {
+    return;
+  }
+
   for (const auto &railBoxEnt : railBoxEnts) {
     if (ent->classname == railBoxEnt.first) {
       drawRailBox(ent, railBoxEnt.second);
+      ent->lastRailBoxTime = level.time;
     }
   }
 }
