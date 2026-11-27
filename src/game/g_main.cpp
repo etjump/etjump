@@ -2008,7 +2008,7 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   ETJump::TimerunEntity::resetTimerunIndices();
 
   // before mapscript is loaded, so remapshaders from mapscripts work properly
-  ETJump::shaderConfigHandler = std::make_unique<ETJump::ShaderConfigHandler>();
+  ETJump::shaderConfigHandler = std::make_unique<ETJump::ShaderConfigHandler>(restart);
 
   // load level script
   G_Script_ScriptLoad();
