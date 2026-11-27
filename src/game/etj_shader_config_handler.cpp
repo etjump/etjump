@@ -32,6 +32,12 @@
 // ShaderConfigHandler - manages shader & shaderstate configstrings
 
 namespace ETJump {
+ShaderConfigHandler::ShaderConfigHandler(const bool restart) {
+  if (restart) {
+    resetAfterMapRestart();
+  }
+}
+
 int16_t ShaderConfigHandler::getShaderIndex(const char *name, const bool create) {
   if (!name || name[0] == '\0') {
     return 0;
