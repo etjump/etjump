@@ -49,7 +49,7 @@ std::vector<int> Utilities::getSpectators(int clientNum) {
     }
 
     if (player->client->ps.clientNum == clientNum) {
-      spectators.push_back(g_entities - player);
+      spectators.push_back(level.sortedClients[i]);
     }
   }
 
