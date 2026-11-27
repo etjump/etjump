@@ -24,12 +24,20 @@
 
 #include "etj_shader_config_handler.h"
 
+#include <array>
+
 #include "etj_string_utilities.h"
 #include "g_local.h"
 
 // ShaderConfigHandler - manages shader & shaderstate configstrings
 
 namespace ETJump {
+ShaderConfigHandler::ShaderConfigHandler(const bool restart) {
+  if (restart) {
+    resetAfterMapRestart();
+  }
+}
+
 int16_t ShaderConfigHandler::getShaderIndex(const char *name, const bool create) {
   if (!name || name[0] == '\0') {
     return 0;
@@ -129,6 +137,52 @@ void ShaderConfigHandler::updateShaderState() {
   }
 
   remapQueue.clear();
+}
+
+void ShaderConfigHandler::resetAfterMapRestart() {
+  std::array<char, MAX_STRING_CHARS> buf{};
+  std::unordered_map<int16_t, std::string> indexToName;
+
+  // indices must match what clients already parsed from these configstrings
+  for (int32_t slot = 0; slot < MAX_CS_SHADERS; slot++) {
+    trap_GetConfigstring(CS_SHADERS + slot, buf.data(), static_cast<int>(buf.size()));
+    const auto names = StringUtils::split(buf.data(), " ");
+
+    for (int32_t i = 0; i < static_cast<int32_t>(names.size()); i++) {
+      if (names[i].empty()) {
+        continue;
+      }
+
+      const auto index          = static_cast<int16_t>(slot * MAX_SHADERS_PER_INDEX + i + 1);
+      gameShaderCache[names[i]] = index;
+      indexToName[index]        = names[i];
+    }
+  }
+
+  // shaderstate entries are formatted as 'i1=i2:timeOffset@'
+  for (int32_t slot = 0; slot < MAX_CS_SHADERSTATES; slot++) {
+    trap_GetConfigstring(CS_SHADERSTATE + slot, buf.data(), static_cast<int>(buf.size()));
+
+    for (const auto &entry : StringUtils::split(buf.data(), "@")) {
+      const auto i1 = static_cast<int16_t>(Q_atoi(entry.c_str()));
+      const auto it = indexToName.find(i1);
+
+      if (it == indexToName.cend()) {
+        continue;
+      }
+
+      ShaderRemap sr{};
+      sr.originalShader = it->second;
+      sr.currentShader  = it->second;
+      sr.i1             = i1;
+      sr.i2             = i1;
+
+      remapQueue.insert(static_cast<int16_t>(shaderRemaps.size() / MAX_SHADERSTATES_PER_INDEX));
+      shaderRemaps.emplace_back(sr);
+    }
+  }
+
+  updateShaderState();
 }
 
 std::string ShaderConfigHandler::buildShaderStateString(const int32_t index) {

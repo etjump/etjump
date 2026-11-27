@@ -38,6 +38,8 @@ inline constexpr int32_t MAX_SHADER_REMAPS = MAX_SHADER_INDEX * 4;
 
 class ShaderConfigHandler {
 public:
+  explicit ShaderConfigHandler(bool restart);
+
   int16_t getShaderIndex(const char *name, bool create);
   void addShaderRemap(const char *oldShader, const char *newShader);
   void updateShaderState();
@@ -56,5 +58,10 @@ private:
   std::unordered_set<int16_t> remapQueue;
 
   std::string buildShaderStateString(int32_t index);
+
+  // map_restart keeps the configstrings and clients keep their renderer remaps,
+  // so pick up the previous shader indices and send every remap back to its
+  // original shader, otherwise remaps done before the restart persist
+  void resetAfterMapRestart();
 };
 } // namespace ETJump
