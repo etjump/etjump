@@ -619,6 +619,9 @@ struct gentity_s {
 
   // target_ft_setrules
   char *ftSavelimit;
+
+  // g_scriptDebug railbox throttling
+  int lastRailBoxTime;
 };
 
 typedef enum {
