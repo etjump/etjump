@@ -24,6 +24,8 @@
 
 #include "etj_shader_config_handler.h"
 
+#include <array>
+
 #include "etj_string_utilities.h"
 #include "g_local.h"
 
@@ -132,13 +134,13 @@ void ShaderConfigHandler::updateShaderState() {
 }
 
 void ShaderConfigHandler::resetAfterMapRestart() {
-  char buf[MAX_STRING_CHARS];
+  std::array<char, MAX_STRING_CHARS> buf{};
   std::unordered_map<int16_t, std::string> indexToName;
 
   // indices must match what clients already parsed from these configstrings
   for (int32_t slot = 0; slot < MAX_CS_SHADERS; slot++) {
-    trap_GetConfigstring(CS_SHADERS + slot, buf, sizeof(buf));
-    const auto names = StringUtils::split(buf, " ");
+    trap_GetConfigstring(CS_SHADERS + slot, buf.data(), static_cast<int>(buf.size()));
+    const auto names = StringUtils::split(buf.data(), " ");
 
     for (int32_t i = 0; i < static_cast<int32_t>(names.size()); i++) {
       if (names[i].empty()) {
@@ -153,9 +155,9 @@ void ShaderConfigHandler::resetAfterMapRestart() {
 
   // shaderstate entries are formatted as 'i1=i2:timeOffset@'
   for (int32_t slot = 0; slot < MAX_CS_SHADERSTATES; slot++) {
-    trap_GetConfigstring(CS_SHADERSTATE + slot, buf, sizeof(buf));
+    trap_GetConfigstring(CS_SHADERSTATE + slot, buf.data(), static_cast<int>(buf.size()));
 
-    for (const auto &entry : StringUtils::split(buf, "@")) {
+    for (const auto &entry : StringUtils::split(buf.data(), "@")) {
       const auto i1 = static_cast<int16_t>(Q_atoi(entry.c_str()));
       const auto it = indexToName.find(i1);
 
