@@ -77,6 +77,8 @@ private:
   float currentSpeed{};
   float maxSpeed{};
 
+  AccelColorV2::Style cvarAccelColorStyle{};
+  // 'cvarAccelColorStyle', downgraded to simple when pps isn't accurate
   AccelColorV2::Style accelColorStyle{};
   int32_t textStyle{};
 

@@ -207,8 +207,8 @@ bool AccelMeterV2::canSkipDraw() {
     return true;
   }
 
-  // TODO: revisit with 'g_synchronousClients'
-  if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) {
+  // following someone is fine, 'ppsIsAccurate' decides if we can draw
+  if (cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR && !(cg.snap->ps.pm_flags & PMF_FOLLOW)) {
     return true;
   }
 

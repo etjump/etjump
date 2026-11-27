@@ -89,7 +89,8 @@ void DrawSpeed2::setSize(const vmCvar_t &cvar) {
 }
 
 void DrawSpeed2::setAccelColorStyle(const vmCvar_t &cvar) {
-  accelColorStyle = static_cast<AccelColorV2::Style>(std::clamp(cvar.integer, 0, 2));
+  cvarAccelColorStyle = static_cast<AccelColorV2::Style>(std::clamp(cvar.integer, 0, 2));
+  accelColorStyle     = cvarAccelColorStyle;
 
   // re-parse the base color if we're turning off accel-based coloring
   if (accelColorStyle == AccelColorV2::Style::NONE) {
@@ -172,6 +173,8 @@ bool DrawSpeed2::beforeRender() {
 
   // pps must be accurate in order to use advanced accel coloring
   // TODO: revisit with 'g_synchronousClients'
+  accelColorStyle = cvarAccelColorStyle;
+
   if (!cgame.hudData.pmoveV2->ppsIsAccurate(s.pm) && accelColorStyle == AccelColorV2::Style::ADVANCED) {
     accelColorStyle = AccelColorV2::Style::SIMPLE;
   }

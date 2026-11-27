@@ -109,10 +109,11 @@ public:
 
   bool skipUpdate(int32_t &lastUpdateTime, std::optional<HUDLerpFlags> flag, const pmove_t &pm);
 
-  // 'cg.predictedPlayerState' is considered accurate if:
-  // - we are not following anyone
-  // - we are in demo playback (not following), and the snapshot cadence
-  //   matches 'pmove_msec', meaning demo was recorded at 'sv_fps/snaps 125'
+  // the playerstate is considered accurate if:
+  // - we are playing and not following anyone (predicted every frame)
+  // - we are following someone or in demo playback, and the snapshot cadence
+  //   matches 'pmove_msec' ('sv_fps/snaps 125'), in which case 'runFrame'
+  //   uses 'cg.snap->ps' instead of the interpolated 'cg.predictedPlayerState'
   //
   // In any other scenario, we cannot fully trust it, because it has some form
   // of interpolation applied to it - most notably, velocity isn't snapped,
@@ -145,8 +146,12 @@ private:
 
   State s{};
 
+  // a single late or dropped snapshot shouldn't turn off HUDs that need
+  // accurate data, so cadence only mismatches after this many in a row
+  static constexpr int32_t SNAP_CADENCE_MAX_MISSES = 3;
+
   int32_t prevSnapTime{};
-  int32_t snapInterval{};
+  int32_t snapCadenceMisses = SNAP_CADENCE_MAX_MISSES;
 
   bool doPmove{};
   std::vector<const vmCvar_t *> hudCvars;

@@ -155,7 +155,11 @@ bool PmoveUtilsV2::check() const {
 }
 
 void PmoveUtilsV2::runFrame() {
-  s.ps       = cg.predictedPlayerState;
+  // in spec/demo playback, 'cg.predictedPlayerState' is interpolated between
+  // snapshots, so use the snapshot itself if it contains every physics frame
+  const bool useSnap = cg.snap && (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW)) && snapCadenceMatchesPmove();
+
+  s.ps       = useSnap ? cg.snap->ps : cg.predictedPlayerState;
   s.pm.ps    = &s.ps;
   s.pm.pmext = &s.pmext;
   setupPmove(s.pm);
@@ -1075,11 +1079,17 @@ bool PmoveUtilsV2::snapCadenceMatchesPmove() {
   const int32_t snapTime = cg.snap->serverTime;
 
   if (snapTime != prevSnapTime) {
-    snapInterval = prevSnapTime && snapTime > prevSnapTime ? snapTime - prevSnapTime : 0;
-    prevSnapTime = snapTime;
+    const int32_t snapInterval = prevSnapTime && snapTime > prevSnapTime ? snapTime - prevSnapTime : 0;
+    prevSnapTime               = snapTime;
+
+    if (snapInterval == cgs.pmove_msec) {
+      snapCadenceMisses = 0;
+    } else if (snapCadenceMisses < SNAP_CADENCE_MAX_MISSES) {
+      snapCadenceMisses++;
+    }
   }
 
-  return snapInterval == cgs.pmove_msec;
+  return snapCadenceMisses < SNAP_CADENCE_MAX_MISSES;
 }
 
 bool PmoveUtilsV2::ppsIsAccurate(const pmove_t &pm) {
@@ -1087,11 +1097,11 @@ bool PmoveUtilsV2::ppsIsAccurate(const pmove_t &pm) {
     return false;
   }
 
-  if (pm.ps->clientNum == cg.clientNum) {
-    return cg.demoPlayback ? snapCadenceMatchesPmove() : true;
+  if (pm.ps->clientNum == cg.clientNum && !cg.demoPlayback) {
+    return true;
   }
 
-  return false;
+  return snapCadenceMatchesPmove();
 }
 
 void PmoveUtilsV2::setDefaultInput(pmove_t &pm, const int8_t scale, const EnumBitset<PmoveDefaultInput> &defaultInput) {
