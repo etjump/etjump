@@ -72,6 +72,7 @@ function(create_compiler_opts target)
 		/wd4267                # ignore integer narrowing warnings
 		/wd4250                # ignore function hiding with virtual
 		/EHsc                  # standard C++ exception handling
+		/permissive-           # standards conformance (default from C++20)
 		/MP                    # build with Multiple Processes
 		$<IF:$<STREQUAL:${WARN_LEVEL},0>,/W0,/W${WARN_LEVEL}>
 		$<$<CONFIG:Release>:
