@@ -2010,6 +2010,10 @@ void G_InitGame(int levelTime, int randomSeed, int restart) {
   // before mapscript is loaded, so remapshaders from mapscripts work properly
   ETJump::shaderConfigHandler = std::make_unique<ETJump::ShaderConfigHandler>();
 
+  if (restart) {
+    ETJump::shaderConfigHandler->resetAfterMapRestart();
+  }
+
   // load level script
   G_Script_ScriptLoad();
 

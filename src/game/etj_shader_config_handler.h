@@ -42,6 +42,11 @@ public:
   void addShaderRemap(const char *oldShader, const char *newShader);
   void updateShaderState();
 
+  // map_restart keeps the configstrings and clients keep their renderer remaps,
+  // so pick up the previous shader indices and send every remap back to its
+  // original shader, otherwise remaps done before the restart persist
+  void resetAfterMapRestart();
+
 private:
   struct ShaderRemap {
     std::string originalShader;

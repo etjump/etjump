@@ -131,6 +131,52 @@ void ShaderConfigHandler::updateShaderState() {
   remapQueue.clear();
 }
 
+void ShaderConfigHandler::resetAfterMapRestart() {
+  char buf[MAX_STRING_CHARS];
+  std::unordered_map<int16_t, std::string> indexToName;
+
+  // indices must match what clients already parsed from these configstrings
+  for (int32_t slot = 0; slot < MAX_CS_SHADERS; slot++) {
+    trap_GetConfigstring(CS_SHADERS + slot, buf, sizeof(buf));
+    const auto names = StringUtils::split(buf, " ");
+
+    for (int32_t i = 0; i < static_cast<int32_t>(names.size()); i++) {
+      if (names[i].empty()) {
+        continue;
+      }
+
+      const auto index          = static_cast<int16_t>(slot * MAX_SHADERS_PER_INDEX + i + 1);
+      gameShaderCache[names[i]] = index;
+      indexToName[index]        = names[i];
+    }
+  }
+
+  // shaderstate entries are formatted as 'i1=i2:timeOffset@'
+  for (int32_t slot = 0; slot < MAX_CS_SHADERSTATES; slot++) {
+    trap_GetConfigstring(CS_SHADERSTATE + slot, buf, sizeof(buf));
+
+    for (const auto &entry : StringUtils::split(buf, "@")) {
+      const auto i1 = static_cast<int16_t>(Q_atoi(entry.c_str()));
+      const auto it = indexToName.find(i1);
+
+      if (it == indexToName.cend()) {
+        continue;
+      }
+
+      ShaderRemap sr{};
+      sr.originalShader = it->second;
+      sr.currentShader  = it->second;
+      sr.i1             = i1;
+      sr.i2             = i1;
+
+      remapQueue.insert(static_cast<int16_t>(shaderRemaps.size() / MAX_SHADERSTATES_PER_INDEX));
+      shaderRemaps.emplace_back(sr);
+    }
+  }
+
+  updateShaderState();
+}
+
 std::string ShaderConfigHandler::buildShaderStateString(const int32_t index) {
   assert(index < static_cast<int32_t>(shaderRemaps.size()));
 
