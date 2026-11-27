@@ -157,7 +157,7 @@ bool PmoveUtilsV2::check() const {
 void PmoveUtilsV2::runFrame() {
   // in spec/demo playback, 'cg.predictedPlayerState' is interpolated between
   // snapshots, so use the snapshot itself if it contains every physics frame
-  const bool useSnap = cg.snap && (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW)) && snapCadenceMatchesPmove();
+  const bool useSnap = (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW)) && snapCadenceMatchesPmove();
 
   s.ps       = useSnap ? cg.snap->ps : cg.predictedPlayerState;
   s.pm.ps    = &s.ps;
